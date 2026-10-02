@@ -38,6 +38,13 @@
   .fabfull:hover{background:var(--azul-claro);transform:translateY(-1px)}
   .btn.vr.pulse{animation:pdePulse 1.4s ease-in-out 6}
   @keyframes pdePulse{0%,100%{box-shadow:0 0 0 0 rgba(46,158,70,.0)}50%{box-shadow:0 0 0 8px rgba(46,158,70,.35)}}
+  #vrGate{position:fixed;inset:0;z-index:2147483300;background:radial-gradient(circle at 50% 35%,#0f2c4a,#05070f 70%);display:flex;align-items:center;justify-content:center;color:#fff;font-family:'Segoe UI',system-ui,Arial}
+  .vrgate-box{display:flex;flex-direction:column;align-items:center;gap:14px;text-align:center;padding:24px}
+  .vrgate-box img{width:96px;height:96px;border-radius:50%;box-shadow:0 0 40px rgba(55,177,218,.4)}
+  .vrgate-t{font-size:clamp(28px,5vw,48px);font-weight:800;letter-spacing:-.02em}
+  .vrgate-s{color:#9fdcff;font-size:15px;letter-spacing:.08em;text-transform:uppercase}
+  .vrgate-box button{margin-top:8px;min-width:280px;padding:18px 28px;border-radius:999px;border:2px solid rgba(255,255,255,.25);background:linear-gradient(135deg,#37b1da,#1c83bc);color:#fff;font-size:20px;font-weight:800;cursor:pointer}
+  .vrgate-box button.sec{background:rgba(255,255,255,.08);font-size:15px;font-weight:600;padding:12px 22px;min-width:0}
   html.kiosk,body.kiosk{overflow:hidden!important}
   #app.kiosk{position:fixed!important;inset:0!important;width:100vw!important;height:100vh!important;z-index:2147483000!important;background:var(--cinza)}
 
@@ -586,6 +593,7 @@ function buildPlaneta(){
   const m=esfera(C.raio,C.cor,estado.sel==='sol',estado.sel);root.add(m);
   m.rotation.z=(C.incl||0)*PI/180;
   if(C.anel){m.add(criarAnelSaturno(C.raio));}
+  m.userData.corpoKey=estado.sel;m.userData.vrInterativo=true;
   focoMesh={mesh:m,spin:(C.rotDias<0?-1:1)/Math.max(0.3,Math.abs(C.rotDias))};
   camTarget.set(0,0,0);camDist=C.raio*5+3;camElev=0.35;camAzim=0.7;atualizarCamera();
 }
@@ -1073,13 +1081,32 @@ let dragging=false,lx=0,ly=0;
 if(!semWebGL()){
   const start=(x,y)=>{dragging=true;lx=x;ly=y;};
   const move=(x,y)=>{if(!dragging)return;camAzim-=(x-lx)*0.005;camElev=clamp(camElev+(y-ly)*0.005,-1.45,1.45);lx=x;ly=y;atualizarCamera();};
-  canvas3d.addEventListener('mousedown',e=>start(e.clientX,e.clientY));
+  // clique (sem arrastar) num corpo: seleciona + ficha + narração
+  const clickRay=new THREE.Raycaster(),clickNdc=new THREE.Vector2();let downX=0,downY=0,downT=0;
+  function corpoSobCursor(cx,cy){
+    if(estado.vr||!renderer)return null;
+    const r=canvas3d.getBoundingClientRect();clickNdc.set(((cx-r.left)/r.width)*2-1,-((cy-r.top)/r.height)*2+1);
+    clickRay.setFromCamera(clickNdc,camera);const hits=clickRay.intersectObjects(objetosVR(),false);
+    return hits.length?hits[0].object:null;
+  }
+  function clicarCorpo(cx,cy){
+    const m=corpoSobCursor(cx,cy);if(!m||!m.userData.corpoKey)return false;
+    const k=m.userData.corpoKey;selecionar(k);
+    if(narrAtual===k)narrParar();else narrar(k,m);
+    return true;
+  }
+  canvas3d.addEventListener('mousedown',e=>{downX=e.clientX;downY=e.clientY;downT=performance.now();start(e.clientX,e.clientY);});
+  canvas3d.addEventListener('click',e=>{if(Math.hypot(e.clientX-downX,e.clientY-downY)<6&&performance.now()-downT<600)clicarCorpo(e.clientX,e.clientY);});
+  let hoverT=0;
+  canvas3d.addEventListener('mousemove',e=>{const t=performance.now();if(dragging||t-hoverT<80)return;hoverT=t;canvas3d.style.cursor=corpoSobCursor(e.clientX,e.clientY)?'pointer':'';});
   window.addEventListener('mouseup',()=>dragging=false);
   window.addEventListener('mousemove',e=>move(e.clientX,e.clientY));
   canvas3d.addEventListener('wheel',e=>{e.preventDefault();camDist=clamp(camDist+e.deltaY*0.05,8,900);atualizarCamera();},{passive:false});
   canvas3d.addEventListener('touchstart',e=>start(e.touches[0].clientX,e.touches[0].clientY),{passive:true});
   canvas3d.addEventListener('touchmove',e=>{move(e.touches[0].clientX,e.touches[0].clientY);},{passive:true});
-  canvas3d.addEventListener('touchend',()=>dragging=false);
+  let tX=0,tY=0,tT=0;
+  canvas3d.addEventListener('touchstart',e=>{tX=e.touches[0].clientX;tY=e.touches[0].clientY;tT=performance.now();},{passive:true});
+  canvas3d.addEventListener('touchend',e=>{dragging=false;const c=e.changedTouches&&e.changedTouches[0];if(c&&Math.hypot(c.clientX-tX,c.clientY-tY)<10&&performance.now()-tT<500)clicarCorpo(c.clientX,c.clientY);});
 }
 
 /* =====================================================================
@@ -1371,11 +1398,18 @@ try{
   if(!aplicarDeepLink())entrarVista('sistema');
   setKiosk(true); // abre já em tela cheia, sem cabeçalho/rodapé do Portal
   if(/[?&]vr=1/.test(location.search)){
-    const bv=$('btnVR');
-    if(bv){bv.classList.add('pulse');bv.scrollIntoView({block:'nearest',inline:'center'});}
+    // O WebXR só abre a sessão a partir de um toque nesta página: mostramos uma tela de entrada com um único botão.
     const semVR=()=>vrMensagem('🥽 Para a experiência em VR, abra este mesmo link no navegador do óculos (Meta Quest). Aqui você pode explorar em 3D normalmente.',9000);
+    const mostrarEntrada=()=>{
+      const ov=document.createElement('div');ov.id='vrGate';
+      ov.innerHTML='<div class="vrgate-box"><img src="../../assets/logo-portal-educador.png" alt=""><div class="vrgate-t">Sistema Solar VR</div><div class="vrgate-s">Coloque o óculos e toque para começar</div><button type="button" data-action="vr-entrar">🥽 Entrar em VR</button><button type="button" class="sec" data-action="vr-3d">Explorar em 3D</button></div>';
+      document.body.appendChild(ov);
+      ov.addEventListener('click',e=>{const b=e.target.closest('[data-action]');if(!b)return;
+        if(b.dataset.action==='vr-entrar'){alternarVR().finally(()=>{ov.remove();});}
+        else ov.remove();});
+    };
     if(!navigator.xr) semVR();
-    else navigator.xr.isSessionSupported('immersive-vr').then(ok=>ok?vrMensagem('🥽 Óculos detectado. Clique em <b>Entrar em VR</b> na barra superior para iniciar.',9000):semVR()).catch(semVR);
+    else navigator.xr.isSessionSupported('immersive-vr').then(ok=>ok?mostrarEntrada():semVR()).catch(semVR);
   }
 }catch(err){
   var d=document.getElementById('dica');

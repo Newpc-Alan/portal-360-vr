@@ -803,7 +803,7 @@ function vrMensagem(html,tempo){
 const NARR_BASE='audio/';
 let narrListener=null,narrSom=null,narrAtual=null,narrCache={},narrCarregando=null;
 function narrInit(){ if(narrListener||semWebGL())return; try{narrListener=new THREE.AudioListener();camera.add(narrListener);}catch(e){} }
-function duckMusica(on){ try{ if(musicNodes&&audioCtx){const m=musicNodes.master,t=audioCtx.currentTime;m.gain.cancelScheduledValues(t);m.gain.setValueAtTime(m.gain.value,t);m.gain.linearRampToValueAtTime(on?0.05:0.26,t+0.7);} }catch(e){} }
+function duckMusica(on){ try{ if(musicNodes&&audioCtx){const m=musicNodes.master,t=audioCtx.currentTime;m.gain.cancelScheduledValues(t);m.gain.setValueAtTime(m.gain.value,t);m.gain.linearRampToValueAtTime(on?(musicNodes.nivel||0.26)*0.2:(musicNodes.nivel||0.26),t+0.7);} }catch(e){} }
 function narrParar(){
   if(narrSom){try{if(narrSom.isPlaying)narrSom.stop();}catch(e){} try{if(narrSom.parent)narrSom.parent.remove(narrSom);}catch(e){} narrSom=null;}
   try{if(window.speechSynthesis)speechSynthesis.cancel();}catch(e){}
@@ -1323,7 +1323,7 @@ function iniciarMusica(){
       musicNodes={master:master,nodes:[],pendente:true};
       carregarFundo(function(buf){
         if(!musicNodes||!musicNodes.pendente)return;
-        if(buf){ var src=ctx.createBufferSource(); src.buffer=buf; src.loop=true; src.connect(master); src.start(); musicNodes={master:master,nodes:[src]}; master.gain.linearRampToValueAtTime(narrAtual?0.05:0.26, ctx.currentTime+3); }
+        if(buf){ var src=ctx.createBufferSource(); src.buffer=buf; src.loop=true; src.connect(master); src.start(); musicNodes={master:master,nodes:[src],nivel:0.55}; master.gain.linearRampToValueAtTime(narrAtual?0.11:0.55, ctx.currentTime+3); }
         else { musicNodes=null; try{master.disconnect();}catch(e){} fundoFalhou=true; iniciarMusica(); }
       });
       return;
@@ -1340,7 +1340,7 @@ function iniciarMusica(){
       o.connect(g); g.connect(lp); o.start(); nodes.push(o,lfo,alfo);
     });
     master.gain.linearRampToValueAtTime(0.26, ctx.currentTime+3);
-    musicNodes={master:master,nodes:nodes};
+    musicNodes={master:master,nodes:nodes,nivel:0.26};
   }catch(e){}
 }
 function pararMusica(){ if(musicNodes&&audioCtx){var m=musicNodes.master,t=audioCtx.currentTime,ns=musicNodes.nodes; m.gain.cancelScheduledValues(t); m.gain.setValueAtTime(m.gain.value,t); m.gain.linearRampToValueAtTime(0,t+1.4); setTimeout(function(){ns.forEach(function(o){try{o.stop()}catch(e){}});},1600); musicNodes=null;} }

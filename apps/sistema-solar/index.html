@@ -784,6 +784,49 @@ function vrMensagem(html,tempo){
   const el=$('vrStatus');if(!el)return;el.innerHTML=html;el.classList.add('show');
   if(tempo)setTimeout(()=>el.classList.remove('show'),tempo);
 }
+/* ---------- NARRAÇÃO (MP3 em audio/<corpo>.mp3; reserva: voz do navegador) ----------
+   Áudio posicional: a voz sai do próprio planeta. A música ambiente abaixa enquanto narra. */
+const NARR_BASE='audio/';
+let narrListener=null,narrSom=null,narrAtual=null,narrCache={},narrCarregando=null;
+function narrInit(){ if(narrListener||semWebGL())return; try{narrListener=new THREE.AudioListener();camera.add(narrListener);}catch(e){} }
+function duckMusica(on){ try{ if(musicNodes&&audioCtx){const m=musicNodes.master,t=audioCtx.currentTime;m.gain.cancelScheduledValues(t);m.gain.setValueAtTime(m.gain.value,t);m.gain.linearRampToValueAtTime(on?0.05:0.26,t+0.7);} }catch(e){} }
+function narrParar(){
+  if(narrSom){try{if(narrSom.isPlaying)narrSom.stop();}catch(e){} try{if(narrSom.parent)narrSom.parent.remove(narrSom);}catch(e){} narrSom=null;}
+  try{if(window.speechSynthesis)speechSynthesis.cancel();}catch(e){}
+  narrAtual=null;narrCarregando=null;duckMusica(false);atualizarBotoesNarr();
+}
+function narrFallback(key){
+  if(!window.speechSynthesis){vrMensagem('🔇 Narração indisponível neste navegador.',2500);return;}
+  const C=CORPOS[key];const u=new SpeechSynthesisUtterance(C.nome+'. '+C.tipo+'. '+C.fato);u.lang='pt-BR';u.rate=0.95;
+  const voz=speechSynthesis.getVoices().find(v=>/pt[-_]BR/i.test(v.lang));if(voz)u.voice=voz;
+  u.onend=()=>{if(narrAtual===key){narrAtual=null;duckMusica(false);atualizarBotoesNarr();}};
+  narrAtual=key;duckMusica(true);atualizarBotoesNarr();speechSynthesis.speak(u);
+}
+function meshDoCorpo(key){
+  if(estado.vista==='sistema'){const s=sis.find(x=>x.k===key);if(s)return s.mesh;let m=null;root.traverse(o=>{if(!m&&o.isMesh&&o.userData.corpoKey===key)m=o;});return m;}
+  if(estado.vista==='planeta'&&focoMesh&&estado.sel===key)return focoMesh.mesh;
+  return null;
+}
+function narrar(key,mesh){
+  narrInit();narrParar();
+  if(!narrListener){narrFallback(key);return;}
+  try{if(narrListener.context.state==='suspended')narrListener.context.resume();}catch(e){}
+  const alvo=mesh||meshDoCorpo(key);
+  const som=alvo?new THREE.PositionalAudio(narrListener):new THREE.Audio(narrListener);
+  if(alvo){som.setRefDistance(estado.vr?0.5:12);som.setRolloffFactor(0.6);som.setDistanceModel('inverse');alvo.add(som);}
+  som.onEnded=function(){THREE.Audio.prototype.onEnded.call(this);if(narrSom===this){narrAtual=null;duckMusica(false);atualizarBotoesNarr();try{if(this.parent)this.parent.remove(this);}catch(e){}narrSom=null;}};
+  const tocar=buf=>{som.setBuffer(buf);som.setVolume(1);som.play();narrSom=som;narrAtual=key;duckMusica(true);atualizarBotoesNarr();};
+  if(narrCache[key]){tocar(narrCache[key]);return;}
+  narrCarregando=key;
+  new THREE.AudioLoader().load(NARR_BASE+key+'.mp3',buf=>{narrCache[key]=buf;if(narrCarregando===key)tocar(buf);},undefined,()=>{if(narrCarregando===key){try{if(som.parent)som.parent.remove(som);}catch(e){}narrFallback(key);}});
+}
+function atualizarBotoesNarr(){
+  const tocando=!!narrAtual;
+  document.querySelectorAll('[data-action="narrar"]').forEach(b=>{b.classList.toggle('on',tocando&&b.dataset.k===narrAtual);b.innerHTML=(tocando&&b.dataset.k===narrAtual)?'⏹ Parar narração':'🔊 Ouvir narração';});
+  if(typeof atualizarBotaoRepetirVR==='function')atualizarBotaoRepetirVR();
+}
+$('ficha').addEventListener('click',e=>{const b=e.target.closest('[data-action="narrar"]');if(!b)return;if(narrAtual===b.dataset.k)narrParar();else narrar(b.dataset.k);});
+
 /* ---------- Modo VR: maquete interativa ----------
    Em vez de jogar o usuário na borda do sistema (planetas em linha, longe),
    o Sistema Solar vira uma maquete inclinada à frente dele, ao alcance das mãos.
@@ -797,6 +840,8 @@ let vrFoco=null;         // mesh em zoom (grip)
 let vrRootBackup=null;   // transform do root antes do VR
 let vrPrevBtn=[{},{}];   // estado anterior dos botões por controle
 let vrLuzBackup=null;
+let vrBotoes=[];         // sprites clicáveis (sair, catálogo, repetir)
+let vrBtnRepetir=null;
 
 function textoCanvasVR(w,h,desenhar){
   const c=document.createElement('canvas');c.width=w;c.height=h;const g=c.getContext('2d');
@@ -821,6 +866,38 @@ function criarTextoVR(linhas){
     linhas.forEach((t,i)=>g.fillText(t,64,214+i*96));
   });
   sp.scale.set(1.25,0.342,1);return sp;
+}
+function criarBotaoVR(texto,acao,cor){
+  const sp=textoCanvasVR(1024,256,(g,c)=>{
+    g.fillStyle=cor||'rgba(15,44,74,.96)';g.beginPath();g.roundRect(12,24,c.width-24,208,56);g.fill();
+    g.strokeStyle='rgba(255,255,255,.55)';g.lineWidth=8;g.stroke();
+    g.fillStyle='#fff';g.font='700 96px Segoe UI,Arial';g.textAlign='center';g.fillText(texto,c.width/2,162);
+  });
+  sp.scale.set(0.44,0.11,1);sp.userData.vrBotao=acao;vrBotoes.push(sp);return sp;
+}
+function criarBotoesFixosVR(){
+  // presos à cabeça, canto inferior: sempre ao alcance, sem procurar
+  const sair=criarBotaoVR('✕  Sair do VR','sair','rgba(140,20,20,.95)');camera.add(sair);sair.position.set(-0.66,-0.50,-1.45);
+  const cat=criarBotaoVR('↙  Catálogo','catalogo','rgba(15,44,74,.96)');camera.add(cat);cat.position.set(-0.18,-0.50,-1.45);
+}
+function limparBotoesVR(){for(const b of vrBotoes){try{if(b.parent)b.parent.remove(b);b.material.map.dispose();b.material.dispose();}catch(e){}}vrBotoes=[];vrBtnRepetir=null;}
+function atualizarBotaoRepetirVR(){ if(!vrBtnRepetir||!vrPainel)return; const tocando=narrAtual===vrPainel.mesh.userData.corpoKey;
+  const novo=criarBotaoVR(tocando?'⏹  Parar narração':'🔊  Ouvir de novo','repetir','rgba(26,107,42,.96)');
+  scene.add(novo);novo.position.copy(vrBtnRepetir.position);
+  vrBotoes=vrBotoes.filter(b=>b!==vrBtnRepetir);scene.remove(vrBtnRepetir);try{vrBtnRepetir.material.map.dispose();vrBtnRepetir.material.dispose();}catch(e){}
+  vrBtnRepetir=novo;}
+function raycastBotoesVR(ctrl){
+  if(!vrBotoes.length)return null;
+  vrRaycaster.camera=camera; // Sprite.raycast precisa da câmera
+  vrTempMat.identity().extractRotation(ctrl.matrixWorld);
+  vrRaycaster.ray.origin.setFromMatrixPosition(ctrl.matrixWorld);
+  vrRaycaster.ray.direction.set(0,0,-1).applyMatrix4(vrTempMat);
+  const hits=vrRaycaster.intersectObjects(vrBotoes,false);return hits.length?hits[0].object:null;
+}
+function acaoBotaoVR(acao){
+  if(acao==='sair'){alternarVR();return;}
+  if(acao==='catalogo'){try{narrParar();}catch(e){} const ir=()=>{window.location.href='../../?catalog=1';}; if(vrSession){vrSession.end().then(ir,ir);}else ir(); return;}
+  if(acao==='repetir'&&vrPainel){const k=vrPainel.mesh.userData.corpoKey;if(narrAtual===k)narrParar();else narrar(k,vrPainel.mesh);return;}
 }
 function criarLabelVR(nome){
   const sp=textoCanvasVR(1024,256,(g,c)=>{
@@ -898,7 +975,8 @@ function aplicarMaqueteVR(){
 }
 function ajustarParticulasVR(){const f=root.scale.x;root.traverse(o=>{if(o.isPoints&&o.userData._size!==undefined)o.material.size=o.userData._size*f;});}
 function limparLabelsVR(){for(const l of vrLabels){scene.remove(l.sp);try{l.sp.material.map.dispose();l.sp.material.dispose();}catch(e){}}vrLabels=[];}
-function fecharPainelVR(){if(vrPainel){scene.remove(vrPainel.sp);if(vrPainel.linha)scene.remove(vrPainel.linha);try{vrPainel.sp.material.map.dispose();vrPainel.sp.material.dispose();}catch(e){}vrPainel=null;}}
+function fecharPainelVR(){if(vrPainel){scene.remove(vrPainel.sp);if(vrPainel.linha)scene.remove(vrPainel.linha);try{vrPainel.sp.material.map.dispose();vrPainel.sp.material.dispose();}catch(e){}vrPainel=null;}
+  if(vrBtnRepetir){vrBotoes=vrBotoes.filter(b=>b!==vrBtnRepetir);scene.remove(vrBtnRepetir);try{vrBtnRepetir.material.map.dispose();vrBtnRepetir.material.dispose();}catch(e){}vrBtnRepetir=null;}}
 function posicionarPainelVR(){
   if(!vrPainel)return;
   const cam=new THREE.Vector3();camera.getWorldPosition(cam);
@@ -907,9 +985,11 @@ function posicionarPainelVR(){
   const dist=vrFoco?VR_CFG.painelDist+0.25:VR_CFG.painelDist;
   const offLado=vrFoco?VR_CFG.painelLado+0.45:VR_CFG.painelLado;
   vrPainel.sp.position.set(cam.x+_vrTmpB.x*dist+lado.x*offLado,cam.y+0.02,cam.z+_vrTmpB.z*dist+lado.z*offLado);
+  if(vrBtnRepetir){vrBtnRepetir.position.copy(vrPainel.sp.position);vrBtnRepetir.position.y-=0.44;}
 }
 function abrirPainelVR(mesh,key){
   fecharPainelVR();const sp=criarPainelVR(key);scene.add(sp);vrPainel={sp,mesh};
+  vrBtnRepetir=criarBotaoVR('🔊  Ouvir de novo','repetir','rgba(26,107,42,.96)');scene.add(vrBtnRepetir);
   posicionarPainelVR(); // fixa no mundo, na altura dos olhos; não acompanha a órbita (evita tremor)
 }
 function desmontarMaqueteVR(){
@@ -922,17 +1002,18 @@ function desmontarMaqueteVR(){
 }
 /* --- seleção --- */
 function tratarSelecaoVR(ctrl){
+  const btn=raycastBotoesVR(ctrl);if(btn){acaoBotaoVR(btn.userData.vrBotao);return;}
   const hit=raycastController(ctrl);
-  if(!hit){fecharPainelVR();destacarVR(null);return;}
+  if(!hit){fecharPainelVR();destacarVR(null);narrParar();return;}
   const mesh=hit.object,key=mesh.userData.corpoKey;if(!key)return;
-  destacarVR(mesh);estado.sel=key;atualizarFicha();abrirPainelVR(mesh,key);
+  destacarVR(mesh);estado.sel=key;atualizarFicha();abrirPainelVR(mesh,key);narrar(key,mesh);
   const alvo=vrMissao.alvos[vrMissao.indice%vrMissao.alvos.length];
   if(key===alvo){vrMissao.acertos++;vrMissao.indice++;vrMensagem('✅ <b>Missão concluída!</b> '+CORPOS[key].nome+' encontrado.',2800);atualizarHudVR();}
 }
 function alternarFocoVR(ctrl){
   if(vrFoco){vrFoco=null;aplicarMaqueteVR();posicionarPainelVR();return;}
   const hit=raycastController(ctrl);if(!hit||!hit.object.userData.corpoKey)return;
-  vrFoco=hit.object;destacarVR(vrFoco);estado.sel=vrFoco.userData.corpoKey;atualizarFicha();abrirPainelVR(vrFoco,estado.sel);
+  vrFoco=hit.object;destacarVR(vrFoco);estado.sel=vrFoco.userData.corpoKey;atualizarFicha();abrirPainelVR(vrFoco,estado.sel);if(narrAtual!==estado.sel)narrar(estado.sel,vrFoco);
 }
 function criarControleVR(i){
   const ctrl=renderer.xr.getController(i);vrRig.add(ctrl);
@@ -946,7 +1027,7 @@ const _vrTmpA=new THREE.Vector3(),_vrTmpB=new THREE.Vector3();
 function atualizarVR(){
   if(!vrMaquete)return;
   // raio muda de cor ao apontar para um corpo
-  for(const c of vrControllers){const h=raycastController(c);const ray=c.getObjectByName('vrRay');if(ray)ray.material.color.setHex(h?0x76f1c0:0x37b1da);}
+  for(const c of vrControllers){const h=raycastController(c)||raycastBotoesVR(c);const ray=c.getObjectByName('vrRay');if(ray)ray.material.color.setHex(h?0x76f1c0:0x37b1da);}
   // manete: eixo X gira a maquete, eixo Y aproxima/afasta; botão A/X pausa
   const session=renderer.xr.getSession();
   if(session){let idx=0;for(const src of session.inputSources){const gp=src.gamepad;if(!gp){idx++;continue;}
@@ -995,15 +1076,15 @@ async function entrarVR(){
   await renderer.xr.setSession(vrSession);estado.vr=true;document.body.classList.add('vr-active');$('btnVR').classList.add('on');$('btnVR').textContent='🥽 Sair do VR';
   camera.position.set(0,1.6,0);camera.rotation.set(0,0,0);vrRig.position.set(0,0,0);vrRig.rotation.set(0,0,0);
   if(!vrControllers.length){criarControleVR(0);criarControleVR(1);}
-  montarMaqueteVR();
+  montarMaqueteVR();narrInit();criarBotoesFixosVR();
   if(!vrHud){vrHud=criarTextoVR(['MISSÃO 01: '+vrMissao.textos[0],'Aponte e aperte o gatilho','Acertos: 0/'+vrMissao.alvos.length]);camera.add(vrHud);}
   vrHud.position.copy(VR_CFG.hudPos);
-  vrMensagem('🥽 <b>Maquete do Sistema Solar</b> à sua frente. Gatilho: abre a ficha do planeta · Grip: aproxima · Manete: gira e redimensiona · A/X: pausa.',7000);
+  vrMensagem('🥽 <b>Maquete do Sistema Solar</b> à sua frente. Gatilho: ficha + narração · Grip: aproxima · Manete: gira e redimensiona · A/X: pausa · Botões no canto inferior: Sair / Catálogo.',8000);
   vrSession.addEventListener('end',sairVRFinal);
 }
 function sairVRFinal(){
   estado.vr=false;document.body.classList.remove('vr-active');if($('btnVR')){$('btnVR').classList.remove('on');$('btnVR').textContent='🥽 Entrar em VR';}
-  vrSession=null;desmontarMaqueteVR();vrRig.position.set(0,0,0);camera.position.set(0,0,0);atualizarCamera();vrMensagem('VR encerrado. Você voltou ao modo 3D.',2200);
+  vrSession=null;narrParar();limparBotoesVR();desmontarMaqueteVR();vrRig.position.set(0,0,0);camera.position.set(0,0,0);atualizarCamera();vrMensagem('VR encerrado. Você voltou ao modo 3D.',2200);
 }
 async function alternarVR(){
   if(estado.vr&&vrSession){try{await vrSession.end();}catch(e){}return;}
@@ -1059,6 +1140,7 @@ function atualizarFicha(){
     if(C.ua>0)h+=`<div class="metric"><span class="lbl">Distância</span><span class="val">${C.ua} UA</span></div>`;
   }
   h+=`<div class="fato"><b>Curiosidade:</b> ${C.fato}</div>`;
+  h+=`<button class="btn" data-action="narrar" data-k="${estado.sel}" style="width:100%;justify-content:center;margin-top:10px">${narrAtual===estado.sel?'⏹ Parar narração':'🔊 Ouvir narração'}</button>`;
   $('ficha').innerHTML=h;
 }
 
@@ -1106,6 +1188,7 @@ const INFOS={
   eclipse:'<b>Eclipses:</b> acontecem só quando Sol, Terra e Lua se alinham.'
 };
 function entrarVista(v){
+  if(typeof narrParar==='function')narrParar();
   estado.vista=v;mostrarGrupos();
   $('badge').textContent=BADGES[v];$('dica').textContent=DICAS[v];
   const info=$('modeinfo');if(INFOS[v]){info.innerHTML=INFOS[v];info.classList.add('show');}else info.classList.remove('show');

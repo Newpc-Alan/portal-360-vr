@@ -27,6 +27,9 @@ O Sistema Solar vira uma maquete inclinada à frente do usuário (ao alcance das
 - Grip (aperto lateral) num planeta: aproxima o planeta até ~28 cm de raio à frente dos olhos, com a ficha ao lado; grip de novo volta à maquete.
 - Manete: esquerda/direita gira a maquete; cima/baixo aproxima/afasta.
 - Botão A/X: pausa ou retoma o movimento.
+- A ficha fica fixa à direita do usuário, na altura dos olhos, com uma linha-guia até o planeta; o painel de missão fica acima da linha dos olhos.
+- Narração: ao apertar o gatilho num planeta, toca `audio/<corpo>.mp3` saindo do próprio planeta (áudio posicional); a música ambiente abaixa; botão "Ouvir de novo / Parar" abaixo da ficha. Se o MP3 faltar, usa a voz do navegador (Web Speech); no desktop há o botão "Ouvir narração" na ficha.
+- Botões presos à visão, canto inferior esquerdo: "Sair do VR" (encerra a sessão) e "Catálogo" (encerra e volta ao catálogo).
 - Parâmetros em `VR_CFG` (escala, altura, inclinação, tamanho do foco) no topo do bloco VR.
 
 ## Próximos passos

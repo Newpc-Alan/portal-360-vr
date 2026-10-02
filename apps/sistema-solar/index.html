@@ -789,7 +789,7 @@ function vrMensagem(html,tempo){
    o Sistema Solar vira uma maquete inclinada à frente dele, ao alcance das mãos.
    Gatilho = seleciona e abre a ficha · Grip = aproxima/afasta o planeta ·
    Manete = gira e redimensiona a maquete · Botão A/X = pausa ou retoma. */
-const VR_CFG={escala:0.022,raioFoco:0.28,altura:1.05,frente:-1.55,inclinacao:0.42,planetaScale:2.2,solScale:1.0};
+const VR_CFG={hudPos:new THREE.Vector3(-0.22,0.55,-1.7),painelDist:1.15,painelLado:0.62,escala:0.022,raioFoco:0.28,altura:1.05,frente:-1.55,inclinacao:0.42,planetaScale:2.2,solScale:1.0};
 let vrMaquete=null;      // {pos,rot,scale} base da maquete
 let vrLabels=[];         // sprites de nome (VR)
 let vrPainel=null;       // sprite da ficha aberta
@@ -802,7 +802,8 @@ function textoCanvasVR(w,h,desenhar){
   const c=document.createElement('canvas');c.width=w;c.height=h;const g=c.getContext('2d');
   if(!g.roundRect){g.roundRect=function(x,y,ww,hh){this.rect(x,y,ww,hh);};}
   desenhar(g,c);
-  const tx=new THREE.CanvasTexture(c);tx.minFilter=THREE.LinearFilter;tx.anisotropy=4;
+  const tx=new THREE.CanvasTexture(c);tx.minFilter=THREE.LinearMipmapLinearFilter;tx.magFilter=THREE.LinearFilter;tx.generateMipmaps=true;
+  try{tx.anisotropy=renderer.capabilities.getMaxAnisotropy();}catch(e){tx.anisotropy=4;}
   const sp=new THREE.Sprite(new THREE.SpriteMaterial({map:tx,transparent:true,depthTest:false,depthWrite:false}));
   sp.renderOrder=999;return sp;
 }
@@ -812,42 +813,42 @@ function quebrarLinhas(g,texto,maxW){
   if(atual)linhas.push(atual);return linhas;
 }
 function criarTextoVR(linhas){
-  const sp=textoCanvasVR(1024,320,(g,c)=>{
-    g.fillStyle='rgba(5,18,34,.88)';g.fillRect(0,0,c.width,c.height);
-    g.strokeStyle='#37b1da';g.lineWidth=6;g.strokeRect(4,4,c.width-8,c.height-8);
-    g.fillStyle='#76f1c0';g.font='700 42px Segoe UI,Arial';g.fillText('SISTEMA SOLAR VR',42,62);
-    g.fillStyle='#ffffff';g.font='600 34px Segoe UI,Arial';
-    linhas.forEach((t,i)=>g.fillText(t,42,124+i*48));
+  const sp=textoCanvasVR(2048,560,(g,c)=>{
+    g.fillStyle='rgba(5,18,34,.90)';g.beginPath();g.roundRect(0,0,c.width,c.height,40);g.fill();
+    g.strokeStyle='#37b1da';g.lineWidth=10;g.stroke();
+    g.fillStyle='#76f1c0';g.font='800 66px Segoe UI,Arial';g.fillText('SISTEMA SOLAR VR',64,104);
+    g.fillStyle='#ffffff';g.font='600 62px Segoe UI,Arial';
+    linhas.forEach((t,i)=>g.fillText(t,64,214+i*96));
   });
-  sp.scale.set(0.96,0.30,1);return sp;
+  sp.scale.set(1.25,0.342,1);return sp;
 }
 function criarLabelVR(nome){
-  const sp=textoCanvasVR(512,128,(g,c)=>{
-    g.fillStyle='rgba(4,14,28,.72)';g.beginPath();g.roundRect(8,20,c.width-16,88,22);g.fill();
-    g.strokeStyle='rgba(123,224,255,.6)';g.lineWidth=4;g.stroke();
-    g.fillStyle='#fff';g.font='700 56px Segoe UI,Arial';g.textAlign='center';g.fillText(nome,c.width/2,84);
+  const sp=textoCanvasVR(1024,256,(g,c)=>{
+    g.fillStyle='rgba(4,14,28,.78)';g.beginPath();g.roundRect(16,40,c.width-32,176,44);g.fill();
+    g.strokeStyle='rgba(123,224,255,.7)';g.lineWidth=8;g.stroke();
+    g.fillStyle='#fff';g.font='700 116px Segoe UI,Arial';g.textAlign='center';g.fillText(nome,c.width/2,170);
   });
-  sp.scale.set(0.22,0.055,1);return sp;
+  sp.scale.set(0.30,0.075,1);return sp;
 }
 function criarPainelVR(key){
   const C=CORPOS[key],m=estado.modo;
-  const sp=textoCanvasVR(1024,720,(g,c)=>{
-    g.fillStyle='rgba(4,14,28,.92)';g.beginPath();g.roundRect(0,0,c.width,c.height,36);g.fill();
-    g.strokeStyle='#37b1da';g.lineWidth=8;g.stroke();
-    g.fillStyle='#76f1c0';g.font='800 64px Segoe UI,Arial';g.fillText(C.nome,48,88);
-    g.fillStyle='#9fdcff';g.font='600 32px Segoe UI,Arial';g.fillText(C.tipo.toUpperCase(),48,134);
+  const sp=textoCanvasVR(2048,1440,(g,c)=>{
+    g.fillStyle='rgba(4,14,28,.94)';g.beginPath();g.roundRect(0,0,c.width,c.height,64);g.fill();
+    g.strokeStyle='#37b1da';g.lineWidth=14;g.stroke();
+    g.fillStyle='#76f1c0';g.font='800 132px Segoe UI,Arial';g.fillText(C.nome,88,176);
+    g.fillStyle='#9fdcff';g.font='700 60px Segoe UI,Arial';g.fillText(C.tipo.toUpperCase(),88,262);
     const linhas=[['Diâmetro',C.diam],['Distância do Sol',C.dist],['Luas',String(C.luas)],['Temperatura',C.temp]];
     if(C.anoDias>0)linhas.push(['Ano (translação)',C.anoDias>=365?plural(C.anoDias/365,'ano','anos',1):plural(C.anoDias,'dia','dias',0)]);
     if(C.rotDias)linhas.push(['Dia (rotação)',Math.abs(C.rotDias)>=1?plural(Math.abs(C.rotDias),'dia','dias',2)+(C.rotDias<0?' (retrógrada)':''):(Math.abs(C.rotDias)*24).toFixed(1)+' h']);
-    let y=196;
-    linhas.forEach(([l,v])=>{g.fillStyle='#8fa6bd';g.font='600 30px Segoe UI,Arial';g.fillText(l,48,y);
-      g.fillStyle='#fff';g.font='700 34px Segoe UI,Arial';g.textAlign='right';g.fillText(v,c.width-48,y);g.textAlign='left';
-      g.strokeStyle='rgba(255,255,255,.12)';g.lineWidth=2;g.beginPath();g.moveTo(48,y+16);g.lineTo(c.width-48,y+16);g.stroke();y+=56;});
-    g.fillStyle='#d8f3e4';g.font='500 30px Segoe UI,Arial';
-    quebrarLinhas(g,C.fato,c.width-96).slice(0,4).forEach(t=>{y+=42;g.fillText(t,48,y);});
-    g.fillStyle='#7fb2d0';g.font='500 24px Segoe UI,Arial';g.fillText('Gatilho fora do planeta fecha · Grip aproxima · Manete gira',48,c.height-28);
+    let y=380;
+    linhas.forEach(([l,v])=>{g.fillStyle='#9fb6cc';g.font='600 58px Segoe UI,Arial';g.fillText(l,88,y);
+      g.fillStyle='#fff';g.font='700 66px Segoe UI,Arial';g.textAlign='right';g.fillText(v,c.width-88,y);g.textAlign='left';
+      g.strokeStyle='rgba(255,255,255,.14)';g.lineWidth=3;g.beginPath();g.moveTo(88,y+30);g.lineTo(c.width-88,y+30);g.stroke();y+=108;});
+    g.fillStyle='#d8f3e4';g.font='500 58px Segoe UI,Arial';
+    quebrarLinhas(g,C.fato,c.width-176).slice(0,4).forEach(t=>{y+=80;g.fillText(t,88,y);});
+    g.fillStyle='#7fb2d0';g.font='500 44px Segoe UI,Arial';g.fillText('Gatilho fora do planeta fecha · Grip aproxima · Manete gira',88,c.height-52);
   });
-  sp.scale.set(0.62,0.436,1);return sp;
+  sp.scale.set(1.0,0.703,1);return sp;
 }
 function atualizarHudVR(){
   if(!vrHud||!camera)return;
@@ -856,7 +857,7 @@ function atualizarHudVR(){
   const linhas=['MISSÃO '+String(i+1).padStart(2,'0')+': '+vrMissao.textos[i], 'Aponte e aperte o gatilho · Alvo: '+alvo, 'Acertos: '+vrMissao.acertos+'/'+vrMissao.alvos.length];
   const novo=criarTextoVR(linhas);
   if(vrHud.parent)vrHud.parent.remove(vrHud);vrHud.material.map.dispose();vrHud.material.dispose();
-  vrHud=novo;camera.add(vrHud);vrHud.position.set(0,-0.62,-1.45);
+  vrHud=novo;camera.add(vrHud);vrHud.position.copy(VR_CFG.hudPos);
 }
 function destacarVR(mesh){
   if(vrSelected&&vrSelected.material&&vrSelected.userData._emissive!==undefined){try{vrSelected.material.emissive.setHex(vrSelected.userData._emissive);}catch(e){}}
@@ -897,9 +898,19 @@ function aplicarMaqueteVR(){
 }
 function ajustarParticulasVR(){const f=root.scale.x;root.traverse(o=>{if(o.isPoints&&o.userData._size!==undefined)o.material.size=o.userData._size*f;});}
 function limparLabelsVR(){for(const l of vrLabels){scene.remove(l.sp);try{l.sp.material.map.dispose();l.sp.material.dispose();}catch(e){}}vrLabels=[];}
-function fecharPainelVR(){if(vrPainel){scene.remove(vrPainel.sp);try{vrPainel.sp.material.map.dispose();vrPainel.sp.material.dispose();}catch(e){}vrPainel=null;}}
+function fecharPainelVR(){if(vrPainel){scene.remove(vrPainel.sp);if(vrPainel.linha)scene.remove(vrPainel.linha);try{vrPainel.sp.material.map.dispose();vrPainel.sp.material.dispose();}catch(e){}vrPainel=null;}}
+function posicionarPainelVR(){
+  if(!vrPainel)return;
+  const cam=new THREE.Vector3();camera.getWorldPosition(cam);
+  camera.getWorldDirection(_vrTmpB);_vrTmpB.y=0;if(_vrTmpB.lengthSq()<1e-4)_vrTmpB.set(0,0,-1);_vrTmpB.normalize();
+  const lado=new THREE.Vector3(-_vrTmpB.z,0,_vrTmpB.x); // direita do usuário
+  const dist=vrFoco?VR_CFG.painelDist+0.25:VR_CFG.painelDist;
+  const offLado=vrFoco?VR_CFG.painelLado+0.45:VR_CFG.painelLado;
+  vrPainel.sp.position.set(cam.x+_vrTmpB.x*dist+lado.x*offLado,cam.y+0.02,cam.z+_vrTmpB.z*dist+lado.z*offLado);
+}
 function abrirPainelVR(mesh,key){
   fecharPainelVR();const sp=criarPainelVR(key);scene.add(sp);vrPainel={sp,mesh};
+  posicionarPainelVR(); // fixa no mundo, na altura dos olhos; não acompanha a órbita (evita tremor)
 }
 function desmontarMaqueteVR(){
   fecharPainelVR();limparLabelsVR();vrFoco=null;destacarVR(null);
@@ -919,7 +930,7 @@ function tratarSelecaoVR(ctrl){
   if(key===alvo){vrMissao.acertos++;vrMissao.indice++;vrMensagem('✅ <b>Missão concluída!</b> '+CORPOS[key].nome+' encontrado.',2800);atualizarHudVR();}
 }
 function alternarFocoVR(ctrl){
-  if(vrFoco){vrFoco=null;aplicarMaqueteVR();return;}
+  if(vrFoco){vrFoco=null;aplicarMaqueteVR();posicionarPainelVR();return;}
   const hit=raycastController(ctrl);if(!hit||!hit.object.userData.corpoKey)return;
   vrFoco=hit.object;destacarVR(vrFoco);estado.sel=vrFoco.userData.corpoKey;atualizarFicha();abrirPainelVR(vrFoco,estado.sel);
 }
@@ -957,20 +968,20 @@ function atualizarVR(){
     const raioMundo=raioBase*s;
     const dist=Math.max(0.8,raioMundo*(CORPOS[vrFoco.userData.corpoKey].anel?4.2:3.2));
     const camPos=new THREE.Vector3();camera.getWorldPosition(camPos);
-    const alvo=camPos.clone().add(_vrTmpB.multiplyScalar(dist));alvo.y=camPos.y-0.05;
+    const lado=new THREE.Vector3(-_vrTmpB.z,0,_vrTmpB.x);
+    const alvo=camPos.clone().add(_vrTmpB.multiplyScalar(dist)).add(lado.multiplyScalar(-0.25));alvo.y=camPos.y-0.05;
     root.position.add(alvo.sub(_vrTmpA));
   }else aplicarMaqueteVR();
   ajustarParticulasVR();
   root.updateMatrixWorld(true);
   // etiquetas acompanham os corpos
   for(const l of vrLabels){l.mesh.getWorldPosition(_vrTmpA);const r=(CORPOS[l.mesh.userData.corpoKey]||{raio:1}).raio*l.mesh.scale.x*root.scale.x;l.sp.position.set(_vrTmpA.x,_vrTmpA.y+r+0.045,_vrTmpA.z);
-    const esc=vrFoco?0.5:1;l.sp.scale.set(0.22*esc,0.055*esc,1);l.sp.visible=!vrFoco||l.mesh===vrFoco;}
-  // ficha acompanha o corpo selecionado
-  if(vrPainel){vrPainel.mesh.getWorldPosition(_vrTmpA);const r=(CORPOS[vrPainel.mesh.userData.corpoKey]||{raio:1}).raio*vrPainel.mesh.scale.x*root.scale.x;
-    if(vrFoco){ // em foco: ficha ao lado do planeta, na altura dos olhos
-      camera.getWorldDirection(_vrTmpB);_vrTmpB.y=0;_vrTmpB.normalize();const lado=new THREE.Vector3(-_vrTmpB.z,0,_vrTmpB.x); // direita do usuário
-      vrPainel.sp.position.set(_vrTmpA.x+lado.x*(r+0.42),_vrTmpA.y+0.02,_vrTmpA.z+lado.z*(r+0.42));
-    }else vrPainel.sp.position.set(_vrTmpA.x,_vrTmpA.y+r+0.27,_vrTmpA.z);}
+    const esc=vrFoco?0.6:1;l.sp.scale.set(0.30*esc,0.075*esc,1);l.sp.visible=!vrFoco||l.mesh===vrFoco;}
+  // linha-guia discreta da ficha até o corpo selecionado (a ficha fica parada; a linha acompanha)
+  if(vrPainel){vrPainel.mesh.getWorldPosition(_vrTmpA);
+    if(!vrPainel.linha){const g=new THREE.BufferGeometry().setFromPoints([new THREE.Vector3(),new THREE.Vector3()]);
+      vrPainel.linha=new THREE.Line(g,new THREE.LineBasicMaterial({color:0x37b1da,transparent:true,opacity:.55}));scene.add(vrPainel.linha);}
+    const pa=vrPainel.linha.geometry.attributes.position;pa.setXYZ(0,vrPainel.sp.position.x,vrPainel.sp.position.y-0.36,vrPainel.sp.position.z);pa.setXYZ(1,_vrTmpA.x,_vrTmpA.y,_vrTmpA.z);pa.needsUpdate=true;}
 }
 async function entrarVR(){
   if(semWebGL())return;
@@ -986,7 +997,7 @@ async function entrarVR(){
   if(!vrControllers.length){criarControleVR(0);criarControleVR(1);}
   montarMaqueteVR();
   if(!vrHud){vrHud=criarTextoVR(['MISSÃO 01: '+vrMissao.textos[0],'Aponte e aperte o gatilho','Acertos: 0/'+vrMissao.alvos.length]);camera.add(vrHud);}
-  vrHud.position.set(0,-0.62,-1.45);
+  vrHud.position.copy(VR_CFG.hudPos);
   vrMensagem('🥽 <b>Maquete do Sistema Solar</b> à sua frente. Gatilho: abre a ficha do planeta · Grip: aproxima · Manete: gira e redimensiona · A/X: pausa.',7000);
   vrSession.addEventListener('end',sairVRFinal);
 }

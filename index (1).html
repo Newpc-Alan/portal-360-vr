@@ -112,6 +112,20 @@ body.intro-fullscreen #intro{cursor:none}
 }
 
 </style>
+
+<script>
+(function(){
+  try{
+    var q=new URLSearchParams(location.search);
+    var direct=q.get('catalog')==='1' || location.hash==='#experiencias' || localStorage.getItem('portal360_intro_seen')==='1' || sessionStorage.getItem('portal360_intro_done')==='1';
+    if(direct) document.documentElement.classList.add('open-catalog-direct');
+  }catch(e){}
+})();
+</script>
+<style>
+html.open-catalog-direct #intro{display:none!important}
+html.open-catalog-direct #catalog{display:block!important}
+</style>
 </head>
 <body>
 <section id="intro">
@@ -164,7 +178,7 @@ body.intro-fullscreen #intro{cursor:none}
   </header>
 
   <main>
-    <div class="section-title">
+    <div class="section-title" id="experiencias">
       <div>
         <h2>Experiências</h2>
         <p>Escolha um universo para explorar.</p>
@@ -286,7 +300,7 @@ function setImmersiveMode(on){
 }
 function showCatalog(){
   if(catalogShown)return;
-  try{sessionStorage.setItem('portal360_intro_done','1');}catch(e){}
+  try{sessionStorage.setItem('portal360_intro_done','1');localStorage.setItem('portal360_intro_seen','1');}catch(e){}
   catalogShown=true;
   document.getElementById('intro').classList.add('hidden');
   document.getElementById('catalog').classList.remove('hidden');
@@ -318,7 +332,7 @@ async function startImmersiveIntro(){
   }
 }
 function showIntro(){
-  try{sessionStorage.removeItem('portal360_intro_done');}catch(e){}
+  try{sessionStorage.removeItem('portal360_intro_done');localStorage.removeItem('portal360_intro_seen');}catch(e){}
   catalogShown=false;
   document.getElementById('catalog').classList.add('hidden');
   document.getElementById('intro').classList.remove('hidden');
@@ -363,12 +377,14 @@ window.onYouTubeIframeAPIReady=function(){
 function shouldOpenCatalogDirect(){
   try{
     const q=new URLSearchParams(location.search);
-    return q.get('catalog')==='1' || sessionStorage.getItem('portal360_intro_done')==='1';
+    return q.get('catalog')==='1' || location.hash==='#experiencias' || sessionStorage.getItem('portal360_intro_done')==='1' || localStorage.getItem('portal360_intro_seen')==='1';
   }catch(e){ return false; }
 }
 if(shouldOpenCatalogDirect()){
   document.addEventListener('DOMContentLoaded',function(){
     catalogShown=true;
+    try{sessionStorage.setItem('portal360_intro_done','1');localStorage.setItem('portal360_intro_seen','1');}catch(e){}
+    document.documentElement.classList.remove('open-catalog-direct');
     const intro=document.getElementById('intro');
     const catalog=document.getElementById('catalog');
     if(intro)intro.classList.add('hidden');
@@ -412,6 +428,13 @@ function applyFilters(){
  });
 }
 [fBusca,fTema,fSerie,fStatus].forEach(el=>el.addEventListener('change',applyFilters));
+// Ao abrir qualquer aplicação, a apresentação inicial fica marcada como concluída.
+document.querySelectorAll('a[href^="apps/"]').forEach(function(a){
+  a.addEventListener('click',function(){
+    try{sessionStorage.setItem('portal360_intro_done','1');localStorage.setItem('portal360_intro_seen','1');}catch(e){}
+  });
+});
+
 
 </script>
 </body>

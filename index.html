@@ -146,6 +146,12 @@
 </style>
 </head>
 <body>
+<script>
+try{
+  sessionStorage.setItem('portal360_intro_done','1');
+  localStorage.setItem('portal360_intro_seen','1');
+}catch(e){}
+</script>
 <div id="app">
   <div id="imMenu">
     <button data-mus id="btnMusIm">🔇 Música</button>
@@ -1217,7 +1223,7 @@ if(!semWebGL())animate(); // inicia o loop de render SÓ depois de tudo declarad
       if(document.fullscreenElement && document.exitFullscreen) document.exitFullscreen().catch(function(){});
       else if(document.webkitFullscreenElement && document.webkitExitFullscreen) document.webkitExitFullscreen();
     }catch(e){}
-    setTimeout(function(){ window.location.href='../../?catalog=1'; },120);
+    setTimeout(function(){ try{sessionStorage.setItem('portal360_intro_done','1');localStorage.setItem('portal360_intro_seen','1');}catch(e){}; var destino='../../?catalog=1#experiencias'; try{ if(window.top&&window.top!==window){window.top.location.href=destino;} else {window.location.href=destino;} }catch(err){window.location.href=destino;} },120);
   }); Q.btn=btn; raiz.appendChild(btn);
   window.__pdeQuiosque={entrar:entrar,sair:sair};
   if(quer())entrar();

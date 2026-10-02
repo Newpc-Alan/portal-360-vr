@@ -23,13 +23,13 @@ apps/sistema-solar/vendor/      three.js r128 e qrcode.js locais (funciona sem C
 
 ## Modo VR (Meta Quest)
 O Sistema Solar vira uma maquete inclinada à frente do usuário (ao alcance das mãos), em vez de jogá-lo na borda do sistema.
-- Gatilho num planeta: destaca, abre a ficha flutuante (diâmetro, distância, luas, temperatura, ano, dia, curiosidade) e conta para a missão. Gatilho no vazio fecha a ficha.
+- Gatilho num planeta: destaca, abre a ficha flutuante (diâmetro, distância, luas, temperatura, ano, dia, curiosidade) e inicia a narração. Gatilho no vazio fecha a ficha.
 - Grip (aperto lateral) num planeta: aproxima o planeta até ~28 cm de raio à frente dos olhos, com a ficha ao lado; grip de novo volta à maquete.
 - Manete: esquerda/direita gira a maquete; cima/baixo aproxima/afasta.
 - Botão A/X: pausa ou retoma o movimento.
-- A ficha fica fixa à direita do usuário, na altura dos olhos, com uma linha-guia até o planeta; o painel de missão fica acima da linha dos olhos.
+- A ficha fica fixa à direita do usuário, na altura dos olhos, com uma linha-guia até o planeta. Não há painel de missão: o foco é apontar, ver a ficha e ouvir a narração.
 - Narração: ao apertar o gatilho num planeta, toca `audio/<corpo>.mp3` saindo do próprio planeta (áudio posicional); a música ambiente abaixa; botão "Ouvir de novo / Parar" abaixo da ficha. Se o MP3 faltar, usa a voz do navegador (Web Speech); no desktop há o botão "Ouvir narração" na ficha.
-- Botões presos à visão, canto inferior esquerdo: "Sair do VR" (encerra a sessão) e "Catálogo" (encerra e volta ao catálogo).
+- Botões fixos no mundo, à esquerda da maquete (não acompanham a cabeça): "Sair do VR" (encerra a sessão) e "Catálogo" (encerra e volta ao catálogo). Posições em `VR_CFG.btnSair` / `VR_CFG.btnCatalogo`.
 - Parâmetros em `VR_CFG` (escala, altura, inclinação, tamanho do foco) no topo do bloco VR.
 
 ## Próximos passos

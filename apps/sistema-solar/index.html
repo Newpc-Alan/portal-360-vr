@@ -382,7 +382,6 @@ var _frames=0;
 let renderer,scene,camera,root,starfield;
 let camDist=140,camAzim=0.7,camElev=0.6,camTarget;
 let vrRig=null,vrSession=null,vrControllers=[],vrRaycaster=null,vrTempMat=null,vrHud=null,vrSelected=null;
-let vrMissao={indice:0,acertos:0,alvos:['saturno','marte','jupiter','netuno'],textos:['Encontre o planeta com grandes anéis','Encontre o planeta vermelho','Encontre o maior planeta','Encontre o planeta mais distante do Sol']};
 
 if(!semWebGL()){
   renderer=new THREE.WebGLRenderer({canvas:canvas3d,antialias:true,alpha:true});
@@ -832,7 +831,7 @@ $('ficha').addEventListener('click',e=>{const b=e.target.closest('[data-action="
    o Sistema Solar vira uma maquete inclinada à frente dele, ao alcance das mãos.
    Gatilho = seleciona e abre a ficha · Grip = aproxima/afasta o planeta ·
    Manete = gira e redimensiona a maquete · Botão A/X = pausa ou retoma. */
-const VR_CFG={hudPos:new THREE.Vector3(-0.22,0.55,-1.7),painelDist:1.15,painelLado:0.62,escala:0.022,raioFoco:0.28,altura:1.05,frente:-1.55,inclinacao:0.42,planetaScale:2.2,solScale:1.0};
+const VR_CFG={btnSair:new THREE.Vector3(-1.2,1.26,-1.0),btnCatalogo:new THREE.Vector3(-1.2,1.10,-1.0),painelDist:1.15,painelLado:0.62,escala:0.022,raioFoco:0.28,altura:1.05,frente:-1.55,inclinacao:0.42,planetaScale:2.2,solScale:1.0};
 let vrMaquete=null;      // {pos,rot,scale} base da maquete
 let vrLabels=[];         // sprites de nome (VR)
 let vrPainel=null;       // sprite da ficha aberta
@@ -857,16 +856,6 @@ function quebrarLinhas(g,texto,maxW){
   for(const p of palavras){const t=atual?atual+' '+p:p;if(g.measureText(t).width>maxW&&atual){linhas.push(atual);atual=p;}else atual=t;}
   if(atual)linhas.push(atual);return linhas;
 }
-function criarTextoVR(linhas){
-  const sp=textoCanvasVR(2048,560,(g,c)=>{
-    g.fillStyle='rgba(5,18,34,.90)';g.beginPath();g.roundRect(0,0,c.width,c.height,40);g.fill();
-    g.strokeStyle='#37b1da';g.lineWidth=10;g.stroke();
-    g.fillStyle='#76f1c0';g.font='800 66px Segoe UI,Arial';g.fillText('SISTEMA SOLAR VR',64,104);
-    g.fillStyle='#ffffff';g.font='600 62px Segoe UI,Arial';
-    linhas.forEach((t,i)=>g.fillText(t,64,214+i*96));
-  });
-  sp.scale.set(1.25,0.342,1);return sp;
-}
 function criarBotaoVR(texto,acao,cor){
   const sp=textoCanvasVR(1024,256,(g,c)=>{
     g.fillStyle=cor||'rgba(15,44,74,.96)';g.beginPath();g.roundRect(12,24,c.width-24,208,56);g.fill();
@@ -876,9 +865,9 @@ function criarBotaoVR(texto,acao,cor){
   sp.scale.set(0.44,0.11,1);sp.userData.vrBotao=acao;vrBotoes.push(sp);return sp;
 }
 function criarBotoesFixosVR(){
-  // presos à cabeça, canto inferior: sempre ao alcance, sem procurar
-  const sair=criarBotaoVR('✕  Sair do VR','sair','rgba(140,20,20,.95)');camera.add(sair);sair.position.set(-0.66,-0.50,-1.45);
-  const cat=criarBotaoVR('↙  Catálogo','catalogo','rgba(15,44,74,.96)');camera.add(cat);cat.position.set(-0.18,-0.50,-1.45);
+  // fixos no mundo, como um pequeno console à esquerda da maquete (não acompanham a cabeça)
+  const sair=criarBotaoVR('✕  Sair do VR','sair','rgba(140,20,20,.95)');scene.add(sair);sair.position.copy(VR_CFG.btnSair);
+  const cat=criarBotaoVR('↙  Catálogo','catalogo','rgba(15,44,74,.96)');scene.add(cat);cat.position.copy(VR_CFG.btnCatalogo);
 }
 function limparBotoesVR(){for(const b of vrBotoes){try{if(b.parent)b.parent.remove(b);b.material.map.dispose();b.material.dispose();}catch(e){}}vrBotoes=[];vrBtnRepetir=null;}
 function atualizarBotaoRepetirVR(){ if(!vrBtnRepetir||!vrPainel)return; const tocando=narrAtual===vrPainel.mesh.userData.corpoKey;
@@ -926,15 +915,6 @@ function criarPainelVR(key){
     g.fillStyle='#7fb2d0';g.font='500 44px Segoe UI,Arial';g.fillText('Gatilho fora do planeta fecha · Grip aproxima · Manete gira',88,c.height-52);
   });
   sp.scale.set(1.0,0.703,1);return sp;
-}
-function atualizarHudVR(){
-  if(!vrHud||!camera)return;
-  const i=vrMissao.indice%vrMissao.alvos.length;
-  const alvo=CORPOS[vrMissao.alvos[i]].nome;
-  const linhas=['MISSÃO '+String(i+1).padStart(2,'0')+': '+vrMissao.textos[i], 'Aponte e aperte o gatilho · Alvo: '+alvo, 'Acertos: '+vrMissao.acertos+'/'+vrMissao.alvos.length];
-  const novo=criarTextoVR(linhas);
-  if(vrHud.parent)vrHud.parent.remove(vrHud);vrHud.material.map.dispose();vrHud.material.dispose();
-  vrHud=novo;camera.add(vrHud);vrHud.position.copy(VR_CFG.hudPos);
 }
 function destacarVR(mesh){
   if(vrSelected&&vrSelected.material&&vrSelected.userData._emissive!==undefined){try{vrSelected.material.emissive.setHex(vrSelected.userData._emissive);}catch(e){}}
@@ -1007,8 +987,6 @@ function tratarSelecaoVR(ctrl){
   if(!hit){fecharPainelVR();destacarVR(null);narrParar();return;}
   const mesh=hit.object,key=mesh.userData.corpoKey;if(!key)return;
   destacarVR(mesh);estado.sel=key;atualizarFicha();abrirPainelVR(mesh,key);narrar(key,mesh);
-  const alvo=vrMissao.alvos[vrMissao.indice%vrMissao.alvos.length];
-  if(key===alvo){vrMissao.acertos++;vrMissao.indice++;vrMensagem('✅ <b>Missão concluída!</b> '+CORPOS[key].nome+' encontrado.',2800);atualizarHudVR();}
 }
 function alternarFocoVR(ctrl){
   if(vrFoco){vrFoco=null;aplicarMaqueteVR();posicionarPainelVR();return;}
@@ -1077,9 +1055,7 @@ async function entrarVR(){
   camera.position.set(0,1.6,0);camera.rotation.set(0,0,0);vrRig.position.set(0,0,0);vrRig.rotation.set(0,0,0);
   if(!vrControllers.length){criarControleVR(0);criarControleVR(1);}
   montarMaqueteVR();narrInit();criarBotoesFixosVR();
-  if(!vrHud){vrHud=criarTextoVR(['MISSÃO 01: '+vrMissao.textos[0],'Aponte e aperte o gatilho','Acertos: 0/'+vrMissao.alvos.length]);camera.add(vrHud);}
-  vrHud.position.copy(VR_CFG.hudPos);
-  vrMensagem('🥽 <b>Maquete do Sistema Solar</b> à sua frente. Gatilho: ficha + narração · Grip: aproxima · Manete: gira e redimensiona · A/X: pausa · Botões no canto inferior: Sair / Catálogo.',8000);
+  vrMensagem('🥽 <b>Maquete do Sistema Solar</b> à sua frente. Gatilho: ficha + narração · Grip: aproxima · Manete: gira e redimensiona · A/X: pausa · Botões Sair / Catálogo à esquerda da maquete.',8000);
   vrSession.addEventListener('end',sairVRFinal);
 }
 function sairVRFinal(){

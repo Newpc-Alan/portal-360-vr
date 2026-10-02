@@ -338,6 +338,9 @@ const CORPOS={
   terra:{nome:'Terra',tipo:'Planeta rochoso',cor:0x2e6fdb,raio:1.0,orbita:20,rotDias:1,anoDias:365,ua:1.0,
     diam:'12.742 km',dist:'149,6 milhões km',luas:1,incl:23.5,temp:'-88 a 58 °C',
     fato:'O único planeta com vida conhecida. A inclinação de 23,5° do seu eixo é a causa das estações do ano.'},
+  lua:{nome:'Lua',tipo:'Satélite natural da Terra',cor:0xcfd3d8,raio:0.27,orbita:0,rotDias:27.3,anoDias:27.3,ua:1.0,satelite:true,
+    diam:'3.474 km',dist:'384.400 km',distLabel:'Distância da Terra',anoLabel:'Volta ao redor da Terra',luas:'—',incl:6.7,temp:'-173 a 127 °C',
+    fato:'Sempre mostra a mesma face para a Terra, porque gira em torno de si no mesmo tempo em que dá a volta ao nosso planeta. É o único outro mundo onde o ser humano já pisou.'},
   marte:{nome:'Marte',tipo:'Planeta rochoso',cor:0xc1440e,raio:0.72,orbita:26,rotDias:1.03,anoDias:687,ua:1.52,
     diam:'6.779 km',dist:'227,9 milhões km',luas:2,incl:25,temp:'-140 a 20 °C',
     fato:'O "planeta vermelho", pela poeira rica em ferro. Abriga o Monte Olimpo, o maior vulcão conhecido do Sistema Solar.'},
@@ -354,8 +357,8 @@ const CORPOS={
     diam:'49.244 km',dist:'4,50 bilhões km',luas:16,incl:28,temp:'~-200 °C',
     fato:'O planeta mais distante do Sol. Tem os ventos mais velozes do Sistema Solar, chegando a 2.000 km/h.'}
 };
-const ORDEM=['sol','mercurio','venus','terra','marte','jupiter','saturno','urano','netuno'];
-const PLANETAS=ORDEM.slice(1);
+const ORDEM=['sol','mercurio','venus','terra','lua','marte','jupiter','saturno','urano','netuno'];
+const PLANETAS=ORDEM.filter(k=>k!=='sol'&&!CORPOS[k].satelite);
 
 /* ---------- TEXTURAS (mapas equiretangulares embutidos) ---------- */
 const TEX_DATA={
@@ -574,7 +577,7 @@ function buildSistema(){
     if(k==='terra'){
       const dLua=C.raio+2.4;                      // distância visual da Lua (antes 1.1: parecia colada)
       const lp=new THREE.Group();lp.rotation.x=5.1*PI/180;holder.add(lp);
-      const lua=esfera(0.27,0xcfd3d8,false,'lua');lua.position.x=dLua;lp.add(lua);
+      const lua=esfera(0.27,0xcfd3d8,false,'lua');lua.position.x=dLua;lp.add(lua);lua.userData.corpoKey='lua';lua.userData.vrInterativo=true;addLabel(lua,'Lua');
       const orbLua=anelOrbita(dLua);orbLua.material.opacity=.35;orbLua.visible=estado.orbitas;lp.add(orbLua);
       m.userData.luaPivot=lp;m.userData.orbLua=orbLua;m.userData.lua=lua;m.userData.dLua=dLua;}
     pivot.rotation.y=Math.random()*TAU;
@@ -920,8 +923,8 @@ function criarPainelVR(key){
     g.strokeStyle='#37b1da';g.lineWidth=14;g.stroke();
     g.fillStyle='#76f1c0';g.font='800 132px Segoe UI,Arial';g.fillText(C.nome,88,176);
     g.fillStyle='#9fdcff';g.font='700 60px Segoe UI,Arial';g.fillText(C.tipo.toUpperCase(),88,262);
-    const linhas=[['Diâmetro',C.diam],['Distância do Sol',C.dist],['Luas',String(C.luas)],['Temperatura',C.temp]];
-    if(C.anoDias>0)linhas.push(['Ano (translação)',C.anoDias>=365?plural(C.anoDias/365,'ano','anos',1):plural(C.anoDias,'dia','dias',0)]);
+    const linhas=[['Diâmetro',C.diam],[C.distLabel||'Distância do Sol',C.dist],['Luas',String(C.luas)],['Temperatura',C.temp]];
+    if(C.anoDias>0)linhas.push([C.anoLabel||'Ano (translação)',C.anoDias>=365?plural(C.anoDias/365,'ano','anos',1):plural(C.anoDias,'dia','dias',0)]);
     if(C.rotDias)linhas.push(['Dia (rotação)',Math.abs(C.rotDias)>=1?plural(Math.abs(C.rotDias),'dia','dias',2)+(C.rotDias<0?' (retrógrada)':''):(Math.abs(C.rotDias)*24).toFixed(1)+' h']);
     let y=380;
     linhas.forEach(([l,v])=>{g.fillStyle='#9fb6cc';g.font='600 58px Segoe UI,Arial';g.fillText(l,88,y);
@@ -958,7 +961,7 @@ function montarMaqueteVR(){
   // etiquetas de nome
   limparLabelsVR();
   for(const s of sis){const l=criarLabelVR(CORPOS[s.k].nome);scene.add(l);vrLabels.push({sp:l,mesh:s.mesh});}
-  root.traverse(o=>{if(o.isMesh&&o.userData&&o.userData.corpoKey==='sol'){const l=criarLabelVR('Sol');scene.add(l);vrLabels.push({sp:l,mesh:o});}});
+  root.traverse(o=>{if(o.isMesh&&o.userData&&(o.userData.corpoKey==='sol'||o.userData.corpoKey==='lua')){const l=criarLabelVR(CORPOS[o.userData.corpoKey].nome);scene.add(l);vrLabels.push({sp:l,mesh:o});}});
   // partículas (cinturão, cometas) têm tamanho em unidades de mundo: precisam acompanhar a escala
   root.traverse(o=>{if(o.isPoints&&o.material&&o.userData._size===undefined)o.userData._size=o.material.size;});
   ajustarParticulasVR();
@@ -1143,14 +1146,14 @@ function atualizarFicha(){
   let h=`<div class="cardhead"><span class="bola" style="${thumbStyle(estado.sel,C)}"></span>
     <div><div class="nome">${C.nome}</div><div class="tipo">${C.tipo}</div></div></div>`;
   h+=`<div class="metric"><span class="lbl">Diâmetro</span><span class="val">${C.diam}</span></div>`;
-  h+=`<div class="metric"><span class="lbl">Distância do Sol</span><span class="val">${C.dist}</span></div>`;
-  if(C.anoDias>0)h+=`<div class="metric"><span class="lbl">Ano (translação)</span><span class="val">${C.anoDias>=365?plural(C.anoDias/365,'ano','anos',1):plural(C.anoDias,'dia','dias',0)}</span></div>`;
+  h+=`<div class="metric"><span class="lbl">${C.distLabel||'Distância do Sol'}</span><span class="val">${C.dist}</span></div>`;
+  if(C.anoDias>0)h+=`<div class="metric"><span class="lbl">${C.anoLabel||'Ano (translação)'}</span><span class="val">${C.anoDias>=365?plural(C.anoDias/365,'ano','anos',1):plural(C.anoDias,'dia','dias',0)}</span></div>`;
   if(C.rotDias)h+=`<div class="metric"><span class="lbl">Dia (rotação)</span><span class="val">${Math.abs(C.rotDias)>=1?plural(Math.abs(C.rotDias),'dia','dias',2)+(C.rotDias<0?' (retróg.)':''):(Math.abs(C.rotDias)*24).toFixed(1)+' h'}</span></div>`;
   h+=`<div class="metric"><span class="lbl">Luas</span><span class="val">${C.luas}</span></div>`;
   if(m==='avancado'){
     h+=`<div class="metric"><span class="lbl">Inclinação do eixo</span><span class="val">${C.incl}°</span></div>`;
     h+=`<div class="metric"><span class="lbl">Temperatura</span><span class="val">${C.temp}</span></div>`;
-    if(C.ua>0)h+=`<div class="metric"><span class="lbl">Distância</span><span class="val">${C.ua} UA</span></div>`;
+    if(C.ua>0&&!C.satelite)h+=`<div class="metric"><span class="lbl">Distância</span><span class="val">${C.ua} UA</span></div>`;
   }
   h+=`<div class="fato"><b>Curiosidade:</b> ${C.fato}</div>`;
   h+=`<button class="btn" data-action="narrar" data-k="${estado.sel}" style="width:100%;justify-content:center;margin-top:10px">${narrAtual===estado.sel?'⏹ Parar narração':'🔊 Ouvir narração'}</button>`;
@@ -1302,12 +1305,29 @@ if($('btnFullIm'))$('btnFullIm').addEventListener('click',alternarTelaCheia);
 document.addEventListener('keydown',function(e){if(e.key==='Escape'&&document.body.classList.contains('imersao'))sairImersao();});
 
 let audioCtx=null,musicaOn=false,musicNodes=null;
+/* Trilha de fundo: se existir audio/fundo.mp3, toca em loop; senão, usa o pad sintetizado abaixo. */
+const FUNDO_URL='audio/fundo.mp3';
+let fundoBuffer=null,fundoFalhou=false,fundoCarregando=false;
+function carregarFundo(cb){
+  if(fundoBuffer){cb(fundoBuffer);return;} if(fundoFalhou){cb(null);return;}
+  if(fundoCarregando)return; fundoCarregando=true;
+  fetch(FUNDO_URL).then(r=>{if(!r.ok)throw 0;return r.arrayBuffer();}).then(ab=>audioCtx.decodeAudioData(ab)).then(buf=>{fundoBuffer=buf;fundoCarregando=false;cb(buf);}).catch(()=>{fundoFalhou=true;fundoCarregando=false;cb(null);});
+}
 function iniciarMusica(){
   try{
     if(musicNodes)return;
     if(!audioCtx)audioCtx=new (window.AudioContext||window.webkitAudioContext)();
     if(audioCtx.state==='suspended')audioCtx.resume();
     var ctx=audioCtx, master=ctx.createGain(); master.gain.value=0; master.connect(ctx.destination);
+    if(!fundoFalhou){
+      musicNodes={master:master,nodes:[],pendente:true};
+      carregarFundo(function(buf){
+        if(!musicNodes||!musicNodes.pendente)return;
+        if(buf){ var src=ctx.createBufferSource(); src.buffer=buf; src.loop=true; src.connect(master); src.start(); musicNodes={master:master,nodes:[src]}; master.gain.linearRampToValueAtTime(narrAtual?0.05:0.26, ctx.currentTime+3); }
+        else { musicNodes=null; try{master.disconnect();}catch(e){} fundoFalhou=true; iniciarMusica(); }
+      });
+      return;
+    }
     var delay=ctx.createDelay(2.0); delay.delayTime.value=0.5; var fb=ctx.createGain(); fb.gain.value=0.42; delay.connect(fb); fb.connect(delay);
     var wet=ctx.createGain(); wet.gain.value=0.34; delay.connect(wet); wet.connect(master);
     var lp=ctx.createBiquadFilter(); lp.type='lowpass'; lp.frequency.value=950; lp.Q.value=0.6; lp.connect(master); lp.connect(delay);

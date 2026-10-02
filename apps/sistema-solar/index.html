@@ -571,8 +571,12 @@ function buildSistema(){
     const m=esfera(C.raio,C.cor,false,k);m.userData.corpoKey=k;m.userData.vrInterativo=true;holder.add(m);
     m.rotation.z=(C.incl||0)*PI/180;
     if(C.anel){m.add(criarAnelSaturno(C.raio));}
-    if(k==='terra'){const lp=new THREE.Group();holder.add(lp);const lua=esfera(0.27,0xcfd3d8,false,'lua');lua.position.x=C.raio+1.1;lp.add(lua);
-      m.userData.luaPivot=lp;}
+    if(k==='terra'){
+      const dLua=C.raio+2.4;                      // distância visual da Lua (antes 1.1: parecia colada)
+      const lp=new THREE.Group();lp.rotation.x=5.1*PI/180;holder.add(lp);
+      const lua=esfera(0.27,0xcfd3d8,false,'lua');lua.position.x=dLua;lp.add(lua);
+      const orbLua=anelOrbita(dLua);orbLua.material.opacity=.35;orbLua.visible=estado.orbitas;lp.add(orbLua);
+      m.userData.luaPivot=lp;m.userData.orbLua=orbLua;}
     pivot.rotation.y=Math.random()*TAU;
     sis.push({k,pivot,mesh:m,orb,revSpeed:1/C.anoDias,spinSpeed:(C.rotDias<0?-1:1)/Math.max(0.3,Math.abs(C.rotDias))});
     addLabel(m,C.nome);
@@ -949,7 +953,7 @@ function montarMaqueteVR(){
   vrMaquete={rotY:0,scale:VR_CFG.escala};
   aplicarMaqueteVR();
   // planetas maiores para serem alvos fáceis do raio
-  for(const s of sis){const f=s.k==='sol'?VR_CFG.solScale:VR_CFG.planetaScale;s.mesh.scale.setScalar(f);}
+  for(const s of sis){const f=s.k==='sol'?VR_CFG.solScale:VR_CFG.planetaScale;s.mesh.scale.setScalar(f);if(s.mesh.userData.luaPivot)s.mesh.userData.luaPivot.scale.setScalar(f);}
   // etiquetas de nome
   limparLabelsVR();
   for(const s of sis){const l=criarLabelVR(CORPOS[s.k].nome);scene.add(l);vrLabels.push({sp:l,mesh:s.mesh});}
@@ -987,7 +991,7 @@ function abrirPainelVR(mesh,key){
 }
 function desmontarMaqueteVR(){
   fecharPainelVR();limparLabelsVR();vrFoco=null;destacarVR(null);
-  for(const s of sis){s.mesh.scale.setScalar(1);}
+  for(const s of sis){s.mesh.scale.setScalar(1);if(s.mesh.userData.luaPivot)s.mesh.userData.luaPivot.scale.setScalar(1);}
   root.traverse(o=>{if(o.isPoints&&o.userData._size!==undefined){o.material.size=o.userData._size;delete o.userData._size;}});
   root.traverse(o=>{if(o.isPointLight&&vrLuzBackup!==null){o.intensity=vrLuzBackup;}});vrLuzBackup=null;
   if(vrRootBackup){root.position.copy(vrRootBackup.pos);root.rotation.copy(vrRootBackup.rot);root.scale.copy(vrRootBackup.scale);vrRootBackup=null;}
@@ -1215,7 +1219,7 @@ function entrarVista(v){
 $('btnPlay').addEventListener('click',function(){estado.playing=!estado.playing;this.classList.toggle('on',estado.playing);this.innerHTML=estado.playing?'⏸ Pausar':'▶ Reproduzir';});
 $('btnResetVista').addEventListener('click',()=>{camAzim=0.7;camElev=(estado.vista==='estacoes'||estado.vista==='fases')?1.0:0.5;entrarVista(estado.vista);});
 $('velRange').addEventListener('input',e=>{estado.vel=e.target.value/100;$('velLbl').textContent=estado.vel.toFixed(1);});
-$('tgOrbitas').addEventListener('change',e=>{estado.orbitas=e.target.checked;sis.forEach(s=>s.orb.visible=estado.orbitas);});
+$('tgOrbitas').addEventListener('change',e=>{estado.orbitas=e.target.checked;sis.forEach(s=>{s.orb.visible=estado.orbitas;if(s.mesh.userData.orbLua)s.mesh.userData.orbLua.visible=estado.orbitas;});});
 $('tgNomes').addEventListener('change',e=>{estado.nomes=e.target.checked;});
 $('tgEscala').addEventListener('change',e=>{estado.escala=e.target.checked;if(estado.vista==='sistema')buildSistema();});
 $('orbRange').addEventListener('input',e=>{estado.orbAng=parseFloat(e.target.value);aplicarOrbita();});

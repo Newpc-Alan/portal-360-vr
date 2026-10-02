@@ -21,6 +21,14 @@ apps/sistema-solar/vendor/      three.js r128 e qrcode.js locais (funciona sem C
 - `apps/sistema-solar/?vr=1` destaca o botão "Entrar em VR" e orienta sobre o óculos (WebXR exige HTTPS).
 - `apps/sistema-solar/?quiosque=0` desliga o modo quiosque (útil para testes fora do Webnode).
 
+## Modo VR (Meta Quest)
+O Sistema Solar vira uma maquete inclinada à frente do usuário (ao alcance das mãos), em vez de jogá-lo na borda do sistema.
+- Gatilho num planeta: destaca, abre a ficha flutuante (diâmetro, distância, luas, temperatura, ano, dia, curiosidade) e conta para a missão. Gatilho no vazio fecha a ficha.
+- Grip (aperto lateral) num planeta: aproxima o planeta até ~28 cm de raio à frente dos olhos, com a ficha ao lado; grip de novo volta à maquete.
+- Manete: esquerda/direita gira a maquete; cima/baixo aproxima/afasta.
+- Botão A/X: pausa ou retoma o movimento.
+- Parâmetros em `VR_CFG` (escala, altura, inclinação, tamanho do foco) no topo do bloco VR.
+
 ## Próximos passos
 - Trocar o vídeo de abertura (ID em `VIDEO_ID` no `index.html`) pelo novo vídeo com identidade visual do Portal do Educador.
 - Aplicar a identidade visual do Portal no catálogo.

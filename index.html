@@ -117,6 +117,8 @@ body.intro-fullscreen #btnSkipIntro{cursor:pointer}
 body.intro-fullscreen #btnSkipIntro{cursor:pointer}
 #introNote{position:absolute;left:50%;bottom:26px;transform:translateX(-50%);z-index:7;color:#9fb6c9;font-size:13px;opacity:0;transition:opacity .5s;pointer-events:none}
 #introNote.show{opacity:1}
+#appFrame{position:fixed;inset:0;width:100vw;height:100vh;border:0;z-index:5000;opacity:0;pointer-events:none;background:#000}
+#appFrame.show{opacity:1;pointer-events:auto}
 #intro:fullscreen,
 #intro:-webkit-full-screen{
   width:100vw;height:100vh;background:#000;
@@ -205,7 +207,7 @@ body.intro-fullscreen #btnSkipIntro{cursor:pointer}
           <div class="meta"><span>Astronomia</span><span>Fundamental I ao Médio</span><span>VR + 3D</span></div>
           <div class="card-actions">
             <a href="apps/sistema-solar/" class="primary-btn">Explorar em 3D</a>
-            <a href="apps/sistema-solar/?vr=1" class="secondary-btn">🥽 Entrar em VR</a>
+            <a href="apps/sistema-solar/?vr=1" class="secondary-btn" id="btnVRDireto">🥽 Entrar em VR</a>
           </div>
         </div>
       </article>
@@ -446,6 +448,34 @@ document.addEventListener('webkitfullscreenchange',function(){
     setImmersiveMode(!!fullscreenElement());
   }
 });
+
+/* ===== Entrar em VR direto do catálogo =====
+   O app fica pré-carregado num iframe invisível (mesma origem). O clique aqui conta como gesto
+   do usuário para o iframe, então a sessão WebXR abre na hora, sem segundo toque. */
+let appFrame=null;
+function prepararApp(){
+  if(appFrame||!document.getElementById('btnVRDireto'))return;
+  appFrame=document.createElement('iframe');appFrame.id='appFrame';
+  appFrame.setAttribute('allow','xr-spatial-tracking; fullscreen; autoplay; accelerometer; gyroscope');
+  appFrame.src='apps/sistema-solar/?quiosque=0&embed=1';
+  document.body.appendChild(appFrame);
+}
+function entrarVRdireto(e){
+  let w=null;try{w=appFrame&&appFrame.contentWindow;}catch(err){}
+  if(w&&typeof w.alternarVR==='function'&&w.navigator&&w.navigator.xr){
+    e.preventDefault();
+    appFrame.classList.add('show');
+    try{ if(player&&player.stopVideo)player.stopVideo(); }catch(err){}
+    try{ w.alternarVR(); }catch(err){ location.href='apps/sistema-solar/?vr=1'; }
+    return;
+  }
+  // app ainda não carregou (ou sem WebXR): segue o link normal
+}
+document.getElementById('btnVRDireto').addEventListener('click',entrarVRdireto);
+// pré-carrega quando o catálogo aparece (não durante a abertura em vídeo)
+const _obsCat=new MutationObserver(()=>{ if(!document.getElementById('catalog').classList.contains('hidden')){prepararApp();_obsCat.disconnect();} });
+_obsCat.observe(document.getElementById('catalog'),{attributes:true,attributeFilter:['class']});
+document.addEventListener('DOMContentLoaded',()=>{ if(!document.getElementById('catalog').classList.contains('hidden'))prepararApp(); });
 
 const fBusca=document.getElementById('fBusca');
 const fTema=document.getElementById('fTema');

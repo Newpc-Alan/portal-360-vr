@@ -891,9 +891,14 @@ function raycastBotoesVR(ctrl){
   vrRaycaster.ray.direction.set(0,0,-1).applyMatrix4(vrTempMat);
   const hits=vrRaycaster.intersectObjects(vrBotoes,false);return hits.length?hits[0].object:null;
 }
+function irCatalogo(){
+  const u=new URL('../../?catalog=1',location.href).href;
+  try{ if(window.top&&window.top!==window){window.top.location.href=u;return;} }catch(e){}
+  window.location.href=u;
+}
 function acaoBotaoVR(acao){
   if(acao==='sair'){alternarVR();return;}
-  if(acao==='catalogo'){try{narrParar();}catch(e){} const ir=()=>{window.location.href='../../?catalog=1';}; if(vrSession){vrSession.end().then(ir,ir);}else ir(); return;}
+  if(acao==='catalogo'){try{narrParar();}catch(e){} if(vrSession){vrSession.end().then(irCatalogo,irCatalogo);}else irCatalogo(); return;}
   if(acao==='repetir'&&vrPainel){const k=vrPainel.mesh.userData.corpoKey;if(narrAtual===k)narrParar();else narrar(k,vrPainel.mesh);return;}
 }
 function criarLabelVR(nome){
@@ -1332,6 +1337,7 @@ const appEl=$('app');
 let _appParent=null,_appNext=null,_feCss=null;
 function emQuiosque(){return appEl.classList.contains('kiosk');}
 function expandirIframe(on){
+  if(/quiosque=0/.test(location.search||''))return; // embutido no catálogo: quem controla o iframe é o catálogo
   // Se o app estiver dentro de um iframe do MESMO domínio (caso do Portal/Webnode),
   // expande o próprio iframe para cobrir a página inteira, escondendo cabeçalho/rodapé.
   // Cross-origin lança exceção e é ignorado silenciosamente.
@@ -1468,7 +1474,7 @@ if(!semWebGL())animate(); // inicia o loop de render SÓ depois de tudo declarad
       if(document.fullscreenElement && document.exitFullscreen) document.exitFullscreen().catch(function(){});
       else if(document.webkitFullscreenElement && document.webkitExitFullscreen) document.webkitExitFullscreen();
     }catch(e){}
-    setTimeout(function(){ window.location.href='../../?catalog=1'; },120);
+    setTimeout(function(){ if(typeof irCatalogo==='function')irCatalogo(); else window.location.href='../../?catalog=1'; },120);
   }); Q.btn=btn;
   var barra=document.querySelector('.barrasup'); if(barra)barra.insertBefore(btn,barra.firstChild); else raiz.appendChild(btn);
   window.__pdeQuiosque={entrar:entrar,sair:sair};

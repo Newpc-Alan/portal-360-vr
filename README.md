@@ -18,7 +18,8 @@ apps/sistema-solar/vendor/      three.js r128 e qrcode.js locais (funciona sem C
 
 ## Links
 - `apps/sistema-solar/` abre em 3D.
-- `apps/sistema-solar/?vr=1` abre uma tela de entrada com um único botão "Entrar em VR" (o WebXR exige um toque na própria página; não há como abrir a sessão sozinho). Sem óculos, mostra aviso e segue em 3D.
+- "Entrar em VR" no catálogo abre a sessão WebXR direto: o app fica pré-carregado num iframe invisível de mesma origem (`apps/sistema-solar/?quiosque=0&embed=1`) e o clique do catálogo vale como gesto do usuário para ele. Se o app ainda não carregou, o link segue para `apps/sistema-solar/?vr=1`, que mostra uma tela de entrada com um único botão.
+- Dentro do iframe, os botões "Catálogo" navegam a janela de cima (`irCatalogo()`).
 - No 3D (desktop/Chromebook/lousa), clicar ou tocar num planeta no palco seleciona, abre a ficha e narra; clicar de novo para a narração. Arrastar continua girando a câmera.
 - `apps/sistema-solar/?quiosque=0` desliga o modo quiosque (útil para testes fora do Webnode).
 

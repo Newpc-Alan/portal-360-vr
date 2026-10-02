@@ -576,7 +576,7 @@ function buildSistema(){
       const lp=new THREE.Group();lp.rotation.x=5.1*PI/180;holder.add(lp);
       const lua=esfera(0.27,0xcfd3d8,false,'lua');lua.position.x=dLua;lp.add(lua);
       const orbLua=anelOrbita(dLua);orbLua.material.opacity=.35;orbLua.visible=estado.orbitas;lp.add(orbLua);
-      m.userData.luaPivot=lp;m.userData.orbLua=orbLua;}
+      m.userData.luaPivot=lp;m.userData.orbLua=orbLua;m.userData.lua=lua;m.userData.dLua=dLua;}
     pivot.rotation.y=Math.random()*TAU;
     sis.push({k,pivot,mesh:m,orb,revSpeed:1/C.anoDias,spinSpeed:(C.rotDias<0?-1:1)/Math.max(0.3,Math.abs(C.rotDias))});
     addLabel(m,C.nome);
@@ -843,7 +843,7 @@ $('ficha').addEventListener('click',e=>{const b=e.target.closest('[data-action="
    o Sistema Solar vira uma maquete inclinada à frente dele, ao alcance das mãos.
    Gatilho = seleciona e abre a ficha · Grip = aproxima/afasta o planeta ·
    Manete = gira e redimensiona a maquete · Botão A/X = pausa ou retoma. */
-const VR_CFG={btnSair:new THREE.Vector3(-1.2,1.26,-1.0),btnCatalogo:new THREE.Vector3(-1.2,1.10,-1.0),painelDist:1.15,painelLado:0.62,escala:0.022,raioFoco:0.28,altura:1.05,frente:-1.55,inclinacao:0.42,planetaScale:2.2,solScale:1.0};
+const VR_CFG={btnSair:new THREE.Vector3(-1.2,1.26,-1.0),btnCatalogo:new THREE.Vector3(-1.2,1.10,-1.0),painelDist:1.15,painelLado:0.62,escala:0.022,raioFoco:0.28,altura:1.05,frente:-1.55,inclinacao:0.42,planetaScale:2.2,solScale:1.0,luaFolga:1.0,luaScale:1.8};
 let vrMaquete=null;      // {pos,rot,scale} base da maquete
 let vrLabels=[];         // sprites de nome (VR)
 let vrPainel=null;       // sprite da ficha aberta
@@ -953,7 +953,8 @@ function montarMaqueteVR(){
   vrMaquete={rotY:0,scale:VR_CFG.escala};
   aplicarMaqueteVR();
   // planetas maiores para serem alvos fáceis do raio
-  for(const s of sis){const f=s.k==='sol'?VR_CFG.solScale:VR_CFG.planetaScale;s.mesh.scale.setScalar(f);if(s.mesh.userData.luaPivot)s.mesh.userData.luaPivot.scale.setScalar(f);}
+  for(const s of sis){const f=s.k==='sol'?VR_CFG.solScale:VR_CFG.planetaScale;s.mesh.scale.setScalar(f);
+    const u=s.mesh.userData;if(u.lua){const d=CORPOS.terra.raio*f+VR_CFG.luaFolga;u.lua.position.x=d;u.lua.scale.setScalar(VR_CFG.luaScale);u.orbLua.scale.setScalar(d/u.dLua);}}
   // etiquetas de nome
   limparLabelsVR();
   for(const s of sis){const l=criarLabelVR(CORPOS[s.k].nome);scene.add(l);vrLabels.push({sp:l,mesh:s.mesh});}
@@ -991,7 +992,7 @@ function abrirPainelVR(mesh,key){
 }
 function desmontarMaqueteVR(){
   fecharPainelVR();limparLabelsVR();vrFoco=null;destacarVR(null);
-  for(const s of sis){s.mesh.scale.setScalar(1);if(s.mesh.userData.luaPivot)s.mesh.userData.luaPivot.scale.setScalar(1);}
+  for(const s of sis){s.mesh.scale.setScalar(1);const u=s.mesh.userData;if(u.lua){u.lua.position.x=u.dLua;u.lua.scale.setScalar(1);u.orbLua.scale.setScalar(1);}}
   root.traverse(o=>{if(o.isPoints&&o.userData._size!==undefined){o.material.size=o.userData._size;delete o.userData._size;}});
   root.traverse(o=>{if(o.isPointLight&&vrLuzBackup!==null){o.intensity=vrLuzBackup;}});vrLuzBackup=null;
   if(vrRootBackup){root.position.copy(vrRootBackup.pos);root.rotation.copy(vrRootBackup.rot);root.scale.copy(vrRootBackup.scale);vrRootBackup=null;}

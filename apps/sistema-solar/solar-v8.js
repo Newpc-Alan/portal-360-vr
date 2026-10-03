@@ -40,7 +40,7 @@ el('div',{id:'v8Speech',hidden:true,role:'status','aria-live':'polite'},document
 const planetDock=el('section',{id:'v8PlanetDock',hidden:true,innerHTML:'<div class="v8-planet-head"><div class="v8-planet-ball" id="v8PlanetBall"></div><div><div class="v8-planet-name" id="v8PlanetName"></div><div class="v8-planet-type" id="v8PlanetType"></div></div></div><div class="v8-planet-text" id="v8PlanetText"></div>'},document.querySelector('.palco'));
 const settings=el('details',{className:'v8-settings',innerHTML:'<summary>Conforto, áudio e qualidade</summary>'},panel);
 select(settings,'Qualidade gráfica',[['economico','Econômico'],['equilibrado','Equilibrado'],['alto','Mais detalhes']],S.quality,v=>{S.quality=v;dimensions.p=0;applyQuality();});
-range(settings,'Volume da voz','v8Voice',0,100,85,n=>{S.voice=n/100;if(narrSom)narrSom.setVolume(S.voice);});
+range(settings,'Volume da voz','v8Voice',0,100,85,n=>{S.voice=n/100;if(narrSom)narrSom.setVolume(S.voice);if(S.narrAudio)S.narrAudio.volume=S.voice;});
 range(settings,'Volume da trilha','v8Music',0,100,55,n=>{S.music=n/100;if(musicNodes&&audioCtx){musicNodes.nivel=S.music;musicNodes.master.gain.setTargetAtTime(narrAtual?S.music*.2:S.music,audioCtx.currentTime,.12);}});
 for(const [label,key] of [['Ambiente com poeira e cometas','environment'],['Exibir legendas da narração','captions']]){const l=el('label',{textContent:label},settings);const i=el('input',{type:'checkbox',checked:S[key]},l);i.onchange=()=>{S[key]=i.checked;applyQuality();if(key==='captions')caption(S.caption);};}
 note('No VR: use os controles. Centralize a experiência e ajuste a posição antes de começar. Interrompa se houver desconforto.',settings);
@@ -50,9 +50,13 @@ const dialog=el('div',{className:'v8-dialog',id:'v8Summary',hidden:true,role:'di
 function applyQuality(){if(cinturao)cinturao.visible=S.environment;for(const c of cometas)c.piv.visible=S.environment;if(starfield)starfield.children.forEach(o=>o.visible=S.environment);if(renderer.xr.setFoveation)renderer.xr.setFoveation(S.quality==='alto'?.25:.7);}
 
 function stopNarrationExclusive(){
-  try{narrParar();}catch(e){}
+  // Invalida qualquer callback assíncrono de uma narração anterior.
+  S.narrSeq++;
+  try{if(S.narrAudio){S.narrAudio.onended=null;S.narrAudio.onerror=null;S.narrAudio.pause();S.narrAudio.currentTime=0;S.narrAudio.removeAttribute('src');S.narrAudio.load();S.narrAudio=null;}}catch(e){}
+  try{if(narrSom){if(narrSom.isPlaying)narrSom.stop();if(narrSom.parent)narrSom.parent.remove(narrSom);narrSom=null;}}catch(e){}
   try{if(window.speechSynthesis)speechSynthesis.cancel();}catch(e){}
   try{scene.traverse(o=>{if(o&&o.isAudio&&o.isPlaying){try{o.stop();}catch(e){}}});}catch(e){}
+  narrAtual=null;narrCarregando=null;duckMusica(false);try{atualizarBotoesNarr();}catch(e){}
 }
 function clearDesktopFocus(){
   if(S.desktopFocus){release(S.desktopFocus);S.desktopFocus=null;}
@@ -161,9 +165,31 @@ for(const ev of ['pointerup','pointercancel'])canvas3d.addEventListener(ev,e=>{i
 for(const ev of ['mousedown','touchstart','touchmove'])canvas3d.addEventListener(ev,e=>{if(activeDrag){e.preventDefault();e.stopImmediatePropagation();}},true);
 canvas3d.addEventListener('click',e=>{if(['planeta','diaNoite'].includes(estado.vista)){e.stopImmediatePropagation();}},true);
 
-// Narração: mantém os MP3 existentes; sintetizador do navegador é a alternativa.
-narrar=function(key,mesh){stopNarrationExclusive();caption(CORPOS[key].nome+'. '+CORPOS[key].fato,30);const alvo=(!estado.vr&&estado.vista==='sistema'&&S.desktopFocus&&S.desktopFocusKey===key)?S.desktopFocus.userData.planetMesh:mesh;original.narrar(key,alvo);};
-narrFallback=function(key){if(!window.speechSynthesis){caption(CORPOS[key].fato);return;}const u=new SpeechSynthesisUtterance(CORPOS[key].nome+'. '+CORPOS[key].fato);u.lang='pt-BR';u.rate=.94;u.volume=S.voice;const pt=speechSynthesis.getVoices().find(x=>/pt[-_]BR/i.test(x.lang));if(pt)u.voice=pt;narrAtual=key;duckMusica(true);u.onend=u.onerror=()=>{narrAtual=null;duckMusica(false);atualizarBotoesNarr();};atualizarBotoesNarr();speechSynthesis.speak(u);};
+// Narração humanizada: UM player global. Um novo planeta sempre encerra o áudio anterior.
+narrParar=function(){stopNarrationExclusive();};
+narrFallback=function(key,seq){
+  if(seq!==undefined&&seq!==S.narrSeq)return;
+  if(!window.speechSynthesis){caption(CORPOS[key].fato);return;}
+  try{speechSynthesis.cancel();}catch(e){}
+  const C=CORPOS[key],u=new SpeechSynthesisUtterance(C.nome+'. '+C.tipo+'. '+C.fato);u.lang='pt-BR';u.rate=.94;u.volume=S.voice;
+  const pt=speechSynthesis.getVoices().find(x=>/pt[-_]BR/i.test(x.lang));if(pt)u.voice=pt;
+  narrAtual=key;duckMusica(true);atualizarBotoesNarr();
+  u.onend=u.onerror=()=>{if(seq===undefined||seq===S.narrSeq){narrAtual=null;duckMusica(false);atualizarBotoesNarr();}};
+  speechSynthesis.speak(u);
+};
+narrar=function(key,mesh){
+  if(!CORPOS[key])return;
+  stopNarrationExclusive();
+  const seq=S.narrSeq;
+  caption(CORPOS[key].nome+'. '+CORPOS[key].fato,30);
+  const a=new Audio(NARR_BASE+key+'.mp3');
+  S.narrAudio=a;narrAtual=key;a.preload='auto';a.volume=Math.max(0,Math.min(1,S.voice));
+  duckMusica(true);atualizarBotoesNarr();
+  const finish=()=>{if(seq!==S.narrSeq||S.narrAudio!==a)return;S.narrAudio=null;narrAtual=null;duckMusica(false);atualizarBotoesNarr();};
+  a.onended=finish;
+  a.onerror=()=>{if(seq!==S.narrSeq||S.narrAudio!==a)return;S.narrAudio=null;narrAtual=null;duckMusica(false);atualizarBotoesNarr();narrFallback(key,seq);};
+  const p=a.play();if(p&&p.catch)p.catch(()=>{if(seq===S.narrSeq&&S.narrAudio===a){S.narrAudio=null;narrAtual=null;duckMusica(false);atualizarBotoesNarr();narrFallback(key,seq);}});
+};
 const GUIDE=[
  {v:'sistema',t:'Conheça a maquete',p:'O Sol é a estrela deste sistema. Selecione um planeta e observe sua órbita. Os tamanhos e as distâncias foram ajustados para a exploração.'},
  {v:'planeta',t:'Observe a Terra de perto',p:'Esta é a bancada de investigação. Arraste a Terra para observar continentes, oceanos e nuvens. Essa ampliação serve para inspecionar detalhes.'},
@@ -262,7 +288,7 @@ animate=function(){const now=performance.now(),dt=Math.min(.05,Math.max(0,(now-v
  if(estado.vista==='fases'&&fasesObj){fasesObj.luaPivot.rotation.y+=step*.6;atualizarFase();}
  root.traverse(o=>{if(o.userData.cloud)o.rotation.y+=step*.025;});
  if(starfield)starfield.material.opacity=.88; // ciel fixe : repère de confort en VR.
- if(narrSom&&narrSom.getVolume&&narrSom.getVolume()!==S.voice)narrSom.setVolume(S.voice);
+ if(narrSom&&narrSom.getVolume&&narrSom.getVolume()!==S.voice)narrSom.setVolume(S.voice);if(S.narrAudio&&Math.abs(S.narrAudio.volume-S.voice)>.01)S.narrAudio.volume=S.voice;
  updateDesktopFocus();atualizarLabels();if(estado.vr)atualizarVR();renderer.render(scene,camera);
  const speech=$v('v8Speech');if(speech){const active=S.captions&&S.caption&&now<=S.captionUntil;speech.hidden=!active||estado.vista==='planeta';}if(estado.vista==='planeta')syncPlanetDock();
 };

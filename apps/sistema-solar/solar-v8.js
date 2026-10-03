@@ -357,20 +357,52 @@ setupXRActivity=function(){
   const X=.78,Y0=-.02,DY=.145;
   if(S.qr.fim){botaoLargoVR('↺  Nova rodada','rodada','rgba(26,107,42,.96)').position.copy(atAnchor(X,Y0-.3,1.45));return;}
   const ops=Array.from($v('qOps').children);
-  ops.forEach((b,i)=>{let cor='rgba(15,44,74,.96)';if(quiz.respondida){if(b.classList.contains('certa'))cor='rgba(26,107,42,.96)';else if(b.classList.contains('errada'))cor='rgba(140,20,20,.95)';else cor='rgba(40,55,75,.85)';}
-    botaoLargoVR(String.fromCharCode(65+i)+'  ·  '+b.textContent,quiz.respondida?'nada':'resp:'+i,cor).position.copy(atAnchor(X,Y0-i*DY,1.45));});
-  if(quiz.respondida)botaoLargoVR(S.qr.i>=S.qr.n?'Ver resultado  ▸':'Próxima questão  ▸','proxima','rgba(26,107,42,.96)').position.copy(atAnchor(X,Y0-4*DY-.06,1.45));
+  ops.forEach((b,i)=>{let cor='rgba(15,44,74,.96)',pref=String.fromCharCode(65+i)+'  ·  ',corTexto='#fff';
+    if(quiz.respondida){if(b.classList.contains('certa')){cor='#2e9e46';pref='✓  ';}else if(b.classList.contains('errada')){cor='#c62828';pref='✗  ';}else{cor='rgba(40,55,75,.55)';corTexto='rgba(255,255,255,.45)';}}
+    botaoLargoVR(pref+b.textContent,quiz.respondida?'nada':'resp:'+i,cor,corTexto).position.copy(atAnchor(X,Y0-i*DY,1.45));});
+  if(quiz.respondida){
+    const ok=!$v('qOps').querySelector('.errada');
+    const fb=textoCanvasVR(2048,320,(g,c)=>{g.fillStyle=ok?'#2e9e46':'#c62828';g.beginPath();g.roundRect(8,8,c.width-16,c.height-16,60);g.fill();g.strokeStyle='rgba(255,255,255,.7)';g.lineWidth=10;g.stroke();
+      g.fillStyle='#fff';g.font='900 150px Segoe UI,Arial';g.textAlign='center';g.textBaseline='middle';g.fillText(ok?'✅  ACERTOU!':'❌  ERROU',c.width/2,c.height/2+8);});
+    fb.scale.set(.98,.153,1);fb.position.copy(atAnchor(X,Y0+.17,1.45));scene.add(fb);vrBotoes.push(fb);fb.userData.vrBotao='nada';
+    botaoLargoVR(S.qr.i>=S.qr.n?'Ver resultado  ▸':'Próxima questão  ▸','proxima','rgba(15,44,74,.96)').position.copy(atAnchor(X,Y0-4*DY-.06,1.45));
+    somFeedback(ok);
+  }
 };
+function painelQuizVR(lines,ok){
+  return textoCanvasVR(2048,1024,(g,c)=>{
+    g.fillStyle='rgba(5,19,34,.95)';g.beginPath();g.roundRect(0,0,c.width,c.height,48);g.fill();g.strokeStyle=ok===true?'#2e9e46':ok===false?'#c62828':'#37b1da';g.lineWidth=12;g.stroke();
+    let y=96;
+    // linha 1: cabeçalho (questão / placar)
+    g.fillStyle='#80dfc0';g.font='700 56px Segoe UI,Arial';g.fillText(lines[0],72,y);y+=96;
+    // linha 2: pergunta grande
+    g.fillStyle='#ffffff';g.font='800 80px Segoe UI,Arial';
+    for(const l of quebrarLinhas(g,lines[1],c.width-144).slice(0,4)){g.fillText(l,72,y);y+=96;}
+    y+=24;
+    // demais linhas: feedback / orientação
+    for(let i=2;i<lines.length;i++){g.fillStyle=ok===true?'#9ff0b5':ok===false?'#ffb3b3':'#e4f3ff';g.font='600 54px Segoe UI,Arial';
+      for(const l of quebrarLinhas(g,lines[i],c.width-144)){if(y>c.height-40)break;g.fillText(l,72,y);y+=66;}y+=16;}
+  });
+}
+let fbCtx=null;
+function somFeedback(ok){
+  try{fbCtx=fbCtx||new (window.AudioContext||window.webkitAudioContext)();if(fbCtx.state==='suspended')fbCtx.resume();
+    const t=fbCtx.currentTime,g=fbCtx.createGain();g.gain.value=0.0001;g.connect(fbCtx.destination);
+    const notas=ok?[[523,0],[659,.12],[784,.24]]:[[220,0],[180,.18]];
+    for(const [f,d] of notas){const o=fbCtx.createOscillator();o.type=ok?'triangle':'sawtooth';o.frequency.value=f;o.connect(g);o.start(t+d);o.stop(t+d+(ok?.16:.22));}
+    g.gain.setValueAtTime(0.0001,t);g.gain.exponentialRampToValueAtTime(ok?.25:.18,t+.02);g.gain.exponentialRampToValueAtTime(0.0001,t+(ok?.5:.48));
+  }catch(e){}
+}
 const updateV8=updateXRPanel;
 updateXRPanel=function(){
   if(estado.vista!=='desafio'){updateV8();return;}
   let lines;
-  if(S.qr.fim){const a=S.qr.acertos,n=S.qr.n;lines=['Resultado da rodada','Você acertou '+a+' de '+n+' questões.','Erros: '+S.qr.erros+'.',a===n?'Perfeito! Você dominou o Sistema Solar.':a>=n*0.7?'Muito bem! Revise as que errou e tente de novo.':'Explore as atividades e tente uma nova rodada.'];}
+  if(S.qr.fim){const a=S.qr.acertos,n=S.qr.n;lines=['Resultado da rodada','Você acertou '+a+' de '+n+'!','✅ Acertos: '+a+'      ❌ Erros: '+S.qr.erros,a===n?'Perfeito! Você dominou o Sistema Solar.':a>=n*0.7?'Muito bem! Revise as que errou e tente de novo.':'Explore as atividades e tente uma nova rodada.'];}
   else{lines=['Desafio · Questão '+S.qr.i+' de '+S.qr.n+'   ·   ✅ '+S.qr.acertos+'   ❌ '+S.qr.erros,$v('qPergunta').textContent];
-    if(quiz.respondida){const ok=!$v('qOps').querySelector('.errada');lines.push((ok?'✅ Correto! ':'❌ Não foi dessa vez. A resposta certa é '+quiz.certa+'. ')+explicacaoAtual());}
+    if(quiz.respondida){const ok=!$v('qOps').querySelector('.errada');const ex=explicacaoAtual();lines.push(ok?'✅ Correto! '+ex:('❌ Não foi dessa vez. '+(/^A resposta (certa|correta)/i.test(ex)?ex:'A resposta certa é '+quiz.certa+'. '+ex)));}
     else lines.push('Aponte para uma alternativa e aperte o gatilho.');}
   const txt='Q|'+lines.join('|');if(txt===S.lastPanel)return;S.lastPanel=txt;if(S.xrPanel)release(S.xrPanel);
-  const sp=xrText(lines,1400,640);sp.scale.set(.98,.448,1);sp.position.copy(atAnchor(.78,.42,1.5));scene.add(sp);S.xrPanel=sp;
+  const sp=painelQuizVR(lines,quiz.respondida&&!S.qr.fim?!$v('qOps').querySelector('.errada'):null);sp.scale.set(1.08,.54,1);sp.position.copy(atAnchor(.78,.50,1.5));scene.add(sp);S.xrPanel=sp;
 };
 const acaoV8=acaoBotaoVR;
 acaoBotaoVR=function(action){

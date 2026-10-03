@@ -413,6 +413,34 @@ acaoBotaoVR=function(action){
   acaoV8(action);
 };
 
+
+// ===================== NARRAÇÃO DAS ATIVIDADES =====================
+// Arquivos: audio/vista-dianoite.mp3, vista-estacoes.mp3, vista-fases.mp3, vista-eclipse-solar.mp3, vista-eclipse-lunar.mp3, vista-comparar.mp3
+const NARR_VISTAS={
+ diaNoite:{key:'vista-dianoite',nome:'Dia e noite',fato:'A Terra gira em torno do seu próprio eixo, como um pião, e leva vinte e quatro horas para completar uma volta. Esse movimento se chama rotação. O Sol ilumina sempre metade do planeta: onde a luz chega, é dia; do outro lado, é noite. Repare no marcador amarelo, que representa o Brasil. Gire a Terra e veja o marcador entrar na luz e depois na sombra. É isso que acontece com a gente todos os dias: amanhece, o Sol parece atravessar o céu e anoitece, mas quem está girando somos nós.'},
+ estacoes:{key:'vista-estacoes',nome:'Estações do ano',fato:'A Terra dá uma volta completa ao redor do Sol em trezentos e sessenta e cinco dias. Mas as estações não acontecem porque a Terra fica mais perto ou mais longe do Sol. O segredo é a inclinação: o eixo da Terra é inclinado vinte e três graus e meio, e aponta sempre para a mesma direção no espaço. Em dezembro, o Hemisfério Sul, onde fica o Brasil, está virado para o Sol: é verão aqui e inverno no Norte. Em junho, é o contrário. Arraste a Terra pela órbita e compare as estações nos dois hemisférios.'},
+ fases:{key:'vista-fases',nome:'Fases da Lua',fato:'A Lua não tem luz própria: ela reflete a luz do Sol. Metade dela está sempre iluminada, mas, conforme a Lua dá a volta ao redor da Terra, nós enxergamos partes diferentes dessa metade iluminada. Quando a Lua está entre a Terra e o Sol, vemos o lado escuro: é a Lua Nova. Quando a Terra está no meio, vemos o lado todo iluminado: é a Lua Cheia. No caminho entre uma e outra aparecem a crescente e a minguante. O ciclo completo leva cerca de vinte e nove dias e meio.'},
+ 'eclipse:solar':{key:'vista-eclipse-solar',nome:'Eclipse solar',fato:'No eclipse solar, a Lua passa exatamente entre o Sol e a Terra e projeta sua sombra sobre uma faixa do nosso planeta. Quem está nessa faixa vê o Sol ser encoberto, às vezes por completo, e o dia escurece por alguns minutos. Isso só pode acontecer na Lua Nova, e nem toda Lua Nova produz eclipse, porque a órbita da Lua é um pouco inclinada. Lembre-se: nunca olhe para o Sol sem proteção especial, mesmo durante um eclipse.'},
+ 'eclipse:lunar':{key:'vista-eclipse-lunar',nome:'Eclipse lunar',fato:'No eclipse lunar, é a Terra que fica entre o Sol e a Lua. A sombra da Terra cobre a Lua, que escurece e muitas vezes fica avermelhada, por causa da luz que atravessa a nossa atmosfera. Isso só acontece na Lua Cheia. Diferente do eclipse solar, o eclipse lunar pode ser visto por todo mundo que estiver no lado da Terra onde é noite, e a olho nu, sem nenhum perigo.'},
+ comparar:{key:'vista-comparar',nome:'Comparando tamanhos',fato:'Aqui os corpos aparecem com os diâmetros na mesma proporção. Dentro de Júpiter caberiam mais de mil e trezentas Terras. E o Sol é tão grande que caberiam mais de um milhão de Terras dentro dele. Na maquete do Sistema Solar, os tamanhos e as distâncias são ajustados para caber na sua frente. Nesta vista, você vê a diferença real de tamanho entre os corpos, mas as distâncias entre eles continuam ilustrativas.'}
+};
+for(const k in NARR_VISTAS){const n=NARR_VISTAS[k];CORPOS[n.key]={nome:n.nome,tipo:'Atividade',fato:n.fato};}
+S.autoNarrVista=true;
+function chaveVistaAtual(){const v=estado.vista;if(v==='eclipse')return 'eclipse:'+(estado.ecl||'solar');return v;}
+function narrarVista(){const n=NARR_VISTAS[chaveVistaAtual()];if(!n)return;narrar(n.key);}
+const entrarVistaN=entrarVista;
+entrarVista=function(v){S._eclNarrado=null;entrarVistaN(v);if(v!=='eclipse'&&S.autoNarrVista&&NARR_VISTAS[chaveVistaAtual()])setTimeout(narrarVista,350);};
+const aplicarEclipseN=aplicarEclipse;
+aplicarEclipse=function(){const antes=estado.ecl;aplicarEclipseN();if(estado.vista==='eclipse'&&S.autoNarrVista&&S._eclNarrado!==estado.ecl){S._eclNarrado=estado.ecl;setTimeout(narrarVista,200);}};
+// painel (desktop): botão "Ouvir explicação" nas atividades
+const renderPanelN=renderPanel;
+renderPanel=function(){renderPanelN();if(NARR_VISTAS[chaveVistaAtual()]){const r=row(experiment);button('🔊 Ouvir explicação',()=>{if(narrAtual===NARR_VISTAS[chaveVistaAtual()].key)narrParar();else narrarVista();},r,'btn full');}};
+// console VR: botão nas atividades
+const setupN=setupXRActivity;
+setupXRActivity=function(){setupN();if(NARR_VISTAS[chaveVistaAtual()])xrButton('🔊 Ouvir explicação','narrarVista',-.80,-.60);};
+const acaoN=acaoBotaoVR;
+acaoBotaoVR=function(a){if(a==='narrarVista'){if(narrAtual===NARR_VISTAS[chaveVistaAtual()].key)narrParar();else narrarVista();return;}if(a.startsWith('eclipse:')){acaoN(a);return;}acaoN(a);};
+
 window.PortalSolarV8={version:'8.9',state:S,seasons,daylight,setDay,beginMission,checkMission,finishMission,enterView:entrarVista,exportSummary,setupXRActivity,resetStudent};
 entrarVista(S.views.includes(estado.vista)?estado.vista:'sistema');renderer.setAnimationLoop(animate);
 })();

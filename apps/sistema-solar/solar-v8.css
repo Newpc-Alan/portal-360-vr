@@ -16,3 +16,18 @@ body.vr-active .v8-brandbar,body.vr-active .v8-footer,body.vr-active #v8Speech,b
 @media(max-width:1100px){.painel{width:296px}.barrasup .btn{padding:7px 8px;font-size:11px}.switch{width:140px}.v8-brandbar{min-height:54px}.corpos{width:74px}.v8-panel h2{font-size:16px}}
 @media(max-width:720px){.v8-brandbar{padding:7px 10px;min-height:52px}.v8-brandbar img{width:34px;height:34px}.v8-brandbar h1{font-size:15px}.v8-version{font-size:10px!important}.barrasup{max-height:108px;overflow:auto;gap:5px;align-content:start;padding:6px}.barrasup .ctrls{margin-left:0}.barrasup .btn{font-size:11px;min-height:32px;padding:6px 8px}.barrasup #btnProj,.barrasup #btnKiosk,.barrasup .switch{display:none}main{display:grid;grid-template-columns:66px minmax(0,1fr);grid-template-rows:minmax(220px,1fr) minmax(160px,35dvh)}.corpos{grid-column:1;grid-row:1/3;width:auto;padding:6px 4px}.corpos button{min-height:61px;font-size:9px}.corpos button .bola{width:29px;height:29px}.palco{grid-row:1;grid-column:2}.painel{grid-row:2;grid-column:2;width:auto;min-height:0;border-top:1px solid #dce7ed}.painel .aba{padding:12px}.v8-footer{font-size:9px;padding:5px 8px}.v8-footer .v8-stats{display:none}#v8Speech{font-size:11px;padding:8px;bottom:60px}.palco .dica{font-size:9px;right:40px;bottom:5px}.fabfull{width:34px;height:34px;bottom:8px;right:8px}.palco .badge{max-width:calc(100% - 20px);font-size:10px;left:8px;top:8px}.v8-note{font-size:11px}}
 @media(prefers-reduced-motion:reduce){*{scroll-behavior:auto!important}.btn.vr.pulse{animation:none}}
+
+
+/* Vista de planeta: tela mais limpa, planeta maior e texto abaixo */
+#v8PlanetDock{position:absolute;left:50%;bottom:12px;transform:translateX(-50%);width:min(860px,calc(100% - 28px));padding:14px 16px;border-radius:18px;background:linear-gradient(180deg,rgba(5,18,33,.82),rgba(5,18,33,.94));border:1px solid rgba(108,177,213,.34);box-shadow:0 18px 38px rgba(0,0,0,.28);backdrop-filter:blur(10px);color:#eef7ff;z-index:6;pointer-events:none}
+#v8PlanetDock[hidden]{display:none}
+#v8PlanetDock .v8-planet-head{display:flex;align-items:center;gap:12px;margin-bottom:8px}
+#v8PlanetDock .v8-planet-ball{width:54px;height:54px;border-radius:50%;flex:0 0 54px;box-shadow:inset -10px -10px 16px rgba(0,0,0,.35),0 8px 20px rgba(0,0,0,.22)}
+#v8PlanetDock .v8-planet-name{font-size:24px;font-weight:800;letter-spacing:-.02em;line-height:1.1}
+#v8PlanetDock .v8-planet-type{font-size:12px;letter-spacing:.08em;text-transform:uppercase;color:#8fdfff}
+#v8PlanetDock .v8-planet-text{font-size:15px;line-height:1.62;color:#e3f2ff}
+body.vista-planeta .painel{display:none!important}
+body.vista-planeta .palco{flex:1}
+body.vista-planeta #v8Speech{display:none!important}
+body.vista-planeta .palco .dica{display:none!important}
+@media(max-width:720px){#v8PlanetDock{width:calc(100% - 14px);bottom:6px;padding:10px 11px;border-radius:14px}#v8PlanetDock .v8-planet-ball{width:40px;height:40px;flex-basis:40px}#v8PlanetDock .v8-planet-name{font-size:18px}#v8PlanetDock .v8-planet-type{font-size:10px}#v8PlanetDock .v8-planet-text{font-size:12px;line-height:1.5}}

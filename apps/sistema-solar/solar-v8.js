@@ -298,6 +298,89 @@ animate=function(){const now=performance.now(),dt=Math.min(.05,Math.max(0,(now-v
  const speech=$v('v8Speech');if(speech){const active=S.captions&&S.caption&&now<=S.captionUntil;speech.hidden=!active||estado.vista==='planeta';}if(estado.vista==='planeta')syncPlanetDock();
 };
 setInterval(()=>{const e=$v('v8Stats');if(e)e.textContent=S.visited.size+' corpos explorados · '+S.activities.size+' atividades';},1200);
+
+// ===================== DESAFIO v2 (rodadas, placar e VR interativo) =====================
+const QUIZ_EXTRA=[
+ {p:'Qual é o único planeta com vida conhecida?',c:'Terra',e:['Marte','Vênus','Europa'],x:'A Terra está na distância certa do Sol para ter água líquida.'},
+ {p:'Qual planeta tem o maior vulcão conhecido, o Monte Olimpo?',c:'Marte',e:['Terra','Vênus','Mercúrio'],x:'O Monte Olimpo tem quase três vezes a altura do Everest.'},
+ {p:'Quantas luas Júpiter tem (aproximadamente)?',c:'Mais de 90',e:['Nenhuma','Uma','Duas'],x:'Júpiter é quase um sistema solar em miniatura, com 95 luas conhecidas.'},
+ {p:'Qual planeta flutuaria na água, se houvesse um oceano grande o bastante?',c:'Saturno',e:['Júpiter','Terra','Netuno'],x:'Saturno é menos denso que a água.'},
+ {p:'Qual é a estrela do nosso Sistema Solar?',c:'O Sol',e:['A Lua','Júpiter','Sirius'],x:'O Sol concentra 99,8% da massa do Sistema Solar.'},
+ {p:'Qual planeta gira ao contrário dos demais (rotação retrógrada)?',c:'Vênus',e:['Marte','Terra','Saturno'],x:'Em Vênus o Sol nasce no oeste e se põe no leste.'},
+ {p:'Qual planeta tem os ventos mais velozes do Sistema Solar?',c:'Netuno',e:['Júpiter','Terra','Marte'],x:'Os ventos de Netuno passam de 2.000 km/h.'},
+ {p:'Quanto tempo a luz do Sol leva para chegar a Netuno?',c:'Mais de 4 horas',e:['8 minutos','1 segundo','1 dia'],x:'Até a Terra a luz leva cerca de 8 minutos; até Netuno, mais de 4 horas.'},
+ {p:'Qual é o menor planeta do Sistema Solar?',c:'Mercúrio',e:['Marte','Vênus','Plutão'],x:'Mercúrio é o menor e o mais próximo do Sol.'},
+ {p:'A Lua sempre mostra a mesma face para a Terra porque...',c:'gira em torno de si no mesmo tempo em que dá a volta na Terra',e:['não gira','a Terra gira junto','ela é plana'],x:'A rotação e a translação da Lua levam os mesmos 27 dias.'},
+ {p:'Quantos dias a Lua leva para dar uma volta ao redor da Terra?',c:'Cerca de 27 dias',e:['1 dia','7 dias','365 dias'],x:'Por isso as fases se repetem a cada mês, aproximadamente.'},
+ {p:'Qual movimento da Terra dura 24 horas?',c:'Rotação',e:['Translação','Precessão','Eclipse'],x:'A rotação em torno do próprio eixo causa o dia e a noite.'},
+ {p:'Qual movimento da Terra dura 365 dias?',c:'Translação',e:['Rotação','Fase da Lua','Maré'],x:'A translação é a volta completa ao redor do Sol.'},
+ {p:'Quando é verão no Brasil (Hemisfério Sul), no Hemisfério Norte é...',c:'Inverno',e:['Verão','Outono','Primavera'],x:'A inclinação do eixo faz as estações serem opostas nos dois hemisférios.'},
+ {p:'O que são os cometas?',c:'Corpos de gelo e poeira que formam cauda perto do Sol',e:['Estrelas pequenas','Luas soltas','Pedaços do Sol'],x:'A cauda aparece quando o gelo do cometa evapora com o calor do Sol.'},
+ {p:'Onde fica o cinturão de asteroides?',c:'Entre Marte e Júpiter',e:['Entre a Terra e a Lua','Depois de Netuno','Perto do Sol'],x:'São milhares de rochas orbitando entre Marte e Júpiter.'},
+ {p:'Qual planeta tem uma tempestade maior que a Terra, a Grande Mancha Vermelha?',c:'Júpiter',e:['Saturno','Marte','Netuno'],x:'A Grande Mancha Vermelha está ativa há séculos.'},
+ {p:'A inclinação do eixo da Terra é de aproximadamente...',c:'23,5 graus',e:['0 grau','90 graus','45 graus'],x:'Essa inclinação é a causa das estações do ano.'},
+ {p:'No eclipse lunar, quem fica entre o Sol e a Lua?',c:'A Terra',e:['Marte','Vênus','A própria Lua'],x:'A sombra da Terra cobre a Lua, que pode ficar avermelhada.'},
+ {p:'No eclipse solar, quem fica entre o Sol e a Terra?',c:'A Lua',e:['Marte','Vênus','Mercúrio'],x:'A Lua projeta sua sombra sobre uma faixa da Terra.'}
+];
+const bancoBase=bancoQuestoes;bancoQuestoes=function(){return bancoBase().concat(QUIZ_EXTRA);};
+S.qr={n:8,i:0,acertos:0,erros:0,fim:false,atual:null};
+function iniciarRodada(){const todas=embaralhar(bancoQuestoes());bancoQ=todas.slice(0,S.qr.n).reverse();S.qr={n:S.qr.n,i:0,acertos:0,erros:0,fim:false,atual:null};quiz.acertos=quiz.total=quiz.seq=0;$v('qAcertos').textContent=$v('qTotal').textContent=$v('qSeq').textContent='0';}
+const novaQuestaoV8=novaQuestao;
+novaQuestao=function(){
+  if(S.qr.fim){iniciarRodada();}
+  if(S.qr.i>=S.qr.n){ // fim da rodada
+    S.qr.fim=true;const a=S.qr.acertos,n=S.qr.n;
+    $v('qPergunta').innerHTML='<b>Fim da rodada!</b> Você acertou '+a+' de '+n+'. '+(a===n?'Perfeito!':a>=n*0.7?'Muito bem!':'Explore as atividades e tente de novo.');
+    $v('qOps').innerHTML='';const box=$v('v8QuizExplain');if(box)box.remove();$v('qProximo').textContent='↺ Nova rodada';
+    S.lastPanel='';if(estado.vr)setupXRActivity();return;
+  }
+  $v('qProximo').textContent='Próxima ▸';
+  novaQuestaoV8();S.qr.i++;S.lastPanel='';
+};
+const responderV8=responder;
+responder=function(btn,ok,correct){if(quiz.respondida)return;responderV8(btn,ok,correct);if(ok)S.qr.acertos++;else S.qr.erros++;S.lastPanel='';if(estado.vr)setupXRActivity();};
+const entrarVistaV8=entrarVista;
+entrarVista=function(v){if(v==='desafio')iniciarRodada();entrarVistaV8(v);};
+// explicação da questão atual (banco extra tem campo x; as originais usam o mapa explanations)
+function explicacaoAtual(){const p=$v('qPergunta').textContent;const q=bancoQuestoes().find(q=>q.p===p);return (q&&q.x)||explanations[p]||('A resposta correta é '+quiz.certa+'.');}
+// ---- VR ----
+function botaoLargoVR(texto,acao,cor,corTexto){
+  const sp=textoCanvasVR(2048,256,(g,c)=>{g.fillStyle=cor||'rgba(15,44,74,.96)';g.beginPath();g.roundRect(12,24,c.width-24,208,56);g.fill();g.strokeStyle='rgba(255,255,255,.55)';g.lineWidth=8;g.stroke();
+    g.fillStyle=corTexto||'#fff';g.font='700 76px Segoe UI,Arial';g.textAlign='left';g.textBaseline='middle';let t=texto;while(g.measureText(t).width>c.width-120&&t.length>4)t=t.slice(0,-2);if(t!==texto)t=t.slice(0,-1)+'…';g.fillText(t,60,128);});
+  sp.scale.set(0.98,0.1225,1);sp.userData.vrBotao=acao;vrBotoes.push(sp);scene.add(sp);return sp;}
+const setupV8=setupXRActivity;
+setupXRActivity=function(){
+  setupV8();
+  if(estado.vista!=='desafio')return;
+  // remove os botões antigos de resposta/questão da camada anterior
+  for(const b of vrBotoes.slice()){const a=b.userData.vrBotao||'';if(a.startsWith('answer:')||a==='question'){vrBotoes=vrBotoes.filter(x=>x!==b);release(b);}}
+  const X=.78,Y0=-.02,DY=.145;
+  if(S.qr.fim){botaoLargoVR('↺  Nova rodada','rodada','rgba(26,107,42,.96)').position.copy(atAnchor(X,Y0-.3,1.45));return;}
+  const ops=Array.from($v('qOps').children);
+  ops.forEach((b,i)=>{let cor='rgba(15,44,74,.96)';if(quiz.respondida){if(b.classList.contains('certa'))cor='rgba(26,107,42,.96)';else if(b.classList.contains('errada'))cor='rgba(140,20,20,.95)';else cor='rgba(40,55,75,.85)';}
+    botaoLargoVR(String.fromCharCode(65+i)+'  ·  '+b.textContent,quiz.respondida?'nada':'resp:'+i,cor).position.copy(atAnchor(X,Y0-i*DY,1.45));});
+  if(quiz.respondida)botaoLargoVR(S.qr.i>=S.qr.n?'Ver resultado  ▸':'Próxima questão  ▸','proxima','rgba(26,107,42,.96)').position.copy(atAnchor(X,Y0-4*DY-.06,1.45));
+};
+const updateV8=updateXRPanel;
+updateXRPanel=function(){
+  if(estado.vista!=='desafio'){updateV8();return;}
+  let lines;
+  if(S.qr.fim){const a=S.qr.acertos,n=S.qr.n;lines=['Resultado da rodada','Você acertou '+a+' de '+n+' questões.','Erros: '+S.qr.erros+'.',a===n?'Perfeito! Você dominou o Sistema Solar.':a>=n*0.7?'Muito bem! Revise as que errou e tente de novo.':'Explore as atividades e tente uma nova rodada.'];}
+  else{lines=['Desafio · Questão '+S.qr.i+' de '+S.qr.n+'   ·   ✅ '+S.qr.acertos+'   ❌ '+S.qr.erros,$v('qPergunta').textContent];
+    if(quiz.respondida){const ok=!$v('qOps').querySelector('.errada');lines.push((ok?'✅ Correto! ':'❌ Não foi dessa vez. A resposta certa é '+quiz.certa+'. ')+explicacaoAtual());}
+    else lines.push('Aponte para uma alternativa e aperte o gatilho.');}
+  const txt='Q|'+lines.join('|');if(txt===S.lastPanel)return;S.lastPanel=txt;if(S.xrPanel)release(S.xrPanel);
+  const sp=xrText(lines,1400,640);sp.scale.set(.98,.448,1);sp.position.copy(atAnchor(.78,.42,1.5));scene.add(sp);S.xrPanel=sp;
+};
+const acaoV8=acaoBotaoVR;
+acaoBotaoVR=function(action){
+  if(action.startsWith('resp:')){const b=$v('qOps').children[Number(action.slice(5))];if(b&&!quiz.respondida)b.click();return;}
+  if(action==='proxima'){novaQuestao();setupXRActivity();return;}
+  if(action==='rodada'){iniciarRodada();novaQuestao();setupXRActivity();return;}
+  if(action==='nada')return;
+  acaoV8(action);
+};
+
 window.PortalSolarV8={version:'8.3',state:S,seasons,daylight,setDay,beginMission,checkMission,finishMission,enterView:entrarVista,exportSummary,setupXRActivity,resetStudent};
 entrarVista(S.views.includes(estado.vista)?estado.vista:'sistema');renderer.setAnimationLoop(animate);
 })();

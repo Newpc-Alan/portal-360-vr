@@ -413,6 +413,6 @@ acaoBotaoVR=function(action){
   acaoV8(action);
 };
 
-window.PortalSolarV8={version:'8.3',state:S,seasons,daylight,setDay,beginMission,checkMission,finishMission,enterView:entrarVista,exportSummary,setupXRActivity,resetStudent};
+window.PortalSolarV8={version:'8.9',state:S,seasons,daylight,setDay,beginMission,checkMission,finishMission,enterView:entrarVista,exportSummary,setupXRActivity,resetStudent};
 entrarVista(S.views.includes(estado.vista)?estado.vista:'sistema');renderer.setAnimationLoop(animate);
 })();

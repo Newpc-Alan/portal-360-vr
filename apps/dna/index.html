@@ -479,7 +479,7 @@ if(!semWebGL()){
   const move=(x,y)=>{if(!dragging)return;camAzim-=(x-lx)*0.005;camElev=clamp(camElev+(y-ly)*0.005,-1.45,1.45);lx=x;ly=y;atualizarCamera();};
   const clickRay=new THREE.Raycaster(),clickNdc=new THREE.Vector2();let downX=0,downY=0,downT=0;
   function sobCursor(cx,cy){if(estado.vr)return null;const r=canvas3d.getBoundingClientRect();clickNdc.set(((cx-r.left)/r.width)*2-1,-((cy-r.top)/r.height)*2+1);clickRay.setFromCamera(clickNdc,camera);const h=clickRay.intersectObjects(objetosClicaveis(),false);return h.length?h[0].object:null;}
-  function clicar(cx,cy){const m=sobCursor(cx,cy);if(!m)return false;tratarClique(m);return true;}
+  function clicar(cx,cy){const m=sobCursor(cx,cy);if(!m){if(narrAtual)narrParar();return false;}tratarClique(m);return true;}
   canvas3d.addEventListener('mousedown',e=>{downX=e.clientX;downY=e.clientY;downT=performance.now();start(e.clientX,e.clientY);});
   window.addEventListener('mouseup',()=>dragging=false);
   window.addEventListener('mousemove',e=>move(e.clientX,e.clientY));

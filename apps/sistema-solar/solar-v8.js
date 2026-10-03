@@ -7,7 +7,7 @@ if(!window.THREE||!renderer||!root)return;
 const T=THREE, $v=id=>document.getElementById(id);
 const el=(tag,props={},parent=null)=>{const n=document.createElement(tag);Object.assign(n,props);if(parent)parent.appendChild(n);return n;};
 const D={sol:1392700,mercurio:4879,venus:12104,terra:12742,lua:3474,marte:6779,jupiter:139820,saturno:116460,urano:50724,netuno:49244};
-const S={quality:'equilibrado',environment:true,voice:.85,music:.55,captions:true,compareA:'terra',compareB:'jupiter',guide:-1,mission:0,attempts:0,complete:false,dayAngle:0,manual:false,caption:'',captionUntil:0,visited:new Set(['terra']),activities:new Set(['sistema']),inspections:[],held:new Map(),dt:.016,simTime:0,phase:0,xrAnchor:null,xrPanel:null,xrCaption:null,xrLabels:[],lastPanel:'',lastCaption:'',lastPhase:-999,xrFocus:null,xrFocusKey:null,events:[],views:['sistema','planeta','comparar','diaNoite','fases','estacoes','eclipse','desafio']};
+const S={quality:'equilibrado',environment:true,voice:.85,music:.55,captions:true,compareA:'terra',compareB:'jupiter',guide:-1,mission:0,attempts:0,complete:false,dayAngle:0,manual:false,caption:'',captionUntil:0,visited:new Set(['terra']),activities:new Set(['sistema']),inspections:[],held:new Map(),dt:.016,simTime:0,phase:0,xrAnchor:null,xrPanel:null,xrCaption:null,xrLabels:[],lastPanel:'',lastCaption:'',lastPhase:-999,xrFocus:null,xrFocusKey:null,events:[],desktopFocus:null,desktopFocusKey:null,desktopFocusT:0,views:['sistema','planeta','comparar','diaNoite','fases','estacoes','eclipse','desafio']};
 let vvLast=performance.now(), dimensions={w:0,h:0,p:0}, activeDrag=null;
 const original={esfera,criarAnelSaturno,entrarVista,mostrarGrupos,buildPlaneta,buildFases,buildEclipse,atualizarFicha,selecionar,narrar,narrFallback,responder,criarControleVR,irCatalogo};
 const ambient=scene.children.find(o=>o.isAmbientLight);
@@ -48,6 +48,45 @@ button('Iniciar novo aluno',()=>{if(confirm('Limpar as atividades desta sessão 
 const footer=el('footer',{className:'v8-footer',innerHTML:'<b>Explore · compare · experimente</b><span>Modelo didático: tamanhos e distâncias ajustados, exceto no comparador.</span><span class="v8-stats" id="v8Stats"></span>'},app);
 const dialog=el('div',{className:'v8-dialog',id:'v8Summary',hidden:true,role:'dialog','aria-modal':'true'},app);
 function applyQuality(){if(cinturao)cinturao.visible=S.environment;for(const c of cometas)c.piv.visible=S.environment;if(starfield)starfield.children.forEach(o=>o.visible=S.environment);if(renderer.xr.setFoveation)renderer.xr.setFoveation(S.quality==='alto'?.25:.7);}
+
+function stopNarrationExclusive(){
+  try{narrParar();}catch(e){}
+  try{if(window.speechSynthesis)speechSynthesis.cancel();}catch(e){}
+  try{scene.traverse(o=>{if(o&&o.isAudio&&o.isPlaying){try{o.stop();}catch(e){}}});}catch(e){}
+}
+function clearDesktopFocus(){
+  if(S.desktopFocus){release(S.desktopFocus);S.desktopFocus=null;}
+  S.desktopFocusKey=null;S.desktopFocusT=0;
+  document.body.classList.remove('v8-system-focus');
+}
+function desktopFocusTarget(){
+  const dir=new T.Vector3();camera.getWorldDirection(dir);dir.normalize();
+  const right=new T.Vector3().crossVectors(dir,camera.up).normalize();
+  const up=camera.up.clone().normalize();
+  return camera.position.clone().add(dir.multiplyScalar(10.5)).add(right.multiplyScalar(-1.15)).add(up.multiplyScalar(.25));
+}
+function createDesktopFocus(key){
+  if(estado.vr||estado.vista!=='sistema'||!CORPOS[key])return null;
+  clearDesktopFocus();
+  const C=CORPOS[key],g=new T.Group();
+  const visualRadius=key==='sol'?2.65:(key==='saturno'?2.35:2.55);
+  const m=esfera(visualRadius,C.cor,key==='sol',key);m.userData.corpoKey=null;m.userData.vrInterativo=false;
+  if(C.anel)m.add(criarAnelSaturno(visualRadius));
+  g.add(m);g.userData.focusPlanet=true;g.userData.planetMesh=m;g.scale.setScalar(.03);
+  g.position.copy(desktopFocusTarget());scene.add(g);
+  S.desktopFocus=g;S.desktopFocusKey=key;S.desktopFocusT=0;
+  document.body.classList.add('v8-system-focus');
+  return m;
+}
+function updateDesktopFocus(){
+  const g=S.desktopFocus;if(!g||estado.vr||estado.vista!=='sistema')return;
+  S.desktopFocusT=Math.min(1,S.desktopFocusT+S.dt*3.8);
+  const t=1-Math.pow(1-S.desktopFocusT,3);
+  g.scale.setScalar(.03+.97*t);
+  const target=desktopFocusTarget();g.position.lerp(target,Math.min(1,S.dt*8));
+  const m=g.userData.planetMesh;if(m)m.rotation.y+=S.dt*.08;
+}
+
 BADGES.comparar='Comparação de diâmetros';DICAS.comparar='Diâmetros na mesma proporção · distância entre os corpos ajustada';DICAS.planeta='Arraste o planeta para girar · arraste o fundo para mover a câmera';DICAS.diaNoite='Gire a Terra ou use o controle de rotação · observe o marcador amarelo';
 INFOS.sistema='Os tamanhos e as distâncias são ajustados para caber na maquete. Use Comparar para observar os diâmetros na mesma proporção.';
 INFOS.estacoes='Estações do Ano no Hemisfério Sul (Brasil): Outono, Inverno, Primavera e Verão. A inclinação do eixo é mantida fixa no espaço.';
@@ -96,13 +135,13 @@ desenharFase=function(deg){const c=$v('faseCanvas'),g=c.getContext('2d'),w=c.wid
 atualizarFase=function(){if(!fasesObj)return;let a=((fasesObj.luaPivot.rotation.y*180/PI)%360+360)%360;const step=Math.round(a);if(S.lastPhase===step)return;S.lastPhase=step;const signed=a<=180?a:a-360;desenharFase(signed);$v('faseNome').textContent=nomeFase(signed);const f=Math.round((1-Math.cos(a*PI/180))*50);$v('fasePasso').innerHTML='Iluminação visível da Terra: <b>'+f+'%</b>. A Lua reflete a luz do Sol. As fases não são a sombra da Terra; a orientação da ilustração é uma convenção de observação.';};
 function setPhase(a){if(fasesObj)fasesObj.luaPivot.rotation.y=a*PI/180;pause(true);S.lastPhase=-999;atualizarFase();S.lastPanel='';}
 function rebuildView(v){if(v==='comparar')buildCompare();else if(v==='sistema')buildSistema();else if(v==='planeta')buildPlaneta();else if(v==='diaNoite')buildDiaNoite();else if(v==='estacoes')buildEstacoes();else if(v==='fases')buildFases();else if(v==='eclipse')buildEclipse();else if(v==='desafio'){buildSistema();novaQuestao();}}
-entrarVista=function(v){if(!S.views.includes(v))v='sistema';narrParar();clearXRUI();estado.vista=v;S.activities.add(v);mostrarGrupos();$v('badge').textContent=BADGES[v];$v('dica').textContent=DICAS[v]||'';$v('modeinfo').classList.remove('show');context.textContent=(INFOS[v]||'Observe, manipule e compare.');atualizarBncc();rebuildView(v);ambient.intensity=['diaNoite','fases','eclipse'].includes(v)?.045:.36;renderPanel();syncPause();applyQuality();syncPlanetDock();if(estado.vr)setupXRActivity();emit('atividade',v);};
+entrarVista=function(v){if(!S.views.includes(v))v='sistema';stopNarrationExclusive();if(v!=='sistema')clearDesktopFocus();clearXRUI();estado.vista=v;S.activities.add(v);mostrarGrupos();$v('badge').textContent=BADGES[v];$v('dica').textContent=DICAS[v]||'';$v('modeinfo').classList.remove('show');context.textContent=(INFOS[v]||'Observe, manipule e compare.');atualizarBncc();rebuildView(v);ambient.intensity=['diaNoite','fases','eclipse'].includes(v)?.045:.36;renderPanel();syncPause();applyQuality();syncPlanetDock();if(estado.vr)setupXRActivity();emit('atividade',v);};
 mostrarGrupos=function(){original.mostrarGrupos();$v('grpTempo').style.display=['estacoes','eclipse','desafio','comparar'].includes(estado.vista)?'none':'block';$v('grpBncc').style.display=['sistema','planeta','comparar','desafio'].includes(estado.vista)?'none':'block';};
-selecionar=function(k){if(!CORPOS[k])return;S.visited.add(k);if(estado.vr&&estado.vista==='planeta'){estado.sel=k;entrarVista('planeta');}else original.selecionar(k);emit('corpo',k);if(['sistema','planeta'].includes(estado.vista))renderPanel();syncPlanetDock();};
+selecionar=function(k){if(!CORPOS[k])return;S.visited.add(k);if(estado.vr&&estado.vista==='planeta'){estado.sel=k;entrarVista('planeta');}else{original.selecionar(k);if(!estado.vr&&estado.vista==='sistema')createDesktopFocus(k);}emit('corpo',k);if(['sistema','planeta'].includes(estado.vista))renderPanel();syncPlanetDock();};
 atualizarLabels=function(){const show=estado.nomes&&!estado.vr&&['sistema','comparar','estacoes'].includes(estado.vista);for(const l of labelsMap){l.el.style.display=show?'block':'none';if(!show)continue;const p=new T.Vector3();l.mesh.getWorldPosition(p);p.project(camera);if(p.z>1||p.z< -1){l.el.style.display='none';continue;}l.el.style.left=((p.x*.5+.5)*canvas3d.clientWidth)+'px';l.el.style.top=((-p.y*.5+.5)*canvas3d.clientHeight)+'px';}};
 
 function renderPanel(){experiment.innerHTML='';const v=estado.vista;
- if(v==='sistema'){el('h2',{textContent:'Um universo para investigar'},experiment);note('Selecione um planeta para conhecer seus detalhes ou inicie uma aula guiada.',experiment);const r=row(experiment);button('Examinar '+CORPOS[estado.sel].nome,()=>entrarVista('planeta'),r);button('Aula guiada',startGuide,r);}
+ if(v==='sistema'){el('h2',{textContent:'Um universo para investigar'},experiment);note('Clique em um planeta: ele será ampliado à sua frente e a narração anterior será encerrada antes da próxima começar.',experiment);const r=row(experiment);button('Examinar '+CORPOS[estado.sel].nome,()=>entrarVista('planeta'),r);button('Aula guiada',startGuide,r);if(S.desktopFocus)button('Fechar zoom',()=>{stopNarrationExclusive();clearDesktopFocus();renderPanel();},experiment,'btn full');}
  if(v==='planeta'){el('h2',{textContent:'Bancada de investigação'},experiment);note('Nesta vista, o foco fica no planeta ampliado. A narração aparece abaixo da visualização para não cobrir o objeto.',experiment);const r=row(experiment);button('↶ Girar',()=>rotateTarget(-.25),r);button('Girar ↷',()=>rotateTarget(.25),r);button('Comparar tamanhos',()=>{S.compareA=estado.sel;entrarVista('comparar');},experiment,'btn full');}
  if(v==='comparar'){el('h2',{textContent:'Compare os diâmetros'},experiment);const vals=ORDEM.map(k=>[k,CORPOS[k].nome]);select(experiment,'Primeiro corpo',vals,S.compareA,v=>{S.compareA=v;entrarVista('comparar');});select(experiment,'Segundo corpo',vals,S.compareB,v=>{S.compareB=v;entrarVista('comparar');});const ratio=D[S.compareB]/D[S.compareA];el('div',{className:'v8-result',textContent:'Diâmetro de '+CORPOS[S.compareB].nome+' ÷ diâmetro de '+CORPOS[S.compareA].nome+' = '+ratio.toLocaleString('pt-BR',{maximumFractionDigits:2})+'.'},experiment);note('Mesma escala de diâmetro. Isso não representa a proporção de massas nem de volumes. O Sol pode tornar os planetas pequenos demais para inspeção.',experiment);const r=row(experiment);button('Terra × Lua',()=>{S.compareA='terra';S.compareB='lua';entrarVista(v);},r);button('Terra × Júpiter',()=>{S.compareA='terra';S.compareB='jupiter';entrarVista(v);},r);}
  if(v==='diaNoite'){el('h2',{textContent:S.mission?'Missão: do dia para a noite':'Faça o planeta girar'},experiment);note('O ponto amarelo representa uma localização aproximada no Brasil. Observe quando ele recebe luz.',experiment);range(experiment,'Rotação da Terra','v8DayRange',0,360,Math.round(S.dayAngle*180/PI),n=>setDay(n*PI/180));el('div',{className:'v8-result',id:'v8DayState'},experiment);const r=row(experiment);button('− 15°',()=>setDay(S.dayAngle-PI/12),r);button('+ 15°',()=>setDay(S.dayAngle+PI/12),r);if(!S.mission)button('Iniciar missão',beginMission,experiment,'btn full');if(S.mission===1){note('Objetivo: coloque o marcador no lado noturno e confira.',experiment);button('Conferir posição',checkMission,experiment,'btn on full');el('div',{id:'v8MissionResult',className:'v8-result warning',textContent:'Dica: mantenha o Sol parado e gire a Terra.'},experiment);}if(S.mission===2){note('Qual movimento você realizou?',experiment);const r2=row(experiment);button('Rotação',()=>finishMission('rotacao'),r2);button('Translação',()=>finishMission('translacao'),r2);}if(S.complete){el('div',{className:'v8-result',textContent:'✓ Missão concluída. A rotação explica a alternância entre dia e noite.'},experiment);button('Repetir missão',beginMission,experiment,'btn full');}updateDayStatus();}
@@ -123,7 +162,7 @@ for(const ev of ['mousedown','touchstart','touchmove'])canvas3d.addEventListener
 canvas3d.addEventListener('click',e=>{if(['planeta','diaNoite'].includes(estado.vista)){e.stopImmediatePropagation();}},true);
 
 // Narração: mantém os MP3 existentes; sintetizador do navegador é a alternativa.
-narrar=function(key,mesh){caption(CORPOS[key].nome+'. '+CORPOS[key].fato,30);original.narrar(key,mesh);};
+narrar=function(key,mesh){stopNarrationExclusive();caption(CORPOS[key].nome+'. '+CORPOS[key].fato,30);const alvo=(!estado.vr&&estado.vista==='sistema'&&S.desktopFocus&&S.desktopFocusKey===key)?S.desktopFocus.userData.planetMesh:mesh;original.narrar(key,alvo);};
 narrFallback=function(key){if(!window.speechSynthesis){caption(CORPOS[key].fato);return;}const u=new SpeechSynthesisUtterance(CORPOS[key].nome+'. '+CORPOS[key].fato);u.lang='pt-BR';u.rate=.94;u.volume=S.voice;const pt=speechSynthesis.getVoices().find(x=>/pt[-_]BR/i.test(x.lang));if(pt)u.voice=pt;narrAtual=key;duckMusica(true);u.onend=u.onerror=()=>{narrAtual=null;duckMusica(false);atualizarBotoesNarr();};atualizarBotoesNarr();speechSynthesis.speak(u);};
 const GUIDE=[
  {v:'sistema',t:'Conheça a maquete',p:'O Sol é a estrela deste sistema. Selecione um planeta e observe sua órbita. Os tamanhos e as distâncias foram ajustados para a exploração.'},
@@ -149,7 +188,7 @@ responder=function(btn,ok,correct){if(quiz.respondida)return;original.responder(
 const oldQ=novaQuestao;novaQuestao=function(){oldQ();const box=$v('v8QuizExplain');if(box)box.remove();S.lastPanel='';};
 function showSummary(){dialog.innerHTML='';dialog.hidden=false;const b=el('div',{},dialog);el('h2',{textContent:'Resumo da exploração'},b);note('Registro desta sessão, sem nome de aluno e sem envio a um servidor.',b);note('Corpos explorados: '+[...S.visited].map(k=>CORPOS[k].nome).join(', ')+'.',b);note('Atividades abertas: '+[...S.activities].map(k=>BADGES[k]).join(', ')+'.',b);note('Missão dia e noite: '+(S.complete?'concluída':'ainda não concluída')+'. Conferências e respostas: '+S.attempts+'.',b);note('Revisão: '+quiz.acertos+' acertos em '+quiz.total+' respostas.',b);const r=row(b);button('Exportar resumo',exportSummary,r);button('Fechar',()=>dialog.hidden=true,r);}
 function exportSummary(){const data={aplicacao:'Sistema Solar v8',gerado:new Date().toISOString(),corpos:[...S.visited],atividades:[...S.activities],missaoDiaNoite:{concluida:S.complete,tentativas:S.attempts},revisao:{acertos:quiz.acertos,total:quiz.total},eventos:S.events};const blob=new Blob([JSON.stringify(data,null,2)],{type:'application/json'});const url=URL.createObjectURL(blob),a=el('a',{href:url,download:'resumo-sistema-solar.json'});a.click();setTimeout(()=>URL.revokeObjectURL(url),1000);}
-function resetStudent(){narrParar();S.visited=new Set(['terra']);S.activities=new Set();S.mission=0;S.complete=false;S.attempts=0;S.events=[];S.guide=-1;S.dayAngle=0;quiz.acertos=quiz.total=quiz.seq=0;$v('qAcertos').textContent=$v('qTotal').textContent=$v('qSeq').textContent='0';dialog.hidden=true;entrarVista('sistema');}
+function resetStudent(){stopNarrationExclusive();clearDesktopFocus();S.visited=new Set(['terra']);S.activities=new Set();S.mission=0;S.complete=false;S.attempts=0;S.events=[];S.guide=-1;S.dayAngle=0;quiz.acertos=quiz.total=quiz.seq=0;$v('qAcertos').textContent=$v('qTotal').textContent=$v('qSeq').textContent='0';dialog.hidden=true;entrarVista('sistema');}
 
 // VR: console no mundo, atividades sem sair do headset, cópia independente segurável.
 function clearInspections(){for(const m of S.inspections)release(m);S.inspections=[];S.held.clear();}
@@ -224,7 +263,7 @@ animate=function(){const now=performance.now(),dt=Math.min(.05,Math.max(0,(now-v
  root.traverse(o=>{if(o.userData.cloud)o.rotation.y+=step*.025;});
  if(starfield)starfield.material.opacity=.88; // ciel fixe : repère de confort en VR.
  if(narrSom&&narrSom.getVolume&&narrSom.getVolume()!==S.voice)narrSom.setVolume(S.voice);
- atualizarLabels();if(estado.vr)atualizarVR();renderer.render(scene,camera);
+ updateDesktopFocus();atualizarLabels();if(estado.vr)atualizarVR();renderer.render(scene,camera);
  const speech=$v('v8Speech');if(speech){const active=S.captions&&S.caption&&now<=S.captionUntil;speech.hidden=!active||estado.vista==='planeta';}if(estado.vista==='planeta')syncPlanetDock();
 };
 setInterval(()=>{const e=$v('v8Stats');if(e)e.textContent=S.visited.size+' corpos explorados · '+S.activities.size+' atividades';},1200);

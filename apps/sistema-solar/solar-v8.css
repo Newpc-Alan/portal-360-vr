@@ -31,3 +31,8 @@ body.vista-planeta .palco{flex:1}
 body.vista-planeta #v8Speech{display:none!important}
 body.vista-planeta .palco .dica{display:none!important}
 @media(max-width:720px){#v8PlanetDock{width:calc(100% - 14px);bottom:6px;padding:10px 11px;border-radius:14px}#v8PlanetDock .v8-planet-ball{width:40px;height:40px;flex-basis:40px}#v8PlanetDock .v8-planet-name{font-size:18px}#v8PlanetDock .v8-planet-type{font-size:10px}#v8PlanetDock .v8-planet-text{font-size:12px;line-height:1.5}}
+
+
+/* Ajuste v8.1 — nenhuma caixa de 'Narração' na vista Planeta */
+body.vista-planeta #v8Speech{display:none!important}
+body.vista-planeta #v8PlanetDock{background:linear-gradient(180deg,rgba(5,18,33,.58),rgba(5,18,33,.82));border-color:rgba(108,177,213,.22)}

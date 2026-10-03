@@ -804,7 +804,7 @@ function vrMensagem(html,tempo){
 const NARR_BASE='audio/';
 let narrListener=null,narrSom=null,narrAtual=null,narrCache={},narrCarregando=null;
 function narrInit(){ if(narrListener||semWebGL())return; try{narrListener=new THREE.AudioListener();camera.add(narrListener);}catch(e){} }
-function duckMusica(on){ try{ if(musicNodes&&audioCtx){const m=musicNodes.master,t=audioCtx.currentTime;m.gain.cancelScheduledValues(t);m.gain.setValueAtTime(m.gain.value,t);m.gain.linearRampToValueAtTime(on?(musicNodes.nivel||0.26)*0.2:(musicNodes.nivel||0.26),t+0.7);} }catch(e){} }
+function duckMusica(on){ try{ if(musicNodes&&audioCtx){const m=musicNodes.master,t=audioCtx.currentTime;m.gain.cancelScheduledValues(t);m.gain.setValueAtTime(m.gain.value,t);m.gain.linearRampToValueAtTime(on?(musicNodes.nivel||0.26)*0.07:(musicNodes.nivel||0.26),t+0.7);} }catch(e){} }
 function narrParar(){
   if(narrSom){try{if(narrSom.isPlaying)narrSom.stop();}catch(e){} try{if(narrSom.parent)narrSom.parent.remove(narrSom);}catch(e){} narrSom=null;}
   try{if(window.speechSynthesis)speechSynthesis.cancel();}catch(e){}
@@ -1507,6 +1507,6 @@ if(!semWebGL())animate(); // inicia o loop de render SÓ depois de tudo declarad
   if(quer())entrar();
 })();
 </script>
-<script src="solar-v8.js?v=8.5"></script>
+<script src="solar-v8.js?v=8.6"></script>
 </body>
 </html>

@@ -36,3 +36,8 @@ body.vista-planeta .palco .dica{display:none!important}
 /* Ajuste v8.1 — nenhuma caixa de 'Narração' na vista Planeta */
 body.vista-planeta #v8Speech{display:none!important}
 body.vista-planeta #v8PlanetDock{background:linear-gradient(180deg,rgba(5,18,33,.58),rgba(5,18,33,.82));border-color:rgba(108,177,213,.22)}
+
+
+/* Estações do Ano: identificação didática ao redor da órbita */
+#labels .lab.season-label{font-size:13px;font-weight:800;letter-spacing:.055em;color:#fff;background:rgba(7,24,43,.90);border:1px solid rgba(87,212,255,.48);padding:6px 10px;border-radius:10px;box-shadow:0 7px 18px rgba(0,0,0,.28);text-transform:uppercase}
+body.proj #labels .lab.season-label{font-size:16px;padding:8px 13px}

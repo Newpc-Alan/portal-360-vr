@@ -8,6 +8,9 @@ index.html                      catálogo + abertura (YouTube)
 assets/                         logo (256px) e capas em WebP
 apps/sistema-solar/index.html   Sistema Solar 3D / VR
 apps/sistema-solar/vendor/      three.js r128 e qrcode.js locais (funciona sem CDN)
+apps/dna/index.html             DNA Imersivo (estrutura, pareamento, narração, VR)
+apps/dna/audio/                 narrações (dna, adenina, timina, citosina, guanina, esqueleto, ligacoes) + fundo.mp3
+apps/dna/vendor/                three.js r128 local
 ```
 
 ## Comportamento em rede de escola
@@ -30,10 +33,22 @@ O Sistema Solar vira uma maquete inclinada à frente do usuário (ao alcance das
 - Manete: esquerda/direita gira a maquete; cima/baixo aproxima/afasta.
 - Botão A/X: pausa ou retoma o movimento.
 - A ficha fica fixa à direita do usuário, na altura dos olhos, com uma linha-guia até o planeta. Não há painel de missão: o foco é apontar, ver a ficha e ouvir a narração.
-- Narração: ao apertar o gatilho num planeta, toca `audio/<corpo>.mp3` saindo do próprio planeta (áudio posicional); a música ambiente abaixa; botão "Ouvir de novo / Parar" abaixo da ficha. Se o MP3 faltar, usa a voz do navegador (Web Speech); no desktop há o botão "Ouvir narração" na ficha.
+- Trilha de fundo: se existir `audio/fundo.mp3`, toca em loop (botão "Música"); sem o arquivo, usa o pad sintetizado. Abaixa durante a narração.
+- Narração: ao apertar o gatilho num corpo (inclusive a Lua: `audio/lua.mp3`), toca `audio/<corpo>.mp3` saindo do próprio planeta (áudio posicional); a música ambiente abaixa; botão "Ouvir de novo / Parar" abaixo da ficha. Se o MP3 faltar, usa a voz do navegador (Web Speech); no desktop há o botão "Ouvir narração" na ficha.
 - Botões fixos no mundo, à esquerda da maquete (não acompanham a cabeça): "Sair do VR" (encerra a sessão) e "Catálogo" (encerra e volta ao catálogo). Posições em `VR_CFG.btnSair` / `VR_CFG.btnCatalogo`.
 - Parâmetros em `VR_CFG` (escala, altura, inclinação, tamanho do foco) no topo do bloco VR.
 
 ## Próximos passos
 - Trocar o vídeo de abertura (ID em `VIDEO_ID` no `index.html`) pelo novo vídeo com identidade visual do Portal do Educador.
 - Aplicar a identidade visual do Portal no catálogo.
+
+## DNA Imersivo (`apps/dna/`)
+- Mesma arquitetura do Sistema Solar: arquivo único, quiosque/embed, `irCatalogo()`, `alternarVR()` exposta, narração posicional com reserva de voz, trilha `audio/fundo.mp3`.
+- Vistas: **Estrutura** (hélice com 24 pares, ficha por base/fita/ligações, legenda, 5′/3′) e **Pareamento** (10 pares sorteados; a base da fita 2 some e o aluno responde A/T/C/G; feedback e placar).
+- VR: hélice em pé à frente do usuário (~1,5 m), gatilho = ficha + narração, grip = aproxima, manete = gira / sobe e desce, A/X = alterna Estrutura/Pareamento. No Pareamento, o painel da pergunta com 4 letras flutua à direita; também vale apontar e apertar numa base com a letra certa.
+- Catálogo: card "DNA Imersivo" disponível; "Entrar em VR" direto funciona igual ao Sistema Solar (iframe pré-carregado por app).
+
+## Sistema Solar v8 (camada `solar-v8.js` / `solar-v8.css`)
+- Camada carregada depois do `index.html` que redefine funções do app: Comparar diâmetros, missão Dia e Noite, Aula guiada, Resumo exportável (JSON local), estações pelo Hemisfério Sul, Terra com nuvens/oceanos (`media/`), atmosferas, cometas com partículas, legendas, qualidade gráfica e console completo no VR (atividades sem sair do óculos, cópias seguráveis com o grip).
+- Narração passou a usar um player único (`new Audio`), sem áudio posicional. Correção aplicada: `S.narrSeq` iniciava indefinido e o fim do áudio não liberava o estado (botão ficava em "Parar" e a música abaixada).
+- A pasta `vendor/` continua obrigatória: o pacote v8.6 não a incluía.

@@ -117,8 +117,8 @@ body.intro-fullscreen #btnSkipIntro{cursor:pointer}
 body.intro-fullscreen #btnSkipIntro{cursor:pointer}
 #introNote{position:absolute;left:50%;bottom:26px;transform:translateX(-50%);z-index:7;color:#9fb6c9;font-size:13px;opacity:0;transition:opacity .5s;pointer-events:none}
 #introNote.show{opacity:1}
-#appFrame{position:fixed;inset:0;width:100vw;height:100vh;border:0;z-index:5000;opacity:0;pointer-events:none;background:#000}
-#appFrame.show{opacity:1;pointer-events:auto}
+.appFrame{position:fixed;inset:0;width:100vw;height:100vh;border:0;z-index:5000;opacity:0;pointer-events:none;background:#000}
+.appFrame.show{opacity:1;pointer-events:auto}
 #intro:fullscreen,
 #intro:-webkit-full-screen{
   width:100vw;height:100vh;background:#000;
@@ -207,7 +207,21 @@ body.intro-fullscreen #btnSkipIntro{cursor:pointer}
           <div class="meta"><span>Astronomia</span><span>Fundamental I ao Médio</span><span>VR + 3D</span></div>
           <div class="card-actions">
             <a href="apps/sistema-solar/" class="primary-btn">Explorar em 3D</a>
-            <a href="apps/sistema-solar/?vr=1" class="secondary-btn" id="btnVRDireto">🥽 Entrar em VR</a>
+            <a href="apps/sistema-solar/?vr=1" class="secondary-btn" data-vr-app="sistema-solar">🥽 Entrar em VR</a>
+          </div>
+        </div>
+      </article>
+
+      <article class="card available experience-card" data-keywords="dna dupla helice genetica biologia bases nitrogenadas adenina timina citosina guanina pareamento cromossomo vr 3d" data-tema="biologia" data-serie="efii em" data-status="disponivel" style="--bgimg:linear-gradient(135deg,#0b2a3a,#1a1030)">
+        <div class="media"></div><div class="glow"></div>
+        <div class="card-content">
+          <span class="tag">Disponível agora</span>
+          <h3>DNA Imersivo</h3>
+          <p>Entre na dupla hélice: bases nitrogenadas, fitas de açúcar-fosfato, ligações de hidrogênio e o jogo "complete a fita", com narração em áudio, em 3D e realidade virtual.</p>
+          <div class="meta"><span>Biologia</span><span>Fundamental II e Médio</span><span>VR + 3D</span></div>
+          <div class="card-actions">
+            <a href="apps/dna/" class="primary-btn">Explorar em 3D</a>
+            <a href="apps/dna/?vr=1" class="secondary-btn" data-vr-app="dna">🥽 Entrar em VR</a>
           </div>
         </div>
       </article>
@@ -452,26 +466,29 @@ document.addEventListener('webkitfullscreenchange',function(){
 /* ===== Entrar em VR direto do catálogo =====
    O app fica pré-carregado num iframe invisível (mesma origem). O clique aqui conta como gesto
    do usuário para o iframe, então a sessão WebXR abre na hora, sem segundo toque. */
-let appFrame=null;
+const appFrames={};
 function prepararApp(){
-  if(appFrame||!document.getElementById('btnVRDireto'))return;
-  appFrame=document.createElement('iframe');appFrame.id='appFrame';
-  appFrame.setAttribute('allow','xr-spatial-tracking; fullscreen; autoplay; accelerometer; gyroscope');
-  appFrame.src='apps/sistema-solar/?quiosque=0&embed=1';
-  document.body.appendChild(appFrame);
+  document.querySelectorAll('[data-vr-app]').forEach(a=>{
+    const app=a.dataset.vrApp;if(appFrames[app])return;
+    const f=document.createElement('iframe');f.className='appFrame';f.id='appFrame-'+app;
+    f.setAttribute('allow','xr-spatial-tracking; fullscreen; autoplay; accelerometer; gyroscope');
+    f.src='apps/'+app+'/?quiosque=0&embed=1';
+    document.body.appendChild(f);appFrames[app]=f;
+  });
 }
 function entrarVRdireto(e){
-  let w=null;try{w=appFrame&&appFrame.contentWindow;}catch(err){}
+  const a=e.target.closest('[data-vr-app]');if(!a)return;
+  const app=a.dataset.vrApp,fr=appFrames[app];let w=null;try{w=fr&&fr.contentWindow;}catch(err){}
   if(w&&typeof w.alternarVR==='function'&&w.navigator&&w.navigator.xr){
     e.preventDefault();
-    appFrame.classList.add('show');
+    fr.classList.add('show');
     try{ if(player&&player.stopVideo)player.stopVideo(); }catch(err){}
-    try{ w.alternarVR(); }catch(err){ location.href='apps/sistema-solar/?vr=1'; }
+    try{ w.alternarVR(); }catch(err){ location.href=a.getAttribute('href'); }
     return;
   }
   // app ainda não carregou (ou sem WebXR): segue o link normal
 }
-document.getElementById('btnVRDireto').addEventListener('click',entrarVRdireto);
+document.getElementById('gridCards').addEventListener('click',entrarVRdireto);
 // pré-carrega quando o catálogo aparece (não durante a abertura em vídeo)
 const _obsCat=new MutationObserver(()=>{ if(!document.getElementById('catalog').classList.contains('hidden')){prepararApp();_obsCat.disconnect();} });
 _obsCat.observe(document.getElementById('catalog'),{attributes:true,attributeFilter:['class']});

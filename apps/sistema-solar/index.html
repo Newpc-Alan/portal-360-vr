@@ -3,8 +3,8 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Sistema Solar 3D | Portal do Educador · NEWPC</title>
-<link rel="icon" type="image/png" href="../../assets/logo-portal-educador.png">
+<title>Sistema Solar v8 | Portal do Educador</title>
+<link rel="icon" type="image/png" href="media/logo.png">
 <!-- Bibliotecas locais (funcionam sem internet / com CDN bloqueado na escola); CDN só como reserva -->
 <script src="vendor/three.r128.min.js"></script>
 <script>if(!window.THREE){document.write('<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"><\/script>');}</script>
@@ -156,6 +156,7 @@
   body.vr-active .palco{position:fixed;inset:0;width:100vw;height:100vh;z-index:2147483200}
 
 </style>
+<link rel="stylesheet" href="solar-v8.css?v=8.0">
 </head>
 <body>
 <div id="app">
@@ -1433,7 +1434,7 @@ try{
     const semVR=()=>vrMensagem('🥽 Para a experiência em VR, abra este mesmo link no navegador do óculos (Meta Quest). Aqui você pode explorar em 3D normalmente.',9000);
     const mostrarEntrada=()=>{
       const ov=document.createElement('div');ov.id='vrGate';
-      ov.innerHTML='<div class="vrgate-box"><img src="../../assets/logo-portal-educador.png" alt=""><div class="vrgate-t">Sistema Solar VR</div><div class="vrgate-s">Coloque o óculos e toque para começar</div><button type="button" data-action="vr-entrar">🥽 Entrar em VR</button><button type="button" class="sec" data-action="vr-3d">Explorar em 3D</button></div>';
+      ov.innerHTML='<div class="vrgate-box"><img src="media/logo.png" alt=""><div class="vrgate-t">Sistema Solar VR</div><div class="vrgate-s">Coloque o óculos e toque para começar</div><button type="button" data-action="vr-entrar">🥽 Entrar em VR</button><button type="button" class="sec" data-action="vr-3d">Explorar em 3D</button></div>';
       document.body.appendChild(ov);
       ov.addEventListener('click',e=>{const b=e.target.closest('[data-action]');if(!b)return;
         if(b.dataset.action==='vr-entrar'){alternarVR().finally(()=>{ov.remove();});}
@@ -1506,5 +1507,6 @@ if(!semWebGL())animate(); // inicia o loop de render SÓ depois de tudo declarad
   if(quer())entrar();
 })();
 </script>
+<script src="solar-v8.js?v=8.0"></script>
 </body>
 </html>

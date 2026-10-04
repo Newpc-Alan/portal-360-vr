@@ -130,8 +130,45 @@ function ligarPosicional(){
 ['pointerdown','keydown','touchstart'].forEach(ev=>document.addEventListener(ev,ligarPosicional,{passive:true}));
 document.addEventListener('visibilitychange',()=>{if(!document.hidden&&ligado){try{T.AudioContext.getContext().resume();}catch(e){}}});
 const toggleOriginal=Proto.toggleVR;
-Proto.toggleVR=async function(){const r=await toggleOriginal.call(this);ligarPosicional();if(posicional)posicional.setRefDistance(this.xr?1.2:14);return r;};
+Proto.toggleVR=async function(){const r=await toggleOriginal.call(this);ligarPosicional();if(posicional)posicional.setRefDistance(this.xr?1.2:14);if(this.xr&&typeof entrarAmbiente==='function')entrarAmbiente();return r;};
 const exitOriginal=Proto.exitXR;
 Proto.exitXR=function(){exitOriginal.call(this);if(posicional)posicional.setRefDistance(14);};
+
+/* ---------- 5. Ambiente VR com profundidade + trilha de fundo ---------- */
+let ambiente=null,musicaAntes=null;
+function criarAmbiente(){
+  const g=new T.Group();g.name='ambienteVR';
+  // abóbada em gradiente (azul-profundo do Portal → quase preto no zênite e no chão)
+  const c=document.createElement('canvas');c.width=16;c.height=512;const x=c.getContext('2d');
+  const gr=x.createLinearGradient(0,0,0,512);gr.addColorStop(0,'#03070f');gr.addColorStop(.42,'#0b2340');gr.addColorStop(.58,'#0f2c4a');gr.addColorStop(.72,'#071526');gr.addColorStop(1,'#02050a');
+  x.fillStyle=gr;x.fillRect(0,0,16,512);
+  const tex=new T.CanvasTexture(c);tex.encoding=T.sRGBEncoding;
+  const domo=new T.Mesh(new T.SphereGeometry(45,48,32),new T.MeshBasicMaterial({map:tex,side:T.BackSide,depthWrite:false}));
+  domo.position.y=1.2;g.add(domo);
+  // partículas "meio celular": duas camadas, próxima e distante
+  const mkPontos=(n,raio,tam,cor,op)=>{const pos=new Float32Array(n*3);for(let i=0;i<n;i++){const r=raio*(0.35+0.65*Math.cbrt(Math.random())),th=Math.random()*Math.PI*2,ph=Math.acos(2*Math.random()-1);pos[i*3]=r*Math.sin(ph)*Math.cos(th);pos[i*3+1]=1.4+r*Math.cos(ph)*0.55;pos[i*3+2]=r*Math.sin(ph)*Math.sin(th);}
+    const geo=new T.BufferGeometry();geo.setAttribute('position',new T.BufferAttribute(pos,3));
+    const sp=document.createElement('canvas');sp.width=sp.height=64;const q=sp.getContext('2d');const rg=q.createRadialGradient(32,32,0,32,32,32);rg.addColorStop(0,'rgba(255,255,255,1)');rg.addColorStop(.35,'rgba(170,230,255,.55)');rg.addColorStop(1,'rgba(120,200,255,0)');q.fillStyle=rg;q.fillRect(0,0,64,64);
+    const m=new T.PointsMaterial({size:tam,map:new T.CanvasTexture(sp),color:cor,transparent:true,opacity:op,depthWrite:false,blending:T.AdditiveBlending,sizeAttenuation:true});
+    const pts=new T.Points(geo,m);pts.userData.vel=0.02+Math.random()*0.02;return pts;};
+  g.add(mkPontos(420,14,.09,0x7fd6ff,.55),mkPontos(180,6,.05,0xa6f0d6,.7));
+  // chão: disco escuro + anéis finos para referência de posição (altura do piso real, local-floor)
+  const chao=new T.Mesh(new T.CircleGeometry(9,64),new T.MeshBasicMaterial({color:0x02070e,transparent:true,opacity:.92,depthWrite:false}));chao.rotation.x=-Math.PI/2;chao.position.y=0.005;g.add(chao);
+  for(const r of [1,2.2,3.6,5.2]){const an=new T.Mesh(new T.RingGeometry(r-.012,r+.012,96),new T.MeshBasicMaterial({color:0x37b1da,transparent:true,opacity:r===1?.32:.12,side:T.DoubleSide,depthWrite:false}));an.rotation.x=-Math.PI/2;an.position.y=0.01;g.add(an);}
+  const fog=new T.Mesh(new T.CircleGeometry(9,64),new T.MeshBasicMaterial({color:0x0f2c4a,transparent:true,opacity:.08,depthWrite:false,blending:T.AdditiveBlending}));fog.rotation.x=-Math.PI/2;fog.position.y=0.02;g.add(fog);
+  return g;
+}
+function entrarAmbiente(){if(ambiente)return;ambiente=criarAmbiente();view.scene.add(ambiente);
+  musicaAntes=narrator.musicOn;if(!narrator.musicOn){const vol=Math.max(.12,narrator.musicVolume||.2);narrator.setMusic(true,vol);const cb=document.getElementById('musicEnabled');if(cb)cb.checked=true;}}
+function sairAmbiente(){if(ambiente){M.dispose(ambiente);view.scene.remove(ambiente);ambiente=null;}
+  if(musicaAntes===false){narrator.setMusic(false);const cb=document.getElementById('musicEnabled');if(cb)cb.checked=false;}musicaAntes=null;}
+const frameOriginal=Proto.frame;
+Proto.frame=function(time,frame){
+  if(this.xr&&!ambiente)entrarAmbiente();
+  if(ambiente){const t=(time||performance.now())*0.001;ambiente.children.forEach(o=>{if(o.isPoints){o.rotation.y=t*o.userData.vel;o.position.y=Math.sin(t*0.35+o.userData.vel*50)*0.08;}});}
+  return frameOriginal.call(this,time,frame);
+};
+const exitOriginal2=Proto.exitXR;
+Proto.exitXR=function(){sairAmbiente();return exitOriginal2.call(this);};
 });
 })();

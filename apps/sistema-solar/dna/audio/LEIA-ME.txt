@@ -1,0 +1,6 @@
+Mantenha os MP3 humanizados de DNA que já existirem nesta pasta.
+O pacote traz somente fundo.mp3, copiado sem alteração do material recebido.
+Falas gravadas compatíveis: dna.mp3, adenina.mp3, timina.mp3, citosina.mp3,
+guanina.mp3, fosfato.mp3, acucar.mp3, esqueleto.mp3, ligacoes.mp3.
+Novas orientações: consulte ROTEIRO-AUDIOS.csv na raiz do pacote.
+Não renomeie falas de planetas para usar como se fossem falas de DNA.

@@ -119,6 +119,23 @@ function torax(opt={}){
   g.userData.partes={pulmaoE:pE,pulmaoD:pD,traqueia:tr,bronquios:br,coracao:co,diafragma:di};
   return g;
 }
+
+/* ---------- Sistema digestório (Fase 2) ---------- */
+function digestivo(opt={}){
+  const g=new T.Group();const CORD={esof:0xe9a070,estom:0xe08a50,delg:0xf0c07a,grosso:0xc99a6b,figado:0x9e4d40,boca:0xffb3a7};
+  const boca=organico(elips(.3,.18,.22,CORD.boca,V(0,3.05,.42)),.02,4,1);tag(boca,{type:'inspect',key:'boca'});g.add(boca);
+  const far=new T.Mesh(new T.CylinderGeometry(.11,.11,.5,12),mat(0xaad8ef,{transparent:true,opacity:.75}));far.position.set(0,2.6,.1);tag(far,{type:'inspect',key:'faringe'});g.add(far);
+  const esof=tubo([V(0,2.35,.05),V(-.05,1.7,-.15),V(-.1,.9,-.2),V(-.25,.35,-.05)],.09,CORD.esof);tag(esof,{type:'inspect',key:'esofago'});g.add(esof);
+  const est=organico(elips(.62,.42,.4,CORD.estom,V(.05,.15,.15)),.035,2.8,9);est.rotation.z=-.5;tag(est,{type:'inspect',key:'estomago'});g.add(est);
+  const fig=organico(elips(.75,.38,.45,CORD.figado,V(-.65,.55,.15)),.03,2.5,3);fig.rotation.z=.15;tag(fig,{type:'inspect',key:'figado'});g.add(fig);
+  // intestino delgado: tubo serpenteando dentro do abdome
+  const pts=[];for(let i=0;i<46;i++){const u=i/45;const y=-.25-u*1.9;pts.push(V(Math.sin(u*Math.PI*7.5)*.62+Math.cos(u*13)*.08,y,Math.cos(u*Math.PI*7.5)*.22+.1));}
+  pts.unshift(V(.55,-.1,.2));const delg=tubo(pts,.11,CORD.delg,{roughness:.55},220);tag(delg,{type:'inspect',key:'intestino_delgado'});g.add(delg);
+  // intestino grosso: moldura (ascendente, transverso, descendente)
+  const gro=tubo([V(.95,-2.3,0),V(1.0,-1.4,-.05),V(1.0,-.55,-.05),V(.6,-.4,-.15),V(-.2,-.4,-.2),V(-.95,-.5,-.1),V(-1.0,-1.4,-.05),V(-.95,-2.2,0),V(-.5,-2.5,.05),V(-.1,-2.75,.05)],.16,CORD.grosso,{roughness:.6},140);tag(gro,{type:'inspect',key:'intestino_grosso'});g.add(gro);
+  g.userData.tubo=[V(0,3.05,.42),V(0,2.6,.1),V(0,2.35,.05),V(-.1,.9,-.2),V(-.25,.35,-.05),V(.1,.1,.15),V(.55,-.1,.2),...pts.filter((p,i)=>i%6===0),V(.95,-2.3,0),V(1.0,-.55,-.05),V(-.2,-.4,-.2),V(-1.0,-1.4,-.05),V(-.1,-2.75,.05)];
+  return g;
+}
 /* ---------- Cenas por atividade ---------- */
 function stageBase(g,width=5,y=-3.15,z=0){const m=new T.Mesh(new T.CircleGeometry(width,72),mat(0x0b2637,{roughness:.7,metalness:.12}));m.rotation.x=-Math.PI/2;m.position.set(0,y,z);g.add(m);const rim=new T.Mesh(new T.RingGeometry(width-.016,width+.016,72),new T.MeshBasicMaterial({color:0x305d72,side:T.DoubleSide}));rim.rotation.x=-Math.PI/2;rim.position.set(0,y+.01,z);g.add(rim);}
 function contexto(level){
@@ -137,6 +154,7 @@ function inspection(key){
   if(key==='alveolos')return alveolo({});
   if(key==='nariz'||key==='faringe'){const g=new T.Group();const s=silhueta({opacidade:.25,nariz:true});s.scale.setScalar(.8);s.position.y=-2.2;g.add(s);return g;}
   if(key==='sangue'||key==='corpo_celulas'){const g=new T.Group();const cap=tubo([V(-1.5,0,0),V(-.5,.2,.1),V(.5,-.2,-.1),V(1.5,0,0)],.22,COR.arteria,{transparent:true,opacity:.45});g.add(cap);for(let i=0;i<7;i++){const h=new T.Mesh(new T.TorusGeometry(.09,.045,8,16),mat(0xff5a5a));h.position.set(-1.3+i*.43,Math.sin(i)*.08,0);h.rotation.y=Math.PI/2;g.add(h);}return g;}
+  if(['boca','esofago','estomago','intestino_delgado','intestino_grosso','figado'].includes(key)){const d=digestivo();const g=new T.Group();[...d.children].forEach(o=>{if(!(o.userData.hit&&o.userData.hit.key===key))d.remove(o);});const box=new T.Box3().setFromObject(d),c=box.getCenter(new T.Vector3());d.position.copy(c).multiplyScalar(-1);g.add(d);return g;}
   if(key==='torax')return torax();
   const g=new T.Group();g.add(torax({costelas:false}));return g;
 }
@@ -166,18 +184,23 @@ function sequencia(state,cfg){
   }
   // bandeja de peças (embaralhadas, sem as já colocadas)
   const restantes=state.bandeja.filter(k=>!state.colocados.includes(k));
-  restantes.forEach((k,i)=>{const cols=2,c=i%cols,r=Math.floor(i/cols);const x=-3.75+c*1.6,y=top-.1-r*.72;
+  restantes.forEach((k,i)=>{const cols=2,c=i%cols,r=Math.floor(i/cols);const x=(cfg.titulo==='CAMINHO DO ALIMENTO'?2.75:-3.75)+c*1.6,y=top-.1-r*.72;
     const peca=new T.Mesh(new T.BoxGeometry(1.48,.56,.2),mat(0x2b6f88,{roughness:.4}));peca.position.set(x,y,.1);peca.userData.draggable=true;tag(peca,{type:'seqPiece',key:k});g.add(peca);
     const t=label(cfg.rotulos[k],'#ffffff',1.46,66);t.position.set(x,y,.22);g.add(t);
     if(state.selected===k){const anel=new T.Mesh(new T.BoxGeometry(1.6,.68,.08),new T.MeshBasicMaterial({color:0xffffff,wireframe:true}));anel.position.set(x,y,.1);g.add(anel);}
   });
-  if(!state.done)textAt(g,'PEÇAS',-2.95,top+.75,0,1.4,'#9cbed0');
+  if(!state.done)textAt(g,'PEÇAS',cfg.titulo==='CAMINHO DO ALIMENTO'?3.55:-2.95,top+.75,0,1.4,'#9cbed0');
   if(state.done&&cfg.titulo==='CAMINHO DO SANGUE'){
     const co=coracao({cavidades:true});co.scale.setScalar(1.15);co.position.set(-2.9,-.3,0);g.add(co);
     const pts=[V(-.55,1.3,-.1),V(-.5,.75,-.08),V(-.38,.48,.1),V(-.28,-.1,.45),V(-.2,.5,.35),V(-.05,.95,.25),V(.4,1.0,.1),V(.95,.55,-.2),V(.45,.5,-.1),V(.3,.52,.15),V(.3,-.25,.4),V(.15,.35,.1),V(.15,.95,.05),V(.05,1.25,-.05),V(-.3,1.25,-.15),V(-.42,.9,-.25)].map(p=>p.clone().multiplyScalar(1.15).add(V(-2.9,-.3,0)));
     const curva=new T.CatmullRomCurve3(pts);const gotas=[];for(let i=0;i<10;i++){const d=ball(.07,COR.veia,V(),{emissive:0x223355});d.userData.f=i/10;g.add(d);gotas.push(d);}
     textAt(g,'SIGA A GOTA',-2.9,1.75,0,2.2,'#ffb0b0');
     g.userData.tick=(t)=>{gotas.forEach(d=>{const u=(t*.07+d.userData.f)%1;d.position.copy(curva.getPointAt(u));const rico=u>.47&&u<.98;d.material.color.setHex(rico?COR.arteria:COR.veia);d.material.emissive.setHex(rico?0x552222:0x223355);});};
+  }
+  if(cfg.titulo==='CAMINHO DO ALIMENTO'){
+    const d=digestivo();d.scale.setScalar(.78);d.position.set(-2.9,-.1,0);g.add(d);const si=silhueta({opacidade:.08,nariz:false});si.scale.setScalar(.78);si.position.set(-2.9,-.1,0);g.add(si);
+    if(state.done){const curva=new T.CatmullRomCurve3(d.userData.tubo.map(p=>p.clone().multiplyScalar(.78).add(V(-2.9,-.1,0))));const bolos=[];for(let i=0;i<8;i++){const b=ball(.07,0xffe08a,V(),{emissive:0x553d10});b.userData.f=i/8;g.add(b);bolos.push(b);}
+      textAt(g,'SIGA O ALIMENTO',-2.9,2.75,0,2.6,'#ffe08a');g.userData.tick=(t)=>{bolos.forEach(b=>{const u=(t*.05+b.userData.f)%1;b.position.copy(curva.getPointAt(u));});};}
   }
   if(state.done&&cfg.titulo==='CAMINHO DO AR'){
     const tx=torax({costelas:false});tx.scale.setScalar(.95);tx.position.set(-2.9,-.6,0);g.add(tx);const si=silhueta({opacidade:.1,nariz:true});si.scale.setScalar(.95);si.position.set(-2.9,-.6,0);g.add(si);
@@ -216,5 +239,5 @@ function alveolo(state){
   return g;
 }
 function dispose(g){if(!g)return;const geos=new Set(),mats=new Set(),tex=new Set();g.traverse(o=>{if(o.geometry&&!o.isSprite)geos.add(o.geometry);for(const m of [].concat(o.material||[])){if(!m)continue;mats.add(m);if(m.map)tex.add(m.map);}});geos.forEach(x=>x.dispose());mats.forEach(x=>x.dispose());tex.forEach(x=>x.dispose());if(g.parent)g.parent.remove(g);}
-window.CORPO_MODELS={V,COR,mat,ball,tubo,label,textAt,tag,organico,coracao,pulmao,traqueia,bronquios,diafragma,costelas,silhueta,torax,contexto,explorar,inspection,respire,sequencia,alveolo,stageBase,dispose};
+window.CORPO_MODELS={V,COR,mat,ball,tubo,label,textAt,tag,organico,digestivo,coracao,pulmao,traqueia,bronquios,diafragma,costelas,silhueta,torax,contexto,explorar,inspection,respire,sequencia,alveolo,stageBase,dispose};
 })();

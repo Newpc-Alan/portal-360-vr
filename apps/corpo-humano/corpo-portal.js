@@ -113,11 +113,12 @@ Proto.buildXRUI=function(){
     this.xrButton(a.label,a.cmd,1.16+(i%2?.25:-.25),-.22-Math.floor(i/2)*UI.passo,UI.btnW,a.disabled,cor);
   });
   if(pages>1&&!quizFase){this.xrButton('◀ Opções','xr:prev',.91,-.86,UI.btnW,this.uiPage===0);this.xrButton('Mais opções ▶','xr:next',1.41,-.86,UI.btnW,this.uiPage===pages-1);}
-  D.activities.forEach((a,i)=>this.xrButton((i+1)+'. '+a.label,'view:'+a.id,-1.18,.52-i*UI.passo,.5));
-  this.xrButton('🥽 Sair do VR','vr',-1.18,-.62,.5,false,{bg:'#5a2a16',borda:'#ff9f6b',texto:'#fff2ea'});
-  this.xrButton('↙ Catálogo','catalog',-1.18,-.77,.5,false,{bg:'#0f2c4a',borda:'#37B1DA',texto:'#ffffff'});
-  this.xrButton('◎ Centralizar','center',-.52,-.86,UI.btnW);this.xrButton(S.autoRotate?'Ⅱ Pausar':'▷ Girar','rotate',-.02,-.86,UI.btnW);
-  this.xrButton('🔊 Ouvir','voice:repeat',-.52,-1.01,UI.btnW);this.xrButton('■ Parar voz','voice:stop',-.02,-1.01,UI.btnW);
+  D.activities.forEach((a,i)=>this.xrButton((i+1)+'. '+a.label,'view:'+a.id,-1.18,.6-i*UI.passo,.5));
+  const yb=.6-D.activities.length*UI.passo-.04;
+  this.xrButton('🥽 Sair do VR','vr',-1.18,yb,.5,false,{bg:'#5a2a16',borda:'#ff9f6b',texto:'#fff2ea'});
+  this.xrButton('↙ Catálogo','catalog',-1.18,yb-UI.passo,.5,false,{bg:'#0f2c4a',borda:'#37B1DA',texto:'#ffffff'});
+  this.xrButton('◎ Centralizar','center',-.52,-.95,UI.btnW);this.xrButton(S.autoRotate?'Ⅱ Pausar':'▷ Girar','rotate',-.02,-.95,UI.btnW);
+  this.xrButton('🔊 Ouvir','voice:repeat',-.52,-1.1,UI.btnW);this.xrButton('■ Parar voz','voice:stop',-.02,-1.1,UI.btnW);
 };
 /* lista de ações da lateral (o dna-app monta os botões com data-act; lemos de lá para não depender de variáveis internas) */
 Proto._acoes=function(){const out=[];document.querySelectorAll('#lessonPanel [data-act]').forEach(b=>{if(/^seq:target:/.test(b.dataset.act))return;if(b.closest('details')&&!b.closest('details').open)return;const label=(b.title&&b.textContent.trim().length<=1?b.textContent.trim()+' · '+b.title:b.textContent.trim());out.push({label,cmd:b.dataset.act,disabled:b.disabled});});return out;};
@@ -196,7 +197,7 @@ const placeOriginal=Proto.placeXR;
 Proto.placeXR=function(){
   placeOriginal.call(this);
   if(!this.xr||!this.model||!this.anchor)return;
-  const S=Lab.state,fita=['caminhoAr','caminhoSangue'].includes(S.view);
+  const S=Lab.state,fita=['caminhoAr','caminhoSangue','alimento'].includes(S.view);
   if(!fita)return;
   const f=1.0;this.root.scale.multiplyScalar(f);this.root.position.y+=.05;this.root.position.addScaledVector(this.anchor.f,-.25);this.root.updateMatrixWorld(true);
 };

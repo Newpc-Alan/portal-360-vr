@@ -1,4 +1,4 @@
-CORPO HUMANO IMERSIVO v2.0 · Portal 360º VR (NEWPC / Portal do Educador)
+CORPO HUMANO IMERSIVO v2.1 · Portal 360º VR (NEWPC / Portal do Educador)
 
 Pergunta central: como o oxigênio que respiramos chega às células?
 Arquitetura: a mesma do DNA Imersivo v2.1+ (narrador MP3 com fallback, aula guiada, resumo exportável,
@@ -11,7 +11,8 @@ ATIVIDADES
 04 Caminho do ar   ordenar nariz → faringe → laringe → traqueia → brônquios → alvéolos
 05 Caminho do sangue  ordenar átrio D → ventrículo D → pulmões → átrio E → ventrículo E → células
 06 Troca gasosa    alvéolo ampliado com capilar; O2 entra no sangue, CO2 sai
-07 Desafio         6 situações com explicação; no VR, painel verde/vermelho
+07 Digestão        ordenar boca → faringe → esôfago → estômago → intestino delgado → intestino grosso (Fase 2)
+08 Desafio         8 situações com explicação; no VR, painel verde/vermelho
 
 MODELOS 3D
 Procedurais, estilo atlas escolar (coração com átrios, ventrículos, aorta, tronco pulmonar e cavas; pulmões com lobos;

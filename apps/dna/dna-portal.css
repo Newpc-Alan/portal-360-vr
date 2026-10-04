@@ -8,3 +8,8 @@
 .vrgate-box button.sec{background:rgba(255,255,255,.08);font-size:15px;font-weight:600;padding:12px 22px;min-width:0}
 /* dentro do catálogo (iframe): a tela cheia é do próprio catálogo */
 body.embed #fullscreenBtn{display:none}
+
+/* botão Entrar em VR verde, igual ao catálogo */
+#vrBtn.vr{background:linear-gradient(135deg,#19c96a,#0F9861);border:2px solid #7CFFB8;color:#fff;font-weight:800;box-shadow:0 0 0 0 rgba(34,224,120,.7);animation:vrPulse 2.2s ease-out infinite}
+@keyframes vrPulse{0%{box-shadow:0 0 0 0 rgba(34,224,120,.75)}70%{box-shadow:0 0 0 12px rgba(34,224,120,0)}100%{box-shadow:0 0 0 0 rgba(34,224,120,0)}}
+@media(prefers-reduced-motion:reduce){#vrBtn.vr{animation:none}}

@@ -9,6 +9,10 @@ const mat=(color,extra={})=>new T.MeshStandardMaterial(Object.assign({color,roug
 function tag(o,data){o.traverse(x=>{if(x.isMesh)x.userData.hit=data;});o.userData.hit=data;return o;}
 function ball(r,color,pos,extra,seg=24){const m=new T.Mesh(new T.SphereGeometry(r,seg,Math.max(10,seg*.7|0)),mat(color,extra));if(pos)m.position.copy(pos);return m;}
 function elips(rx,ry,rz,color,pos,extra){const m=ball(1,color,pos,extra,28);m.scale.set(rx,ry,rz);return m;}
+/* relevo irregular: desloca vértices ao longo da normal com ruído suave (aspecto orgânico) */
+function organico(mesh,amp=.05,freq=3.1,seed=1){const g=mesh.geometry;const pos=g.attributes.position,nor=g.attributes.normal;const v=new T.Vector3(),n=new T.Vector3();
+  for(let i=0;i<pos.count;i++){v.fromBufferAttribute(pos,i);n.fromBufferAttribute(nor,i);const d=amp*(Math.sin(v.x*freq+seed)*Math.cos(v.y*freq*1.3+seed*2)+.6*Math.sin(v.z*freq*1.7-seed)*Math.cos(v.x*freq*.7)+.35*Math.sin((v.x+v.y+v.z)*freq*2.3));v.addScaledVector(n,d);pos.setXYZ(i,v.x,v.y,v.z);}
+  pos.needsUpdate=true;g.computeVertexNormals();return mesh;}
 function tubo(pts,r,color,extra,seg=48){const curve=new T.CatmullRomCurve3(pts);return new T.Mesh(new T.TubeGeometry(curve,seg,r,12,false),mat(color,extra));}
 function label(text,color='#e7f6ff',width=1.5,size=56){const c=document.createElement('canvas');c.width=512;c.height=128;const ctx=c.getContext('2d');ctx.font='600 '+size+'px Segoe UI,Arial';while(ctx.measureText(text).width>490&&size>17){size-=2;ctx.font='600 '+size+'px Segoe UI,Arial';}ctx.textAlign='center';ctx.textBaseline='middle';ctx.shadowColor='#031220';ctx.shadowBlur=7;ctx.fillStyle=color;ctx.fillText(text,256,64);const tx=new T.CanvasTexture(c);tx.encoding=T.sRGBEncoding;tx.minFilter=T.LinearMipmapLinearFilter;tx.generateMipmaps=true;tx.anisotropy=8;const sp=new T.Sprite(new T.SpriteMaterial({map:tx,transparent:true,depthWrite:false,depthTest:true}));sp.scale.set(width,width/4,1);return sp;}
 function textAt(g,text,x,y,z=0,width=1.5,color){const sp=label(text,color,width);sp.position.set(x,y,z);g.add(sp);return sp;}
@@ -17,11 +21,11 @@ function textAt(g,text,x,y,z=0,width=1.5,color){const sp=label(text,color,width)
 function coracao(opt={}){
   const g=new T.Group();
   // ventrículos: massa principal inclinada, ponta para baixo-esquerda do paciente (direita de quem olha)
-  const vent=elips(.56,.72,.5,COR.coracao,V(0,-.1,0));vent.rotation.z=-.35;vent.rotation.x=.15;g.add(vent);
+  const vent=organico(elips(.56,.72,.5,COR.coracao,V(0,-.1,0)),.035,2.4,5);vent.rotation.z=-.35;vent.rotation.x=.15;g.add(vent);
   const sulco=tubo([V(-.1,.45,.45),V(.05,.1,.52),V(.22,-.3,.42),V(.3,-.62,.2)],.025,COR.coracaoEsc);g.add(sulco);
   // átrios: duas bolsas atrás e acima
-  const atD=elips(.33,.3,.3,COR.coracaoEsc,V(-.38,.48,-.08));g.add(atD);
-  const atE=elips(.3,.27,.28,COR.coracaoEsc,V(.3,.5,-.18));g.add(atE);
+  const atD=organico(elips(.33,.3,.3,COR.coracaoEsc,V(-.38,.48,-.08)),.03,3,2);g.add(atD);
+  const atE=organico(elips(.3,.27,.28,COR.coracaoEsc,V(.3,.5,-.18)),.03,3,4);g.add(atE);
   // aorta: sobe do ventrículo esquerdo e faz o arco
   const aorta=tubo([V(.12,.35,.05),V(.15,.95,.05),V(.05,1.25,-.05),V(-.3,1.25,-.15),V(-.42,.9,-.25),V(-.4,.3,-.3)],.11,COR.arteria);g.add(aorta);
   for(const dx of [-.22,-.05,.12]){g.add(tubo([V(dx,1.2,-.1),V(dx-.05,1.55,-.12)],.05,COR.arteria));}
@@ -43,9 +47,9 @@ function coracao(opt={}){
 }
 function pulmao(lado){ // lado: -1 esquerdo (do paciente, fica à direita de quem olha), +1 direito
   const g=new T.Group();const s=lado;
-  const sup=elips(.52,.78,.46,COR.pulmao,V(0,.45,0));g.add(sup);
-  const inf=elips(.6,.7,.52,COR.pulmao,V(s*.04,-.45,.02));g.add(inf);
-  if(lado>0){const med=elips(.58,.5,.5,COR.pulmao,V(s*.02,0,.05));g.add(med);} // lobo médio só no direito
+  const sup=organico(elips(.52,.78,.46,COR.pulmao,V(0,.45,0)),.045,2.6,lado);g.add(sup);
+  const inf=organico(elips(.6,.7,.52,COR.pulmao,V(s*.04,-.45,.02)),.045,2.9,lado+3);g.add(inf);
+  if(lado>0){const med=organico(elips(.58,.5,.5,COR.pulmao,V(s*.02,0,.05)),.04,3.2,7);g.add(med);} // lobo médio só no direito
   // fissuras (linhas escuras) sugerindo os lobos
   g.add(tubo([V(-s*.4,.2,.4),V(0,-.05,.5),V(s*.5,-.3,.3)],.015,COR.pulmaoEsc));
   if(lado>0)g.add(tubo([V(-s*.3,.55,.35),V(s*.2,.35,.48),V(s*.5,.2,.3)],.015,COR.pulmaoEsc));
@@ -167,7 +171,22 @@ function sequencia(state,cfg){
     const t=label(cfg.rotulos[k],'#ffffff',1.46,66);t.position.set(x,y,.22);g.add(t);
     if(state.selected===k){const anel=new T.Mesh(new T.BoxGeometry(1.6,.68,.08),new T.MeshBasicMaterial({color:0xffffff,wireframe:true}));anel.position.set(x,y,.1);g.add(anel);}
   });
-  textAt(g,'PEÇAS',-2.95,top+.75,0,1.4,'#9cbed0');
+  if(!state.done)textAt(g,'PEÇAS',-2.95,top+.75,0,1.4,'#9cbed0');
+  if(state.done&&cfg.titulo==='CAMINHO DO SANGUE'){
+    const co=coracao({cavidades:true});co.scale.setScalar(1.15);co.position.set(-2.9,-.3,0);g.add(co);
+    const pts=[V(-.55,1.3,-.1),V(-.5,.75,-.08),V(-.38,.48,.1),V(-.28,-.1,.45),V(-.2,.5,.35),V(-.05,.95,.25),V(.4,1.0,.1),V(.95,.55,-.2),V(.45,.5,-.1),V(.3,.52,.15),V(.3,-.25,.4),V(.15,.35,.1),V(.15,.95,.05),V(.05,1.25,-.05),V(-.3,1.25,-.15),V(-.42,.9,-.25)].map(p=>p.clone().multiplyScalar(1.15).add(V(-2.9,-.3,0)));
+    const curva=new T.CatmullRomCurve3(pts);const gotas=[];for(let i=0;i<10;i++){const d=ball(.07,COR.veia,V(),{emissive:0x223355});d.userData.f=i/10;g.add(d);gotas.push(d);}
+    textAt(g,'SIGA A GOTA',-2.9,1.75,0,2.2,'#ffb0b0');
+    g.userData.tick=(t)=>{gotas.forEach(d=>{const u=(t*.07+d.userData.f)%1;d.position.copy(curva.getPointAt(u));const rico=u>.47&&u<.98;d.material.color.setHex(rico?COR.arteria:COR.veia);d.material.emissive.setHex(rico?0x552222:0x223355);});};
+  }
+  if(state.done&&cfg.titulo==='CAMINHO DO AR'){
+    const tx=torax({costelas:false});tx.scale.setScalar(.95);tx.position.set(-2.9,-.6,0);g.add(tx);const si=silhueta({opacidade:.1,nariz:true});si.scale.setScalar(.95);si.position.set(-2.9,-.6,0);g.add(si);
+    const base=V(-2.9,-.6,0),s=.95;const P=(x,y,z)=>V(x*s,y*s,z*s).add(base);
+    const rotas=[[P(0,3.1,.56),P(0,2.6,.15),P(0,2.3,.05),P(0,1.6,.05),P(0,1.05,.05),P(-.42,.7,.07),P(-.8,.4,0),P(-.85,-.1,.02)],[P(0,3.1,.56),P(0,2.6,.15),P(0,2.3,.05),P(0,1.6,.05),P(0,1.05,.05),P(.42,.7,.07),P(.78,.4,0),P(.82,-.1,.02)]];
+    const parts=[];rotas.forEach((r,k)=>{const c=new T.CatmullRomCurve3(r);for(let i=0;i<7;i++){const d=ball(.055,COR.gasO2,V(),{emissive:0x2f7f8f});d.userData.f=i/7;d.userData.c=c;g.add(d);parts.push(d);}});
+    textAt(g,'O AR ENTRA',-2.9,2.6,0,2.0,'#c9f7ff');
+    g.userData.tick=(t)=>{parts.forEach(d=>{const u=(t*.12+d.userData.f)%1;d.position.copy(d.userData.c.getPointAt(u));});};
+  }
   g.userData.slots={top,dy};
   return g;
 }
@@ -197,5 +216,5 @@ function alveolo(state){
   return g;
 }
 function dispose(g){if(!g)return;const geos=new Set(),mats=new Set(),tex=new Set();g.traverse(o=>{if(o.geometry&&!o.isSprite)geos.add(o.geometry);for(const m of [].concat(o.material||[])){if(!m)continue;mats.add(m);if(m.map)tex.add(m.map);}});geos.forEach(x=>x.dispose());mats.forEach(x=>x.dispose());tex.forEach(x=>x.dispose());if(g.parent)g.parent.remove(g);}
-window.CORPO_MODELS={V,COR,mat,ball,tubo,label,textAt,tag,coracao,pulmao,traqueia,bronquios,diafragma,costelas,silhueta,torax,contexto,explorar,inspection,respire,sequencia,alveolo,stageBase,dispose};
+window.CORPO_MODELS={V,COR,mat,ball,tubo,label,textAt,tag,organico,coracao,pulmao,traqueia,bronquios,diafragma,costelas,silhueta,torax,contexto,explorar,inspection,respire,sequencia,alveolo,stageBase,dispose};
 })();

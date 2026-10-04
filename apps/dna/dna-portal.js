@@ -190,5 +190,15 @@ Proto.frame=function(time,frame){
 };
 const exitOriginal2=Proto.exitXR;
 Proto.exitXR=function(){sairAmbiente();return exitOriginal2.call(this);};
+
+/* ---------- 6. Modelo maior no VR nas atividades de fita ---------- */
+const placeOriginal=Proto.placeXR;
+Proto.placeXR=function(){
+  placeOriginal.call(this);
+  if(!this.xr||!this.model||!this.anchor)return;
+  const S=Lab.state,fita=['pareamento','desafio','replicacao','montagem'].includes(S.view)&&!(S.view==='desafio'&&S.quiz.phase!==0);
+  if(!fita)return;
+  const f=1.3;this.root.scale.multiplyScalar(f);this.root.position.y+=.08;this.root.position.addScaledVector(this.anchor.f,-.35);this.root.updateMatrixWorld(true);
+};
 });
 })();

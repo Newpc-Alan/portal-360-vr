@@ -1,0 +1,71 @@
+/* Corpo Humano Imersivo v2.0 · conteúdo didático (Portal do Educador / NEWPC)
+   Pergunta central: como o oxigênio que respiramos chega às células?
+   Fase 1: sistema respiratório + sistema circulatório (BNCC EF05CI06-07, EF08CI07-08). */
+(function(){'use strict';
+const info={
+ corpo:{name:'Corpo humano',kind:'Visão geral',color:'#9fd3ff',text:'O corpo humano é formado por sistemas que trabalham juntos. Nesta experiência vamos acompanhar dois deles: o respiratório, que traz o ar para dentro, e o circulatório, que leva o oxigênio até cada célula.',detail:'A silhueta e as proporções são esquemáticas. Os órgãos foram ampliados e simplificados para facilitar a observação.'},
+ torax:{name:'Tórax',kind:'Caixa torácica',color:'#cfe3f2',text:'O tórax é protegido pelas costelas. Dentro dele ficam os pulmões e o coração, e, logo abaixo, o diafragma, que separa o tórax do abdome.',detail:'As costelas se articulam com a coluna e com o esterno. Elas se movem um pouco a cada respiração.'},
+ nariz:{name:'Nariz',kind:'Via aérea superior',color:'#8fd0ff',text:'O ar entra pelo nariz. Lá dentro ele é aquecido, umedecido e filtrado pelos pelos e pelo muco, antes de seguir para a faringe.',detail:'Respirar pelo nariz protege os pulmões: partículas de poeira ficam presas no muco.'},
+ faringe:{name:'Faringe',kind:'Via aérea superior',color:'#8fd0ff',text:'A faringe é a garganta: um corredor compartilhado pelo ar e pelo alimento. O ar segue para a laringe, e o alimento, para o esôfago.',detail:'A epiglote fecha a entrada da laringe quando engolimos, para o alimento não ir para os pulmões.'},
+ laringe:{name:'Laringe',kind:'Via aérea superior',color:'#8fd0ff',text:'A laringe fica no início da traqueia e abriga as pregas vocais. É aqui que a voz nasce, quando o ar faz as pregas vibrarem.',detail:'O "pomo de Adão" é a cartilagem da laringe, mais visível em homens adultos.'},
+ traqueia:{name:'Traqueia',kind:'Via aérea',color:'#7fc8ff',text:'A traqueia é um tubo de cerca de 12 centímetros, mantido aberto por anéis de cartilagem. Ela conduz o ar da laringe até os brônquios.',detail:'Os anéis em forma de C impedem que a traqueia se feche. Por dentro, cílios empurram o muco com as impurezas para fora.'},
+ bronquios:{name:'Brônquios',kind:'Via aérea',color:'#79bdf3',text:'A traqueia se divide em dois brônquios, um para cada pulmão. Eles se ramificam muitas vezes, como uma árvore de cabeça para baixo, até chegar aos alvéolos.',detail:'As ramificações mais finas são os bronquíolos. Essa "árvore" distribui o ar por todo o pulmão.'},
+ pulmoes:{name:'Pulmões',kind:'Órgão da respiração',color:'#f0a3a3',text:'Os pulmões são dois órgãos esponjosos cheios de alvéolos. É neles que o oxigênio do ar passa para o sangue e o gás carbônico faz o caminho contrário.',detail:'O pulmão direito tem três lobos; o esquerdo, dois, deixando espaço para o coração. Juntos têm cerca de 300 milhões de alvéolos.'},
+ alveolos:{name:'Alvéolos',kind:'Troca gasosa',color:'#ffd38a',text:'Os alvéolos são bolsinhas minúsculas no fim das vias aéreas, envolvidas por capilares. A parede é tão fina que o oxigênio atravessa para o sangue, e o gás carbônico sai do sangue para o ar.',detail:'Abertos, os alvéolos de uma pessoa cobririam uma área parecida com a de uma quadra de tênis.'},
+ diafragma:{name:'Diafragma',kind:'Músculo da respiração',color:'#c9a0ff',text:'O diafragma é um músculo em forma de cúpula abaixo dos pulmões. Quando ele se contrai e desce, o tórax aumenta e o ar entra. Quando relaxa e sobe, o ar sai.',detail:'Soluço é uma contração involuntária do diafragma. Os músculos entre as costelas também ajudam na respiração.'},
+ coracao:{name:'Coração',kind:'Bomba do sistema circulatório',color:'#ff7a7a',text:'O coração é um músculo do tamanho de um punho, com quatro cavidades: dois átrios em cima e dois ventrículos embaixo. O lado direito manda sangue para os pulmões; o lado esquerdo manda sangue para o corpo todo.',detail:'Ele bate cerca de 100 mil vezes por dia. As válvulas garantem que o sangue siga sempre no mesmo sentido.'},
+ atrioD:{name:'Átrio direito',kind:'Cavidade do coração',color:'#7fa7ff',text:'O átrio direito recebe o sangue que volta do corpo, pobre em oxigênio, pelas veias cavas. Dele, o sangue passa para o ventrículo direito.',detail:'Átrios são câmaras de entrada; ventrículos, de saída.'},
+ ventD:{name:'Ventrículo direito',kind:'Cavidade do coração',color:'#7fa7ff',text:'O ventrículo direito bombeia o sangue pobre em oxigênio para os pulmões, pela artéria pulmonar. É a pequena circulação.',detail:'Essa parede é mais fina que a do ventrículo esquerdo, porque os pulmões ficam perto.'},
+ atrioE:{name:'Átrio esquerdo',kind:'Cavidade do coração',color:'#ff8a8a',text:'O átrio esquerdo recebe o sangue que volta dos pulmões, agora rico em oxigênio, pelas veias pulmonares.',detail:'As veias pulmonares são as únicas veias que transportam sangue rico em oxigênio.'},
+ ventE:{name:'Ventrículo esquerdo',kind:'Cavidade do coração',color:'#ff8a8a',text:'O ventrículo esquerdo é a cavidade mais forte. Ele bombeia o sangue rico em oxigênio pela aorta para o corpo inteiro. É a grande circulação.',detail:'Sua parede muscular é cerca de três vezes mais espessa que a do ventrículo direito.'},
+ aorta:{name:'Aorta',kind:'Artéria',color:'#ff6b6b',text:'A aorta é a maior artéria do corpo. Sai do ventrículo esquerdo e se ramifica para levar sangue oxigenado à cabeça, aos braços, ao tronco e às pernas.',detail:'Artérias levam sangue para fora do coração; veias trazem de volta.'},
+ corpo_celulas:{name:'Células do corpo',kind:'Destino do oxigênio',color:'#ffc06b',text:'Nos tecidos, o sangue entrega oxigênio e nutrientes às células e recolhe o gás carbônico. É assim que a respiração chega até a última célula do corpo.',detail:'Nas células, o oxigênio é usado para liberar energia dos alimentos: a respiração celular.'},
+ sangue:{name:'Sangue',kind:'Transporte',color:'#ff9f9f',text:'O sangue é o transportador. As hemácias carregam o oxigênio ligado à hemoglobina, que fica vermelho-vivo quando está cheia de oxigênio e mais escura quando está pobre.',detail:'Em um adulto circulam cerca de cinco litros de sangue, dando a volta completa pelo corpo em cerca de um minuto.'}
+};
+const activities=[
+ {id:'contexto',label:'Contexto',title:'Onde fica cada órgão?',subtitle:'Do corpo inteiro ao interior do tórax.',kicker:'LOCALIZE'},
+ {id:'explorar',label:'Explorar',title:'Dois sistemas, um objetivo.',subtitle:'Aponte em um órgão para examiná-lo e ouvir a explicação.',kicker:'EXPLORE'},
+ {id:'respire',label:'Respire',title:'O que acontece quando você respira?',subtitle:'Controle o diafragma e observe os pulmões.',kicker:'EXPERIMENTE'},
+ {id:'caminhoAr',label:'Caminho do ar',title:'Por onde o ar passa?',subtitle:'Coloque as etapas na ordem certa, do nariz aos alvéolos.',kicker:'ORGANIZE'},
+ {id:'caminhoSangue',label:'Caminho do sangue',title:'Siga a gota de sangue.',subtitle:'Monte o percurso do sangue pelo coração, pulmões e corpo.',kicker:'ORGANIZE'},
+ {id:'troca',label:'Troca gasosa',title:'Dentro do alvéolo.',subtitle:'Veja o oxigênio entrar no sangue e o gás carbônico sair.',kicker:'INVESTIGUE'},
+ {id:'desafio',label:'Desafio',title:'Agora, explique o que descobriu.',subtitle:'Situações para aplicar o que você viu.',kicker:'APLIQUE'}
+];
+const guide=[
+ {view:'contexto',title:'Localize os órgãos',goal:'Avance do corpo inteiro até o interior do tórax e identifique coração, pulmões e diafragma.',check:'contexto',audio:'aula-contexto'},
+ {view:'explorar',title:'Investigue as partes',goal:'Aponte em pelo menos três órgãos diferentes e ouça o que cada um faz.',check:'explorar',audio:'aula-explorar'},
+ {view:'respire',title:'Faça o pulmão respirar',goal:'Complete três ciclos de inspiração e expiração controlando o diafragma.',check:'respire',audio:'aula-respire'},
+ {view:'caminhoAr',title:'Organize o caminho do ar',goal:'Coloque as seis etapas na ordem, do nariz até os alvéolos.',check:'caminhoAr',audio:'aula-ar'},
+ {view:'caminhoSangue',title:'Siga a gota de sangue',goal:'Monte o percurso do sangue pelas quatro cavidades, pulmões e corpo.',check:'caminhoSangue',audio:'aula-sangue'},
+ {view:'desafio',title:'Mostre o que entendeu',goal:'Responda às situações finais e consulte o seu resumo.',check:'desafio',audio:'aula-desafio'}
+];
+const context=[
+ {name:'Corpo inteiro',text:'Este é um esquema do corpo humano. O ar entra pelo nariz e pela boca e desce até o tórax. Selecione o tórax para olhar lá dentro.',target:'torax'},
+ {name:'Tórax',text:'Dentro do tórax, protegidos pelas costelas, estão os dois pulmões e, entre eles, o coração. Embaixo, o diafragma. Selecione um dos órgãos para começar a explorar.',target:'orgao'},
+ {name:'Órgãos',text:'Pulmões, coração e diafragma trabalham juntos o tempo todo: um traz o ar, o outro bombeia o sangue e o terceiro faz o movimento. Vamos explorar cada um.',target:null}
+];
+/* sequências das atividades de ordenação */
+const sequencias={
+ caminhoAr:{titulo:'CAMINHO DO AR',ordem:['nariz','faringe','laringe','traqueia','bronquios','alveolos'],rotulos:{nariz:'Nariz',faringe:'Faringe',laringe:'Laringe',traqueia:'Traqueia',bronquios:'Brônquios',alveolos:'Alvéolos'},cor:'#7fc8ff',
+  pistas:['O ar entra por onde você sente o cheiro.','Depois da garganta vem o órgão da voz.','O tubo com anéis de cartilagem vem antes de se dividir em dois.','As bolsinhas da troca gasosa ficam no fim do caminho.']},
+ caminhoSangue:{titulo:'CAMINHO DO SANGUE',ordem:['atrioD','ventD','pulmoes','atrioE','ventE','corpo_celulas'],rotulos:{atrioD:'Átrio direito',ventD:'Ventrículo direito',pulmoes:'Pulmões',atrioE:'Átrio esquerdo',ventE:'Ventrículo esquerdo',corpo_celulas:'Células do corpo'},cor:'#ff8a8a',
+  pistas:['O sangue que volta do corpo entra sempre por um átrio.','Átrio em cima, ventrículo embaixo, no mesmo lado.','Depois do lado direito, o sangue vai buscar oxigênio.','O lado esquerdo manda o sangue para o corpo todo.']}
+};
+const questions=[
+ {id:'diafragma',skill:'respiracao',q:'O que acontece quando o diafragma se contrai e desce?',options:['O tórax aumenta e o ar entra nos pulmões','O tórax diminui e o ar sai dos pulmões','Os pulmões param de se mover'],correct:0,why:'Ao descer, o diafragma aumenta o espaço do tórax. A pressão cai e o ar entra: é a inspiração.'},
+ {id:'troca',skill:'troca-gasosa',q:'Onde o oxigênio do ar passa para o sangue?',options:['Na traqueia','Nos alvéolos dos pulmões','No coração'],correct:1,why:'Os alvéolos têm paredes finíssimas envolvidas por capilares. É ali que o oxigênio entra no sangue e o gás carbônico sai.'},
+ {id:'ladoDireito',skill:'circulacao',q:'Para onde o lado direito do coração bombeia o sangue?',options:['Para o corpo inteiro','Para o cérebro','Para os pulmões'],correct:2,why:'O ventrículo direito envia o sangue pobre em oxigênio para os pulmões, pela artéria pulmonar: a pequena circulação.'},
+ {id:'ladoEsquerdo',skill:'circulacao',q:'Por que a parede do ventrículo esquerdo é mais grossa?',options:['Porque ele bombeia sangue para o corpo inteiro','Porque ele recebe o sangue dos pulmões','Porque ele é a cavidade de entrada'],correct:0,why:'O ventrículo esquerdo precisa de força para empurrar o sangue pela aorta até a cabeça, os braços e as pernas.'},
+ {id:'ordem',skill:'respiracao',q:'Qual é a ordem correta do caminho do ar?',options:['Nariz, traqueia, laringe, brônquios','Nariz, faringe, laringe, traqueia, brônquios','Boca, brônquios, traqueia, alvéolos'],correct:1,why:'O ar passa pelo nariz, pela faringe, pela laringe, desce pela traqueia e se distribui pelos brônquios até os alvéolos.'},
+ {id:'celulas',skill:'integracao',q:'Como o oxigênio que respiramos chega às células?',options:['Pelo ar que circula dentro dos ossos','Pelo sangue, bombeado pelo coração a partir dos pulmões','Pelo diafragma, que empurra o ar até as células'],correct:1,why:'O oxigênio entra no sangue nos alvéolos, volta ao coração e é bombeado pela aorta até os tecidos, onde chega a cada célula.'}
+];
+const sources=[
+ ['Sistema respiratório · Khan Academy (pt-BR)','https://pt.khanacademy.org/science/biology/human-biology/respiratory-system'],
+ ['Sistema circulatório · Khan Academy (pt-BR)','https://pt.khanacademy.org/science/biology/human-biology/circulatory-pulmonary'],
+ ['Anatomia do coração · NHLBI (NIH)','https://www.nhlbi.nih.gov/health/heart'],
+ ['Como funcionam os pulmões · NHLBI (NIH)','https://www.nhlbi.nih.gov/health/lungs'],
+ ['BNCC · Ciências EF05CI06-07 e EF08CI07-08','http://basenacionalcomum.mec.gov.br/'],
+ ['Three.js / WebXR','https://threejs.org/docs/pages/WebXRManager.html']
+];
+window.CORPO_DATA={info,activities,guide,context,sequencias,questions,sources,version:'2.0.0'};
+})();

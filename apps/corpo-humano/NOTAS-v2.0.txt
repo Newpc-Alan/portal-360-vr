@@ -1,0 +1,26 @@
+CORPO HUMANO IMERSIVO v2.0 · Portal 360º VR (NEWPC / Portal do Educador)
+
+Pergunta central: como o oxigênio que respiramos chega às células?
+Arquitetura: a mesma do DNA Imersivo v2.1+ (narrador MP3 com fallback, aula guiada, resumo exportável,
+camada Portal com VR no padrão do catálogo, ambiente com profundidade, trilha de fundo no VR).
+
+ATIVIDADES
+01 Contexto        corpo inteiro → tórax → órgãos
+02 Explorar        apontar em coração, pulmões, traqueia, brônquios, diafragma, alvéolos, laringe, nariz → ficha + narração
+03 Respire         Inspirar/Expirar controla o diafragma; pulmões expandem; 3 ciclos concluem
+04 Caminho do ar   ordenar nariz → faringe → laringe → traqueia → brônquios → alvéolos
+05 Caminho do sangue  ordenar átrio D → ventrículo D → pulmões → átrio E → ventrículo E → células
+06 Troca gasosa    alvéolo ampliado com capilar; O2 entra no sangue, CO2 sai
+07 Desafio         6 situações com explicação; no VR, painel verde/vermelho
+
+MODELOS 3D
+Procedurais, estilo atlas escolar (coração com átrios, ventrículos, aorta, tronco pulmonar e cavas; pulmões com lobos;
+traqueia com anéis; brônquios ramificados; diafragma em cúpula; costelas; silhueta). Para trocar por glTF CC-BY,
+substitua a função do órgão em corpo-models.js (coracao, pulmao, traqueia, bronquios, diafragma) mantendo o userData.hit.
+
+ÁUDIOS
+Ainda não gravados. Lista e textos em ROTEIRO-AUDIOS.csv (mesmo formato do DNA). Enquanto não existem, o app usa a voz
+do navegador (e só texto no Quest). Nomes das fichas: coracao, pulmoes, traqueia, bronquios, diafragma, alveolos, laringe,
+faringe, nariz, atrioD, ventD, atrioE, ventE, aorta, sangue, corpo_celulas, corpo, torax.
+
+CACHE: recursos em ?v=2.0.0. Ao atualizar, troque o número em index.html.

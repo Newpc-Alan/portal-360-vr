@@ -72,3 +72,4 @@ narração, textos secundários enxutos; no VR isso reduz os botões do painel).
 v3.1.1: painel esquerdo do VR em dois níveis. Raiz com 5 botões (módulo atual, "Missão N de 8", Controles, Ouvir de novo,
 Sair do VR); "Missão" abre as 8 atividades do módulo; o nome do módulo abre a troca de módulo; Controles reúne
 Centralizar, Girar, Parar voz e Catálogo. Antes eram 16 missões + 6 controles de uma vez.
+v3.2: sem piso. O modelo fica no espaço (abóbada simétrica sem linha de horizonte + partículas), no 3D e no VR.

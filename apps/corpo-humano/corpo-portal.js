@@ -177,11 +177,11 @@ function criarAmbiente(modo2d){
   const g=new T.Group();g.name='ambienteVR';g.userData.modo2d=!!modo2d;const E=modo2d?1.9:1,CY=modo2d?-3.6:0;/* no 3D o chão fica abaixo do modelo e os anéis crescem */
   // abóbada em gradiente (azul-profundo do Portal → quase preto no zênite e no chão)
   const c=document.createElement('canvas');c.width=16;c.height=512;const x=c.getContext('2d');
-  const gr=x.createLinearGradient(0,0,0,512);gr.addColorStop(0,'#03070f');gr.addColorStop(.42,'#0b2340');gr.addColorStop(.58,'#0f2c4a');gr.addColorStop(.72,'#071526');gr.addColorStop(1,'#02050a');
+  const gr=x.createLinearGradient(0,0,0,512);gr.addColorStop(0,'#04101c');gr.addColorStop(.35,'#0a2238');gr.addColorStop(.5,'#0e2a44');gr.addColorStop(.65,'#0a2238');gr.addColorStop(1,'#04101c');/* espaço: simétrico, sem linha de chão */
   x.fillStyle=gr;x.fillRect(0,0,16,512);
   const tex=new T.CanvasTexture(c);tex.encoding=T.sRGBEncoding;
   const domo=new T.Mesh(new T.SphereGeometry(45,48,32),new T.MeshBasicMaterial({map:tex,side:T.BackSide,depthWrite:false}));
-  domo.position.y=modo2d?-1.6:1.2;g.add(domo);g.userData.domo=domo;
+  domo.position.y=modo2d?0:1.2;g.add(domo);g.userData.domo=domo;
   // partículas "meio celular": duas camadas, próxima e distante
   const mkPontos=(n,raio,tam,cor,op)=>{const pos=new Float32Array(n*3);for(let i=0;i<n;i++){const r=raio*(0.35+0.65*Math.cbrt(Math.random())),th=Math.random()*Math.PI*2,ph=Math.acos(2*Math.random()-1);pos[i*3]=r*Math.sin(ph)*Math.cos(th);pos[i*3+1]=1.4+r*Math.cos(ph)*0.55;pos[i*3+2]=r*Math.sin(ph)*Math.sin(th);}
     const geo=new T.BufferGeometry();geo.setAttribute('position',new T.BufferAttribute(pos,3));
@@ -189,10 +189,7 @@ function criarAmbiente(modo2d){
     const m=new T.PointsMaterial({size:tam,map:new T.CanvasTexture(sp),color:cor,transparent:true,opacity:op,depthWrite:false,blending:T.AdditiveBlending,sizeAttenuation:true});
     const pts=new T.Points(geo,m);pts.userData.vel=0.02+Math.random()*0.02;return pts;};
   g.add(mkPontos(420,14,.09,0x7fd6ff,.55),mkPontos(180,6,.05,0xa6f0d6,.7));
-  // chão: disco escuro + anéis finos para referência de posição (altura do piso real, local-floor)
-  const chao=new T.Mesh(new T.CircleGeometry(9,64),new T.MeshBasicMaterial({color:0x02070e,transparent:true,opacity:.92,depthWrite:false}));chao.rotation.x=-Math.PI/2;chao.position.y=CY+0.005;chao.scale.setScalar(E);g.add(chao);g.userData.piso=[[chao,0.005]];
-  for(const r of [1,2.2,3.6,5.2]){const an=new T.Mesh(new T.RingGeometry(r-.012,r+.012,96),new T.MeshBasicMaterial({color:0x37b1da,transparent:true,opacity:r===1?.32:.12,side:T.DoubleSide,depthWrite:false}));an.rotation.x=-Math.PI/2;an.position.y=CY+0.01;an.scale.setScalar(E);g.add(an);g.userData.piso.push([an,0.01]);}
-  const fog=new T.Mesh(new T.CircleGeometry(9,64),new T.MeshBasicMaterial({color:0x0f2c4a,transparent:true,opacity:.08,depthWrite:false,blending:T.AdditiveBlending}));fog.rotation.x=-Math.PI/2;fog.position.y=CY+0.02;fog.scale.setScalar(E);g.add(fog);g.userData.piso.push([fog,0.02]);
+  g.userData.piso=[];/* v3.2: sem piso. O modelo fica no espaço, só com a abóbada e as partículas (regra: igual no 3D e no VR). */
   return g;
 }
 function entrarAmbiente(modo2d){if(ambiente&&ambiente.userData.modo2d===!!modo2d)return;if(ambiente){M.dispose(ambiente);view.scene.remove(ambiente);ambiente=null;}ambiente=criarAmbiente(modo2d);view.scene.add(ambiente);
@@ -209,7 +206,7 @@ const frameOriginal=Proto.frame;
 Proto.frame=function(time,frame){
   if(this.xr){if(!ambiente||ambiente.userData.modo2d)entrarAmbiente(false);}else{if(!ambiente)entrarAmbiente(true);armarMusica2d();
     /* no 3D o piso acompanha a base do modelo (corpo inteiro nunca fica com os pés abaixo do chão) */
-    ambiente.userData.n=(ambiente.userData.n||0)+1;if(ambiente.userData.n%15===1&&this.model){const b=this.boxDe?this.boxDe(this.model,true):new T.Box3().setFromObject(this.model);const y=b.isEmpty()?-3.6:Math.min(-3.6,b.min.y-.12);if(Math.abs((ambiente.userData.pisoY??-3.6)-y)>.01){ambiente.userData.pisoY=y;(ambiente.userData.piso||[]).forEach(([o,d])=>{o.position.y=y+d;});if(ambiente.userData.domo)ambiente.userData.domo.position.y=y+2.0;/* horizonte da abóbada logo acima do piso: nada do modelo fica 'enterrado' */}}}
+    ambiente.userData.n=(ambiente.userData.n||0)+1;if(ambiente.userData.n%15===1&&this.model){const b=this.boxDe?this.boxDe(this.model,true):new T.Box3().setFromObject(this.model);const y=b.isEmpty()?-3.6:Math.min(-3.6,b.min.y-.12);if(Math.abs((ambiente.userData.pisoY??-3.6)-y)>.01){ambiente.userData.pisoY=y;(ambiente.userData.piso||[]).forEach(([o,d])=>{o.position.y=y+d;});}}}
   if(ambiente){const t=(time||performance.now())*0.001;ambiente.children.forEach(o=>{if(o.isPoints){o.rotation.y=t*o.userData.vel;o.position.y=Math.sin(t*0.35+o.userData.vel*50)*0.08;}});}
   return frameOriginal.call(this,time,frame);
 };

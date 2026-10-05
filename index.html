@@ -474,20 +474,28 @@ document.addEventListener('webkitfullscreenchange',function(){
 /* ===== Entrar em VR direto do catálogo =====
    O app fica pré-carregado num iframe invisível (mesma origem). O clique aqui conta como gesto
    do usuário para o iframe, então a sessão WebXR abre na hora, sem segundo toque. */
+/* BUILD muda a cada publicação: força o navegador do óculos a buscar o index.html novo dos apps (o GitHub Pages ignora a query) */
+const BUILD='20261005c';
 const appFrames={};
-function prepararApp(){
+/* os links dos cartões também levam a versão, para abrir direto sem cache antigo */
+document.querySelectorAll('.card-actions a[href^="apps/"]').forEach(a=>{const u=new URL(a.getAttribute('href'),location.href);u.searchParams.set('v',BUILD);a.setAttribute('href',u.pathname+u.search);});
+/* v2 (out/2026): pré-carrega UM app por vez, só quando o ponteiro chega ao botão do cartão. Três cenas WebGL
+   simultâneas (Solar + DNA + Corpo) estouravam o limite de contextos no navegador do óculos e o app abria sem 3D. */
+function prepararApp(apenas){
   document.querySelectorAll('[data-vr-app]').forEach(a=>{
-    const app=a.dataset.vrApp;if(appFrames[app])return;
+    const app=a.dataset.vrApp;if(appFrames[app]||(apenas&&app!==apenas))return;
+    for(const k of Object.keys(appFrames)){if(k!==app){try{appFrames[k].remove();}catch(_){}delete appFrames[k];}}
     const f=document.createElement('iframe');f.className='appFrame';f.id='appFrame-'+app;
     f.setAttribute('allow','xr-spatial-tracking; fullscreen; autoplay; accelerometer; gyroscope');
-    f.src='apps/'+app+'/?quiosque=0&embed=1';
+    f.src='apps/'+app+'/?quiosque=0&embed=1&v='+BUILD;
     document.body.appendChild(f);appFrames[app]=f;
   });
 }
 function entrarVRdireto(e){
   const a=e.target.closest('[data-vr-app]');if(!a)return;
   const app=a.dataset.vrApp,fr=appFrames[app];let w=null;try{w=fr&&fr.contentWindow;}catch(err){}
-  if(w&&typeof w.alternarVR==='function'&&w.navigator&&w.navigator.xr){
+  let sem3d=false;try{sem3d=!!(w&&w.document&&w.document.querySelector('.stage.error,#stage.error'));}catch(err){}
+  if(!sem3d&&w&&typeof w.alternarVR==='function'&&w.navigator&&w.navigator.xr){
     e.preventDefault();
     fr.classList.add('show');
     try{ if(player&&player.stopVideo)player.stopVideo(); }catch(err){}
@@ -498,9 +506,10 @@ function entrarVRdireto(e){
 }
 document.getElementById('gridCards').addEventListener('click',entrarVRdireto);
 // pré-carrega quando o catálogo aparece (não durante a abertura em vídeo)
-const _obsCat=new MutationObserver(()=>{ if(!document.getElementById('catalog').classList.contains('hidden')){prepararApp();_obsCat.disconnect();} });
+document.getElementById('gridCards').addEventListener('pointerenter',e=>{const a=e.target.closest&&e.target.closest('[data-vr-app]');if(a)prepararApp(a.dataset.vrApp);},true);
+const _obsCat=new MutationObserver(()=>{ if(!document.getElementById('catalog').classList.contains('hidden')){_obsCat.disconnect();} });
 _obsCat.observe(document.getElementById('catalog'),{attributes:true,attributeFilter:['class']});
-document.addEventListener('DOMContentLoaded',()=>{ if(!document.getElementById('catalog').classList.contains('hidden'))prepararApp(); });
+
 
 const fBusca=document.getElementById('fBusca');
 const fTema=document.getElementById('fTema');

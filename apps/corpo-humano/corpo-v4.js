@@ -22,13 +22,13 @@
  };
  const PHASES=[{name:'Enchimento',text:'O coração recebe sangue durante o relaxamento.',keys:['atrioD','atrioE']},{name:'Contração dos átrios',text:'Os átrios ajudam a completar o enchimento dos ventrículos.',keys:['atrioD','atrioE']},{name:'Contração dos ventrículos',text:'Os ventrículos ejetam sangue para a circulação pulmonar e a circulação do corpo.',keys:['ventD','ventE']},{name:'Relaxamento',text:'O músculo relaxa e um novo ciclo começa.',keys:[]}];
  const MISSION=[
-  {title:'O ar entra',info:'nariz',focus:'traqueia',scene:'torax',goal:'Observe o caminho de entrada do ar e a ligação com a traqueia.'},
-  {title:'Chegada aos pulmões',info:'pulmoes',focus:'pulmaoD',scene:'torax',goal:'Localize os dois pulmões. Agora vamos mudar a escala de observação.'},
-  {title:'Troca no alvéolo',info:'alveolos',scene:'micro',goal:'Ative a passagem do oxigênio para o sangue e do gás carbônico para o ar, e observe as duas direções.'},
-  {title:'Retorno ao coração',info:'atrioE',focus:'atrioE',scene:'heart',goal:'O sangue oxigenado retorna dos pulmões ao átrio esquerdo.'},
-  {title:'Bombeamento',info:'ventE',focus:'ventE',scene:'heart',goal:'Localize o ventrículo esquerdo, que envia sangue para o corpo.'},
-  {title:'Distribuição pela aorta',info:'aorta',focus:'aorta',scene:'torax',goal:'Observe a aorta e sua relação com a saída do coração.'},
-  {title:'Chegada às células',info:'corpo_celulas',scene:'blood',goal:'A cena amplia um capilar. Relacione o transporte no sangue com as células dos tecidos.'},
+  {title:'O ar entra',info:'nariz',focus:'traqueia',scene:'torax',goal:'Tudo começa no nariz. Veja por onde o ar entra e como ele desce até a traqueia.'},
+  {title:'Chegada aos pulmões',info:'pulmoes',focus:'pulmaoD',scene:'torax',goal:'O ar chegou aos pulmões. Localize os dois e prepare-se: vamos olhar bem de perto.'},
+  {title:'Troca no alvéolo',info:'alveolos',scene:'micro',goal:'Estamos dentro de um alvéolo. Ative a passagem do oxigênio para o sangue e a do gás carbônico para o ar, e veja as duas trocas acontecerem.'},
+  {title:'Retorno ao coração',info:'atrioE',focus:'atrioE',scene:'heart',goal:'O sangue, agora rico em oxigênio, volta dos pulmões e chega ao átrio esquerdo.'},
+  {title:'Bombeamento',info:'ventE',focus:'ventE',scene:'heart',goal:'Encontre o ventrículo esquerdo. É ele que bombeia o sangue com força para o corpo inteiro.'},
+  {title:'Distribuição pela aorta',info:'aorta',focus:'aorta',scene:'torax',goal:'Pela aorta, o sangue sai do coração e se espalha em artérias cada vez menores.'},
+  {title:'Chegada às células',info:'corpo_celulas',scene:'blood',goal:'Chegamos a um capilar, bem fininho. Aqui o oxigênio deixa o sangue e entra nas células dos tecidos.'},
   {title:'Explique a conexão',info:'corpo_celulas',scene:'torax',goal:'Aplique o que você observou na pergunta final.'}
  ];
  const extra=[
@@ -43,10 +43,10 @@
  ins('respiratorio','laboratorio','contexto');ins('respiratorio','montagemTorax','respire');ins('circulatorio','coracaoLab','explorar');ins('circulatorio','missaoOxigenio','caminhoSangue');
  /* passos da aula guiada (chaves de áudio lab-*: MP3 quando gravado; até lá, voz do navegador ou texto) */
  D.guide.push(
-  {view:'laboratorio',title:'Veja o corpo em camadas',goal:'Selecione coração, pulmões ou diafragma. Ligue e desligue as camadas para ver como as estruturas se relacionam.',check:'laboratorio',audio:'lab-camadas'},
-  {view:'montagemTorax',title:'Reconstrua o tórax',goal:'Coloque os dois pulmões, o coração e o diafragma em suas posições. Use as referências e pense na organização do tórax.',check:'montagemTorax',audio:'lab-montagem'},
-  {view:'coracaoLab',title:'Por dentro do coração',goal:'Selecione as quatro cavidades e acompanhe o ciclo.',check:'coracaoLab',audio:'lab-coracao'},
-  {view:'missaoOxigenio',title:'Do ar à célula',goal:'Percorra as oito etapas e responda à pergunta final.',check:'missaoOxigenio',audio:'lab-missao'});
+  {view:'laboratorio',title:'Veja o corpo em camadas',goal:'Aqui o corpo se abre em camadas. Toque no coração, nos pulmões ou no diafragma e ligue e desligue as camadas para ver quem fica ao lado de quem.',check:'laboratorio',audio:'lab-camadas'},
+  {view:'montagemTorax',title:'Reconstrua o tórax',goal:'Agora é com você: coloque os dois pulmões, o coração e o diafragma no lugar certo. As sombras no tórax mostram onde cada um se encaixa.',check:'montagemTorax',audio:'lab-montagem'},
+  {view:'coracaoLab',title:'Por dentro do coração',goal:'Vamos entrar no coração. Toque em cada uma das quatro cavidades e acompanhe o ciclo, do enchimento ao relaxamento.',check:'coracaoLab',audio:'lab-coracao'},
+  {view:'missaoOxigenio',title:'Do ar à célula',goal:'Siga o oxigênio em oito etapas, do ar que entra pelo nariz até a célula. No final, responda à pergunta.',check:'missaoOxigenio',audio:'lab-missao'});
  const btn=(label,cmd,cls='',disabled=false,pressed)=>'<button type="button" data-act="'+esc(cmd)+'" class="'+cls+'"'+(disabled?' disabled':'')+(pressed===undefined?'':' aria-pressed="'+pressed+'"')+'>'+esc(label)+'</button>';
  const range=(key,label,value,min,max,step=1)=>'<label class="v4-range">'+esc(label)+' <output>'+Math.round(value)+(max===100?'%':'')+'</output><input type="range" data-v4-range="'+key+'" value="'+value+'" min="'+min+'" max="'+max+'" step="'+step+'"></label>';
  const meter=(n,total,label)=>'<div class="v4-progress"><div><span>'+esc(label)+'</span><b>'+n+' / '+total+'</b></div><progress value="'+n+'" max="'+total+'"></progress></div>';
@@ -64,7 +64,7 @@
    html+='<details class="v4-details" open><summary>Camadas e transparência</summary><div class="v4-layers">'+[['pele','Superfície'],['ossos','Ossos'],['respiratorio','Respiração'],['circulatorio','Circulação'],['musculos','Músculos']].map(([k,l])=>btn((s.layers[k]?'✓ ':'')+l,'v4:layer:'+k,'',false,s.layers[k])).join('')+'</div>'+range('bonesOpacity','Opacidade dos ossos',s.bonesOpacity,0,100)+'<div class="button-row v4-small">'+btn('− Opacidade','v4:opacity:-20')+btn('+ Opacidade','v4:opacity:20')+'</div>'+range('spread','Separar estruturas',s.spread,0,100)+'<div class="button-row v4-small">'+btn('− Separação','v4:spread:-25')+btn('+ Separação','v4:spread:25')+'</div></details>';
    html+='<div class="v4-organ-list">'+['coracao','pulmaoD','pulmaoE','diafragma','traqueia','bronquios'].map(k=>btn(PARTS[k].name,'v4:select:'+k,'',false,s.selected===k)).join('')+'</div>'+selectedCard(s);
    html+='<div class="button-row">'+btn(s.playing?'Pausar animação':'Animar respiração','v4:play','primary',false,s.playing)+btn('Restaurar anatomia','v4:restore')+'</div><div class="button-row v4-small">'+btn('Inspirar','v4:breath:in')+btn('Expirar','v4:breath:out')+'</div>'+cutTools(s);
-   text=s.selected?infoFor(s.selected).text:'Selecione coração, pulmões ou diafragma. Ligue e desligue as camadas para ver como as estruturas se relacionam.';key=s.selected?infoFor(s.selected).key:'lab-camadas';
+   text=s.selected?infoFor(s.selected).text:'Aqui o corpo se abre em camadas. Toque no coração, nos pulmões ou no diafragma e ligue e desligue as camadas para ver quem fica ao lado de quem.';key=s.selected?infoFor(s.selected).key:'lab-camadas';
   }else if(S.view==='montagemTorax'){
    const done=s.placed.length===CORE.length;
    html='<span class="eyebrow">MISSÃO · LOCALIZAR E POSICIONAR</span><h2>Reconstrua o tórax</h2><p>Arraste as peças para as referências translúcidas. Você também pode escolher uma peça e um destino abaixo.</p>'+meter(s.placed.length,4,'Estruturas posicionadas');
@@ -74,7 +74,7 @@
    html+='<div class="metric-row"><span>Tentativas incorretas</span><b>'+s.errors+'</b></div><div class="metric-row"><span>Pistas consultadas</span><b>'+s.hints+'</b></div><div class="button-row">'+btn('Desfazer encaixe','v4:undo','',!s.undo.length)+btn('Recomeçar','v4:restartAssembly')+'</div>';
    if(done)html+='<div class="v4-success"><b>Tórax reconstruído.</b><p>Agora conecte a posição das estruturas ao percurso do oxigênio.</p>'+btn('Seguir para Do ar à célula','view:missaoOxigenio','primary')+'</div>';
    html+='<p class="fine">D e E referem-se ao corpo observado, não ao observador. No VR, use o botão lateral do controle para segurar a peça.</p>';
-   text=done?'Tórax reconstruído. Agora observe como essas estruturas trabalham juntas.':'Coloque os dois pulmões, o coração e o diafragma em suas posições. Use as referências e pense na organização do tórax.';key=done?'lab-montagem-fim':'lab-montagem';
+   text=done?'Tórax reconstruído! Repare como tudo se encaixa: os pulmões abraçam o coração, e o diafragma fecha o tórax por baixo.':'Agora é com você: coloque os dois pulmões, o coração e o diafragma no lugar certo. As sombras no tórax mostram onde cada um se encaixa.';key=done?'lab-montagem-fim':'lab-montagem';
   }else if(S.view==='coracaoLab'){
    const i=infoFor(s.heartPart||'coracao'),phase=PHASES[s.heartPhase];
    html='<span class="eyebrow">ANATOMIA EM FOCO</span><h2>Por dentro do coração</h2><p>Selecione uma cavidade ou acompanhe uma etapa do ciclo didático.</p><div class="v4-organ-list">'+[['atrioD','Átrio direito'],['atrioE','Átrio esquerdo'],['ventD','Ventrículo direito'],['ventE','Ventrículo esquerdo']].map(([k,l])=>btn(l,'v4:heartpart:'+k,'',false,s.heartPart===k)).join('')+'</div>';
@@ -174,7 +174,7 @@
  function narrarEtapa(api){const S=api.state,s=S.v4;if(!S.autoVoice)return;const step=MISSION[s.missionStep],final=s.missionStep===MISSION.length-1;if(final){api.narrator.say(D.questions.find(x=>x.id==='celulas').q,'desafio-celulas');return;}const i=D.info[step.info];api.narrator.say(step.goal,'lab-missao-'+(s.missionStep+1),{text:i.text,key:step.info});}
  function recordAttempt(api,key,destination,ok,method){const s=api.state.v4;s.attempts.push({piece:key,target:destination,correct:ok,method,at:new Date().toISOString()});if(s.attempts.length>200)s.attempts.shift();api.log('tentativa','montagemTorax',{component:key,choice:destination,correct:ok,method});if(!ok)s.errors++;}
  function place(api,key,letter,method='buttons',orientationOK=true){const s=api.state.v4;if(!CORE.includes(key)||s.placed.includes(key))return;const ok=LETTER[key]===letter&&orientationOK;recordAttempt(api,key,letter,ok,method);
-  if(ok){s.placed.push(key);s.undo.push(key);s.selected=null;s.target=null;const g=rt?.organs[key];if(g){g.position.fromArray(g.userData.home);g.quaternion.identity();g.scale.setScalar(1);g.userData.draggable=false;}if(s.placed.length===4)api.mark('montagemTorax');refresh(api);api.fb(s.placed.length===4?'Tórax reconstruído. Você posicionou as quatro estruturas.':'Encaixe correto: '+PARTS[key].name+'.');if(s.placed.length===4&&api.state.autoVoice)api.narrator.say('Tórax reconstruído. Agora observe como essas estruturas trabalham juntas.','lab-montagem-fim');}
+  if(ok){s.placed.push(key);s.undo.push(key);s.selected=null;s.target=null;const g=rt?.organs[key];if(g){g.position.fromArray(g.userData.home);g.quaternion.identity();g.scale.setScalar(1);g.userData.draggable=false;}if(s.placed.length===4)api.mark('montagemTorax');refresh(api);api.fb(s.placed.length===4?'Tórax reconstruído. Você posicionou as quatro estruturas.':'Encaixe correto: '+PARTS[key].name+'.');if(s.placed.length===4&&api.state.autoVoice)api.narrator.say('Tórax reconstruído! Repare como tudo se encaixa: os pulmões abraçam o coração, e o diafragma fecha o tórax por baixo.','lab-montagem-fim');}
   else{refresh(api);api.fb(orientationOK?'Observe novamente a posição dessa estrutura. A referência escolhida pertence a outra peça.':'A posição está próxima, mas a orientação precisa ser ajustada. Use Alinhar peça e tente de novo.','warning');}
  }
  function drop(g,api){if(!g||!g.userData.v4organ||!rt)return;const key=g.userData.v4organ,s=api.state.v4;if(!rt.assembly)return;
@@ -214,7 +214,7 @@
    if(arg==='next'&&s.missionStep===2&&(!s.gas.o2||!s.gas.co2))return true;
    s.missionStep=T.MathUtils.clamp(s.missionStep+(arg==='next'?1:-1),0,MISSION.length-1);api.narrator.stop();api.log('etapa','missaoOxigenio',{position:s.missionStep});refresh(api,true);narrarEtapa(api);return true;
   }
-  else if(op==='answer'){if(s.missionAnswer!==null)return true;const q=D.questions.find(x=>x.id==='celulas'),a=Number(arg);if(!Number.isInteger(a)||a<0||a>=q.options.length)return true;s.missionAnswer=a;s.missionDone=true;api.mark('missaoOxigenio');api.log('avaliacao','integracao',{question:'celulas',choice:a,correct:a===q.correct});if(S.autoVoice)api.narrator.say(q.why,'desafio-celulas-explica');}
+  else if(op==='answer'){if(s.missionAnswer!==null)return true;const q=D.questions.find(x=>x.id==='celulas'),a=Number(arg);if(!Number.isInteger(a)||a<0||a>=q.options.length)return true;s.missionAnswer=a;s.missionDone=true;api.mark('missaoOxigenio');api.log('avaliacao','integracao',{question:'celulas',choice:a,correct:a===q.correct});if(S.autoVoice)api.narrator.say('Lembre o caminho: o oxigênio entra no sangue nos alvéolos, volta ao coração, é bombeado pela aorta e chega a cada célula do corpo.','desafio-celulas-explica');}
   else if(op==='restartMission'){Object.assign(s,{missionStep:0,missionAnswer:null,missionDone:false,gas:{o2:false,co2:false}});S.completed=S.completed.filter(x=>x!=='missaoOxigenio');rebuild=true;}
   refresh(api,rebuild);return true;
  }

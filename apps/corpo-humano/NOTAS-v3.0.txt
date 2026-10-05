@@ -93,3 +93,17 @@ v3.4 (relatório do professor)
 - Um sistema entra no relatório se tiver ≥2 missões concluídas, qualquer situação respondida, aula guiada concluída ou for o sistema atual
   (Explorar é compartilhado entre Respiratório e Circulatório e sozinho não puxa o outro sistema).
 - D.version 3.4.0; corpo-portal.js com cache ?v=3.4.0 (estava 2.4.2 desde a 3.x).
+
+v3.5 (Laboratório: Camadas, Monte o tórax, Coração, Do ar à célula)
+- Portadas as 4 experiências da "Prévia 4.0" (pacote de outra ferramenta) para a base v3.4, sem pasta de teste.
+  Arquivos novos: corpo-v4.js (módulo CORPO_V4 adaptado), corpo-v4.css (só regras .v4-*), modelos/pulmoes_lobos.glb (5 lobos, para a montagem).
+  O restante da prévia (loader estático, piso no VR, menu por módulo, TTS para tudo) NÃO foi adotado.
+- Missões dentro dos sistemas (v3.3): Respiratório = Contexto · Camadas · Explorar · Respire · Monte o tórax · Caminho do ar · Troca · Desafio;
+  Circulatório = Explorar · Coração · Caminho do sangue · Do ar à célula · Desafio. Aula guiada inclui os passos novos (+ Troca gasosa, que faltava).
+- Integração no corpo-app.js: S.v4, V4.command antes do handle, V4.create no show(), tickV4, hits/boxDe ignoram objetos invisíveis,
+  arraste de peça com offset + V4.drop, grip (getControllerGrip) para segurar a peça real no VR, localClippingEnabled (corte visual),
+  relatório/resumo com as novas missões. Cores dos órgãos vêm de CORPO_GLTF.material (exportado); normais calculadas quando o GLB não traz.
+- VR: ações do laboratório filtradas (sem sliders, girar/alinhar e corte) para caber no menu paginado; espaço sem chão e projeção preservados.
+- Áudio: fichas já gravadas (nariz, pulmoes, atrioE, ventE, aorta, alveolos, corpo_celulas, desafio-celulas) reaproveitadas; 13 narrações novas
+  com chaves lab-* e desafio-celulas-explica (ROTEIRO-AUDIOS-LAB.csv). Até gravar, cai na voz do navegador ou texto.
+- Músculos do tórax só carregam quando a camada é ligada (3,8 MB). Nav lateral alargada para 124 px.

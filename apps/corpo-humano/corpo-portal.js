@@ -138,7 +138,7 @@ Proto.buildXRUI=function(){
   }
 };
 /* lista de ações da lateral (o dna-app monta os botões com data-act; lemos de lá para não depender de variáveis internas) */
-Proto._acoes=function(){const out=[];document.querySelectorAll('#lessonPanel [data-act]').forEach(b=>{if(/^seq:target:/.test(b.dataset.act))return;if(b.closest('details')&&!b.closest('details').open)return;const label=(b.title&&b.textContent.trim().length<=1?b.textContent.trim()+' · '+b.title:b.textContent.trim());out.push({label,cmd:b.dataset.act,disabled:b.disabled});});return out;};
+Proto._acoes=function(){const out=[];const lab=!!(window.CORPO_V4&&window.CORPO_V4.accepts(Lab.state.view));document.querySelectorAll('#lessonPanel [data-act]').forEach(b=>{if(/^seq:target:/.test(b.dataset.act))return;if(b.closest('details')&&(!b.closest('details').open||lab))return;if(lab&&(b.closest('.v4-small')||/^v4:(turn|align|cutStep|axis)/.test(b.dataset.act)))return;const label=(b.title&&b.textContent.trim().length<=1?b.textContent.trim()+' · '+b.title:b.textContent.trim());out.push({label,cmd:b.dataset.act,disabled:b.disabled});});return out;};
 
 /* gatilho no vazio: para a narração (mesmo comportamento do Sistema Solar) */
 const xrSelectOriginal=Proto.xrSelect;

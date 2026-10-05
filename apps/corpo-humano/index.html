@@ -4,17 +4,17 @@
 <meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <meta name="theme-color" content="#08192c"><meta name="description" content="Corpo Humano Imersivo: respiração, circulação e digestão (caminho do oxigênio) e esqueleto e movimento (ossos, articulações e músculos), com modelos anatômicos reais, narração em português, 3D e realidade virtual.">
 <title>Corpo Humano Imersivo · Laboratório de aprendizagem | Portal do Educador</title>
-<link rel="icon" href="assets/logo.png"><link rel="stylesheet" href="corpo-lab.css?v=3.4.0"><link rel="stylesheet" href="corpo-portal.css?v=3.4.0">
+<link rel="icon" href="assets/logo.png"><link rel="stylesheet" href="corpo-lab.css?v=3.5.0"><link rel="stylesheet" href="corpo-portal.css?v=3.5.0"><link rel="stylesheet" href="corpo-v4.css?v=3.5.0">
 <script defer src="vendor/three.r128.min.js"></script>
 <script defer src="vendor/GLTFLoader.r128.js"></script>
-<script defer src="corpo-data.js?v=3.4.0"></script>
-<script defer src="corpo-gltf.js?v=3.4.0"></script>
-<script defer src="corpo-models.js?v=3.4.0"></script>
-<script defer src="esq-gltf.js?v=3.4.0"></script>
-<script defer src="esq-models.js?v=3.4.0"></script>
-<script defer src="corpo-audio.js?v=3.4.0"></script>
-<script defer src="corpo-app.js?v=3.4.0"></script><script defer src="corpo-relatorio.js?v=3.4.0"></script>
-<script defer src="corpo-portal.js?v=3.4.0"></script>
+<script defer src="corpo-data.js?v=3.5.0"></script>
+<script defer src="corpo-gltf.js?v=3.5.0"></script>
+<script defer src="corpo-models.js?v=3.5.0"></script>
+<script defer src="esq-gltf.js?v=3.5.0"></script>
+<script defer src="esq-models.js?v=3.5.0"></script>
+<script defer src="corpo-audio.js?v=3.5.0"></script>
+<script defer src="corpo-v4.js?v=3.5.0"></script><script defer src="corpo-app.js?v=3.5.0"></script><script defer src="corpo-relatorio.js?v=3.5.0"></script>
+<script defer src="corpo-portal.js?v=3.5.0"></script>
 </head>
 <body>
 <div id="lab">
@@ -31,6 +31,7 @@
   <div class="stage-heading"><span class="eyebrow" id="sceneKicker">LOCALIZE</span><h2 id="sceneTitle">Onde fica cada órgão?</h2><p id="sceneSub">Do corpo inteiro ao interior do tórax.</p></div>
   <div id="sceneLegend" class="scene-legend" aria-label="Legenda do modelo"></div>
   <div id="stageTools" class="stage-tools"><button id="closeInspect" data-action="closeInspect" hidden>← Voltar ao modelo</button><button id="centerBtn" data-action="center">◎ Centralizar</button><button id="rotateBtn" data-action="rotate" aria-pressed="false">▷ Girar</button><button id="zoomIn" data-action="zoomIn" aria-label="Aproximar o modelo">＋</button><button id="zoomOut" data-action="zoomOut" aria-label="Afastar o modelo">−</button></div>
+  <div id="v4Hud" class="v4-hud" aria-hidden="true" hidden><span>MODELO ANATÔMICO</span><span id="v4Phase">EXPLORAÇÃO LIVRE</span></div>
   <div id="stageHint" class="stage-hint">Arraste o fundo para girar · use a roda do mouse para aproximar</div>
   <div id="webglError" class="stage-error" hidden><h2>Visualização 3D indisponível</h2><p>O navegador não conseguiu iniciar o WebGL. Ative a aceleração gráfica ou abra em outro navegador. As orientações e atividades por botões continuam disponíveis.</p></div>
  </main>
@@ -45,7 +46,7 @@
   <div class="side-note" id="modelNote">Modelo didático: formas, cores e proporções convencionais.</div>
  </aside>
 </div>
-<footer><span><b>Portal do Educador</b> · NEWPC · Corpo Humano v2.4.2</span><span id="sessionStatus">Aprenda fazendo, no seu ritmo.</span><button id="sourcesBtn" data-action="sources">Fontes e limites do modelo</button></footer>
+<footer><span><b>Portal do Educador</b> · NEWPC · Corpo Humano v3.5</span><span id="sessionStatus">Aprenda fazendo, no seu ritmo.</span><button id="sourcesBtn" data-action="sources">Fontes e limites do modelo</button></footer>
 </div>
 <dialog id="settingsDialog"><form method="dialog"><div class="dialog-head"><h2>Ajustes da experiência</h2><button aria-label="Fechar ajustes" class="icon">✕</button></div></form>
  <label>Profundidade da explicação<select id="level"><option value="intro">Introdutória</option><option value="medio">Ensino Médio</option></select></label>

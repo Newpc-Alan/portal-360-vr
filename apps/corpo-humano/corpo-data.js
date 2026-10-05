@@ -43,6 +43,7 @@ const guide=[
  {view:'explorar',title:'Investigue as partes',goal:'Aponte em pelo menos três órgãos diferentes e ouça o que cada um faz.',check:'explorar',audio:'aula-explorar'},
  {view:'respire',title:'Faça o pulmão respirar',goal:'Complete três ciclos de inspiração e expiração controlando o diafragma.',check:'respire',audio:'aula-respire'},
  {view:'caminhoAr',title:'Organize o caminho do ar',goal:'Coloque as seis etapas na ordem, do nariz até os alvéolos.',check:'caminhoAr',audio:'aula-ar'},
+ {view:'troca',title:'Veja a troca no alvéolo',goal:'Selecione a molécula de oxigênio e depois a de gás carbônico para ver a troca gasosa.',check:'troca',audio:'aula-troca'},
  {view:'caminhoSangue',title:'Siga a gota de sangue',goal:'Monte o percurso do sangue pelas quatro cavidades, pulmões e corpo.',check:'caminhoSangue',audio:'aula-sangue'},
  {view:'alimento',title:'Siga o alimento',goal:'Monte o percurso do alimento pelo tubo digestório e descubra onde os nutrientes entram no sangue.',check:'alimento',audio:'aula-alimento'},
  {view:'desafio',title:'Mostre o que entendeu',goal:'Responda às situações finais e consulte o seu resumo.',check:'desafio',audio:'aula-desafio'}
@@ -80,7 +81,7 @@ const sources=[
  ['Z-Anatomy · atlas 3D de anatomia (CC BY-SA 4.0)','https://github.com/LluisV/Z-Anatomy'],
  ['Three.js / WebXR','https://threejs.org/docs/pages/WebXRManager.html']
 ];
-window.CORPO_DATA={info,activities,guide,context,sequencias,questions,sources,version:'3.4.0'};
+window.CORPO_DATA={info,activities,guide,context,sequencias,questions,sources,version:'3.5.0'};
 })();
 /* ---------- Módulo 2: Esqueleto e Movimento (v3.0) ---------- */
 (function(D){

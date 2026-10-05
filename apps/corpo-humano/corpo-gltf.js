@@ -48,5 +48,5 @@ function ponto(x,y,z){return toLocal([x,y,z]);}
 /* centro local de uma parte do coração, relativo ao grupo do coração */
 function parteCoracao(parte){const p=CORACAO_PARTES[parte],c=CENTROS.coracao;return new T.Vector3((p[0]-c[0])*ESC,(p[1]-c[1])*ESC,(p[2]-c[2])*ESC);}
 function precarregar(keys){(keys||Object.keys(CENTROS)).forEach(k=>carregar(k,()=>{}));}
-window.CORPO_GLTF={ESC,OY,CENTROS,CORACAO_PARTES,CORES,orgao,ponto,parteCoracao,carregar,precarregar,ATRIBUICAO:'Modelos anatômicos: Z-Anatomy (CC BY-SA 4.0), adaptados pela NEWPC para o Portal 360º VR.'};
+window.CORPO_GLTF={ESC,OY,CENTROS,CORACAO_PARTES,CORES,material,orgao,ponto,parteCoracao,carregar,precarregar,ATRIBUICAO:'Modelos anatômicos: Z-Anatomy (CC BY-SA 4.0), adaptados pela NEWPC para o Portal 360º VR.'};
 })();

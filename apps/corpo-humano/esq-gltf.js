@@ -30,6 +30,7 @@ function material(arq,parte,opt){
   if(arq==='silhueta'||arq==='cabeca'){m.transparent=true;m.opacity=opt.opacidade??.12;m.depthWrite=false;m.side=T.DoubleSide;}
   else if(parte==='capsula'){m.transparent=true;m.opacity=.35;m.depthWrite=false;}
   else if(opt.opacidade!==undefined){m.transparent=true;m.opacity=opt.opacidade;m.depthWrite=opt.opacidade>.5;}
+  if(window.CORPO_TECIDOS){const TT=window.CORPO_TECIDOS;const t=arq==='esqueleto'?'osso':arq==='musculos'?'musculo':(arq==='silhueta'||arq==='cabeca')?'pele':['ligamentos','capsula','labrum','lca','lcp','menisco_medial','menisco_lateral','colateral_tibial','colateral_fibular'].includes(parte)?'cartilagem':'osso';TT.aplicar(m,t);}
   return m;
 }
 function carregar(arq,cb){

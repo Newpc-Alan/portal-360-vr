@@ -20,6 +20,7 @@ function material(key,parte){
   if(key==='silhueta'||key==='cabeca'){m.transparent=true;m.opacity=key==='cabeca'?.16:.12;m.depthWrite=false;m.side=T.DoubleSide;}
   if(key==='costelas'){m.transparent=true;m.opacity=.62;}
   const op=OPAC_PARTES[key]&&OPAC_PARTES[key][parte];if(op!==undefined){m.transparent=true;m.opacity=op;m.depthWrite=false;}
+  if(window.CORPO_TECIDOS){const t=window.CORPO_TECIDOS.tecidoDe(key,parte);if(t)window.CORPO_TECIDOS.aplicar(m,t);}
   return m;
 }
 function carregar(key,cb){

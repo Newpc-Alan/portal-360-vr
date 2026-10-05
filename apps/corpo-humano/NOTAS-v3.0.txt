@@ -125,3 +125,11 @@ v3.5.5
 
 v3.5.6
 - Órgão projetado no VR: 0,72 m à frente do aluno, ~0,55 m (tamanho de segurar nas mãos), um pouco abaixo dos olhos; corpo ao fundo a 2,3 m com ~1,05 m, deslocado à esquerda. placeXR (portal) reposiciona a cópia após o enquadre base. No 3D a cópia ficou maior e mais próxima (fitCopy 2.5, z 1.6).
+
+v3.6.0 (Realismo, etapa 1: tecidos)
+- corpo-tecidos.js: texturas procedurais por canvas (pulmão esponjoso com veias, coração com fibra e coronárias, músculo estriado,
+  osso poroso, vaso liso, víscera, cartilagem) aplicadas por projeção triplanar no shader do MeshStandardMaterial (modelos sem UV),
+  em "metros do órgão" (independe da escala da cópia projetada e da quantização). Relevo por derivadas de tela, rugosidade variável,
+  luz de contorno (fresnel) por tecido, pulso luminoso no coração (uPulso), silhueta com fresnel azul. Tone mapping ACES (rótulos sem).
+- Hooks: CORPO_GLTF.material, ESQ_GLTF material, cloneMaterial do laboratório. Sem arquivos novos de textura (0 bytes extras).
+- Etapa 2 (vida: sangue na aorta, alvéolos) e 3 (ambiente por sistema) a seguir, após aprovação visual.

@@ -95,7 +95,7 @@
   }
   return{html,text,key};
  }
- function cloneMaterial(m){const n=m.clone();n.userData.sharedTextures=!!m.map;n.side=T.DoubleSide;n.metalness=0;n.roughness=.68;return n;}
+ function cloneMaterial(m){const n=m.clone();n.userData.sharedTextures=!!m.map;n.side=T.DoubleSide;n.metalness=0;n.roughness=.68;if(window.CORPO_TECIDOS&&m.userData.tecido)window.CORPO_TECIDOS.aplicar(n,m.userData.tecido);return n;}
  function buildOrgan(key,r,options={}){
   const cfg=PARTS[key],g=new T.Group();g.name='v4:'+key;g.userData.v4organ=key;g.userData.layer=cfg.layer;g.userData.home=G.ponto(...(G.CENTROS[cfg.file]||[0,1.28,0])).toArray();g.position.fromArray(g.userData.home);r.organs[key]=g;r.anatomy.add(g);g.userData.draggable=r.assembly&&CORE.includes(key)&&!r.state.v4.placed.includes(key);
   G.carregar(cfg.file,src=>{

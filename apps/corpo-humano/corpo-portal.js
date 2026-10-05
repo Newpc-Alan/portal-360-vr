@@ -34,7 +34,7 @@ if(q.get('vr')==='1'){
     ov.innerHTML='<div class="vrgate-box"><img src="assets/logo.png" alt=""><div class="vrgate-t">Corpo Humano Imersivo</div><div class="vrgate-s">Coloque o óculos e toque para começar</div><button type="button" data-action="vr-entrar">🥽 Entrar em VR</button><button type="button" class="sec" data-action="vr-3d">Explorar em 3D</button></div>';
     document.body.appendChild(ov);
     ov.addEventListener('click',e=>{const b=e.target.closest('[data-action]');if(!b)return;
-      const S=Lab.state,bv=()=>{if(!S.welcomed&&Lab.boasVindas)Lab.boasVindas();};if(b.dataset.action==='vr-entrar'){window.alternarVR().then(()=>{if(view.xr)setTimeout(bv,900);}).finally(()=>ov.remove());}else{ov.remove();bv();}});
+      const S=Lab.state,bv=()=>{if(!S.welcomed&&Lab.boasVindas)Lab.boasVindas();};if(b.dataset.action==='vr-entrar'){window.alternarVR().finally(()=>ov.remove());}else{ov.remove();bv();}});
   };
   if(!window.isSecureContext||!navigator.xr)semVR();
   else navigator.xr.isSessionSupported('immersive-vr').then(ok=>ok?mostrarEntrada():semVR()).catch(semVR);
@@ -91,6 +91,7 @@ Proto.buildXRUI=function(){
   const S=Lab.state,lesson=document.getElementById('lessonPanel');
   let title=(lesson.querySelector('h2')||{}).textContent||'Corpo Humano';
   const instrucao=document.getElementById('captionText').textContent||'';
+  if(Lab.WELCOME&&instrucao===Lab.WELCOME)title='Bem-vindo ao Corpo Humano Imersivo';
   const fbEl=document.getElementById('feedback');const feedback=fbEl&&!fbEl.hidden?fbEl.textContent:'';
   let body=instrucao+(feedback?'  '+feedback:''),tom='neutro';
   const des=estadoDesafio();
@@ -168,7 +169,7 @@ function ligarPosicional(){
 ['pointerdown','keydown','touchstart'].forEach(ev=>document.addEventListener(ev,ligarPosicional,{passive:true}));
 document.addEventListener('visibilitychange',()=>{if(!document.hidden&&ligado){try{T.AudioContext.getContext().resume();}catch(e){}}});
 const toggleOriginal=Proto.toggleVR;
-Proto.toggleVR=async function(){const r=await toggleOriginal.call(this);ligarPosicional();if(posicional)posicional.setRefDistance(this.xr?1.2:14);if(this.xr&&typeof entrarAmbiente==='function')entrarAmbiente();return r;};
+Proto.toggleVR=async function(){const r=await toggleOriginal.call(this);ligarPosicional();if(posicional)posicional.setRefDistance(this.xr?1.2:14);if(this.xr&&typeof entrarAmbiente==='function')entrarAmbiente();/* boas-vindas a cada entrada no VR (v3.5.4) */if(this.xr&&Lab.boasVindas)setTimeout(()=>{if(view.xr){Lab.boasVindas();setTimeout(()=>{if(view.xr)view.buildXRUI();},700);}},900);return r;};
 const exitOriginal=Proto.exitXR;
 Proto.exitXR=function(){exitOriginal.call(this);if(posicional)posicional.setRefDistance(14);};
 

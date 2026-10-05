@@ -116,3 +116,6 @@ v3.5.1 / v3.5.2
 
 v3.5.3
 - 14 narrações humanas instaladas (boas-vindas + 13 do Laboratório), normalizadas como as demais (silêncio aparado, loudnorm I=-16, mono 44,1 kHz 64 kbps). Total: 132 áudios + fundo.
+
+v3.5.4
+- Boas-vindas também a cada entrada no VR (hook em toggleVR, 0,9 s após a sessão abrir), com o painel VR intitulado 'Bem-vindo ao Corpo Humano Imersivo' enquanto toca; emenda na orientação da missão aberta.

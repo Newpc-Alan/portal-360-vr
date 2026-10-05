@@ -73,3 +73,6 @@ v3.1.1: painel esquerdo do VR em dois níveis. Raiz com 5 botões (módulo atual
 Sair do VR); "Missão" abre as 8 atividades do módulo; o nome do módulo abre a troca de módulo; Controles reúne
 Centralizar, Girar, Parar voz e Catálogo. Antes eram 16 missões + 6 controles de uma vez.
 v3.2: sem piso. O modelo fica no espaço (abóbada simétrica sem linha de horizonte + partículas), no 3D e no VR.
+v3.2.1: interação de inspeção. Órgão projetado à frente um pouco menor (2,1 em vez de 2,6 unidades); tocar no corpo
+que ficou ao fundo fecha a ficha e traz o corpo de volta à frente (3D e VR). Tocar numa peça do órgão projetado
+continua abrindo a ficha dela.

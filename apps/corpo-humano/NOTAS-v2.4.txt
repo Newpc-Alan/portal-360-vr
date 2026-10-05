@@ -1,4 +1,4 @@
-CORPO HUMANO IMERSIVO v2.3 · Portal 360º VR (NEWPC / Portal do Educador)
+CORPO HUMANO IMERSIVO v2.4 · Portal 360º VR (NEWPC / Portal do Educador)
 
 Pergunta central: como o oxigênio que respiramos chega às células?
 Arquitetura: a mesma do DNA Imersivo v2.1+ (narrador MP3 com fallback, aula guiada, resumo exportável,
@@ -30,10 +30,16 @@ procedural de reserva (silhuetaProc, toraxProc, digestivoProc em corpo-models.js
 do navegador (e só texto no Quest). Nomes das fichas: coracao, pulmoes, traqueia, bronquios, diafragma, alveolos, laringe,
 faringe, nariz, atrioD, ventD, atrioE, ventE, aorta, sangue, corpo_celulas, corpo, torax.
 
-CACHE: recursos em ?v=2.3.2. Ao atualizar, troque o número em index.html.
+CACHE: recursos em ?v=2.4.0. Ao atualizar, troque o número em index.html.
 
 FLUXO DE NARRAÇÃO (v2.3.2)
 O narrador aceita uma fala encadeada (say(texto, chave, {text, key})): ao terminar a primeira, toca a segunda.
 Usado em: entrada no Contexto (aula-contexto → contexto-0), entrada no Desafio (aula-desafio → primeira situação)
 e Troca gasosa (explicação do segundo gás → troca-concluida). Com isso os 51 áudios tocam no fluxo normal,
 sem depender da Aula guiada.
+
+MICROESCALA (v2.4)
+Alvéolo: ácino com 9 sacos de membrana translúcida, bronquíolo terminal com anéis, vênula (azul) e arteríola (vermelha)
+com gradiente de cor, rede capilar fina sobre cada saco e hemácias bicôncavas que escurecem/clareiam ao passar.
+Sangue / células: capilar com parede endotelial (ladrilhos), hemácias bicôncavas, leucócito e plaquetas em movimento.
+Tudo procedural (o Z-Anatomy não cobre escala microscópica); a inspeção tem tick próprio (copy.userData.tick).

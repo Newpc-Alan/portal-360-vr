@@ -213,7 +213,16 @@ function inspection(key){
     for(const [txt,pos,dx] of [['Nasofaringe (ar)',P(0,1.571,.028),-.34],['Orofaringe (ar e alimento)',P(0,1.53,.042),-.4],['Laringofaringe',P(0,1.483,.016),-.34]])rotulo(w,txt,pos,dx,.25);
     w.rotation.y=Math.PI/2;const q=new T.Group();q.add(w);return q;}
   if(key==='nariz'||key==='faringe'){const q=new T.Group();const s=silhuetaProc({opacidade:.25,nariz:true});s.scale.setScalar(.8);s.position.y=-2.2;q.add(s);return q;}
-  if(key==='sangue'||key==='corpo_celulas'){const q=new T.Group();const cap=tubo([V(-1.5,0,0),V(-.5,.2,.1),V(.5,-.2,-.1),V(1.5,0,0)],.22,COR.arteria,{transparent:true,opacity:.45});q.add(cap);for(let i=0;i<7;i++){const h=new T.Mesh(new T.TorusGeometry(.09,.045,8,16),mat(0xff5a5a));h.position.set(-1.3+i*.43,Math.sin(i)*.08,0);h.rotation.y=Math.PI/2;q.add(h);}return q;}
+  if(key==='sangue'||key==='corpo_celulas'){const q=new T.Group();const pts=[V(-1.6,0,0),V(-.6,.18,.1),V(.5,-.18,-.1),V(1.6,0,0)];const curva=new T.CatmullRomCurve3(pts);
+    const parede=new T.Mesh(new T.TubeGeometry(curva,60,.3,20,false),mat(0xe9a6a6,{transparent:true,opacity:.28,roughness:.5,side:T.DoubleSide}));q.add(parede);
+    const plasma=new T.Mesh(new T.TubeGeometry(curva,40,.27,16,false),mat(0xffe3c8,{transparent:true,opacity:.1,roughness:1}));q.add(plasma);
+    // células endoteliais: ladrilhos achatados na parede
+    for(let i=0;i<34;i++){const u=.04+((i*.37)%1)*.92,p=curva.getPointAt(u),tg=curva.getTangentAt(u),ang=i*2.1;const n=new T.Vector3(0,1,0).cross(tg).normalize(),b=tg.clone().cross(n);const pos=p.clone().add(n.clone().multiplyScalar(Math.cos(ang)*.3)).add(b.multiplyScalar(Math.sin(ang)*.3));const cel=elips(.11,.015,.08,0xffc9c9,pos,{transparent:true,opacity:.38,roughness:.6});cel.lookAt(p);cel.rotateX(Math.PI/2);q.add(cel);}
+    const hems=[];for(let i=0;i<16;i++){const h=hemacia(.085,i%5===0?0xb43040:0xe0404a);h.userData.f=i/16;h.userData.off=V((Math.random()-.5)*.26,(Math.random()-.5)*.26,0);h.userData.rot=Math.random()*3;q.add(h);hems.push(h);}
+    const leuco=organico(ball(.13,0xf4f1ff,V(0,0,0),{roughness:.9}),.03,6,9);leuco.userData.f=.5;q.add(leuco);
+    const plaq=[];for(let i=0;i<8;i++){const pl=elips(.045,.015,.035,0xe9d8a6,V(0,0,0),{roughness:.8});pl.userData.f=i/8+.03;pl.userData.off=V((Math.random()-.5)*.3,(Math.random()-.5)*.3,0);q.add(pl);plaq.push(pl);}
+    q.userData.tick=(t)=>{const mv=(o,vel)=>{const u=(t*vel+o.userData.f)%1;const p=curva.getPointAt(u),tg=curva.getTangentAt(u);o.position.copy(p).add(o.userData.off||V(0,0,0));o.lookAt(p.clone().add(tg));if(o.userData.rot!==undefined)o.rotateX(o.userData.rot+t*.5);};hems.forEach(h=>mv(h,.07));plaq.forEach(p=>mv(p,.075));mv(leuco,.05);};
+    textAt(q,'HEMÁCIAS',-.6,.55,.3,1.2,'#ffb0b0');textAt(q,'LEUCÓCITO',.7,-.55,.3,1.3,'#e8e8ff');textAt(q,'PAREDE DO CAPILAR',0,-.75,.3,2.2,'#ffd9c2');return q;}
   if(['esofago','estomago','intestino_delgado','intestino_grosso','figado'].includes(key)&&g)return centrado(key);
   if(['boca','esofago','estomago','intestino_delgado','intestino_grosso','figado'].includes(key)){const d=digestivoProc();const q=new T.Group();[...d.children].forEach(o=>{if(!(o.userData.hit&&o.userData.hit.key===key))d.remove(o);});const box=new T.Box3().setFromObject(d),c=box.getCenter(new T.Vector3());d.position.copy(c).multiplyScalar(-1);q.add(d);return q;}
   if(key==='torax')return torax();
@@ -287,28 +296,48 @@ function sequencia(state,cfg){
   return g;
 }
 /* alvéolo com capilar e gases */
+/* ---------- microescala: hemácia, capilares e alvéolo ---------- */
+function hemacia(R=.07,cor=0xd83a3a){const pts=[[0,-.05],[.3,-.075],[.55,-.1],[.75,-.14],[.9,-.1],[1,0],[.9,.1],[.75,.14],[.55,.1],[.3,.075],[0,.05]].map(([x,y])=>new T.Vector2(x*R,y*R*1.4));
+  const m=new T.Mesh(new T.LatheGeometry(pts,28),mat(cor,{roughness:.45,metalness:.05}));m.geometry.computeVertexNormals();return m;}
+/* tubo com cor variando ao longo (azul → vermelho) */
+function tuboGrad(pts,r,corA,corB,opacity=.95,seg=60){const curve=new T.CatmullRomCurve3(pts);const geo=new T.TubeGeometry(curve,seg,r,10,false);const n=geo.attributes.position.count,col=new Float32Array(n*3),a=new T.Color(corA),b=new T.Color(corB),c=new T.Color();
+  for(let i=0;i<n;i++){const u=Math.floor(i/11)/seg;c.copy(a).lerp(b,Math.min(1,Math.max(0,(u-.3)/.45)));col[i*3]=c.r;col[i*3+1]=c.g;col[i*3+2]=c.b;}
+  geo.setAttribute('color',new T.BufferAttribute(col,3));const m=new T.Mesh(geo,new T.MeshStandardMaterial({vertexColors:true,roughness:.4,metalness:.05,transparent:opacity<1,opacity}));m.userData.curva=curve;return m;}
+/* rede capilar abraçando uma esfera (centro c, raio R) */
+function redeCapilar(c,R,n,seed){let s=seed;const rnd=()=>{s=(s*9301+49297)%233280;return s/233280;};const g=new T.Group();
+  for(let k=0;k<n;k++){const ax=new T.Vector3(rnd()-.5,rnd()-.5,rnd()-.5).normalize();const u=new T.Vector3(1,0,0).cross(ax);if(u.lengthSq()<.01)u.set(0,0,1).cross(ax);u.normalize();const v=ax.clone().cross(u);const t0=rnd()*Math.PI*2,arc=Math.PI*(.9+rnd()*.7),pts=[];
+    for(let i=0;i<=14;i++){const th=t0+i/14*arc,rr=R*(1.03+.04*Math.sin(i*1.7+k));pts.push(c.clone().add(u.clone().multiplyScalar(Math.cos(th)*rr)).add(v.clone().multiplyScalar(Math.sin(th)*rr)));}
+    g.add(tuboGrad(pts,.022+rnd()*.012,COR.veia,COR.arteria,1,28));}
+  return g;}
 function alveolo(state){
   const g=new T.Group();
-  const centro=V(0,0,0);const sacos=[V(0,0,0),V(.55,.25,.1),V(-.5,.3,-.1),V(.2,-.5,.2),V(-.35,-.45,-.15),V(.05,.55,-.3),V(.45,-.2,-.4)];
-  sacos.forEach((p,i)=>{const s=ball(i?.42:.55,COR.alveolo,p,{transparent:true,opacity:.75,roughness:.35});tag(s,{type:'inspect',key:'alveolos'});g.add(s);});
-  const bronq=tubo([V(0,1.9,0),V(0,1.2,0),V(.05,.6,0)],.12,COR.traqueia);tag(bronq,{type:'inspect',key:'bronquios'});g.add(bronq);
-  // capilar em espiral ao redor, azul chegando → vermelho saindo
-  const pts1=[],pts2=[];for(let i=0;i<=24;i++){const a=i/24*Math.PI*1.1-Math.PI*.2,r=1.05;pts1.push(V(Math.cos(a)*r,-.9+i/24*.9,Math.sin(a)*r));}
-  for(let i=0;i<=24;i++){const a=Math.PI*.9+i/24*Math.PI*1.1,r=1.05;pts2.push(V(Math.cos(a)*r,0+i/24*.9,Math.sin(a)*r));}
-  const capA=tubo(pts1,.11,COR.veia,{transparent:true,opacity:.75});const capB=tubo(pts2,.11,COR.arteria,{transparent:true,opacity:.75});tag(capA,{type:'inspect',key:'sangue'});tag(capB,{type:'inspect',key:'sangue'});g.add(capA,capB);
+  const sacos=[[V(0,0,0),.6],[V(.62,.28,.1),.44],[V(-.56,.32,-.1),.42],[V(.22,-.56,.22),.4],[V(-.4,-.5,-.15),.38],[V(.05,.62,-.3),.36],[V(.5,-.22,-.45),.36],[V(-.25,.1,.55),.34],[V(.3,.35,-.6),.3]];
+  const memb=new T.Group();
+  sacos.forEach(([p,r],i)=>{const s=organico(ball(r,0xf0c9a2,p,{transparent:true,opacity:.62,roughness:.55,metalness:0,emissive:0x2a1a10},36),.035,4.2+i*.3,i+3);tag(s,{type:'inspect',key:'alveolos'});memb.add(s);
+    const ar=ball(r*.82,0xfff1dc,p,{transparent:true,opacity:.18,roughness:1},20);memb.add(ar);});
+  g.add(memb);
+  // ducto alveolar / bronquíolo terminal
+  const bronq=tubo([V(0,2.0,0),V(.02,1.35,0),V(.05,.75,0)],.13,COR.traqueia,{roughness:.6});tag(bronq,{type:'inspect',key:'bronquios'});g.add(bronq);
+  for(let i=0;i<7;i++){const anel=new T.Mesh(new T.TorusGeometry(.14,.02,8,20),mat(COR.cartilagem));anel.position.set(.02,1.95-i*.16,0);anel.rotation.x=Math.PI/2;g.add(anel);}
+  // capilares: dois vasos principais (vênula chega azul, arteríola sai vermelha) + rede fina sobre cada saco
+  const pts1=[],pts2=[];for(let i=0;i<=24;i++){const a=i/24*Math.PI*1.1-Math.PI*.2,r=1.12;pts1.push(V(Math.cos(a)*r,-.95+i/24*.95,Math.sin(a)*r));}
+  for(let i=0;i<=24;i++){const a=Math.PI*.9+i/24*Math.PI*1.1,r=1.12;pts2.push(V(Math.cos(a)*r,0+i/24*.95,Math.sin(a)*r));}
+  const capA=tuboGrad(pts1,.085,COR.veia,0x8a5fc8,1,48);const capB=tuboGrad(pts2,.085,0x8a5fc8,COR.arteria,1,48);tag(capA,{type:'inspect',key:'sangue'});tag(capB,{type:'inspect',key:'sangue'});g.add(capA,capB);
+  const rede=new T.Group();sacos.forEach(([p,r],i)=>rede.add(redeCapilar(p,r,i?4:7,11+i*7)));tag(rede,{type:'inspect',key:'sangue'});g.add(rede);
   // moléculas: O2 no ar do alvéolo, CO2 no sangue
-  const o2=new T.Group();for(const d of [V(-.07,0,0),V(.07,0,0)])o2.add(ball(.075,COR.gasO2,d,{emissive:0x2f7f8f}));o2.position.set(-.1,.25,.55);tag(o2,{type:'gas',gas:'o2'});g.add(o2);
-  const lo=label('O₂','#c9f7ff',.5,80);lo.position.set(-.1,.5,.6);g.add(lo);
-  const co2=new T.Group();co2.add(ball(.075,COR.gasCO2,V(0,0,0)),ball(.06,0xd8d8e8,V(-.14,0,0)),ball(.06,0xd8d8e8,V(.14,0,0)));co2.position.copy(pts1[12]).add(V(0,.1,0));tag(co2,{type:'gas',gas:'co2'});g.add(co2);
+  const o2=new T.Group();for(const d of [V(-.07,0,0),V(.07,0,0)])o2.add(ball(.075,COR.gasO2,d,{emissive:0x2f7f8f}));o2.position.set(-.1,.25,.7);tag(o2,{type:'gas',gas:'o2'});g.add(o2);
+  const lo=label('O₂','#c9f7ff',.5,80);lo.position.set(-.1,.5,.75);g.add(lo);
+  const co2=new T.Group();co2.add(ball(.075,COR.gasCO2,V(0,0,0)),ball(.06,0xd8d8e8,V(-.14,0,0)),ball(.06,0xd8d8e8,V(.14,0,0)));co2.position.copy(pts1[12]).add(V(0,.12,0));tag(co2,{type:'gas',gas:'co2'});g.add(co2);
   const lc=label('CO₂','#e8e8f4',.6,80);lc.position.copy(co2.position).add(V(0,.25,.1));g.add(lc);
-  g.userData.gases={o2,co2,lo,lc,destO2:pts2[10].clone(),destCO2:V(.15,-.1,.5)};
-  // hemácias passando no capilar
-  const hem=[];for(let i=0;i<6;i++){const h=new T.Mesh(new T.TorusGeometry(.06,.03,6,12),mat(0xff5a5a));h.userData.f=i/6;g.add(h);hem.push(h);}
-  const curva=new T.CatmullRomCurve3(pts1.concat(pts2));
-  g.userData.tick=(t)=>{hem.forEach(h=>{const u=(t*.08+h.userData.f)%1;const p=curva.getPointAt(u);h.position.copy(p);h.lookAt(curva.getPointAt(Math.min(1,u+.01)));});
+  g.userData.gases={o2,co2,lo,lc,destO2:pts2[10].clone(),destCO2:V(.15,-.1,.6)};
+  // hemácias percorrendo o vaso principal: escuras ao chegar, vivas ao sair
+  const hem=[];const curva=new T.CatmullRomCurve3(pts1.concat(pts2));
+  for(let i=0;i<14;i++){const h=hemacia(.055);h.userData.f=i/14;h.userData.rot=Math.random()*Math.PI;g.add(h);hem.push(h);}
+  const escura=new T.Color(0x8c2430),viva=new T.Color(0xe8484f);
+  g.userData.tick=(t)=>{hem.forEach(h=>{const u=(t*.06+h.userData.f)%1;const p=curva.getPointAt(u);h.position.copy(p);h.lookAt(curva.getPointAt(Math.min(1,u+.01)));h.rotateX(Math.PI/2+h.userData.rot+t*.4);h.material.color.copy(escura).lerp(viva,Math.min(1,Math.max(0,(u-.4)/.3)));});
     if(state.o2){o2.position.lerp(g.userData.gases.destO2,.04);lo.position.copy(o2.position).add(V(0,.22,.05));}
     if(state.co2){co2.position.lerp(g.userData.gases.destCO2,.04);lc.position.copy(co2.position).add(V(0,.25,.1));}};
-  textAt(g,'ALVÉOLO · ar',0,1.1,.6,1.6,'#ffe3a8');textAt(g,'CAPILAR · sangue',1.0,-.9,.6,2.0,'#ffb0b0');
+  textAt(g,'ALVÉOLO · ar',0,1.15,.7,1.6,'#ffe3a8');textAt(g,'CAPILAR · sangue',1.05,-1.0,.6,2.0,'#ffb0b0');
   return g;
 }
 function dispose(g){if(!g)return;const geos=new Set(),mats=new Set(),tex=new Set();g.traverse(o=>{if(o.geometry&&!o.isSprite)geos.add(o.geometry);for(const m of [].concat(o.material||[])){if(!m)continue;mats.add(m);if(m.map)tex.add(m.map);}});geos.forEach(x=>x.dispose());mats.forEach(x=>x.dispose());tex.forEach(x=>x.dispose());if(g.parent)g.parent.remove(g);}

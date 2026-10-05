@@ -127,7 +127,7 @@ class LabView {
   if(this.animatedInspect){const i=this.animatedInspect,tt=Math.min(1,(now-i.start)/300),s=S.reducedMotion?1:.82+.18*(1-(1-tt)**3);i.object.scale.setScalar(i.target*s);if(tt>=1)this.animatedInspect=null;}
   // batimento do coração e respiração suave em qualquer cena que tenha o tórax
   if(this.model){this.model.traverse(o=>{if(o.userData.bate){const b=1+Math.sin(t*5.2)*.035;o.scale.setScalar((o.userData.base||(o.userData.base=o.scale.x))*b);}});
-   if(this.obj&&this.obj.userData.tick){if(S.view==='respire'){const r=S.respire,alvo=r.fase==='inspirando'?1:0;r.abertura+=(alvo-r.abertura)*Math.min(1,dt*2.2);this.obj.userData.tick(t,r.abertura);}else this.obj.userData.tick(t);}}
+   if(this.obj&&this.obj.userData.tick){if(S.view==='respire'){const r=S.respire,alvo=r.fase==='inspirando'?1:0;r.abertura+=(alvo-r.abertura)*Math.min(1,dt*2.2);this.obj.userData.tick(t,r.abertura);}else this.obj.userData.tick(t);}if(this.copy&&this.copy.userData.tick)this.copy.userData.tick(t);}
   if(this.xr){if(this.waitFrames){this.waitFrames--;if(!this.waitFrames){this.anchor=null;this.placeXR();this.buildXRUI();}}this.updateXR(dt);}
   this.renderer.render(this.scene,this.camera);
  }

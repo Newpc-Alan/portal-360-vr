@@ -226,6 +226,19 @@ Proto.placeXR=function(){
     const tudo=this.boxDe(this.model,true);if(!tudo.isEmpty()){const alt=tudo.getSize(new T.Vector3()).y,esc=1.72/alt;this.root.scale.multiplyScalar(esc);this.root.updateMatrixWorld(true);const b=this.boxDe(this.model,true),c=b.getCenter(new T.Vector3());this.root.position.x+=this.anchor.p.x+this.anchor.f.x*1.8-c.x;this.root.position.z+=this.anchor.p.z+this.anchor.f.z*1.8-c.z;this.root.position.y+=.05-b.min.y;this.root.updateMatrixWorld(true);}
     return;
   }
+  if(this.copy){
+    /* v3.5.6: o órgão projetado vem bem à frente do aluno (0,7 m), em tamanho de "segurar nas mãos" (~0,55 m); o corpo fica ao fundo */
+    const a=this.anchor,copy=this.copy;this.animatedInspect=null;this.root.updateMatrixWorld(true);
+    /* corpo ao fundo: ~1,05 m de altura a 2,3 m, levemente à esquerda */
+    if(this.obj){const bo=this.boxDe(this.obj);if(!bo.isEmpty()){const so=bo.getSize(new T.Vector3()),mo=Math.max(so.x,so.y,so.z);if(mo>1e-4){this.root.scale.multiplyScalar(1.05/mo);this.root.updateMatrixWorld(true);const co=this.boxDe(this.obj).getCenter(new T.Vector3());const alvoC=a.p.clone().addScaledVector(a.f,2.3);alvoC.y=a.p.y-.15;const lado=new T.Vector3(-a.f.z,0,a.f.x);alvoC.addScaledVector(lado,-.35);this.root.position.add(alvoC.sub(co));this.root.updateMatrixWorld(true);}}}
+    const b=this.boxDe(copy);if(!b.isEmpty()){const size=b.getSize(new T.Vector3()),maior=Math.max(size.x,size.y,size.z);
+      if(maior>1e-4){const alvoTam=.55,k=alvoTam/maior;copy.scale.multiplyScalar(k);this.root.updateMatrixWorld(true);
+        const b2=this.boxDe(copy),c=b2.getCenter(new T.Vector3());
+        const alvo=a.p.clone().addScaledVector(a.f,.72);alvo.y=a.p.y-.08;
+        const delta=alvo.sub(c),pai=copy.parent||this.root;const local=delta.applyQuaternion(pai.getWorldQuaternion(new T.Quaternion()).invert()).divideScalar(pai.getWorldScale(new T.Vector3()).x||1);
+        copy.position.add(local);this.root.updateMatrixWorld(true);}}
+    return;
+  }
   if(!fita)return;
   const f=1.0;this.root.scale.multiplyScalar(f);this.root.position.y+=.05;this.root.position.addScaledVector(this.anchor.f,-.25);this.root.updateMatrixWorld(true);
 };

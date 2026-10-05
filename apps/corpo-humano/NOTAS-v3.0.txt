@@ -122,3 +122,6 @@ v3.5.4
 
 v3.5.5
 - Camadas: tocar num órgão (3D ou VR) projeta a ficha à frente com rótulos, como nas demais missões, e narra; tocar no corpo ao fundo traz de volta. Isolar continua como opção (fecha a projeção).
+
+v3.5.6
+- Órgão projetado no VR: 0,72 m à frente do aluno, ~0,55 m (tamanho de segurar nas mãos), um pouco abaixo dos olhos; corpo ao fundo a 2,3 m com ~1,05 m, deslocado à esquerda. placeXR (portal) reposiciona a cópia após o enquadre base. No 3D a cópia ficou maior e mais próxima (fitCopy 2.5, z 1.6).

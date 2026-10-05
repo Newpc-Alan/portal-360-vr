@@ -77,6 +77,7 @@ const sources=[
  ['Anatomia do coração · NHLBI (NIH)','https://www.nhlbi.nih.gov/health/heart'],
  ['Como funcionam os pulmões · NHLBI (NIH)','https://www.nhlbi.nih.gov/health/lungs'],
  ['BNCC · Ciências EF05CI06-07 e EF08CI07-08','http://basenacionalcomum.mec.gov.br/'],
+ ['Z-Anatomy · atlas 3D de anatomia (CC BY-SA 4.0)','https://github.com/LluisV/Z-Anatomy'],
  ['Three.js / WebXR','https://threejs.org/docs/pages/WebXRManager.html']
 ];
 window.CORPO_DATA={info,activities,guide,context,sequencias,questions,sources,version:'2.1.0'};

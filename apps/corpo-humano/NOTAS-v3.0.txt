@@ -119,3 +119,6 @@ v3.5.3
 
 v3.5.4
 - Boas-vindas também a cada entrada no VR (hook em toggleVR, 0,9 s após a sessão abrir), com o painel VR intitulado 'Bem-vindo ao Corpo Humano Imersivo' enquanto toca; emenda na orientação da missão aberta.
+
+v3.5.5
+- Camadas: tocar num órgão (3D ou VR) projeta a ficha à frente com rótulos, como nas demais missões, e narra; tocar no corpo ao fundo traz de volta. Isolar continua como opção (fecha a projeção).

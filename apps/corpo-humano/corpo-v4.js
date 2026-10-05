@@ -8,6 +8,7 @@
  const ID=['laboratorio','montagemTorax','coracaoLab','missaoOxigenio'];
  const CORE=['pulmaoD','coracao','pulmaoE','diafragma'];
  const LETTER={pulmaoD:'A',coracao:'B',pulmaoE:'C',diafragma:'D'};
+ const PROJETA=['coracao','pulmoes','diafragma','traqueia','bronquios','aorta','torax'];
  const PARTS={
   pulmaoD:{name:'Pulmão direito',file:'pulmoes_lobos',info:'pulmoes',layer:'respiratorio',filter:n=>n.startsWith('direito'),spread:V(-1.7,.15,0),tray:V(-2.75,.9,.25),color:0x729bdd},
   pulmaoE:{name:'Pulmão esquerdo',file:'pulmoes_lobos',info:'pulmoes',layer:'respiratorio',filter:n=>n.startsWith('esquerdo'),spread:V(1.7,.15,0),tray:V(2.75,.9,.25),color:0x94aee4},
@@ -187,12 +188,14 @@
   if(!cmd.startsWith('v4:'))return false;
   const [,op,arg]=cmd.split(':'),S=api.state,s=S.v4;let rebuild=false;
   if(op==='select'){
-   if(!PARTS[arg])return true;s.selected=arg;s.isolate=false;if(!s.seen.includes(arg))s.seen.push(arg);const ik=PARTS[arg].info;if(!S.visited.includes(ik))S.visited.push(ik);api.log('inspecao','laboratorio',{component:arg});if(S.view==='laboratorio'&&s.seen.length>=3)api.mark('laboratorio');refresh(api);if(S.autoVoice)hear(api);return true;
+   if(!PARTS[arg])return true;s.selected=arg;s.isolate=false;if(!s.seen.includes(arg))s.seen.push(arg);const ik=PARTS[arg].info;if(!S.visited.includes(ik))S.visited.push(ik);api.log('inspecao','laboratorio',{component:arg});if(S.view==='laboratorio'&&s.seen.length>=3)api.mark('laboratorio');
+   /* v3.5.5: no 3D e no VR o órgão tocado projeta à frente (mesma regra das demais missões); isolar continua como opção */
+   if(S.view==='laboratorio'&&!s.isolate&&api.inspect&&PROJETA.includes(ik)){api.inspect(ik,false);}else refresh(api);if(S.autoVoice)hear(api);return true;
   }
   if(op==='layer'&&arg in s.layers){s.layers[arg]=!s.layers[arg];s.isolate=false;if(arg==='musculos'&&s.layers.musculos&&rt&&!rt.organs.musculos)buildOrgan('musculos',rt);}
   else if(op==='style'&&['anatomico','didatico'].includes(arg))s.style=arg;
   else if(op==='spread')s.spread=T.MathUtils.clamp(s.spread+Number(arg),0,100);
-  else if(op==='isolate'){if(!s.selected)return true;s.isolate=!s.isolate;}
+  else if(op==='isolate'){if(!s.selected)return true;s.isolate=!s.isolate;if(s.isolate&&api.inspectKey){api.narrator.stop(false);window.CorpoLab.command('inspect:close');}}
   else if(op==='restore'){s.spread=0;s.isolate=false;s.cut=false;s.layers=initial().layers;s.bonesOpacity=28;s.breath='auto';if(api.view)api.view.center();}
   else if(op==='play'){s.playing=!s.playing;s.breath='auto';}
   else if(op==='breath'){s.playing=false;s.breath=arg;}

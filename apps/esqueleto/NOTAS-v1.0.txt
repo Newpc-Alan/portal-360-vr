@@ -1,0 +1,32 @@
+ESQUELETO E MOVIMENTO v1.0 · Portal 360º VR (NEWPC / Portal do Educador)
+
+Pergunta central: como o corpo se sustenta e se move?
+Arquitetura: a mesma do Corpo Humano Imersivo v2.4 (narrador MP3 com fallback e falas encadeadas, aula guiada,
+resumo exportável, camada Portal com VR no padrão do catálogo, ambiente com profundidade no 3D e no VR).
+
+ATIVIDADES
+01 Contexto        corpo (pele) → esqueleto → músculos sobre os ossos
+02 Ossos           apontar em 21 grupos de ossos → ficha + narração
+03 Movimento       flexionar/estender o cotovelo: antebraço articulado, bíceps e tríceps mudam de volume; 3 ciclos concluem
+04 Coluna          ordenar cervical → torácica → lombar → sacro → cóccix (recorte real ao lado, colorido ao acertar)
+05 Articulações    achar no esqueleto os marcadores de dobradiça (joelho), bola-e-soquete (ombro) e pivô (atlas/áxis)
+06 Monte o braço   ordenar clavícula → escápula → úmero → rádio e ulna → mão
+07 Músculos        apontar em 14 músculos → ficha com os ossos de apoio
+08 Desafio         8 situações; no VR, painel verde/vermelho
+
+MODELOS 3D (Z-Anatomy, CC BY-SA 4.0; modelos derivados mantêm a licença)
+esqueleto.glb  206 ossos em 32 grupos nomeados (cranio, mandibula, cervical, toracica, lombar, sacro, coccix, costelas,
+               esterno e pares _d/_e: clavicula, escapula, umero, radio, ulna, mao, pelve, femur, patela, tibia, fibula, pe)
+musculos.glb   14 músculos em pares _d/_e (biceps, triceps, deltoide, peitoral, reto_abdominal, obliquo, trapezio,
+               latissimo, gluteo, quadriceps, isquiotibiais, gastrocnemio, tibial_anterior, esternocleidomastoideo)
+joelho.glb     LCA, LCP, meniscos, colaterais, cápsula + extremidades cortadas de fêmur, tíbia, fíbula e patela
+ombro.glb / quadril.glb / cotovelo.glb  labrum, cápsula, ligamentos + extremidades dos ossos
+silhueta.glb / cabeca.glb  pele translúcida (do Corpo Humano)
+Pipeline: FBX → glTF (fbx2gltf) → seleção/agrupamento/dedup por nome (trimesh) → gltfpack -si (quantizado).
+esq-gltf.js: modelo(arq,{partes,hit,cor,opacidade,centrar,aoCarregar}); partes fora da lista são removidas da cena.
+
+ÁUDIOS
+68 chaves em ROTEIRO-AUDIOS.csv (fichas, aula-*, contexto-*, concluídos, artic-*, desafio-*). Enquanto os MP3 não
+chegam, a voz do navegador lê o mesmo texto. fundo.mp3 reaproveitado do Corpo Humano.
+
+CACHE: recursos em ?v=1.0.0; modelos em ?v=1 (esq-gltf.js).

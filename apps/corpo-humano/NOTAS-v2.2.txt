@@ -28,4 +28,4 @@ procedural de reserva (silhuetaProc, toraxProc, digestivoProc em corpo-models.js
 do navegador (e só texto no Quest). Nomes das fichas: coracao, pulmoes, traqueia, bronquios, diafragma, alveolos, laringe,
 faringe, nariz, atrioD, ventD, atrioE, ventE, aorta, sangue, corpo_celulas, corpo, torax.
 
-CACHE: recursos em ?v=2.2.1. Ao atualizar, troque o número em index.html.
+CACHE: recursos em ?v=2.2.2. Ao atualizar, troque o número em index.html.

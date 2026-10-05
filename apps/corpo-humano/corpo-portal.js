@@ -198,6 +198,11 @@ Proto.placeXR=function(){
   placeOriginal.call(this);
   if(!this.xr||!this.model||!this.anchor)return;
   const S=Lab.state,fita=['caminhoAr','caminhoSangue','alimento'].includes(S.view);
+  if(S.view==='contexto'&&!S.context){
+    // corpo inteiro em tamanho natural, pés no piso, a 1,8 m do professor
+    const tudo=this.boxDe(this.model,true);if(!tudo.isEmpty()){const alt=tudo.getSize(new T.Vector3()).y,esc=1.72/alt;this.root.scale.multiplyScalar(esc);this.root.updateMatrixWorld(true);const b=this.boxDe(this.model,true),c=b.getCenter(new T.Vector3());this.root.position.x+=this.anchor.p.x+this.anchor.f.x*1.8-c.x;this.root.position.z+=this.anchor.p.z+this.anchor.f.z*1.8-c.z;this.root.position.y+=.05-b.min.y;this.root.updateMatrixWorld(true);}
+    return;
+  }
   if(!fita)return;
   const f=1.0;this.root.scale.multiplyScalar(f);this.root.position.y+=.05;this.root.position.addScaledVector(this.anchor.f,-.25);this.root.updateMatrixWorld(true);
 };

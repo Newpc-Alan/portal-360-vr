@@ -30,4 +30,10 @@ procedural de reserva (silhuetaProc, toraxProc, digestivoProc em corpo-models.js
 do navegador (e só texto no Quest). Nomes das fichas: coracao, pulmoes, traqueia, bronquios, diafragma, alveolos, laringe,
 faringe, nariz, atrioD, ventD, atrioE, ventE, aorta, sangue, corpo_celulas, corpo, torax.
 
-CACHE: recursos em ?v=2.3.1. Ao atualizar, troque o número em index.html.
+CACHE: recursos em ?v=2.3.2. Ao atualizar, troque o número em index.html.
+
+FLUXO DE NARRAÇÃO (v2.3.2)
+O narrador aceita uma fala encadeada (say(texto, chave, {text, key})): ao terminar a primeira, toca a segunda.
+Usado em: entrada no Contexto (aula-contexto → contexto-0), entrada no Desafio (aula-desafio → primeira situação)
+e Troca gasosa (explicação do segundo gás → troca-concluida). Com isso os 51 áudios tocam no fluxo normal,
+sem depender da Aula guiada.

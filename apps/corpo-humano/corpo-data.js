@@ -90,3 +90,22 @@ D.activities.forEach(a=>a.modulo="resp");D.activities.push(...E.esqActivities);
 D.esqGuide=E.esqGuide;D.esqContext=E.esqContext;D.esqQuestions=E.esqQuestions;D.sources.push(...E.esqSources.filter(x=>!D.sources.some(y=>y[1]===x[1])));
 D.modulos=[{id:"resp",label:"Respiração, circulação e digestão",curto:"Respiração e circulação",pergunta:"Como o oxigênio que respiramos chega às células?"},{id:"esq",label:"Esqueleto e movimento",curto:"Esqueleto e movimento",pergunta:"Como o corpo se sustenta e se move?"}];
 })(window.CORPO_DATA);
+/* ---------- v3.3: navegação por sistema do corpo ---------- */
+(function(D){
+D.sistemas=[
+ {id:'respiratorio',nome:'Respiratório',exemplos:'Vias respiratórias e pulmões',estuda:'Entrada de oxigênio e eliminação de gás carbônico.',modulo:'resp',atividades:['contexto','explorar','respire','caminhoAr','troca'],questoes:['ordem','diafragma','troca']},
+ {id:'circulatorio',nome:'Circulatório',exemplos:'Coração e vasos sanguíneos',estuda:'Circulação e transporte de substâncias.',modulo:'resp',atividades:['explorar','caminhoSangue'],questoes:['ladoDireito','ladoEsquerdo','celulas']},
+ {id:'digestorio',nome:'Digestório',exemplos:'Estômago e intestinos',estuda:'Digestão e absorção de nutrientes.',modulo:'resp',atividades:['alimento'],questoes:['absorcao','peristaltismo']},
+ {id:'esqueletico',nome:'Esquelético',exemplos:'Ossos e articulações',estuda:'Sustentação, proteção e movimentos.',modulo:'esq',atividades:['esqContexto','ossos','coluna','articulacoes','braco'],questoes:['dobradica','ombro','coluna','pivo','protecao','patela']},
+ {id:'muscular',nome:'Muscular',exemplos:'Músculos',estuda:'Movimento e postura.',modulo:'esq',atividades:['musculos','movimento'],questoes:['par','salto']},
+ {id:'nervoso',nome:'Nervoso',exemplos:'Encéfalo, medula e nervos',estuda:'Sensações, processamento de informações e coordenação.',breve:true},
+ {id:'urinario',nome:'Urinário',exemplos:'Rins e bexiga',estuda:'Eliminação de resíduos pela urina e equilíbrio hídrico.',breve:true},
+ {id:'endocrino',nome:'Endócrino',exemplos:'Glândulas, como a tireoide',estuda:'Hormônios e regulação do organismo.',breve:true},
+ {id:'reprodutor',nome:'Reprodutor',exemplos:'Órgãos reprodutivos',estuda:'Reprodução humana.',breve:true},
+ {id:'linfatico',nome:'Linfático e defesa',exemplos:'Vasos linfáticos, linfonodos e baço',estuda:'Defesa e retorno de líquidos à circulação.',breve:true},
+ {id:'tegumentar',nome:'Tegumentar',exemplos:'Pele, pelos e unhas',estuda:'Revestimento e proteção.',breve:true}
+];
+/* perguntas carregam o prefixo da chave de áudio do módulo de origem */
+D.questions.forEach(q=>{q.pref='';});D.esqQuestions.forEach(q=>{q.pref='esq-';});
+D.todasQuestoes=D.questions.concat(D.esqQuestions);
+})(window.CORPO_DATA);

@@ -50,7 +50,7 @@ Proto.textPlane=function(title,body,w,h,tom){
   const canvas=document.createElement('canvas');canvas.width=1024;canvas.height=1024;const c=canvas.getContext('2d');
   const cores={ok:['rgba(10,46,34,.97)','#3fd48a'],erro:['rgba(60,16,22,.97)','#ff6b6b'],neutro:['rgba(10,31,46,.97)','#4c8294']}[tom||'neutro'];
   c.fillStyle=cores[0];c.fillRect(0,0,1024,1024);c.strokeStyle=cores[1];c.lineWidth=8;c.strokeRect(4,4,1016,1016);
-  const grande=!!(tom&&tom!=='neutro')||(Lab.state.view==='desafio'||Lab.state.view==='esqDesafio');
+  const grande=!!(tom&&tom!=='neutro')||(Lab.state.view==='desafio');
   let y=100;
   c.font='600 70px Segoe UI,Arial';c.fillStyle='#a4e6d1';
   for(const l of quebrar(c,title,930)){c.fillText(l,52,y);y+=86;}
@@ -83,7 +83,7 @@ Proto.xrBotaoLargo=function(label,cmd,x,y,disabled,cor){
   m.position.set(x,y,UI.z);m.rotation.y=-Math.atan2(x,-UI.z);m.userData.command=cmd;this.ui.add(m);if(!disabled)this.uiHits.push(m);return m;
 };
 const VERDE={bg:'#0f6b3a',borda:'#3fd48a',texto:'#ffffff'},VERMELHO={bg:'#7a1f28',borda:'#ff6b6b',texto:'#ffffff'},APAGADO={bg:'#122531',borda:'#243a47',texto:'#5c7484'};
-function estadoDesafio(){const S=Lab.state;const esq=S.view==='esqDesafio';if((S.view!=='desafio'&&!esq))return null;const q=esq?S.esqQuiz:S.quiz,Q=esq?D.esqQuestions:D.questions;if(q.phase!==1||q.done)return null;const i=q.index,resp=q.answers[i];if(resp===undefined)return null;const item=Q[i];return{correto:item.correct,escolha:resp,acertou:resp===item.correct};}
+function estadoDesafio(){const S=Lab.state;if(S.view!=='desafio')return null;const q=Lab.quizAtual(),Q=Lab.questoesAtuais();if(q.phase!==1||q.done)return null;const i=q.index,resp=q.answers[i];if(resp===undefined)return null;const item=Q[i];return{correto:item.correct,escolha:resp,acertou:resp===item.correct};}
 
 Proto.buildXRUI=function(){
   if(!this.xr)return;this.clearXRUI();
@@ -94,12 +94,12 @@ Proto.buildXRUI=function(){
   const fbEl=document.getElementById('feedback');const feedback=fbEl&&!fbEl.hidden?fbEl.textContent:'';
   let body=instrucao+(feedback?'  '+feedback:''),tom='neutro';
   const des=estadoDesafio();
-  if(des){title=des.acertou?'✅ ACERTOU!':'❌ ERROU';tom=des.acertou?'ok':'erro';body=D.questions[S.quiz.index].why;}
+  if(des){title=des.acertou?'✅ ACERTOU!':'❌ ERROU';tom=des.acertou?'ok':'erro';body=Lab.questoesAtuais()[Lab.quizAtual().index].why;}
   if(this.xrReport){const r=Lab.report();title='Resumo da experiência';body=S.completed.length+' atividades concluídas. '+r.independent+' respostas independentes. '+r.errors+' tentativas incorretas. '+r.hints+' pistas consultadas. '+r.skips+' posições puladas. Exporte os registros no modo 3D.';tom='neutro';}
   const panel=this.textPlane(title,body,1.06,.86,tom);panel.position.set(1.16,.30,-1.64);panel.rotation.y=-.6;this.ui.add(panel);
   const lista=this.xrReport?[{label:'Voltar à atividade',cmd:'xr:reportclose'}]:this._acoes();
   const max=8,pages=Math.max(1,Math.ceil(lista.length/max));this.uiPage=Math.min(this.uiPage||0,pages-1);
-  const quizFase=((S.view==='desafio'&&S.quiz.phase===1)||(S.view==='esqDesafio'&&S.esqQuiz.phase===1))&&!this.xrReport;
+  const quizFase=(S.view==='desafio'&&Lab.quizAtual().phase===1)&&!this.xrReport;
   if(quizFase){
     panel.position.set(1.16,.52,-1.64);
     let yy=-.06;lista.forEach(a=>{let cor=null;const m=/^quiz:answer:(\d+)$/.exec(a.cmd);
@@ -113,23 +113,24 @@ Proto.buildXRUI=function(){
     this.xrButton(a.label,a.cmd,1.16+(i%2?.25:-.25),-.22-Math.floor(i/2)*UI.passo,UI.btnW,a.disabled,cor);
   });
   if(pages>1&&!quizFase){this.xrButton('◀ Opções','xr:prev',.91,-.86,UI.btnW,this.uiPage===0);this.xrButton('Mais opções ▶','xr:next',1.41,-.86,UI.btnW,this.uiPage===pages-1);}
-  /* coluna da esquerda em dois níveis: raiz (4 grupos) → missões do módulo atual / controles */
-  const menu=this.xrMenu||'raiz';const mod=D.modulos.find(m=>m.id===S.modulo),outro=D.modulos.find(m=>m.id!==S.modulo);
-  const atual=D.activities.find(a=>a.id===S.view),idx=D.activities.filter(a=>a.modulo===S.modulo).indexOf(atual);
+  /* coluna da esquerda em dois níveis: raiz → sistemas / missões do sistema atual / controles */
+  const menu=this.xrMenu||'raiz';const sis=Lab.sistemaAtual(),atv=Lab.atividadesDe(S.sistema);
+  const atual=atv.find(a=>a.id===S.view)||atv[0],idx=Math.max(0,atv.indexOf(atual));
   const AZ={bg:'#0f2c4a',borda:'#37B1DA',texto:'#ffffff'},VD={bg:'#0f4a3a',borda:'#7CFFB8',texto:'#ffffff'};
   if(menu==='raiz'){
-    this.xrButton(mod.curto,'xr:menu:modulos',-1.18,.6,.5,false,AZ);
-    this.xrButton('▣ Missão '+(idx+1)+' de 8: '+atual.label,'xr:menu:missoes',-1.18,.6-UI.passo,.5,false,VD);
+    this.xrButton('Sistema: '+sis.nome,'xr:menu:sistemas',-1.18,.6,.5,false,AZ);
+    this.xrButton('▣ Missão '+(idx+1)+' de '+atv.length+': '+atual.label,'xr:menu:missoes',-1.18,.6-UI.passo,.5,false,VD);
     this.xrButton('⚙ Controles','xr:menu:controles',-1.18,.6-2*UI.passo,.5);
     this.xrButton('🔊 Ouvir de novo','voice:repeat',-1.18,.6-3*UI.passo,.5);
     this.xrButton('🥽 Sair do VR','vr',-1.18,.6-4.3*UI.passo,.5,false,{bg:'#5a2a16',borda:'#ff9f6b',texto:'#fff2ea'});
   }else if(menu==='missoes'){
-    const atv=D.activities.filter(a=>a.modulo===S.modulo);
     atv.forEach((a,i)=>this.xrButton((i+1)+'. '+a.label,'view:'+a.id,-1.18,.6-i*UI.passo,.5,false,a.id===S.view?VD:null));
     this.xrButton('◀ Voltar','xr:menu:raiz',-1.18,.6-(atv.length+.3)*UI.passo,.5);
-  }else if(menu==='modulos'){
-    D.modulos.forEach((m,i)=>this.xrButton((m.id===S.modulo?'● ':'○ ')+m.curto,'modulo:'+m.id,-1.18,.6-i*UI.passo,.5,false,m.id===S.modulo?VD:null));
-    this.xrButton('◀ Voltar','xr:menu:raiz',-1.18,.6-(D.modulos.length+.3)*UI.passo,.5);
+  }else if(menu==='sistemas'){
+    const disp=D.sistemas.filter(x=>!x.breve);
+    disp.forEach((x,i)=>this.xrButton((x.id===S.sistema?'● ':'○ ')+x.nome,'sistema:'+x.id,-1.18,.6-i*UI.passo,.5,false,x.id===S.sistema?VD:null));
+    this.xrButton('… mais 6 sistemas em breve','xr:menu:raiz',-1.18,.6-disp.length*UI.passo,.5,true);
+    this.xrButton('◀ Voltar','xr:menu:raiz',-1.18,.6-(disp.length+1.3)*UI.passo,.5);
   }else{
     this.xrButton('◎ Centralizar','center',-1.18,.6,.5);this.xrButton(S.autoRotate?'Ⅱ Pausar giro':'▷ Girar modelo','rotate',-1.18,.6-UI.passo,.5);
     this.xrButton('■ Parar voz','voice:stop',-1.18,.6-2*UI.passo,.5);this.xrButton('↙ Catálogo','catalog',-1.18,.6-3*UI.passo,.5,false,AZ);
@@ -219,7 +220,7 @@ Proto.placeXR=function(){
   placeOriginal.call(this);
   if(!this.xr||!this.model||!this.anchor)return;
   const S=Lab.state,fita=['caminhoAr','caminhoSangue','alimento','coluna','braco'].includes(S.view);
-  if(((S.view==='contexto'&&!S.context)||['esqContexto','ossos','musculos','articulacoes','esqDesafio'].includes(S.view))&&!this.copy){
+  if(((S.view==='contexto'&&!S.context)||(['esqContexto','ossos','musculos','articulacoes'].includes(S.view)||(S.view==='desafio'&&S.modulo==='esq')))&&!this.copy){
     // corpo inteiro em tamanho natural, pés no piso, a 1,8 m do professor
     const tudo=this.boxDe(this.model,true);if(!tudo.isEmpty()){const alt=tudo.getSize(new T.Vector3()).y,esc=1.72/alt;this.root.scale.multiplyScalar(esc);this.root.updateMatrixWorld(true);const b=this.boxDe(this.model,true),c=b.getCenter(new T.Vector3());this.root.position.x+=this.anchor.p.x+this.anchor.f.x*1.8-c.x;this.root.position.z+=this.anchor.p.z+this.anchor.f.z*1.8-c.z;this.root.position.y+=.05-b.min.y;this.root.updateMatrixWorld(true);}
     return;

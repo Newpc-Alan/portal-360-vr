@@ -7,4 +7,14 @@
 /* v3.0: dois módulos no menu lateral */
 nav button.nav-modulo{min-height:44px;font-size:9.5px;letter-spacing:.06em;text-transform:uppercase;color:#7fb3c9;background:#0e2535;border:1px dashed #2b4a60;border-radius:10px;margin-top:6px;line-height:1.25}
 nav button.nav-modulo.active{background:#123744;color:#bff3df;border:1px solid #2f6f62}
-nav button[hidden]{display:none}
+nav button[hidden]{display:none}/* v3.3: menu por sistema (acordeão) */
+nav{gap:5px}
+nav .nav-grupo{font-size:9px;letter-spacing:.14em;color:#5f8aa3;padding:4px 2px 2px;text-align:center}
+nav button.nav-sistema{min-height:34px;font-size:10.5px;padding:6px 6px;gap:0;color:#b8d3e3;background:#0e2535;border:1px solid #223c50;border-radius:9px;line-height:1.2;text-align:left;align-items:flex-start}
+nav button.nav-sistema.active{background:#123744;color:#bff3df;border-color:#2f6f62}
+nav button.nav-sistema.breve{opacity:.5;cursor:not-allowed;min-height:28px;font-size:9.5px}
+nav .nav-missoes{display:flex;flex-direction:column;gap:4px;padding:2px 0 6px 6px;border-left:2px solid #2f6f62;margin-left:6px}
+nav button.nav-missao{min-height:40px;flex-direction:row;gap:7px;justify-content:flex-start;text-align:left;font-size:10.5px;padding:5px 7px}
+nav button.nav-missao .nav-num{font-size:12px}
+nav details.nav-breve summary{cursor:pointer;font-size:9.5px;color:#5f8aa3;text-align:center;padding:6px 2px;list-style:none}
+nav details.nav-breve[open] summary{color:#8fb0c2}

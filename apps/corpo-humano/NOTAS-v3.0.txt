@@ -76,3 +76,10 @@ v3.2: sem piso. O modelo fica no espaço (abóbada simétrica sem linha de horiz
 v3.2.1: interação de inspeção. Órgão projetado à frente um pouco menor (2,1 em vez de 2,6 unidades); tocar no corpo
 que ficou ao fundo fecha a ficha e traz o corpo de volta à frente (3D e VR). Tocar numa peça do órgão projetado
 continua abrindo a ficha dela.
+
+v3.3: NAVEGAÇÃO POR SISTEMA DO CORPO. O menu lateral lista os sistemas (Respiratório, Circulatório, Digestório,
+Esquelético, Muscular disponíveis; Nervoso, Urinário, Endócrino, Reprodutor, Linfático e Tegumentar "em breve") em
+acordeão: o sistema aberto mostra suas missões e um Desafio próprio (perguntas filtradas por sistema, estado em
+S.quizzes[sistema]). D.sistemas em corpo-data.js define atividades e perguntas de cada sistema; uma atividade pode
+aparecer em mais de um sistema (Explorar no Respiratório e no Circulatório). Aula guiada por sistema. No VR, a raiz
+mostra "Sistema: X" (abre a lista de sistemas) e "Missão N de M". Comandos: sistema:<id>. Recursos em ?v=3.3.0.

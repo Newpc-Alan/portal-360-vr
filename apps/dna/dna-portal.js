@@ -156,8 +156,8 @@ Proto.exitXR=function(){exitOriginal.call(this);if(posicional)posicional.setRefD
 
 /* ---------- 5. Ambiente VR com profundidade + trilha de fundo ---------- */
 let ambiente=null,musicaAntes=null;
-function criarAmbiente(){
-  const g=new T.Group();g.name='ambienteVR';
+function criarAmbiente(modo2d){
+  const g=new T.Group();g.name='ambienteVR';g.userData.modo2d=!!modo2d;const E=modo2d?1.9:1,CY=modo2d?-3.6:0;/* no 3D o chão fica abaixo do modelo e os anéis crescem */
   // abóbada em gradiente (azul-profundo do Portal → quase preto no zênite e no chão)
   const c=document.createElement('canvas');c.width=16;c.height=512;const x=c.getContext('2d');
   const gr=x.createLinearGradient(0,0,0,512);gr.addColorStop(0,'#03070f');gr.addColorStop(.42,'#0b2340');gr.addColorStop(.58,'#0f2c4a');gr.addColorStop(.72,'#071526');gr.addColorStop(1,'#02050a');
@@ -173,18 +173,24 @@ function criarAmbiente(){
     const pts=new T.Points(geo,m);pts.userData.vel=0.02+Math.random()*0.02;return pts;};
   g.add(mkPontos(420,14,.09,0x7fd6ff,.55),mkPontos(180,6,.05,0xa6f0d6,.7));
   // chão: disco escuro + anéis finos para referência de posição (altura do piso real, local-floor)
-  const chao=new T.Mesh(new T.CircleGeometry(9,64),new T.MeshBasicMaterial({color:0x02070e,transparent:true,opacity:.92,depthWrite:false}));chao.rotation.x=-Math.PI/2;chao.position.y=0.005;g.add(chao);
-  for(const r of [1,2.2,3.6,5.2]){const an=new T.Mesh(new T.RingGeometry(r-.012,r+.012,96),new T.MeshBasicMaterial({color:0x37b1da,transparent:true,opacity:r===1?.32:.12,side:T.DoubleSide,depthWrite:false}));an.rotation.x=-Math.PI/2;an.position.y=0.01;g.add(an);}
-  const fog=new T.Mesh(new T.CircleGeometry(9,64),new T.MeshBasicMaterial({color:0x0f2c4a,transparent:true,opacity:.08,depthWrite:false,blending:T.AdditiveBlending}));fog.rotation.x=-Math.PI/2;fog.position.y=0.02;g.add(fog);
+  const chao=new T.Mesh(new T.CircleGeometry(9,64),new T.MeshBasicMaterial({color:0x02070e,transparent:true,opacity:.92,depthWrite:false}));chao.rotation.x=-Math.PI/2;chao.position.y=CY+0.005;chao.scale.setScalar(E);g.add(chao);
+  for(const r of [1,2.2,3.6,5.2]){const an=new T.Mesh(new T.RingGeometry(r-.012,r+.012,96),new T.MeshBasicMaterial({color:0x37b1da,transparent:true,opacity:r===1?.32:.12,side:T.DoubleSide,depthWrite:false}));an.rotation.x=-Math.PI/2;an.position.y=CY+0.01;an.scale.setScalar(E);g.add(an);}
+  const fog=new T.Mesh(new T.CircleGeometry(9,64),new T.MeshBasicMaterial({color:0x0f2c4a,transparent:true,opacity:.08,depthWrite:false,blending:T.AdditiveBlending}));fog.rotation.x=-Math.PI/2;fog.position.y=CY+0.02;fog.scale.setScalar(E);g.add(fog);
   return g;
 }
-function entrarAmbiente(){if(ambiente)return;ambiente=criarAmbiente();view.scene.add(ambiente);
+function entrarAmbiente(modo2d){if(ambiente&&ambiente.userData.modo2d===!!modo2d)return;if(ambiente){M.dispose(ambiente);view.scene.remove(ambiente);ambiente=null;}ambiente=criarAmbiente(modo2d);view.scene.add(ambiente);
+  if(modo2d)return;
   musicaAntes=narrator.musicOn;if(!narrator.musicOn){const vol=Math.max(.12,narrator.musicVolume||.2);narrator.setMusic(true,vol);const cb=document.getElementById('musicEnabled');if(cb)cb.checked=true;}}
+/* no 3D a trilha também toca, mas só depois do primeiro toque (política de autoplay); respeita o checkbox de Ajustes */
+let musica2dArmada=false;
+function armarMusica2d(){if(musica2dArmada)return;musica2dArmada=true;const cb=document.getElementById('musicEnabled');if(cb&&!cb.checked&&!narrator.musicOn){cb.checked=true;}
+  const ligar=()=>{if(view.xr)return;const c=document.getElementById('musicEnabled');if(c&&c.checked&&!narrator.musicOn)narrator.setMusic(true,Math.max(.12,narrator.musicVolume||.2));};
+  ['pointerdown','keydown'].forEach(ev=>window.addEventListener(ev,ligar,{once:true,capture:true}));}
 function sairAmbiente(){if(ambiente){M.dispose(ambiente);view.scene.remove(ambiente);ambiente=null;}
-  if(musicaAntes===false){narrator.setMusic(false);const cb=document.getElementById('musicEnabled');if(cb)cb.checked=false;}musicaAntes=null;}
+  musicaAntes=null;entrarAmbiente(true);}
 const frameOriginal=Proto.frame;
 Proto.frame=function(time,frame){
-  if(this.xr&&!ambiente)entrarAmbiente();
+  if(this.xr){if(!ambiente||ambiente.userData.modo2d)entrarAmbiente(false);}else{if(!ambiente)entrarAmbiente(true);armarMusica2d();}
   if(ambiente){const t=(time||performance.now())*0.001;ambiente.children.forEach(o=>{if(o.isPoints){o.rotation.y=t*o.userData.vel;o.position.y=Math.sin(t*0.35+o.userData.vel*50)*0.08;}});}
   return frameOriginal.call(this,time,frame);
 };

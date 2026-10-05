@@ -30,7 +30,7 @@ procedural de reserva (silhuetaProc, toraxProc, digestivoProc em corpo-models.js
 do navegador (e só texto no Quest). Nomes das fichas: coracao, pulmoes, traqueia, bronquios, diafragma, alveolos, laringe,
 faringe, nariz, atrioD, ventD, atrioE, ventE, aorta, sangue, corpo_celulas, corpo, torax.
 
-CACHE: recursos em ?v=2.4.0. Ao atualizar, troque o número em index.html.
+CACHE: recursos em ?v=2.4.1. Ao atualizar, troque o número em index.html.
 
 FLUXO DE NARRAÇÃO (v2.3.2)
 O narrador aceita uma fala encadeada (say(texto, chave, {text, key})): ao terminar a primeira, toca a segunda.
@@ -43,3 +43,7 @@ Alvéolo: ácino com 9 sacos de membrana translúcida, bronquíolo terminal com 
 com gradiente de cor, rede capilar fina sobre cada saco e hemácias bicôncavas que escurecem/clareiam ao passar.
 Sangue / células: capilar com parede endotelial (ladrilhos), hemácias bicôncavas, leucócito e plaquetas em movimento.
 Tudo procedural (o Z-Anatomy não cobre escala microscópica); a inspeção tem tick próprio (copy.userData.tick).
+
+REGRA (v2.4.1): toda melhoria do VR vale também no 3D. O ambiente (abóbada, partículas, piso com anéis) agora existe
+nos dois modos (no 3D o piso fica em y=-3,6 e os anéis 1,9× maiores); a trilha de fundo toca no 3D após o primeiro
+toque, respeitando o checkbox de Ajustes. Mesma mudança aplicada ao DNA Imersivo (dna-portal.js 2.2.4).

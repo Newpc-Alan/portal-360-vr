@@ -174,9 +174,9 @@ function criarAmbiente(modo2d){
     const pts=new T.Points(geo,m);pts.userData.vel=0.02+Math.random()*0.02;return pts;};
   g.add(mkPontos(420,14,.09,0x7fd6ff,.55),mkPontos(180,6,.05,0xa6f0d6,.7));
   // chão: disco escuro + anéis finos para referência de posição (altura do piso real, local-floor)
-  const chao=new T.Mesh(new T.CircleGeometry(9,64),new T.MeshBasicMaterial({color:0x02070e,transparent:true,opacity:.92,depthWrite:false}));chao.rotation.x=-Math.PI/2;chao.position.y=CY+0.005;chao.scale.setScalar(E);g.add(chao);
-  for(const r of [1,2.2,3.6,5.2]){const an=new T.Mesh(new T.RingGeometry(r-.012,r+.012,96),new T.MeshBasicMaterial({color:0x37b1da,transparent:true,opacity:r===1?.32:.12,side:T.DoubleSide,depthWrite:false}));an.rotation.x=-Math.PI/2;an.position.y=CY+0.01;an.scale.setScalar(E);g.add(an);}
-  const fog=new T.Mesh(new T.CircleGeometry(9,64),new T.MeshBasicMaterial({color:0x0f2c4a,transparent:true,opacity:.08,depthWrite:false,blending:T.AdditiveBlending}));fog.rotation.x=-Math.PI/2;fog.position.y=CY+0.02;fog.scale.setScalar(E);g.add(fog);
+  const chao=new T.Mesh(new T.CircleGeometry(9,64),new T.MeshBasicMaterial({color:0x02070e,transparent:true,opacity:.92,depthWrite:false}));chao.rotation.x=-Math.PI/2;chao.position.y=CY+0.005;chao.scale.setScalar(E);g.add(chao);g.userData.piso=[[chao,0.005]];
+  for(const r of [1,2.2,3.6,5.2]){const an=new T.Mesh(new T.RingGeometry(r-.012,r+.012,96),new T.MeshBasicMaterial({color:0x37b1da,transparent:true,opacity:r===1?.32:.12,side:T.DoubleSide,depthWrite:false}));an.rotation.x=-Math.PI/2;an.position.y=CY+0.01;an.scale.setScalar(E);g.add(an);g.userData.piso.push([an,0.01]);}
+  const fog=new T.Mesh(new T.CircleGeometry(9,64),new T.MeshBasicMaterial({color:0x0f2c4a,transparent:true,opacity:.08,depthWrite:false,blending:T.AdditiveBlending}));fog.rotation.x=-Math.PI/2;fog.position.y=CY+0.02;fog.scale.setScalar(E);g.add(fog);g.userData.piso.push([fog,0.02]);
   return g;
 }
 function entrarAmbiente(modo2d){if(ambiente&&ambiente.userData.modo2d===!!modo2d)return;if(ambiente){M.dispose(ambiente);view.scene.remove(ambiente);ambiente=null;}ambiente=criarAmbiente(modo2d);view.scene.add(ambiente);
@@ -191,7 +191,9 @@ function sairAmbiente(){if(ambiente){M.dispose(ambiente);view.scene.remove(ambie
   musicaAntes=null;entrarAmbiente(true);}
 const frameOriginal=Proto.frame;
 Proto.frame=function(time,frame){
-  if(this.xr){if(!ambiente||ambiente.userData.modo2d)entrarAmbiente(false);}else{if(!ambiente)entrarAmbiente(true);armarMusica2d();}
+  if(this.xr){if(!ambiente||ambiente.userData.modo2d)entrarAmbiente(false);}else{if(!ambiente)entrarAmbiente(true);armarMusica2d();
+    /* no 3D o piso acompanha a base do modelo (corpo inteiro nunca fica com os pés abaixo do chão) */
+    ambiente.userData.n=(ambiente.userData.n||0)+1;if(ambiente.userData.n%15===1&&this.model){const b=this.boxDe?this.boxDe(this.model,true):new T.Box3().setFromObject(this.model);const y=b.isEmpty()?-3.6:Math.min(-3.6,b.min.y-.12);if(Math.abs((ambiente.userData.pisoY??-3.6)-y)>.01){ambiente.userData.pisoY=y;(ambiente.userData.piso||[]).forEach(([o,d])=>{o.position.y=y+d;});}}}
   if(ambiente){const t=(time||performance.now())*0.001;ambiente.children.forEach(o=>{if(o.isPoints){o.rotation.y=t*o.userData.vel;o.position.y=Math.sin(t*0.35+o.userData.vel*50)*0.08;}});}
   return frameOriginal.call(this,time,frame);
 };

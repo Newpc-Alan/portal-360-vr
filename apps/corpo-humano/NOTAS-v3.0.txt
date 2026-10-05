@@ -113,3 +113,6 @@ v3.5.1 / v3.5.2
 - Boas-vindas ao abrir: diálogo com o texto e botão Começar (o clique libera o áudio no navegador); toca boas-vindas.mp3 e emenda
   na orientação da missão atual (aula-contexto → contexto-0). Uma vez por sessão (S.welcomed); "Novo aluno" mostra de novo.
   Com ?vr=1 não há diálogo: a tela de entrada já é o gesto; toca ao entrar no VR ou ao escolher "Explorar em 3D".
+
+v3.5.3
+- 14 narrações humanas instaladas (boas-vindas + 13 do Laboratório), normalizadas como as demais (silêncio aparado, loudnorm I=-16, mono 44,1 kHz 64 kbps). Total: 132 áudios + fundo.

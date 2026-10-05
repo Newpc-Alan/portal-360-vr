@@ -133,3 +133,11 @@ v3.6.0 (Realismo, etapa 1: tecidos)
   luz de contorno (fresnel) por tecido, pulso luminoso no coração (uPulso), silhueta com fresnel azul. Tone mapping ACES (rótulos sem).
 - Hooks: CORPO_GLTF.material, ESQ_GLTF material, cloneMaterial do laboratório. Sem arquivos novos de textura (0 bytes extras).
 - Etapa 2 (vida: sangue na aorta, alvéolos) e 3 (ambiente por sistema) a seguir, após aprovação visual.
+
+v3.7.0 (VR fase A, parte 1: mãos e controles)
+- Grip em qualquer órgão/osso/músculo (grupo gltf, cópia projetada ou peça do laboratório) traz o objeto real para a mão (attach ao grip),
+  narra a ficha e atualiza o painel; soltar devolve com animação de 380 ms ao lugar/escala originais. Duas mãos no mesmo objeto: escala
+  pela distância entre as mãos (0,3x a 8x). fitCopy/placeXR/animatedInspect não mexem num objeto segurado.
+- Analógico direito: giro em passos de 30° (snap, com trava) e aproximar/afastar em passos de 25 cm. Esquerdo: altura contínua.
+  Botão A: centralizar. Botão B: alterna menu raiz/missões. Cartão "Como usar os controles" no submenu Controles.
+- Alvo: Meta Quest 3S (controles Touch Plus). Fase A parte 2: menu no pulso e rótulos 3D; fase B: dentro do corpo; fase C: viagens.

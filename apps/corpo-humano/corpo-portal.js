@@ -113,12 +113,28 @@ Proto.buildXRUI=function(){
     this.xrButton(a.label,a.cmd,1.16+(i%2?.25:-.25),-.22-Math.floor(i/2)*UI.passo,UI.btnW,a.disabled,cor);
   });
   if(pages>1&&!quizFase){this.xrButton('◀ Opções','xr:prev',.91,-.86,UI.btnW,this.uiPage===0);this.xrButton('Mais opções ▶','xr:next',1.41,-.86,UI.btnW,this.uiPage===pages-1);}
-  D.activities.forEach((a,i)=>this.xrButton((i+1)+'. '+a.label,'view:'+a.id,-1.18,.6-i*UI.passo,.5));
-  const yb=.6-D.activities.length*UI.passo-.04;
-  this.xrButton('🥽 Sair do VR','vr',-1.18,yb,.5,false,{bg:'#5a2a16',borda:'#ff9f6b',texto:'#fff2ea'});
-  this.xrButton('↙ Catálogo','catalog',-1.18,yb-UI.passo,.5,false,{bg:'#0f2c4a',borda:'#37B1DA',texto:'#ffffff'});
-  this.xrButton('◎ Centralizar','center',-.52,-.95,UI.btnW);this.xrButton(S.autoRotate?'Ⅱ Pausar':'▷ Girar','rotate',-.02,-.95,UI.btnW);
-  this.xrButton('🔊 Ouvir','voice:repeat',-.52,-1.1,UI.btnW);this.xrButton('■ Parar voz','voice:stop',-.02,-1.1,UI.btnW);
+  /* coluna da esquerda em dois níveis: raiz (4 grupos) → missões do módulo atual / controles */
+  const menu=this.xrMenu||'raiz';const mod=D.modulos.find(m=>m.id===S.modulo),outro=D.modulos.find(m=>m.id!==S.modulo);
+  const atual=D.activities.find(a=>a.id===S.view),idx=D.activities.filter(a=>a.modulo===S.modulo).indexOf(atual);
+  const AZ={bg:'#0f2c4a',borda:'#37B1DA',texto:'#ffffff'},VD={bg:'#0f4a3a',borda:'#7CFFB8',texto:'#ffffff'};
+  if(menu==='raiz'){
+    this.xrButton(mod.curto,'xr:menu:modulos',-1.18,.6,.5,false,AZ);
+    this.xrButton('▣ Missão '+(idx+1)+' de 8: '+atual.label,'xr:menu:missoes',-1.18,.6-UI.passo,.5,false,VD);
+    this.xrButton('⚙ Controles','xr:menu:controles',-1.18,.6-2*UI.passo,.5);
+    this.xrButton('🔊 Ouvir de novo','voice:repeat',-1.18,.6-3*UI.passo,.5);
+    this.xrButton('🥽 Sair do VR','vr',-1.18,.6-4.3*UI.passo,.5,false,{bg:'#5a2a16',borda:'#ff9f6b',texto:'#fff2ea'});
+  }else if(menu==='missoes'){
+    const atv=D.activities.filter(a=>a.modulo===S.modulo);
+    atv.forEach((a,i)=>this.xrButton((i+1)+'. '+a.label,'view:'+a.id,-1.18,.6-i*UI.passo,.5,false,a.id===S.view?VD:null));
+    this.xrButton('◀ Voltar','xr:menu:raiz',-1.18,.6-(atv.length+.3)*UI.passo,.5);
+  }else if(menu==='modulos'){
+    D.modulos.forEach((m,i)=>this.xrButton((m.id===S.modulo?'● ':'○ ')+m.curto,'modulo:'+m.id,-1.18,.6-i*UI.passo,.5,false,m.id===S.modulo?VD:null));
+    this.xrButton('◀ Voltar','xr:menu:raiz',-1.18,.6-(D.modulos.length+.3)*UI.passo,.5);
+  }else{
+    this.xrButton('◎ Centralizar','center',-1.18,.6,.5);this.xrButton(S.autoRotate?'Ⅱ Pausar giro':'▷ Girar modelo','rotate',-1.18,.6-UI.passo,.5);
+    this.xrButton('■ Parar voz','voice:stop',-1.18,.6-2*UI.passo,.5);this.xrButton('↙ Catálogo','catalog',-1.18,.6-3*UI.passo,.5,false,AZ);
+    this.xrButton('◀ Voltar','xr:menu:raiz',-1.18,.6-4.3*UI.passo,.5);
+  }
 };
 /* lista de ações da lateral (o dna-app monta os botões com data-act; lemos de lá para não depender de variáveis internas) */
 Proto._acoes=function(){const out=[];document.querySelectorAll('#lessonPanel [data-act]').forEach(b=>{if(/^seq:target:/.test(b.dataset.act))return;if(b.closest('details')&&!b.closest('details').open)return;const label=(b.title&&b.textContent.trim().length<=1?b.textContent.trim()+' · '+b.title:b.textContent.trim());out.push({label,cmd:b.dataset.act,disabled:b.disabled});});return out;};

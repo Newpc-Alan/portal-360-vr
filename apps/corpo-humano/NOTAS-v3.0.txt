@@ -30,7 +30,7 @@ procedural de reserva (silhuetaProc, toraxProc, digestivoProc em corpo-models.js
 do navegador (e só texto no Quest). Nomes das fichas: coracao, pulmoes, traqueia, bronquios, diafragma, alveolos, laringe,
 faringe, nariz, atrioD, ventD, atrioE, ventE, aorta, sangue, corpo_celulas, corpo, torax.
 
-CACHE: recursos em ?v=3.0.0. Ao atualizar, troque o número em index.html.
+CACHE: recursos em ?v=3.0.1. Ao atualizar, troque o número em index.html.
 
 FLUXO DE NARRAÇÃO (v2.3.2)
 O narrador aceita uma fala encadeada (say(texto, chave, {text, key})): ao terminar a primeira, toca a segunda.
@@ -62,3 +62,6 @@ corpo-data.js (bloco "Módulo 2"); corpo-app.js trata os dois módulos (S.modulo
 Modelos: esqueleto.glb (206 ossos em 32 grupos), musculos.glb (14 pares), joelho/ombro/quadril/cotovelo.glb
 (ligamentos + extremidades cortadas). Áudios do módulo com prefixo esq- nas chaves de atividade (fichas usam o
 nome do osso/músculo); 67 novas linhas em ROTEIRO-AUDIOS.csv (118 no total).
+
+v3.0.1: 67 narrações do módulo Esqueleto gravadas e normalizadas (-16 LUFS, mono, 64 kbps; ~13 min); 118 MP3 no total.
+Fala encadeada aceita cadeia (next.next): marcador de articulação → ficha da articulação → conclusão no 3º marcador.

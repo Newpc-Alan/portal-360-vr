@@ -23,7 +23,7 @@ class Narrator {
   this.status('speech',text,this.last.key);window.speechSynthesis.speak(u);
  }
  /* toca a próxima fala da fila (ex.: explicação do gás e, em seguida, a conclusão da troca) */
- encadear(token){const n=this.next;if(!n||token!==this.token)return;this.next=null;setTimeout(()=>{if(token===this.token)this.say(n.text,n.key);},350);}
+ encadear(token){const n=this.next;if(!n||token!==this.token)return;this.next=null;setTimeout(()=>{if(token===this.token)this.say(n.text,n.key,n.next||null);},350);}
  repeat(){return this.say(this.last.text,this.last.key);}
  setVoice(v){this.voiceVolume=Math.max(0,Math.min(1,v));this.player.volume=this.voiceVolume;if(!v)this.stop();}
  async setMusic(on,volume){this.musicOn=on;if(volume!==undefined)this.musicVolume=volume;this.duck();if(!on){this.music.pause();return;}try{await this.music.play();}catch(_){this.musicOn=false;this.music.pause();}}

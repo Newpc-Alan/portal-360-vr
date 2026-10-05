@@ -150,3 +150,7 @@ v3.8.0 (VR fase B, parte 1: entrar no corpo + um lugar por sistema)
 - Ambiente por sistema (3D e VR): abóbada e partículas com a cor do sistema (CLIMA): respiratório claro-azulado, circulatório vermelho
   escuro pulsando no ritmo do coração (PULSO dos tecidos), digestório âmbar, esquelético frio neutro, muscular vermelho-terra.
   Reconstrói ao trocar de sistema.
+
+v3.8.1
+- Volta o chão de referência da v2.4 (disco escuro, anéis e névoa), agora na cor do sistema; altura = piso real do óculos, e no 3D acompanha a base do modelo.
+- Tone mapping ACES removido (escurecia abóbada, partículas e painéis do VR). Abóbada do Respiratório volta ao azul do Portal.

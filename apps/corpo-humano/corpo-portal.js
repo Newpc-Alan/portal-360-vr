@@ -185,7 +185,7 @@ Proto.exitXR=function(){exitOriginal.call(this);if(posicional)posicional.setRefD
 let ambiente=null,musicaAntes=null;
 /* v3.8: cada sistema é um lugar (abóbada e partículas com a cor do sistema; o circulatório pulsa no ritmo do coração) */
 const CLIMA={
- respiratorio:{domo:['#06161f','#0d3140','#124052','#0d3140','#06161f'],p1:[0x9fe3ff,.5],p2:[0xd8f6ff,.7]},
+ respiratorio:{domo:['#03070f','#0b2340','#0f2c4a','#0b2340','#03070f'],p1:[0x7fd6ff,.55],p2:[0xa6f0d6,.7]},
  circulatorio:{domo:['#12050a','#2c0a12','#3a0d16','#2c0a12','#12050a'],p1:[0xff6f6f,.55],p2:[0xff9a9a,.75],pulsa:true},
  digestorio:{domo:['#150d05','#30200c','#3e2a10','#30200c','#150d05'],p1:[0xffc27a,.45],p2:[0xffe0b0,.6]},
  esqueletico:{domo:['#05070d','#10161f','#161e2a','#10161f','#05070d'],p1:[0xcfd8e6,.4],p2:[0xf2f2f2,.55]},
@@ -209,7 +209,12 @@ function criarAmbiente(modo2d){
     const m=new T.PointsMaterial({size:tam,map:new T.CanvasTexture(sp),color:cor,transparent:true,opacity:op,depthWrite:false,blending:T.AdditiveBlending,sizeAttenuation:true});
     const pts=new T.Points(geo,m);pts.userData.vel=0.02+Math.random()*0.02;return pts;};
   g.add(mkPontos(420,14,.09,clima.p1[0],clima.p1[1]),mkPontos(180,6,.05,clima.p2[0],clima.p2[1]));g.userData.pulsa=!!clima.pulsa;
-  g.userData.piso=[];/* v3.2: sem piso. O modelo fica no espaço, só com a abóbada e as partículas (regra: igual no 3D e no VR). */
+  /* v3.8.1: o chão de referência da v2.4 está de volta (disco escuro + anéis na cor do sistema + névoa), porque dava a sensação de
+     lugar que o aluno sentiu falta. A altura é o piso real do óculos (local-floor); no 3D acompanha a base do modelo. */
+  const corAnel=new T.Color(clima.p1[0]);
+  const chao=new T.Mesh(new T.CircleGeometry(9,64),new T.MeshBasicMaterial({color:0x02070e,transparent:true,opacity:.9,depthWrite:false}));chao.rotation.x=-Math.PI/2;chao.position.y=CY+0.005;chao.scale.setScalar(E);g.add(chao);g.userData.piso=[[chao,0.005]];
+  for(const r of [1,2.2,3.6,5.2]){const an=new T.Mesh(new T.RingGeometry(r-.012,r+.012,96),new T.MeshBasicMaterial({color:corAnel,transparent:true,opacity:r===1?.34:.13,side:T.DoubleSide,depthWrite:false}));an.rotation.x=-Math.PI/2;an.position.y=CY+0.01;an.scale.setScalar(E);g.add(an);g.userData.piso.push([an,0.01]);}
+  const fog=new T.Mesh(new T.CircleGeometry(9,64),new T.MeshBasicMaterial({color:corAnel,transparent:true,opacity:.07,depthWrite:false,blending:T.AdditiveBlending}));fog.rotation.x=-Math.PI/2;fog.position.y=CY+0.02;fog.scale.setScalar(E);g.add(fog);g.userData.piso.push([fog,0.02]);
   return g;
 }
 function entrarAmbiente(modo2d){if(ambiente&&ambiente.userData.modo2d===!!modo2d)return;if(ambiente){M.dispose(ambiente);view.scene.remove(ambiente);ambiente=null;}ambiente=criarAmbiente(modo2d);view.scene.add(ambiente);

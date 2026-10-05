@@ -142,8 +142,9 @@ const G=()=>window.CORPO_GLTF||null;
 function silhueta(opt={}){
   const g=G();if(!g)return silhuetaProc(opt);
   const w=new T.Group();const sil=g.orgao('silhueta',()=>silhuetaProc(opt),null,{opacidade:opt.opacidade??.13});sil.userData.semEnquadre=!opt.enquadrar;w.add(sil);
-  if(opt.nariz){const nz=ball(.13,0xaad8ef,g.ponto(0,1.605,.095),{transparent:true,opacity:.85,emissive:0x1a3a4a});tag(nz,{type:'inspect',key:'nariz'});w.add(nz);
-    w.add(g.orgao('faringe',null,()=>({type:'inspect',key:'faringe'})));}
+  if(opt.nariz){w.add(g.orgao('nariz',()=>{const nz=ball(.13,0xaad8ef,V(0,0,0),{transparent:true,opacity:.85,emissive:0x1a3a4a});return nz;},()=>({type:'inspect',key:'nariz'})));
+    w.add(g.orgao('faringe',null,()=>({type:'inspect',key:'faringe'})));
+    w.add(g.orgao('laringe',null,()=>({type:'inspect',key:'laringe'})));}
   return w;
 }
 function torax(opt={}){
@@ -165,7 +166,7 @@ function torax(opt={}){
 function digestivo(opt={}){
   const g=G();if(!g)return digestivoProc(opt);
   const w=new T.Group();
-  const boca=organico(elips(.42,.22,.3,0xffb3a7,g.ponto(0,1.59,.085)),.02,4,1);tag(boca,{type:'inspect',key:'boca'});w.add(boca);
+  w.add(g.orgao('boca',()=>organico(elips(.42,.22,.3,0xffb3a7,V(0,0,0)),.02,4,1),()=>({type:'inspect',key:'boca'})));
   for(const k of ['faringe','esofago','estomago','figado','intestino_delgado','intestino_grosso'])w.add(g.orgao(k,null,()=>({type:'inspect',key:k})));
   const P=(x,y,z)=>g.ponto(x,y,z);
   w.userData.tubo=[P(0,1.59,.085),P(0,1.53,.04),P(0,1.45,-.005),P(0,1.33,-.01),P(.02,1.22,.0),P(.06,1.17,.04),P(.0,1.12,.04),P(-.03,1.06,.05),P(.04,1.0,.06),P(-.02,.95,.05),P(-.09,.96,.0),P(-.09,1.06,.01),P(0,1.09,.03),P(.09,1.06,.0),P(.09,.93,.0),P(.02,.84,.02)];
@@ -188,6 +189,20 @@ function inspection(key){
     return w;}
   if(!g){if(key==='coracao')return coracao({cavidades:true});}
   if(key==='pulmoes'){if(!g){const q=new T.Group();const a=pulmao(1),b=pulmao(-1);a.position.x=-.75;b.position.x=.75;q.add(a,b);const br=bronquios();br.position.y=.9;q.add(br);return q;}const w=centrado('pulmoes');const br=g.orgao('bronquios',null,()=>({type:'inspect',key:'bronquios'}));br.position.sub(g.ponto(...g.CENTROS.pulmoes));w.add(br);return w;}
+  const fantasma=(w,c)=>{const cb=g.orgao('cabeca',null,null,{opacidade:.16});cb.position.copy(V((g.CENTROS.cabeca[0]-c[0])*g.ESC,(g.CENTROS.cabeca[1]-c[1])*g.ESC,(g.CENTROS.cabeca[2]-c[2])*g.ESC));cb.userData.semEnquadre=true;w.add(cb);};
+  const rotulo=(w,txt,pos,dx,dz=.1)=>{const sp=label(txt,'#ffffff',.3,64);sp.position.copy(pos).add(V(dx,.03,dz));w.add(sp);w.add(ball(.012,0xffffff,pos.clone().add(V(0,0,dz*.6)),{emissive:0x335566}));};
+  if(key==='laringe'&&g){const w=centrado('laringe');const c=g.CENTROS.laringe,P=(x,y,z)=>V((x-c[0])*g.ESC,(y-c[1])*g.ESC,(z-c[2])*g.ESC);fantasma(w,c);
+    for(const [txt,pos,dx] of [['Osso hioide',P(0,1.509,.03),.32],['Epiglote',P(0,1.497,.023),-.3],['Cartilagem tireoide',P(0,1.483,.03),.34],['Cartilagem cricoide',P(0,1.462,.02),-.34]])rotulo(w,txt,pos,dx);
+    return w;}
+  if(key==='nariz'&&g){const w=centrado('nariz');const c=g.CENTROS.nariz,P=(x,y,z)=>V((x-c[0])*g.ESC,(y-c[1])*g.ESC,(z-c[2])*g.ESC);
+    fantasma(w,c);
+    for(const [txt,pos,dx] of [['Cartilagens do nariz',P(0,1.58,.105),.34],['Conchas nasais',P(.012,1.565,.06),-.34],['Cavidade nasal',P(0,1.6,.07),.34],['Nasofaringe',P(0,1.568,.025),-.3]])rotulo(w,txt,pos,dx,.3);
+    w.rotation.y=Math.PI/2;/* perfil: a cavidade nasal se lê de lado, como no atlas */
+    const q=new T.Group();q.add(w);return q;}
+  if(key==='boca'&&g){const w=centrado('boca');const c=g.CENTROS.boca,P=(x,y,z)=>V((x-c[0])*g.ESC,(y-c[1])*g.ESC,(z-c[2])*g.ESC);
+    fantasma(w,c);
+    for(const [txt,pos,dx] of [['Língua',P(0,1.515,.05),.3],['Palato mole',P(0,1.55,.035),-.3],['Úvula',P(0,1.545,.015),.3]])rotulo(w,txt,pos,dx);
+    return w;}
   if(key==='traqueia'||key==='laringe')return g?centrado('traqueia',()=>({type:'inspect',key})):traqueia();
   if(key==='bronquios')return g?centrado('bronquios'):(()=>{const q=new T.Group();const br=bronquios();br.scale.setScalar(1.6);q.add(br);return q;})();
   if(key==='diafragma')return g?centrado('diafragma'):diafragma();

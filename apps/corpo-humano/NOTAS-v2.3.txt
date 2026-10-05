@@ -1,4 +1,4 @@
-CORPO HUMANO IMERSIVO v2.2 · Portal 360º VR (NEWPC / Portal do Educador)
+CORPO HUMANO IMERSIVO v2.3 · Portal 360º VR (NEWPC / Portal do Educador)
 
 Pergunta central: como o oxigênio que respiramos chega às células?
 Arquitetura: a mesma do DNA Imersivo v2.1+ (narrador MP3 com fallback, aula guiada, resumo exportável,
@@ -18,14 +18,16 @@ MODELOS 3D (v2.2)
 Malhas anatômicas reais do Z-Anatomy (github.com/LluisV/Z-Anatomy, licença CC BY-SA 4.0), convertidas de FBX para glTF,
 simplificadas (gltfpack) e servidas em modelos/*.glb (~3,5 MB no total): pulmões, traqueia, brônquios, faringe, esôfago,
 estômago, fígado, intestinos, coração (com átrios, ventrículos, aorta, tronco pulmonar, cavas, veias pulmonares e
-coronárias nomeados), aorta, diafragma, costelas e silhueta. corpo-gltf.js carrega cada órgão já no lugar anatômico
+coronárias nomeados), aorta, diafragma, costelas e silhueta; na v2.3 entraram nariz (cartilagens, ossos nasais, conchas, mucosa da cavidade,
+nasofaringe), laringe (hioide, epiglote, tireoide, cricoide, aritenoides, laringofaringe), boca (língua, palato mole, úvula)
+e cabeca (pele da cabeça, usada como fantasma nas inspeções). corpo-gltf.js carrega cada órgão já no lugar anatômico
 (escala ESC=7.5, origem OY=1,28 m) e dispara 'corpo:modelo'; se o .glb não carregar (rede da escola), entra o modelo
 procedural de reserva (silhuetaProc, toraxProc, digestivoProc em corpo-models.js). Atribuição obrigatória no diálogo
-"Fontes e limites" (CORPO_GLTF.ATRIBUICAO). Modelos em cache por ?v=1 na URL do .glb; ao regenerar, troque em corpo-gltf.js.
+"Fontes e limites" (CORPO_GLTF.ATRIBUICAO). Modelos em cache por ?v=2 na URL do .glb; ao regenerar, troque em corpo-gltf.js.
 
 ÁUDIOS
 51 MP3 humanizados em audio/, normalizados a -16 LUFS, mono, 64 kbps (nomes em ROTEIRO-AUDIOS.csv).
 do navegador (e só texto no Quest). Nomes das fichas: coracao, pulmoes, traqueia, bronquios, diafragma, alveolos, laringe,
 faringe, nariz, atrioD, ventD, atrioE, ventE, aorta, sangue, corpo_celulas, corpo, torax.
 
-CACHE: recursos em ?v=2.2.2. Ao atualizar, troque o número em index.html.
+CACHE: recursos em ?v=2.3.0. Ao atualizar, troque o número em index.html.

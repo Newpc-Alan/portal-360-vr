@@ -50,7 +50,7 @@ Proto.textPlane=function(title,body,w,h,tom){
   const canvas=document.createElement('canvas');canvas.width=1024;canvas.height=1024;const c=canvas.getContext('2d');
   const cores={ok:['rgba(10,46,34,.97)','#3fd48a'],erro:['rgba(60,16,22,.97)','#ff6b6b'],neutro:['rgba(10,31,46,.97)','#4c8294']}[tom||'neutro'];
   c.fillStyle=cores[0];c.fillRect(0,0,1024,1024);c.strokeStyle=cores[1];c.lineWidth=8;c.strokeRect(4,4,1016,1016);
-  const grande=!!(tom&&tom!=='neutro')||(Lab.state.view==='desafio');
+  const grande=!!(tom&&tom!=='neutro')||(Lab.state.view==='desafio'||Lab.state.view==='esqDesafio');
   let y=100;
   c.font='600 70px Segoe UI,Arial';c.fillStyle='#a4e6d1';
   for(const l of quebrar(c,title,930)){c.fillText(l,52,y);y+=86;}
@@ -83,7 +83,7 @@ Proto.xrBotaoLargo=function(label,cmd,x,y,disabled,cor){
   m.position.set(x,y,UI.z);m.rotation.y=-Math.atan2(x,-UI.z);m.userData.command=cmd;this.ui.add(m);if(!disabled)this.uiHits.push(m);return m;
 };
 const VERDE={bg:'#0f6b3a',borda:'#3fd48a',texto:'#ffffff'},VERMELHO={bg:'#7a1f28',borda:'#ff6b6b',texto:'#ffffff'},APAGADO={bg:'#122531',borda:'#243a47',texto:'#5c7484'};
-function estadoDesafio(){const S=Lab.state;if(S.view!=='desafio'||S.quiz.phase!==1||S.quiz.done)return null;const i=S.quiz.index,resp=S.quiz.answers[i];if(resp===undefined)return null;const item=D.questions[i];return{correto:item.correct,escolha:resp,acertou:resp===item.correct};}
+function estadoDesafio(){const S=Lab.state;const esq=S.view==='esqDesafio';if((S.view!=='desafio'&&!esq))return null;const q=esq?S.esqQuiz:S.quiz,Q=esq?D.esqQuestions:D.questions;if(q.phase!==1||q.done)return null;const i=q.index,resp=q.answers[i];if(resp===undefined)return null;const item=Q[i];return{correto:item.correct,escolha:resp,acertou:resp===item.correct};}
 
 Proto.buildXRUI=function(){
   if(!this.xr)return;this.clearXRUI();
@@ -99,7 +99,7 @@ Proto.buildXRUI=function(){
   const panel=this.textPlane(title,body,1.06,.86,tom);panel.position.set(1.16,.30,-1.64);panel.rotation.y=-.6;this.ui.add(panel);
   const lista=this.xrReport?[{label:'Voltar à atividade',cmd:'xr:reportclose'}]:this._acoes();
   const max=8,pages=Math.max(1,Math.ceil(lista.length/max));this.uiPage=Math.min(this.uiPage||0,pages-1);
-  const quizFase=(S.view==='desafio'&&S.quiz.phase===1&&!this.xrReport);
+  const quizFase=((S.view==='desafio'&&S.quiz.phase===1)||(S.view==='esqDesafio'&&S.esqQuiz.phase===1))&&!this.xrReport;
   if(quizFase){
     panel.position.set(1.16,.52,-1.64);
     let yy=-.06;lista.forEach(a=>{let cor=null;const m=/^quiz:answer:(\d+)$/.exec(a.cmd);
@@ -205,8 +205,8 @@ const placeOriginal=Proto.placeXR;
 Proto.placeXR=function(){
   placeOriginal.call(this);
   if(!this.xr||!this.model||!this.anchor)return;
-  const S=Lab.state,fita=['caminhoAr','caminhoSangue','alimento'].includes(S.view);
-  if(S.view==='contexto'&&!S.context){
+  const S=Lab.state,fita=['caminhoAr','caminhoSangue','alimento','coluna','braco'].includes(S.view);
+  if(((S.view==='contexto'&&!S.context)||['esqContexto','ossos','musculos','articulacoes','esqDesafio'].includes(S.view))&&!this.copy){
     // corpo inteiro em tamanho natural, pés no piso, a 1,8 m do professor
     const tudo=this.boxDe(this.model,true);if(!tudo.isEmpty()){const alt=tudo.getSize(new T.Vector3()).y,esc=1.72/alt;this.root.scale.multiplyScalar(esc);this.root.updateMatrixWorld(true);const b=this.boxDe(this.model,true),c=b.getCenter(new T.Vector3());this.root.position.x+=this.anchor.p.x+this.anchor.f.x*1.8-c.x;this.root.position.z+=this.anchor.p.z+this.anchor.f.z*1.8-c.z;this.root.position.y+=.05-b.min.y;this.root.updateMatrixWorld(true);}
     return;

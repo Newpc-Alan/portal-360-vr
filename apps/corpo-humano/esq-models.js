@@ -1,7 +1,7 @@
 /* Esqueleto e Movimento · cenas 3D (Three.js r128) sobre as malhas do Z-Anatomy
    Cada cena é um Group; peças clicáveis têm userData.hit = {type, key}. Usa ESQ_GLTF para carregar e posicionar. */
 (function(){'use strict';
-const T=THREE,D=ESQ_DATA,V=(x=0,y=0,z=0)=>new T.Vector3(x,y,z);
+const T=THREE,D=CORPO_DATA,V=(x=0,y=0,z=0)=>new T.Vector3(x,y,z);
 const G=()=>window.ESQ_GLTF;
 const COR={osso:0xe9e4d6,musculo:0xb8343f,pele:0x8fc3dd,marcador:0xffd166,ok:0x3ddc84};
 const mat=(color,extra={})=>new T.MeshStandardMaterial(Object.assign({color,roughness:.5,metalness:.05},extra));

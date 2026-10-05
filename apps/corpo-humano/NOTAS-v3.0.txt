@@ -1,4 +1,4 @@
-CORPO HUMANO IMERSIVO v2.4 · Portal 360º VR (NEWPC / Portal do Educador)
+CORPO HUMANO IMERSIVO v3.0 · Portal 360º VR (NEWPC / Portal do Educador)
 
 Pergunta central: como o oxigênio que respiramos chega às células?
 Arquitetura: a mesma do DNA Imersivo v2.1+ (narrador MP3 com fallback, aula guiada, resumo exportável,
@@ -30,7 +30,7 @@ procedural de reserva (silhuetaProc, toraxProc, digestivoProc em corpo-models.js
 do navegador (e só texto no Quest). Nomes das fichas: coracao, pulmoes, traqueia, bronquios, diafragma, alveolos, laringe,
 faringe, nariz, atrioD, ventD, atrioE, ventE, aorta, sangue, corpo_celulas, corpo, torax.
 
-CACHE: recursos em ?v=2.4.1. Ao atualizar, troque o número em index.html.
+CACHE: recursos em ?v=3.0.0. Ao atualizar, troque o número em index.html.
 
 FLUXO DE NARRAÇÃO (v2.3.2)
 O narrador aceita uma fala encadeada (say(texto, chave, {text, key})): ao terminar a primeira, toca a segunda.
@@ -47,3 +47,18 @@ Tudo procedural (o Z-Anatomy não cobre escala microscópica); a inspeção tem 
 REGRA (v2.4.1): toda melhoria do VR vale também no 3D. O ambiente (abóbada, partículas, piso com anéis) agora existe
 nos dois modos (no 3D o piso fica em y=-3,6 e os anéis 1,9× maiores); a trilha de fundo toca no 3D após o primeiro
 toque, respeitando o checkbox de Ajustes. Mesma mudança aplicada ao DNA Imersivo (dna-portal.js 2.2.4).
+
+
+MÓDULO 2 · ESQUELETO E MOVIMENTO (v3.0)
+Decisão de produto (out/2026): tudo dentro de um só "Corpo Humano Imersivo", em módulos, não em apps separados.
+O menu lateral mostra os dois módulos (Respiração, circulação e digestão · Esqueleto e movimento); cada um tem 8
+atividades, Aula guiada própria e Desafio próprio; o Resumo cobre os dois. No VR, o painel lista as atividades do
+módulo atual e um botão "⇄" para trocar de módulo sem sair da sessão.
+Atividades: esqContexto (pele → esqueleto → músculos), ossos (21 grupos), movimento (cotovelo articulado, bíceps e
+tríceps), coluna (ordenar 5 regiões), articulacoes (marcadores de dobradiça/bola-e-soquete/pivô → inspeção do joelho,
+ombro, atlas-áxis), braco (ordenar clavícula → mão), musculos (14, com ossos de apoio), esqDesafio (8 situações).
+Código: esq-gltf.js (loader com recorte por partes, ESC 7.5 / OY 0.95), esq-models.js (cenas), conteúdo em
+corpo-data.js (bloco "Módulo 2"); corpo-app.js trata os dois módulos (S.modulo, quizState(), guideAtual()).
+Modelos: esqueleto.glb (206 ossos em 32 grupos), musculos.glb (14 pares), joelho/ombro/quadril/cotovelo.glb
+(ligamentos + extremidades cortadas). Áudios do módulo com prefixo esq- nas chaves de atividade (fichas usam o
+nome do osso/músculo); 67 novas linhas em ROTEIRO-AUDIOS.csv (118 no total).

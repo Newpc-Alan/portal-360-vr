@@ -65,3 +65,7 @@ nome do osso/músculo); 67 novas linhas em ROTEIRO-AUDIOS.csv (118 no total).
 
 v3.0.1: 67 narrações do módulo Esqueleto gravadas e normalizadas (-16 LUFS, mono, 64 kbps; ~13 min); 118 MP3 no total.
 Fala encadeada aceita cadeia (next.next): marcador de articulação → ficha da articulação → conclusão no 3º marcador.
+
+v3.1: painel lateral mais limpo (listas de órgãos/ossos/músculos recolhidas em "Escolher na lista", legenda só durante a
+narração, textos secundários enxutos; no VR isso reduz os botões do painel). No 3D a abóbada acompanha o piso
+(horizonte logo acima dos pés), eliminando a impressão de corpo enterrado. Recursos em ?v=3.1.0.

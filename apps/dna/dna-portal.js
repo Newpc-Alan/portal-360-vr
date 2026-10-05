@@ -164,7 +164,7 @@ function criarAmbiente(modo2d){
   x.fillStyle=gr;x.fillRect(0,0,16,512);
   const tex=new T.CanvasTexture(c);tex.encoding=T.sRGBEncoding;
   const domo=new T.Mesh(new T.SphereGeometry(45,48,32),new T.MeshBasicMaterial({map:tex,side:T.BackSide,depthWrite:false}));
-  domo.position.y=1.2;g.add(domo);
+  domo.position.y=modo2d?-1.6:1.2;g.add(domo);g.userData.domo=domo;
   // partículas "meio celular": duas camadas, próxima e distante
   const mkPontos=(n,raio,tam,cor,op)=>{const pos=new Float32Array(n*3);for(let i=0;i<n;i++){const r=raio*(0.35+0.65*Math.cbrt(Math.random())),th=Math.random()*Math.PI*2,ph=Math.acos(2*Math.random()-1);pos[i*3]=r*Math.sin(ph)*Math.cos(th);pos[i*3+1]=1.4+r*Math.cos(ph)*0.55;pos[i*3+2]=r*Math.sin(ph)*Math.sin(th);}
     const geo=new T.BufferGeometry();geo.setAttribute('position',new T.BufferAttribute(pos,3));
@@ -192,7 +192,7 @@ const frameOriginal=Proto.frame;
 Proto.frame=function(time,frame){
   if(this.xr){if(!ambiente||ambiente.userData.modo2d)entrarAmbiente(false);}else{if(!ambiente)entrarAmbiente(true);armarMusica2d();
     /* no 3D o piso acompanha a base do modelo (corpo inteiro nunca fica com os pés abaixo do chão) */
-    ambiente.userData.n=(ambiente.userData.n||0)+1;if(ambiente.userData.n%15===1&&this.model){const b=this.boxDe?this.boxDe(this.model,true):new T.Box3().setFromObject(this.model);const y=b.isEmpty()?-3.6:Math.min(-3.6,b.min.y-.12);if(Math.abs((ambiente.userData.pisoY??-3.6)-y)>.01){ambiente.userData.pisoY=y;(ambiente.userData.piso||[]).forEach(([o,d])=>{o.position.y=y+d;});}}}
+    ambiente.userData.n=(ambiente.userData.n||0)+1;if(ambiente.userData.n%15===1&&this.model){const b=this.boxDe?this.boxDe(this.model,true):new T.Box3().setFromObject(this.model);const y=b.isEmpty()?-3.6:Math.min(-3.6,b.min.y-.12);if(Math.abs((ambiente.userData.pisoY??-3.6)-y)>.01){ambiente.userData.pisoY=y;(ambiente.userData.piso||[]).forEach(([o,d])=>{o.position.y=y+d;});if(ambiente.userData.domo)ambiente.userData.domo.position.y=y+2.0;/* horizonte da abóbada logo acima do piso: nada do modelo fica 'enterrado' */}}}
   if(ambiente){const t=(time||performance.now())*0.001;ambiente.children.forEach(o=>{if(o.isPoints){o.rotation.y=t*o.userData.vel;o.position.y=Math.sin(t*0.35+o.userData.vel*50)*0.08;}});}
   return frameOriginal.call(this,time,frame);
 };

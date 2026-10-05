@@ -23,9 +23,9 @@ function recorte(arq,partes,opt={}){const g=G();const o=g.modelo(arq,Object.assi
 /* ---------- Cenas ---------- */
 function contexto(level){
   const g=new T.Group();
-  if(level===0){g.add(silhueta({opacidade:.2,enquadrar:true,hit:()=>({type:'context',target:'esqueleto'})}));g.add(esqueleto({semHit:true,hit:()=>({type:'context',target:'esqueleto'})}));textAt(g,'CORPO HUMANO',0,-6.2,0,4,'#89acbd');return g;}
-  if(level===1){g.add(esqueleto({hit:()=>({type:'context',target:'musculos'})}));textAt(g,'ESQUELETO · 206 OSSOS',0,-6.2,0,4.6,'#ffe3a8');return g;}
-  g.add(esqueleto({semHit:true}),musculos({hit:inspectHit}));textAt(g,'MÚSCULOS SOBRE OS OSSOS',0,-6.2,0,5,'#ffb0b0');return g;
+  if(level===0){g.add(silhueta({opacidade:.2,enquadrar:true,hit:()=>({type:'context',target:'esqueleto'})}));g.add(esqueleto({semHit:true,hit:()=>({type:'context',target:'esqueleto'})}));textAt(g,'CORPO HUMANO',0,-7.9,0,4,'#89acbd');return g;}
+  if(level===1){g.add(esqueleto({hit:()=>({type:'context',target:'musculos'})}));textAt(g,'ESQUELETO · 206 OSSOS',0,-7.9,0,4.6,'#ffe3a8');return g;}
+  g.add(esqueleto({semHit:true}),musculos({hit:inspectHit}));textAt(g,'MÚSCULOS SOBRE OS OSSOS',0,-7.9,0,5,'#ffb0b0');return g;
 }
 function explorar(){const g=new T.Group();g.add(esqueleto());g.add(silhueta({opacidade:.06}));g.userData.esqueleto=true;return g;}
 function musculosCena(){const g=new T.Group();g.add(esqueleto({semHit:true,opacidade:.42}));g.add(musculos());return g;}

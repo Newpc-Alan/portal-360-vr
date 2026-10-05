@@ -18,3 +18,5 @@ nav button.nav-missao{min-height:40px;flex-direction:row;gap:7px;justify-content
 nav button.nav-missao .nav-num{font-size:12px}
 nav details.nav-breve summary{cursor:pointer;font-size:9.5px;color:#5f8aa3;text-align:center;padding:6px 2px;list-style:none}
 nav details.nav-breve[open] summary{color:#8fb0c2}
+
+/* v3.4 relatório do professor */.rel-prof{margin:14px 0 6px;padding:14px;border:1px solid #3e6a5c;background:#0f2f2c;border-radius:12px}.rel-prof h3{margin:0 0 4px;font-size:15px;color:#b9f0da}.rel-form{display:grid;grid-template-columns:1fr 1fr;gap:8px 10px;margin:10px 0 4px}.rel-form label{margin:0;font-size:11px;color:#9fc9c2}.rel-form input{width:100%;margin-top:4px;padding:8px;background:#0d2132;color:#ddf2ff;border:1px solid #3b5a6e;border-radius:7px}@media (max-width:560px){.rel-form{grid-template-columns:1fr}}

@@ -4,17 +4,17 @@
 <meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <meta name="theme-color" content="#08192c"><meta name="description" content="Corpo Humano Imersivo: respiração, circulação e digestão (caminho do oxigênio) e esqueleto e movimento (ossos, articulações e músculos), com modelos anatômicos reais, narração em português, 3D e realidade virtual.">
 <title>Corpo Humano Imersivo · Laboratório de aprendizagem | Portal do Educador</title>
-<link rel="icon" href="assets/logo.png"><link rel="stylesheet" href="corpo-lab.css?v=3.3.0"><link rel="stylesheet" href="corpo-portal.css?v=3.3.0">
+<link rel="icon" href="assets/logo.png"><link rel="stylesheet" href="corpo-lab.css?v=3.4.0"><link rel="stylesheet" href="corpo-portal.css?v=3.4.0">
 <script defer src="vendor/three.r128.min.js"></script>
 <script defer src="vendor/GLTFLoader.r128.js"></script>
-<script defer src="corpo-data.js?v=3.3.0"></script>
-<script defer src="corpo-gltf.js?v=3.3.0"></script>
-<script defer src="corpo-models.js?v=3.3.0"></script>
-<script defer src="esq-gltf.js?v=3.3.0"></script>
-<script defer src="esq-models.js?v=3.3.0"></script>
-<script defer src="corpo-audio.js?v=3.3.0"></script>
-<script defer src="corpo-app.js?v=3.3.0"></script>
-<script defer src="corpo-portal.js?v=2.4.2"></script>
+<script defer src="corpo-data.js?v=3.4.0"></script>
+<script defer src="corpo-gltf.js?v=3.4.0"></script>
+<script defer src="corpo-models.js?v=3.4.0"></script>
+<script defer src="esq-gltf.js?v=3.4.0"></script>
+<script defer src="esq-models.js?v=3.4.0"></script>
+<script defer src="corpo-audio.js?v=3.4.0"></script>
+<script defer src="corpo-app.js?v=3.4.0"></script><script defer src="corpo-relatorio.js?v=3.4.0"></script>
+<script defer src="corpo-portal.js?v=3.4.0"></script>
 </head>
 <body>
 <div id="lab">
@@ -60,7 +60,7 @@
  <p class="fine">A voz humana gravada tem prioridade quando seu MP3 está na pasta <code>audio/</code>. A trilha baixa automaticamente durante uma fala. Não há cadastro do aluno.</p>
  <button id="newStudent" data-action="newStudent" class="danger">Iniciar novo aluno</button>
 </dialog>
-<dialog id="summaryDialog"><div class="dialog-head"><h2>Resumo da experiência</h2><button id="closeSummary" data-action="closeSummary" class="icon" aria-label="Fechar resumo">✕</button></div><div id="summaryContent"></div><div class="button-row"><button id="downloadJSON" data-action="downloadJSON" class="primary">Exportar JSON</button><button id="downloadCSV" data-action="downloadCSV">Exportar CSV</button></div><p class="fine">Registros desta aba, sem nome do aluno. O resumo descreve ações e tentativas; não é um diagnóstico de aprendizagem.</p></dialog>
+<dialog id="summaryDialog"><div class="dialog-head"><h2>Resumo da experiência</h2><button id="closeSummary" data-action="closeSummary" class="icon" aria-label="Fechar resumo">✕</button></div><div id="summaryContent"></div><section class="rel-prof"><h3>Relatório do professor</h3><p class="fine">Uma página com a turma, as missões concluídas e o resultado do Desafio situação por situação. Os campos ficam salvos neste dispositivo.</p><div class="rel-form"><label>Escola<input id="rel_escola" type="text" autocomplete="off" placeholder="Nome da escola"></label><label>Turma<input id="rel_turma" type="text" autocomplete="off" placeholder="Ex.: 8º A"></label><label>Aluno ou grupo<input id="rel_grupo" type="text" autocomplete="off" placeholder="Opcional"></label><label>Professor(a)<input id="rel_professor" type="text" autocomplete="off" placeholder="Nome"></label></div><div class="button-row"><button data-action="relImprimir" class="primary">🖨 Imprimir / PDF</button><button data-action="relAbrir">Abrir em nova aba</button><button data-action="relBaixar">Baixar HTML</button></div></section><details><summary>Exportar registros brutos</summary><div class="button-row"><button id="downloadJSON" data-action="downloadJSON">Exportar JSON</button><button id="downloadCSV" data-action="downloadCSV">Exportar CSV</button></div></details><p class="fine">Registros desta aba; a identificação do aluno ou grupo é opcional e fica apenas neste dispositivo. O resumo descreve ações e tentativas; não é um diagnóstico de aprendizagem.</p></dialog>
 <dialog id="sourcesDialog"><form method="dialog"><div class="dialog-head"><h2>Fontes e limites</h2><button class="icon" aria-label="Fechar fontes">✕</button></div></form><div id="sourcesContent"></div></dialog>
 <script>window.addEventListener('error',function(e){console.error('Corpo Humano:',e.message);});</script>
 </body></html>

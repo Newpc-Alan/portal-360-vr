@@ -83,3 +83,13 @@ acordeão: o sistema aberto mostra suas missões e um Desafio próprio (pergunta
 S.quizzes[sistema]). D.sistemas em corpo-data.js define atividades e perguntas de cada sistema; uma atividade pode
 aparecer em mais de um sistema (Explorar no Respiratório e no Circulatório). Aula guiada por sistema. No VR, a raiz
 mostra "Sistema: X" (abre a lista de sistemas) e "Missão N de M". Comandos: sistema:<id>. Recursos em ?v=3.3.0.
+
+v3.4 (relatório do professor)
+- Novo corpo-relatorio.js: relatório de uma página por sessão (escola, turma, aluno/grupo opcional, professor; data, duração; sistemas trabalhados;
+  missões concluídas com registro; Desafio situação por situação com habilidade, escolha e resposta esperada; totais; espaço para observações).
+- Saídas: Imprimir/PDF (iframe srcdoc, sem popup), Abrir em nova aba, Baixar HTML autocontido. Campos da turma ficam em localStorage (pde_corpo_turma)
+  e sobrevivem ao "Novo aluno"; o registro da sessão continua em sessionStorage.
+- Botão "Relatório do professor" na tela de Desafio concluído e seção no diálogo Resumo; exportação JSON/CSV movida para "Exportar registros brutos".
+- Um sistema entra no relatório se tiver ≥2 missões concluídas, qualquer situação respondida, aula guiada concluída ou for o sistema atual
+  (Explorar é compartilhado entre Respiratório e Circulatório e sozinho não puxa o outro sistema).
+- D.version 3.4.0; corpo-portal.js com cache ?v=3.4.0 (estava 2.4.2 desde a 3.x).

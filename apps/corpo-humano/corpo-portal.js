@@ -28,7 +28,10 @@ window.PortalCorpo={versao:'2.0.0',get emVR(){return !!view.xr;}};
 /* ---------- 2. Tela de entrada (?vr=1) ---------- */
 function mensagem(txt){const f=document.getElementById('feedback');if(!f)return;f.hidden=false;f.className='feedback warning';f.textContent=txt;}
 if(q.get('vr')==='1'){
-  const semVR=()=>mensagem('Para a experiência em VR, abra este mesmo link no navegador do óculos (Meta Quest). Aqui você pode explorar em 3D normalmente.');
+  const semVR=(motivo)=>{const emFrame=(()=>{try{return window.top!==window;}catch(_){return true;}})();
+    const det='Diagnóstico: '+(motivo||'')+' · HTTPS='+window.isSecureContext+' · navigator.xr='+(!!navigator.xr)+' · dentro de iframe='+emFrame+' · '+navigator.userAgent.slice(0,90);
+    mensagem('Para a experiência em VR, abra este mesmo link no navegador do óculos (Meta Quest). Aqui você pode explorar em 3D normalmente. '+det);
+    try{const d=document.createElement('div');d.className='stage-error';d.style.zIndex='2147483400';d.innerHTML='<p><b>Não consegui abrir o modo VR neste navegador.</b></p><p style="font-size:12px;word-break:break-word">'+det.replace(/</g,'&lt;')+'</p><p class="fine">Toque para fechar. Se você está no Meta Quest, abra este link no navegador do óculos (Meta Quest Browser), fora de qualquer outra janela.</p>';d.addEventListener('click',()=>d.remove());document.getElementById('stage').appendChild(d);}catch(_){}};
   const mostrarEntrada=()=>{
     const ov=document.createElement('div');ov.id='vrGate';
     ov.innerHTML='<div class="vrgate-box"><img src="assets/logo.png" alt=""><div class="vrgate-t">Corpo Humano Imersivo</div><div class="vrgate-s">Coloque o óculos e toque para começar</div><button type="button" data-action="vr-entrar">🥽 Entrar em VR</button><button type="button" class="sec" data-action="vr-3d">Explorar em 3D</button></div>';
@@ -36,8 +39,8 @@ if(q.get('vr')==='1'){
     ov.addEventListener('click',e=>{const b=e.target.closest('[data-action]');if(!b)return;
       const S=Lab.state,bv=()=>{if(!S.welcomed&&Lab.boasVindas)Lab.boasVindas();};if(b.dataset.action==='vr-entrar'){window.alternarVR().finally(()=>ov.remove());}else{ov.remove();bv();}});
   };
-  if(!window.isSecureContext||!navigator.xr)semVR();
-  else navigator.xr.isSessionSupported('immersive-vr').then(ok=>ok?mostrarEntrada():semVR()).catch(semVR);
+  if(!window.isSecureContext)semVR('página sem HTTPS');else if(!navigator.xr)semVR('navegador sem WebXR (navigator.xr ausente)');
+  else navigator.xr.isSessionSupported('immersive-vr').then(ok=>ok?mostrarEntrada():semVR('isSessionSupported(immersive-vr) = false')).catch(e=>semVR('isSessionSupported lançou erro: '+(e&&e.message)));
 }
 
 /* ---------- 3. Interface VR: nítida, maior e com feedback de cor ---------- */

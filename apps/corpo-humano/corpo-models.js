@@ -196,7 +196,8 @@ function inspection(key){
     return w;}
   if(key==='nariz'&&g){const w=centrado('nariz');const c=g.CENTROS.nariz,P=(x,y,z)=>V((x-c[0])*g.ESC,(y-c[1])*g.ESC,(z-c[2])*g.ESC);
     fantasma(w,c);
-    for(const [txt,pos,dx] of [['Cartilagens do nariz',P(0,1.58,.105),.34],['Conchas nasais',P(.012,1.565,.06),-.34],['Cavidade nasal',P(0,1.6,.07),.34],['Nasofaringe',P(0,1.568,.025),-.3]])rotulo(w,txt,pos,dx,.3);
+    {const o=g.orgao('faringe',null,()=>({type:'inspect',key:'faringe'}),{opacidade:.35});o.position.copy(P(...g.CENTROS.faringe));o.userData.semEnquadre=true;w.add(o);}
+    for(const [txt,pos,dx] of [['Cartilagens do nariz',P(0,1.58,.105),.34],['Conchas nasais',P(.012,1.565,.06),-.34],['Cavidade nasal',P(0,1.6,.07),.34],['Nasofaringe',P(0,1.571,.028),-.3]])rotulo(w,txt,pos,dx,.3);
     w.rotation.y=Math.PI/2;/* perfil: a cavidade nasal se lê de lado, como no atlas */
     const q=new T.Group();q.add(w);return q;}
   if(key==='boca'&&g){const w=centrado('boca');const c=g.CENTROS.boca,P=(x,y,z)=>V((x-c[0])*g.ESC,(y-c[1])*g.ESC,(z-c[2])*g.ESC);
@@ -207,7 +208,10 @@ function inspection(key){
   if(key==='bronquios')return g?centrado('bronquios'):(()=>{const q=new T.Group();const br=bronquios();br.scale.setScalar(1.6);q.add(br);return q;})();
   if(key==='diafragma')return g?centrado('diafragma'):diafragma();
   if(key==='alveolos')return alveolo({});
-  if(key==='faringe'&&g)return centrado('faringe');
+  if(key==='faringe'&&g){const w=centrado('faringe',p=>({type:'inspect',key:'faringe'}));const c=g.CENTROS.faringe,P=(x,y,z)=>V((x-c[0])*g.ESC,(y-c[1])*g.ESC,(z-c[2])*g.ESC);fantasma(w,c);
+    for(const k of ['nariz','laringe','boca']){const o=g.orgao(k,null,()=>({type:'inspect',key:k}),{opacidade:.35});o.position.copy(P(...g.CENTROS[k]));o.userData.semEnquadre=true;w.add(o);}
+    for(const [txt,pos,dx] of [['Nasofaringe (ar)',P(0,1.571,.028),-.34],['Orofaringe (ar e alimento)',P(0,1.53,.042),-.4],['Laringofaringe',P(0,1.483,.016),-.34]])rotulo(w,txt,pos,dx,.25);
+    w.rotation.y=Math.PI/2;const q=new T.Group();q.add(w);return q;}
   if(key==='nariz'||key==='faringe'){const q=new T.Group();const s=silhuetaProc({opacidade:.25,nariz:true});s.scale.setScalar(.8);s.position.y=-2.2;q.add(s);return q;}
   if(key==='sangue'||key==='corpo_celulas'){const q=new T.Group();const cap=tubo([V(-1.5,0,0),V(-.5,.2,.1),V(.5,-.2,-.1),V(1.5,0,0)],.22,COR.arteria,{transparent:true,opacity:.45});q.add(cap);for(let i=0;i<7;i++){const h=new T.Mesh(new T.TorusGeometry(.09,.045,8,16),mat(0xff5a5a));h.position.set(-1.3+i*.43,Math.sin(i)*.08,0);h.rotation.y=Math.PI/2;q.add(h);}return q;}
   if(['esofago','estomago','intestino_delgado','intestino_grosso','figado'].includes(key)&&g)return centrado(key);

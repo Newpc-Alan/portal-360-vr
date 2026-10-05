@@ -23,11 +23,11 @@ nasofaringe), laringe (hioide, epiglote, tireoide, cricoide, aritenoides, laring
 e cabeca (pele da cabeça, usada como fantasma nas inspeções). corpo-gltf.js carrega cada órgão já no lugar anatômico
 (escala ESC=7.5, origem OY=1,28 m) e dispara 'corpo:modelo'; se o .glb não carregar (rede da escola), entra o modelo
 procedural de reserva (silhuetaProc, toraxProc, digestivoProc em corpo-models.js). Atribuição obrigatória no diálogo
-"Fontes e limites" (CORPO_GLTF.ATRIBUICAO). Modelos em cache por ?v=2 na URL do .glb; ao regenerar, troque em corpo-gltf.js.
+"Fontes e limites" (CORPO_GLTF.ATRIBUICAO). Modelos em cache por ?v=3 na URL do .glb; ao regenerar, troque em corpo-gltf.js.
 
 ÁUDIOS
 51 MP3 humanizados em audio/, normalizados a -16 LUFS, mono, 64 kbps (nomes em ROTEIRO-AUDIOS.csv).
 do navegador (e só texto no Quest). Nomes das fichas: coracao, pulmoes, traqueia, bronquios, diafragma, alveolos, laringe,
 faringe, nariz, atrioD, ventD, atrioE, ventE, aorta, sangue, corpo_celulas, corpo, torax.
 
-CACHE: recursos em ?v=2.3.0. Ao atualizar, troque o número em index.html.
+CACHE: recursos em ?v=2.3.1. Ao atualizar, troque o número em index.html.

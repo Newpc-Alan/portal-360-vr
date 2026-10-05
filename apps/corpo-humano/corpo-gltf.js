@@ -6,11 +6,11 @@
 (function(){'use strict';
 const T=THREE;
 const ESC=7.5,OY=1.28;
-const CENTROS={pulmoes:[-0.001,1.299,0.01],traqueia:[0,1.433,0.006],bronquios:[0.002,1.303,0.005],faringe:[0,1.55,0.042],esofago:[0.005,1.335,-0.008],estomago:[0.038,1.166,0.036],figado:[-0.012,1.175,0.023],intestino_delgado:[0.009,1.012,0.043],intestino_grosso:[0,0.975,0.008],coracao:[0.022,1.284,0.019],aorta:[0.011,1.213,-0.003],diafragma:[0.007,1.152,0.009],costelas:[0,1.255,0.008],silhueta:[0,0.854,0],laringe:[0,1.4837,0.0193],nariz:[0,1.5766,0.0627],boca:[0,1.5259,0.0458],cabeca:[0,1.555,0.0047]};
+const CENTROS={pulmoes:[-0.001,1.299,0.01],traqueia:[0,1.433,0.006],bronquios:[0.002,1.303,0.005],faringe:[0,1.5238,0.0375],esofago:[0.005,1.335,-0.008],estomago:[0.038,1.166,0.036],figado:[-0.012,1.175,0.023],intestino_delgado:[0.009,1.012,0.043],intestino_grosso:[0,0.975,0.008],coracao:[0.022,1.284,0.019],aorta:[0.011,1.213,-0.003],diafragma:[0.007,1.152,0.009],costelas:[0,1.255,0.008],silhueta:[0,0.854,0],laringe:[0,1.484,0.0197],nariz:[0,1.5766,0.0783],boca:[0,1.5259,0.0458],cabeca:[0,1.555,0.0047]};
 const CORACAO_PARTES={atrioD:[-0.0145,1.2955,0.0291],atrioE:[0.021,1.3005,0.0113],ventD:[0.0197,1.2852,0.0477],ventE:[0.0424,1.2815,0.0281],aorta:[0.0112,1.3525,0.0006],pulmonar:[0.0259,1.3135,0.0117],cavas:[-0.0145,1.2042,0.0172],veiasPulm:[0.0053,1.3131,-0.0129]};
 const CORES={pulmoes:0xd98585,traqueia:0x9ed6ef,bronquios:0xbfe3f4,faringe:0xaad8ef,esofago:0xe9a070,estomago:0xe08a50,figado:0x9e4d40,intestino_delgado:0xf0c07a,intestino_grosso:0xc99a6b,diafragma:0xb48ae8,costelas:0xe9e4d6,silhueta:0x8fc3dd,cabeca:0x8fc3dd,aorta:0xe8484f};
-const CORES_PARTES={laringe:{tireoide:0xd8ecf3,cricoide:0xcfe3ee,aritenoide:0xc4dbe8,hioide:0xe9e4d6,epiglote:0xe7a0a0,laringofaringe:0xaad8ef},nariz:{cartilagens:0xd8ecf3,ossos:0xe9e4d6,conchas:0xe3b7b0,mucosa:0xe39a9a,nasofaringe:0xaad8ef},boca:{lingua:0xd96b73,palato:0xe8a39c,uvula:0xe08a90}};
-const OPAC_PARTES={laringe:{laringofaringe:.45},nariz:{mucosa:.8,nasofaringe:.6}};
+const CORES_PARTES={laringe:{tireoide:0xd8ecf3,cricoide:0xcfe3ee,aritenoide:0xc4dbe8,hioide:0xe9e4d6,epiglote:0xe7a0a0,laringofaringe:0xaad8ef},nariz:{cartilagens:0xd8ecf3,ossos:0xe9e4d6,conchas:0xe3b7b0,mucosa:0xe39a9a},faringe:{nasofaringe:0x9ed6ef,orofaringe:0xaad8ef,laringofaringe:0xbfe3f4},boca:{lingua:0xd96b73,palato:0xe8a39c,uvula:0xe08a90}};
+const OPAC_PARTES={nariz:{mucosa:.8}};
 const CORES_CORACAO={atrioD:0xb8343f,atrioE:0xd9434f,ventD:0xc43b48,ventE:0xd9434f,aorta:0xe8484f,pulmonar:0x4f7fe0,cavas:0x4f7fe0,veiasPulm:0xe8484f,coronarias:0x8f2a33};
 const cache={},fila={};let loader=null;
 function toLocal(p){return new T.Vector3(p[0]*ESC,(p[1]-OY)*ESC,p[2]*ESC);}
@@ -28,7 +28,7 @@ function carregar(key,cb){
   fila[key]=[cb];
   if(!T.GLTFLoader){cache[key]=null;fila[key].forEach(f=>f(null));delete fila[key];return;}
   loader=loader||new T.GLTFLoader();
-  loader.load('modelos/'+key+'.glb?v=2',g=>{cache[key]=g.scene;fila[key].forEach(f=>f(g.scene));delete fila[key];},undefined,()=>{console.warn('Corpo Humano: modelo não carregou, usando reserva:',key);cache[key]=null;fila[key].forEach(f=>f(null));delete fila[key];});
+  loader.load('modelos/'+key+'.glb?v=3',g=>{cache[key]=g.scene;fila[key].forEach(f=>f(g.scene));delete fila[key];},undefined,()=>{console.warn('Corpo Humano: modelo não carregou, usando reserva:',key);cache[key]=null;fila[key].forEach(f=>f(null));delete fila[key];});
 }
 /* orgao(key, reserva(), hitFn(parte)) → Group posicionado no lugar anatômico */
 function orgao(key,reserva,hitFn,opt={}){

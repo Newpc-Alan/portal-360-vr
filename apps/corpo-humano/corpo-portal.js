@@ -121,9 +121,10 @@ Proto.buildXRUI=function(){
   if(menu==='raiz'){
     this.xrButton('Sistema: '+sis.nome,'xr:menu:sistemas',-1.18,.6,.5,false,AZ);
     this.xrButton('▣ Missão '+(idx+1)+' de '+atv.length+': '+atual.label,'xr:menu:missoes',-1.18,.6-UI.passo,.5,false,VD);
-    this.xrButton('⚙ Controles','xr:menu:controles',-1.18,.6-2*UI.passo,.5);
-    this.xrButton('🔊 Ouvir de novo','voice:repeat',-1.18,.6-3*UI.passo,.5);
-    this.xrButton('🥽 Sair do VR','vr',-1.18,.6-4.3*UI.passo,.5,false,{bg:'#5a2a16',borda:'#ff9f6b',texto:'#fff2ea'});
+    this.xrButton(this.dentro?'⤡ Sair de dentro do corpo':'⤢ Entrar no corpo','xr:dentro',-1.18,.6-2*UI.passo,.5,false,this.dentro?{bg:'#4a2a0f',borda:'#ffc77a',texto:'#fff6e8'}:{bg:'#2a1050',borda:'#c9a6ff',texto:'#ffffff'});
+    this.xrButton('⚙ Controles','xr:menu:controles',-1.18,.6-3*UI.passo,.5);
+    this.xrButton('🔊 Ouvir de novo','voice:repeat',-1.18,.6-4*UI.passo,.5);
+    this.xrButton('🥽 Sair do VR','vr',-1.18,.6-5.3*UI.passo,.5,false,{bg:'#5a2a16',borda:'#ff9f6b',texto:'#fff2ea'});
   }else if(menu==='missoes'){
     atv.forEach((a,i)=>this.xrButton((i+1)+'. '+a.label,'view:'+a.id,-1.18,.6-i*UI.passo,.5,false,a.id===S.view?VD:null));
     this.xrButton('◀ Voltar','xr:menu:raiz',-1.18,.6-(atv.length+.3)*UI.passo,.5);
@@ -148,11 +149,17 @@ Proto.xrSelect=function(ctrl){
   if(this.held.has(ctrl))return xrSelectOriginal.call(this,ctrl);
   const ray=this.controllerRay(ctrl);
   const ui=ray.intersectObjects(this.uiHits,false)[0];
+  if(ui&&ui.object.userData.command==='xr:dentro'){this.alternarDentro();return;}
   this.root.updateMatrixWorld(true);
   const hit=ui?null:this.hits(ray)[0];
   if(!ui&&!hit){narrator.stop();return;}
   return xrSelectOriginal.call(this,ctrl);
 };
+/* v3.8 · "Entrar no corpo": o modelo cresce até virar uma sala em volta do aluno */
+const DENTRO_TXT={torax:'Você está dentro do tórax. Olhe em volta: as costelas protegem o coração e os pulmões, e a traqueia desce logo acima de você. Aponte para qualquer estrutura para ouvir sobre ela.',corpo:'Você está ao lado de um corpo gigante. Dê a volta, olhe de perto as articulações e aponte para o que quiser conhecer.',fora:'De volta ao tamanho natural.'};
+Proto.alternarDentro=function(){this.dentro=!this.dentro;this.anchor=null;this.xrZoom=1;if(this.copy)Lab.command('inspect:close');this.placeXR();this.buildXRUI();
+  const S=Lab.state,inteiro=((S.view==='contexto'&&!S.context)||['esqContexto','ossos','musculos','articulacoes'].includes(S.view)||(S.view==='desafio'&&S.modulo==='esq'));
+  if(S.autoVoice)narrator.say(this.dentro?(inteiro?DENTRO_TXT.corpo:DENTRO_TXT.torax):DENTRO_TXT.fora,this.dentro?(inteiro?'vr-dentro-corpo':'vr-dentro-torax'):'vr-fora');};
 
 /* ---------- 4. Narração posicional ---------- */
 let posicional=null,ligado=false;
@@ -176,11 +183,21 @@ Proto.exitXR=function(){exitOriginal.call(this);if(posicional)posicional.setRefD
 
 /* ---------- 5. Ambiente VR com profundidade + trilha de fundo ---------- */
 let ambiente=null,musicaAntes=null;
+/* v3.8: cada sistema é um lugar (abóbada e partículas com a cor do sistema; o circulatório pulsa no ritmo do coração) */
+const CLIMA={
+ respiratorio:{domo:['#06161f','#0d3140','#124052','#0d3140','#06161f'],p1:[0x9fe3ff,.5],p2:[0xd8f6ff,.7]},
+ circulatorio:{domo:['#12050a','#2c0a12','#3a0d16','#2c0a12','#12050a'],p1:[0xff6f6f,.55],p2:[0xff9a9a,.75],pulsa:true},
+ digestorio:{domo:['#150d05','#30200c','#3e2a10','#30200c','#150d05'],p1:[0xffc27a,.45],p2:[0xffe0b0,.6]},
+ esqueletico:{domo:['#05070d','#10161f','#161e2a','#10161f','#05070d'],p1:[0xcfd8e6,.4],p2:[0xf2f2f2,.55]},
+ muscular:{domo:['#130607','#2a0e11','#361216','#2a0e11','#130607'],p1:[0xff9c8a,.45],p2:[0xffd0c4,.6]},
+ padrao:{domo:['#04101c','#0a2238','#0e2a44','#0a2238','#04101c'],p1:[0x7fd6ff,.55],p2:[0xa6f0d6,.7]}
+};
+function climaDe(){const S=Lab.state;return CLIMA[S.sistema]||CLIMA.padrao;}
 function criarAmbiente(modo2d){
-  const g=new T.Group();g.name='ambienteVR';g.userData.modo2d=!!modo2d;const E=modo2d?1.9:1,CY=modo2d?-3.6:0;/* no 3D o chão fica abaixo do modelo e os anéis crescem */
+  const g=new T.Group();g.name='ambienteVR';g.userData.modo2d=!!modo2d;const clima=climaDe();g.userData.sistema=Lab.state.sistema;const E=modo2d?1.9:1,CY=modo2d?-3.6:0;/* no 3D o chão fica abaixo do modelo e os anéis crescem */
   // abóbada em gradiente (azul-profundo do Portal → quase preto no zênite e no chão)
   const c=document.createElement('canvas');c.width=16;c.height=512;const x=c.getContext('2d');
-  const gr=x.createLinearGradient(0,0,0,512);gr.addColorStop(0,'#04101c');gr.addColorStop(.35,'#0a2238');gr.addColorStop(.5,'#0e2a44');gr.addColorStop(.65,'#0a2238');gr.addColorStop(1,'#04101c');/* espaço: simétrico, sem linha de chão */
+  const gr=x.createLinearGradient(0,0,0,512);[0,.35,.5,.65,1].forEach((st,i)=>gr.addColorStop(st,clima.domo[i]));/* espaço: simétrico, sem linha de chão */
   x.fillStyle=gr;x.fillRect(0,0,16,512);
   const tex=new T.CanvasTexture(c);tex.encoding=T.sRGBEncoding;
   const domo=new T.Mesh(new T.SphereGeometry(45,48,32),new T.MeshBasicMaterial({map:tex,side:T.BackSide,depthWrite:false}));
@@ -191,7 +208,7 @@ function criarAmbiente(modo2d){
     const sp=document.createElement('canvas');sp.width=sp.height=64;const q=sp.getContext('2d');const rg=q.createRadialGradient(32,32,0,32,32,32);rg.addColorStop(0,'rgba(255,255,255,1)');rg.addColorStop(.35,'rgba(170,230,255,.55)');rg.addColorStop(1,'rgba(120,200,255,0)');q.fillStyle=rg;q.fillRect(0,0,64,64);
     const m=new T.PointsMaterial({size:tam,map:new T.CanvasTexture(sp),color:cor,transparent:true,opacity:op,depthWrite:false,blending:T.AdditiveBlending,sizeAttenuation:true});
     const pts=new T.Points(geo,m);pts.userData.vel=0.02+Math.random()*0.02;return pts;};
-  g.add(mkPontos(420,14,.09,0x7fd6ff,.55),mkPontos(180,6,.05,0xa6f0d6,.7));
+  g.add(mkPontos(420,14,.09,clima.p1[0],clima.p1[1]),mkPontos(180,6,.05,clima.p2[0],clima.p2[1]));g.userData.pulsa=!!clima.pulsa;
   g.userData.piso=[];/* v3.2: sem piso. O modelo fica no espaço, só com a abóbada e as partículas (regra: igual no 3D e no VR). */
   return g;
 }
@@ -207,6 +224,8 @@ function sairAmbiente(){if(ambiente){M.dispose(ambiente);view.scene.remove(ambie
   musicaAntes=null;entrarAmbiente(true);}
 const frameOriginal=Proto.frame;
 Proto.frame=function(time,frame){
+  if(ambiente&&ambiente.userData.sistema!==Lab.state.sistema){const m2=ambiente.userData.modo2d;M.dispose(ambiente);view.scene.remove(ambiente);ambiente=null;ambiente=criarAmbiente(m2);view.scene.add(ambiente);}
+  if(ambiente&&ambiente.userData.pulsa&&ambiente.userData.domo&&window.CORPO_TECIDOS){const k=1+.1*window.CORPO_TECIDOS.PULSO.value;ambiente.userData.domo.material.color.setScalar(k);}
   if(this.xr){if(!ambiente||ambiente.userData.modo2d)entrarAmbiente(false);}else{if(!ambiente)entrarAmbiente(true);armarMusica2d();
     /* no 3D o piso acompanha a base do modelo (corpo inteiro nunca fica com os pés abaixo do chão) */
     ambiente.userData.n=(ambiente.userData.n||0)+1;if(ambiente.userData.n%15===1&&this.model){const b=this.boxDe?this.boxDe(this.model,true):new T.Box3().setFromObject(this.model);const y=b.isEmpty()?-3.6:Math.min(-3.6,b.min.y-.12);if(Math.abs((ambiente.userData.pisoY??-3.6)-y)>.01){ambiente.userData.pisoY=y;(ambiente.userData.piso||[]).forEach(([o,d])=>{o.position.y=y+d;});}}}
@@ -214,7 +233,7 @@ Proto.frame=function(time,frame){
   return frameOriginal.call(this,time,frame);
 };
 const exitOriginal2=Proto.exitXR;
-Proto.exitXR=function(){sairAmbiente();return exitOriginal2.call(this);};
+Proto.exitXR=function(){this.dentro=false;sairAmbiente();return exitOriginal2.call(this);};
 
 /* ---------- 6. Modelo maior no VR nas atividades de fita ---------- */
 const placeOriginal=Proto.placeXR;
@@ -222,6 +241,13 @@ Proto.placeXR=function(){
   placeOriginal.call(this);
   if(!this.xr||!this.model||!this.anchor)return;
   const S=Lab.state,fita=['caminhoAr','caminhoSangue','alimento','coluna','braco'].includes(S.view);
+  if(this.dentro&&!this.copy){
+    const a=this.anchor;const inteiro=((S.view==='contexto'&&!S.context)||['esqContexto','ossos','musculos','articulacoes'].includes(S.view)||(S.view==='desafio'&&S.modulo==='esq'));
+    const alvoObj=this.obj||this.model;const b=this.boxDe(alvoObj,inteiro);if(b.isEmpty())return;const sz=b.getSize(new T.Vector3()),maior=Math.max(sz.x,sz.y,sz.z);if(maior<1e-4)return;
+    if(inteiro){/* corpo gigante de 3,4 m, pés no nível do aluno, a 1,2 m; o analógico esquerdo sobe para ver de perto */const k=3.4/sz.y;this.root.scale.multiplyScalar(k);this.root.updateMatrixWorld(true);const b2=this.boxDe(alvoObj,true),c=b2.getCenter(new T.Vector3());const alvo=a.p.clone().addScaledVector(a.f,1.2);this.root.position.x+=alvo.x-c.x;this.root.position.z+=alvo.z-c.z;this.root.position.y+=.02-b2.min.y;}
+    else{/* tórax-sala: os órgãos (sem a silhueta) ocupam 3,4 m; o aluno fica no meio, coração à altura do peito */const k=3.4/maior;this.root.scale.multiplyScalar(k);this.root.updateMatrixWorld(true);const b2=this.boxDe(alvoObj),c=b2.getCenter(new T.Vector3());const alvo=a.p.clone().addScaledVector(a.f,.45);alvo.y=a.p.y-.3;this.root.position.add(alvo.sub(c));}
+    this.root.updateMatrixWorld(true);return;
+  }
   if(((S.view==='contexto'&&!S.context)||(['esqContexto','ossos','musculos','articulacoes'].includes(S.view)||(S.view==='desafio'&&S.modulo==='esq')))&&!this.copy){
     // corpo inteiro em tamanho natural, pés no piso, a 1,8 m do professor
     const tudo=this.boxDe(this.model,true);if(!tudo.isEmpty()){const alt=tudo.getSize(new T.Vector3()).y,esc=1.72/alt;this.root.scale.multiplyScalar(esc);this.root.updateMatrixWorld(true);const b=this.boxDe(this.model,true),c=b.getCenter(new T.Vector3());this.root.position.x+=this.anchor.p.x+this.anchor.f.x*1.8-c.x;this.root.position.z+=this.anchor.p.z+this.anchor.f.z*1.8-c.z;this.root.position.y+=.05-b.min.y;this.root.updateMatrixWorld(true);}

@@ -141,3 +141,12 @@ v3.7.0 (VR fase A, parte 1: mãos e controles)
 - Analógico direito: giro em passos de 30° (snap, com trava) e aproximar/afastar em passos de 25 cm. Esquerdo: altura contínua.
   Botão A: centralizar. Botão B: alterna menu raiz/missões. Cartão "Como usar os controles" no submenu Controles.
 - Alvo: Meta Quest 3S (controles Touch Plus). Fase A parte 2: menu no pulso e rótulos 3D; fase B: dentro do corpo; fase C: viagens.
+
+v3.8.0 (VR fase B, parte 1: entrar no corpo + um lugar por sistema)
+- "Entrar no corpo" no menu raiz do VR (xr:dentro → alternarDentro): nas missões do tórax os órgãos (sem a silhueta) crescem até 3,4 m
+  e ficam em volta do aluno (centro 0,45 m à frente, coração na altura do peito); nas missões de corpo inteiro o corpo vira um gigante
+  de 3,4 m com os pés no nível do aluno, a 1,2 m. Sair devolve o tamanho natural. Narrações vr-dentro-torax / vr-dentro-corpo / vr-fora
+  (CSV atualizado; voz do navegador até gravar). Sair do VR desliga o modo.
+- Ambiente por sistema (3D e VR): abóbada e partículas com a cor do sistema (CLIMA): respiratório claro-azulado, circulatório vermelho
+  escuro pulsando no ritmo do coração (PULSO dos tecidos), digestório âmbar, esquelético frio neutro, muscular vermelho-terra.
+  Reconstrói ao trocar de sistema.

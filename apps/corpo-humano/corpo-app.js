@@ -5,7 +5,8 @@ const D=CORPO_DATA,M=window.CORPO_MODELS,ME=window.ESQ_MODELS,T=window.THREE,$=i
 const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 const embaralhar=a=>{a=a.slice();for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]];}return a;};
 const freshSeq=(id)=>{const ordem=D.sequencias[id].ordem;return {colocados:Array(ordem.length).fill(null),target:0,selected:null,erros:0,pistas:0,done:false,bandeja:embaralhar(ordem)};};
-const initial=()=>({version:D.version,view:'contexto',modulo:'resp',sistema:'respiratorio',quizzes:{},v4:window.CORPO_V4?window.CORPO_V4.initial():{},level:'intro',guided:false,gstep:0,context:0,esqContext:0,visited:[],completed:[],
+const WELCOME='Bem-vindo ao Corpo Humano Imersivo! Aqui você vai descobrir como o seu corpo funciona por dentro: vai ver o ar entrar pelos pulmões, o coração bombear o sangue, o alimento virar energia, e os ossos e músculos trabalharem juntos a cada movimento. Escolha um sistema na lateral, toque nos órgãos e explore. Vamos começar?';
+const initial=()=>({version:D.version,welcomed:false,view:'contexto',modulo:'resp',sistema:'respiratorio',quizzes:{},v4:window.CORPO_V4?window.CORPO_V4.initial():{},level:'intro',guided:false,gstep:0,context:0,esqContext:0,visited:[],completed:[],
   movimento:{fase:'repouso',abertura:0,ciclos:0,flexionou:false},coluna:freshSeq('coluna'),braco:freshSeq('braco'),artic:{dobradica:false,esferoide:false,pivo:false},esqQuiz:{phase:1,index:0,answers:[],done:false},
   respire:{fase:'repouso',abertura:0,ciclos:0,inspirou:false},caminhoAr:freshSeq('caminhoAr'),caminhoSangue:freshSeq('caminhoSangue'),alimento:freshSeq('alimento'),troca:{o2:false,co2:false},
   quiz:{phase:1,index:0,answers:[],done:false},events:[],started:Date.now(),autoRotate:false,reducedMotion:window.matchMedia('(prefers-reduced-motion: reduce)').matches,quality:'balanced',captions:true,autoVoice:true});
@@ -94,6 +95,7 @@ function handle(cmd){if(V4&&V4.command(cmd,v4API()))return;const [kind,op,a]=cmd
  if(kind==='summary'){showSummary();return;}if(kind==='relatorio'){showSummary();setTimeout(()=>{const el=$('summaryDialog').querySelector('.rel-prof');if(el)el.scrollIntoView({block:'start'});},50);return;}if(kind==='center'){if(view)view.center();return;}if(kind==='rotate'){S.autoRotate=!S.autoRotate;$('rotateBtn').textContent=S.autoRotate?'Ⅱ Pausar':'▷ Girar';$('rotateBtn').setAttribute('aria-pressed',String(S.autoRotate));save();return;}if(kind==='voice'){if(op==='stop')narrator.stop();else narrator.say(instruction,instructionKey);return;}
  if(kind==='vr'){if(view)view.toggleVR();return;}if(kind==='catalog'){narrator.dispose();if(view&&view.xrSession)view.xrSession.end().finally(returnCatalog);else returnCatalog();return;}
 }
+function boasVindas(){S.welcomed=true;save();if(!S.autoVoice)return;const g=D.guide.find(x=>x.view==='contexto');const intro=(S.view==='contexto'&&S.context===0&&g)?{text:g.goal,key:'aula-contexto',next:{text:instruction,key:instructionKey}}:{text:instruction,key:instructionKey};narrator.say(WELCOME,'boas-vindas',intro);}
 function returnCatalog(){const url=new URL('../../?catalog=1',location.href).href;try{if(window.top!==window){window.top.location.href=url;return;}}catch(_){}location.href=url;}
 
 class LabView {
@@ -206,10 +208,10 @@ function setup(){
  $('activityNav').addEventListener('click',e=>{const sb=e.target.closest('[data-sistema]');if(sb&&!sb.disabled){handle('sistema:'+sb.dataset.sistema);return;}const b=e.target.closest('[data-view]');if(b)switchView(b.dataset.view);});$('sidebar').addEventListener('click',e=>{const b=e.target.closest('[data-act]');if(b&&!b.disabled)handle(b.dataset.act);});
  document.body.addEventListener('click',e=>{const b=e.target.closest('[data-action]');if(!b)return;const ac=b.dataset.action;
   if(ac==='guide')handle('guide:start');else if(ac==='summary')showSummary();else if(ac==='settings'){$('level').value=S.level;$('settingsDialog').showModal();}else if(ac==='closeSummary')$('summaryDialog').close();else if(ac==='sources')$('sourcesDialog').showModal();
-  else if(ac==='newStudent'){if(!confirm('Iniciar um novo aluno? Exporte o resumo antes de limpar esta sessão.'))return;narrator.stop();S=initial();inspectKey=null;feedbackText='';$('settingsDialog').close();save();switchView('contexto',false);}
+  else if(ac==='newStudent'){if(!confirm('Iniciar um novo aluno? Exporte o resumo antes de limpar esta sessão.'))return;narrator.stop();S=initial();inspectKey=null;feedbackText='';$('settingsDialog').close();save();switchView('contexto',false);try{$('welcomeDialog').showModal();}catch(_){}}
   else if(ac==='repeatVoice')narrator.say(instruction,instructionKey);else if(ac==='stopVoice')narrator.stop();else if(ac==='closeInspect')handle('inspect:close');else if(ac==='center')handle('center');else if(ac==='rotate'){handle('rotate');if(view&&view.xr)view.buildXRUI();}else if(ac==='zoomIn')view&&view.zoom(1);else if(ac==='zoomOut')view&&view.zoom(-1);else if(ac==='vr')handle('vr');
   else if(ac==='fullscreen'){if(document.fullscreenElement)document.exitFullscreen().catch(()=>{});else if(document.documentElement.requestFullscreen)document.documentElement.requestFullscreen({navigationUI:'hide'}).catch(()=>fb('O navegador não autorizou tela cheia.','warning'));}
-  else if(ac==='relImprimir'){if(window.CorpoRelatorio)window.CorpoRelatorio.imprimir();}else if(ac==='relAbrir'){if(window.CorpoRelatorio)window.CorpoRelatorio.abrir();}else if(ac==='relBaixar'){if(window.CorpoRelatorio)window.CorpoRelatorio.baixar();}
+  else if(ac==='welcomeStart'){$('welcomeDialog').close();boasVindas();}else if(ac==='welcomeSkip'){S.welcomed=true;save();$('welcomeDialog').close();}else if(ac==='relImprimir'){if(window.CorpoRelatorio)window.CorpoRelatorio.imprimir();}else if(ac==='relAbrir'){if(window.CorpoRelatorio)window.CorpoRelatorio.abrir();}else if(ac==='relBaixar'){if(window.CorpoRelatorio)window.CorpoRelatorio.baixar();}
   else if(ac==='downloadJSON')download('CorpoHumano-resumo.json',JSON.stringify(report(),null,2),'application/json');
   else if(ac==='downloadCSV'){const r=report(),rows=[['evento','habilidade','correto','posicao','escolha','data'],...r.events.map(e=>[e.event,e.skill,e.correct??'',e.position??'',e.choice??'',e.at])];const csv='﻿'+rows.map(row=>row.map(v=>'"'+String(v).replace(/"/g,'""')+'"').join(';')).join('\r\n');download('CorpoHumano-atividades.csv',csv,'text/csv;charset=utf-8');}
   else if(ac==='catalog'){e.preventDefault();handle('catalog');}});
@@ -218,8 +220,8 @@ function setup(){
  window.addEventListener('pagehide',()=>{save();narrator.dispose();});document.addEventListener('visibilitychange',()=>{if(document.hidden){narrator.stop();narrator.music.pause();}});
  if(T&&M)view=new LabView();else{$('webglError').hidden=false;$('stage').classList.add('error');}
  window.addEventListener('corpo:modelo',()=>{if(view)view.modeloChegou();});if(window.CORPO_GLTF)window.CORPO_GLTF.precarregar(['pulmoes','traqueia','bronquios','coracao','diafragma','costelas','silhueta','aorta','faringe','nariz','laringe','boca']);if(window.ESQ_GLTF)setTimeout(()=>window.ESQ_GLTF.precarregar(['esqueleto','musculos']),4000);
- switchView(S.view,false);$('rotateBtn').textContent=S.autoRotate?'Ⅱ Pausar':'▷ Girar';
- window.CorpoLab={version:D.version,get state(){return S;},command:handle,report,view,narrator,quizAtual:quizState,questoesAtuais:questoes,atividadesDe,sistemaAtual,ehOsso,ehMusculo,refresh:render,getAPI:v4API};
+ switchView(S.view,false);if(!S.welcomed&&new URLSearchParams(location.search).get('vr')!=='1'&&$('welcomeDialog')&&$('welcomeDialog').showModal){try{$('welcomeDialog').showModal();}catch(_){}}$('rotateBtn').textContent=S.autoRotate?'Ⅱ Pausar':'▷ Girar';
+ window.CorpoLab={version:D.version,get state(){return S;},command:handle,report,view,narrator,quizAtual:quizState,questoesAtuais:questoes,atividadesDe,sistemaAtual,ehOsso,ehMusculo,refresh:render,getAPI:v4API,boasVindas,WELCOME};
 }
 setup();
 })();

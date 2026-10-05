@@ -34,7 +34,7 @@ if(q.get('vr')==='1'){
     ov.innerHTML='<div class="vrgate-box"><img src="assets/logo.png" alt=""><div class="vrgate-t">Corpo Humano Imersivo</div><div class="vrgate-s">Coloque o óculos e toque para começar</div><button type="button" data-action="vr-entrar">🥽 Entrar em VR</button><button type="button" class="sec" data-action="vr-3d">Explorar em 3D</button></div>';
     document.body.appendChild(ov);
     ov.addEventListener('click',e=>{const b=e.target.closest('[data-action]');if(!b)return;
-      if(b.dataset.action==='vr-entrar'){window.alternarVR().finally(()=>ov.remove());}else ov.remove();});
+      const S=Lab.state,bv=()=>{if(!S.welcomed&&Lab.boasVindas)Lab.boasVindas();};if(b.dataset.action==='vr-entrar'){window.alternarVR().then(()=>{if(view.xr)setTimeout(bv,900);}).finally(()=>ov.remove());}else{ov.remove();bv();}});
   };
   if(!window.isSecureContext||!navigator.xr)semVR();
   else navigator.xr.isSessionSupported('immersive-vr').then(ok=>ok?mostrarEntrada():semVR()).catch(semVR);

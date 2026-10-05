@@ -107,3 +107,9 @@ v3.5 (Laboratório: Camadas, Monte o tórax, Coração, Do ar à célula)
 - Áudio: fichas já gravadas (nariz, pulmoes, atrioE, ventE, aorta, alveolos, corpo_celulas, desafio-celulas) reaproveitadas; 13 narrações novas
   com chaves lab-* e desafio-celulas-explica (ROTEIRO-AUDIOS-LAB.csv). Até gravar, cai na voz do navegador ou texto.
 - Músculos do tórax só carregam quando a camada é ligada (3,8 MB). Nav lateral alargada para 124 px.
+
+v3.5.1 / v3.5.2
+- Roteiros humanizados do Laboratório aplicados na tela (texto da lateral = texto da gravação).
+- Boas-vindas ao abrir: diálogo com o texto e botão Começar (o clique libera o áudio no navegador); toca boas-vindas.mp3 e emenda
+  na orientação da missão atual (aula-contexto → contexto-0). Uma vez por sessão (S.welcomed); "Novo aluno" mostra de novo.
+  Com ?vr=1 não há diálogo: a tela de entrada já é o gesto; toca ao entrar no VR ou ao escolher "Explorar em 3D".

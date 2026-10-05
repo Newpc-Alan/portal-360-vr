@@ -20,7 +20,7 @@ traqueia com anéis; brônquios ramificados; diafragma em cúpula; costelas; sil
 substitua a função do órgão em corpo-models.js (coracao, pulmao, traqueia, bronquios, diafragma) mantendo o userData.hit.
 
 ÁUDIOS
-Ainda não gravados. Lista e textos em ROTEIRO-AUDIOS.csv (mesmo formato do DNA). Enquanto não existem, o app usa a voz
+51 MP3 humanizados em audio/, normalizados a -16 LUFS, mono, 64 kbps (nomes em ROTEIRO-AUDIOS.csv).
 do navegador (e só texto no Quest). Nomes das fichas: coracao, pulmoes, traqueia, bronquios, diafragma, alveolos, laringe,
 faringe, nariz, atrioD, ventD, atrioE, ventE, aorta, sangue, corpo_celulas, corpo, torax.
 

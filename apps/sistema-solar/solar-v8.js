@@ -224,8 +224,8 @@ function resetStudent(){stopNarrationExclusive();clearDesktopFocus();S.visited=n
 // VR: console no mundo, atividades sem sair do headset, cópia independente segurável.
 function clearInspections(){for(const m of S.inspections)release(m);S.inspections=[];S.held.clear();}
 function clearXRUI(){limparBotoesVR();fecharPainelVR();limparLabelsVR();for(const l of S.xrLabels)release(l.sp);S.xrLabels=[];if(S.xrPanel){release(S.xrPanel);S.xrPanel=null;}if(S.xrCaption){release(S.xrCaption);S.xrCaption=null;}if(S.xrFocus){release(S.xrFocus);S.xrFocus=null;S.xrFocusKey=null;}S.lastPanel='';S.lastCaption='';}
-function xrAnchor(){const p=new T.Vector3(),q=new T.Quaternion();const cam=renderer.xr.isPresenting?renderer.xr.getCamera(camera):camera;cam.getWorldPosition(p);cam.getWorldQuaternion(q);const forward=new T.Vector3(0,0,-1).applyQuaternion(q);forward.y=0;if(forward.lengthSq()<.01)forward.set(0,0,-1);forward.normalize();return{p,f:forward,r:new T.Vector3(-forward.z,0,forward.x),yaw:Math.atan2(-forward.x,-forward.z)};}
-function atAnchor(x,y,z){return S.xrAnchor.p.clone().addScaledVector(S.xrAnchor.r,x).addScaledVector(S.xrAnchor.f,z).add(new T.Vector3(0,y,0));}
+function xrAnchor(){const p=new T.Vector3(),q=new T.Quaternion();let cam=camera;try{if(renderer.xr.isPresenting)cam=renderer.xr.getCamera(camera);}catch(e){cam=camera;}cam.getWorldPosition(p);cam.getWorldQuaternion(q);const forward=new T.Vector3(0,0,-1).applyQuaternion(q);forward.y=0;if(forward.lengthSq()<.01)forward.set(0,0,-1);forward.normalize();return{p,f:forward,r:new T.Vector3(-forward.z,0,forward.x),yaw:Math.atan2(-forward.x,-forward.z)};}
+function atAnchor(x,y,z){if(!S.xrAnchor)S.xrAnchor=xrAnchor();/* v9.2: nunca chamar sem âncora (erro 228:44 no Quest) */return S.xrAnchor.p.clone().addScaledVector(S.xrAnchor.r,x).addScaledVector(S.xrAnchor.f,z).add(new T.Vector3(0,y,0));}
 function xrButton(text,action,x,y,z=1.45){const b=criarBotaoVR(text,action);b.position.copy(atAnchor(x,y,z));scene.add(b);return b;}
 function setupXRActivity(){clearXRUI();if(!S.xrAnchor)S.xrAnchor=xrAnchor();const v=estado.vista;const scales={sistema:.017,desafio:.017,planeta: .3/(CORPOS[estado.sel].raio||1),comparar:.062,diaNoite:.068,fases:.049,estacoes:.023,eclipse:.028};root.scale.setScalar(scales[v]);root.rotation.set(v==='sistema'||v==='estacoes'?.25:0,S.xrAnchor.yaw,0);root.position.copy(atAnchor(0,-.45,1.85));if(v==='planeta'){root.position.copy(atAnchor(0,.02,1.0));root.scale.multiplyScalar(1.22);}root.traverse(o=>{if(o.isPoints){if(o.userData.baseSize===undefined)o.userData.baseSize=o.material.size;o.material.size=o.userData.baseSize*root.scale.x;}if(o.isPointLight)o.decay=0;});
  const titles=['Sistema Solar','Examinar','Comparar','Dia e noite','Fases da Lua','Estações','Eclipses','Desafio'];S.views.forEach((x,i)=>xrButton(titles[i],'view:'+x,-1.08,.5-i*.135));xrButton('Centralizar','center',-.26,-.88);xrButton('Pausar / retomar','pause',.26,-.88);xrButton('Catálogo','catalogo',-.26,-1.02);xrButton('Sair do VR','sair',.26,-1.02);
@@ -268,7 +268,7 @@ function updateXRPanel(){
  else lines.push(CORPOS[estado.sel].nome,CORPOS[estado.sel].fato,'Aponte e aperte o gatilho para aproximar um planeta.');
  const txt=(lateral?'L|':'C|')+lines.join('|');if(txt===S.lastPanel)return;S.lastPanel=txt;if(S.xrPanel)release(S.xrPanel);
  const sp=xrText(lines,lateral?900:1024,lateral?760:512);
- if(lateral){sp.scale.set(.50,.42,1);sp.position.copy(atAnchor(.74,.12,.92));sp.rotation.y=S.xrAnchor.yaw-.18;}
+ if(lateral){sp.scale.set(.50,.42,1);sp.position.copy(atAnchor(.74,.12,.92));sp.rotation.y=(S.xrAnchor?S.xrAnchor.yaw:0)-.18;}
  else{sp.scale.set(.68,.34,1);sp.position.copy(atAnchor(.82,.42,1.55));}
  scene.add(sp);S.xrPanel=sp;
 }

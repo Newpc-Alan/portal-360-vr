@@ -179,3 +179,6 @@ v4.0.0 (Módulo 3: Sistema Nervoso)
 
 v4.0.1
 - Roteiros do Sistema Nervoso humanizados (tom de fala) nas fichas, no contexto, na aula guiada e no arco reflexo concluído; CSV regenerado com o mesmo texto da tela.
+
+v4.0.3
+- 38 áudios do Sistema Nervoso gravados e normalizados (silenceremove + loudnorm -16 LUFS, mono 44,1 kHz 64 kbps). Situação da panela quente reescrita (gerador de voz recusou o texto original).

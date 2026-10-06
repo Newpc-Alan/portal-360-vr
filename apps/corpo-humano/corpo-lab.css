@@ -27,3 +27,6 @@ nav details.nav-breve[open] summary{color:#8fb0c2}
 
 /* v4.2 · chips da Jornada do pão */
 .chips{display:flex;flex-wrap:wrap;gap:6px;margin:6px 0 10px}.chips .status-pill{background:#1d3a2a;border:1px solid #2f6b44;color:#cfeedb}
+
+/* v4.3 · marcador de cor nas linhas de Filtre o sangue */
+.metric-row .dot{display:inline-block;width:10px;height:10px;border-radius:50%;margin-right:7px;vertical-align:middle}

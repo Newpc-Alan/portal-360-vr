@@ -202,3 +202,14 @@ v4.2.0 (Módulo 4: Sistema Digestório completo)
 
 v4.2.1
 - 25 áudios do Sistema Digestório gravados e normalizados (mesma régua). Corpo Humano com 196 gravações.
+
+v4.3.0 (Módulos 5 e 6: Urinário e Endócrino)
+- Modelos novos (za/uri.py): rins (rim_d/e + pelve renal), ureteres, bexiga (+ uretra), adrenais, tireoide (+ paratireoides), hipofise, pineal.
+  Hipotálamo reaproveitado do encefalo.glb (referencial do esqueleto deslocado por -(1,28-0,95)*7,5) e pâncreas do digestório.
+- Urinário ('uri'): Contexto (corpo → aparelho com rótulos → néfron), Explorar (6 fichas, néfron procedural: glomérulo, cápsula,
+  túbulo com alça, ducto coletor, capilar de retorno), Filtre o sangue (6 substâncias, sangue ou urina; partículas percorrem o caminho
+  escolhido; erros contados), Desafio (4).
+- Endócrino ('end'): Contexto (corpo → cabeça e pescoço → abdome), Explorar (7 fichas), Mensageiros químicos (5 situações: susto,
+  doce, noite, frio, crescer; a glândula certa dispara o hormônio em partículas até os órgãos-alvo), Desafio (5).
+- CLIMA urinario (azul-água) e endocrino (verde-dourado com faíscas). Sobram em breve: Reprodutor, Linfático, Tegumentar.
+- Áudios a gravar: ROTEIRO-AUDIOS-URINARIO-ENDOCRINO.csv (53).

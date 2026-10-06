@@ -1,0 +1,57 @@
+﻿Arquivo na pasta audio;Texto-base para gravação;Observação
+rim.mp3;Os rins são dois filtros do tamanho de um punho, um de cada lado da coluna, logo abaixo das costelas. Todo o seu sangue passa por eles umas 40 vezes por dia. Eles retiram o que sobra, a ureia, o excesso de sal e de água, e devolvem o resto limpo para a circulação.;"Ficha; toca ao apontar (Rins)."
+pelve_renal.mp3;A pelve renal é o funil dentro do rim. Toda a urina produzida pelos néfrons escorre até aqui e depois desce pelo ureter.;"Ficha; toca ao apontar (Pelve renal)."
+ureter.mp3;Os ureteres são dois tubos finos, de uns 25 centímetros, que levam a urina dos rins até a bexiga. A urina não desce só pela gravidade: a parede muscular empurra com ondas, como no esôfago.;"Ficha; toca ao apontar (Ureteres)."
+bexiga.mp3;"A bexiga é uma bolsa muscular que guarda a urina até a hora de eliminar. Vazia, ela fica do tamanho de uma ameixa; cheia, pode guardar meio litro. A vontade de fazer xixi aparece com uns 200 mililitros.";"Ficha; toca ao apontar (Bexiga)."
+uretra.mp3;A uretra é o canal que leva a urina da bexiga para fora do corpo. É a última parte do caminho.;"Ficha; toca ao apontar (Uretra)."
+nefron.mp3;"O néfron é a unidade de filtragem do rim, e cada rim tem um milhão deles. O sangue chega num novelo de capilares, o glomérulo; a parte líquida é filtrada para dentro de um túbulo; ao longo do túbulo, o corpo pega de volta o que é útil, água, glicose, sais, e deixa seguir o que é lixo. O que sobra no fim é a urina.";"Ficha; toca ao apontar (Néfron)."
+hipofise.mp3;A hipófise é uma glândula do tamanho de uma ervilha, pendurada embaixo do hipotálamo. É a chefe das outras glândulas: manda a tireoide, as adrenais e as gônadas trabalharem, e ainda produz o hormônio do crescimento.;"Ficha; toca ao apontar (Hipófise)."
+pineal.mp3;A pineal fica bem no meio do encéfalo e é o relógio do corpo. Quando escurece, ela libera melatonina, o hormônio que dá sono. Luz forte à noite, como a da tela do celular, atrasa esse sinal.;"Ficha; toca ao apontar (Glândula pineal)."
+tireoide.mp3;A tireoide fica na frente do pescoço, em forma de borboleta, abraçando a traqueia. Os hormônios dela, T3 e T4, controlam a velocidade do corpo: quanto de energia cada célula gasta, a temperatura, o ritmo do coração.;"Ficha; toca ao apontar (Tireoide)."
+paratireoides.mp3;Atrás da tireoide ficam quatro glândulas minúsculas, as paratireoides. Elas controlam o cálcio do sangue: quando falta, mandam os ossos liberar um pouco. Cálcio certo é músculo e nervo funcionando.;"Ficha; toca ao apontar (Paratireoides)."
+adrenais.mp3;As adrenais ficam em cima dos rins, como dois chapéus. Num susto, elas lançam adrenalina: o coração dispara, a respiração acelera e os músculos recebem mais sangue. É o corpo se preparando para lutar ou fugir.;"Ficha; toca ao apontar (Glândulas adrenais)."
+uri-contexto-0.mp3;Olha o corpo inteiro. Lá atrás, abaixo das costelas, ficam os dois rins. Deles descem dois tubos até a bexiga. É o sistema urinário: a estação de tratamento do sangue. Toque no corpo para a gente avançar.;Contexto do Sistema Urinário, etapa 1.
+uri-contexto-1.mp3;Rins, ureteres, bexiga e uretra. Os rins filtram, os ureteres transportam, a bexiga guarda e a uretra elimina. Toque de novo para entrar no rim e ver onde a filtragem acontece.;Contexto do Sistema Urinário, etapa 2.
+uri-contexto-2.mp3;Isto é um néfron, ampliado milhares de vezes. O sangue entra no novelo de capilares, o líquido é filtrado para o túbulo, e ao longo dele o corpo recupera o que é útil. Na missão Filtre o sangue, você vai decidir o destino de cada substância.;Contexto do Sistema Urinário, etapa 3.
+uri-aula-contexto.mp3;Vamos começar achando os rins. Avance do corpo inteiro até o néfron e repare por onde a urina passa.;Orientação da missão Localize os filtros (também na aula guiada).
+uri-aula-explorar.mp3;Agora é com você. Aponte em pelo menos três partes e ouça o que cada uma faz com a urina.;Orientação da missão Investigue o aparelho (também na aula guiada).
+uri-aula-filtragem.mp3;Decida o destino de cada substância que chega ao néfron: volta para o sangue ou vai para a urina?;Orientação da missão Filtre o sangue (também na aula guiada).
+uri-aula-desafio.mp3;Hora de mostrar o que você entendeu. Responda às situações e, no final, confira o seu resumo.;Orientação da missão Mostre o que entendeu (também na aula guiada).
+uri-filt-ureia.mp3;"A ureia é o lixo das proteínas. Se ficasse no sangue, envenenaria o corpo; sai toda na urina.";Filtre o sangue: explicação ao acertar (Ureia).
+uri-filt-glicose.mp3;"A glicose é energia. O túbulo reabsorve toda ela; glicose na urina é sinal de diabetes.";Filtre o sangue: explicação ao acertar (Glicose).
+uri-filt-agua.mp3;A água que sobra vira urina. Quando falta água, o rim poupa e a urina fica concentrada e escura.;Filtre o sangue: explicação ao acertar (Água em excesso).
+uri-filt-proteinas.mp3;As proteínas são grandes demais para atravessar o filtro do glomérulo. Ficam no sangue.;Filtre o sangue: explicação ao acertar (Proteínas).
+uri-filt-sais.mp3;O rim elimina o sal que sobra e segura o que o corpo precisa. É assim que a pressão e o volume de sangue ficam equilibrados.;Filtre o sangue: explicação ao acertar (Sal em excesso).
+uri-filt-hemacias.mp3;As células do sangue não passam pelo filtro. Sangue na urina é sempre sinal de problema.;Filtre o sangue: explicação ao acertar (Hemácias).
+uri-filtragem-erro.mp3;Ainda não. Pense: isso é útil para o corpo ou é sobra?;Filtre o sangue: ao errar.
+uri-filtragem-concluida.mp3;Filtragem completa. O rim devolve ao sangue o que é útil e manda para a urina o que sobra: é assim que o sangue fica limpo.;Filtre o sangue: ao concluir.
+uri-desafio-uriFiltro.mp3;Depois de uma refeição rica em proteínas, o corpo produz ureia. Qual órgão retira a ureia do sangue?;Desafio do Sistema Urinário: leitura da situação.
+uri-desafio-uriGlicose.mp3;No exame de urina de uma pessoa saudável, o que NÃO deve aparecer?;Desafio do Sistema Urinário: leitura da situação.
+uri-desafio-uriAgua.mp3;Num dia muito quente, suando bastante, a urina fica mais escura e em menor quantidade. Por quê?;Desafio do Sistema Urinário: leitura da situação.
+uri-desafio-uriUreter.mp3;Como a urina vai do rim até a bexiga?;Desafio do Sistema Urinário: leitura da situação.
+uri-desafio-fim.mp3;Desafio concluído. Compare suas respostas com as explicações e retome as atividades que geraram dúvidas.;Fim do Desafio do Sistema Urinário.
+end-contexto-0.mp3;Veja o corpo inteiro. Espalhadas da cabeça ao abdome, pequenas glândulas despejam hormônios no sangue: mensagens químicas que viajam até os órgãos certos. É o sistema endócrino. Toque no corpo para a gente avançar.;Contexto do Sistema Endócrino, etapa 1.
+end-contexto-1.mp3;"Na cabeça, o hipotálamo e a hipófise formam o comando; a pineal marca a hora de dormir. No pescoço, a tireoide controla a velocidade do corpo. Toque de novo para ver as glândulas do abdome.";Contexto do Sistema Endócrino, etapa 2.
+end-contexto-2.mp3;Em cima dos rins, as adrenais, do susto e do estresse. Atrás do estômago, o pâncreas, que controla o açúcar no sangue com a insulina. Na missão Explorar, aponte em cada glândula para conhecer os seus hormônios.;Contexto do Sistema Endócrino, etapa 3.
+end-aula-contexto.mp3;Vamos começar achando as glândulas. Avance da cabeça ao abdome e repare como elas são pequenas para o tanto que comandam.;Orientação da missão Localize as glândulas (também na aula guiada).
+end-aula-explorar.mp3;Agora é com você. Aponte em pelo menos três glândulas e ouça que hormônio cada uma produz.;Orientação da missão Investigue as glândulas (também na aula guiada).
+end-aula-mensageiros.mp3;Para cada situação, escolha a glândula que responde e veja o hormônio viajar pelo sangue até o órgão-alvo.;Orientação da missão Resolva as situações (também na aula guiada).
+end-aula-desafio.mp3;Hora de mostrar o que você entendeu. Responda às situações e, no final, confira o seu resumo.;Orientação da missão Mostre o que entendeu (também na aula guiada).
+end-mens-0.mp3;Você leva um susto: um cachorro late do nada. O coração dispara e as mãos suam. Qual glândula respondeu?;Mensageiros: situação 1.
+end-mens-0-ok.mp3;As adrenais lançam adrenalina no sangue. O coração acelera, a respiração aumenta e os músculos recebem mais sangue: o corpo pronto para lutar ou fugir.;Mensageiros: explicação ao acertar a situação 1.
+end-mens-1.mp3;Você comeu um pedaço grande de bolo. O açúcar no sangue sobe rápido. Quem organiza a entrada dessa glicose nas células?;Mensageiros: situação 2.
+end-mens-1-ok.mp3;O pâncreas libera insulina, a chave que abre as células para a glicose entrar. Sem insulina, o açúcar fica no sangue: é o diabetes.;Mensageiros: explicação ao acertar a situação 2.
+end-mens-2.mp3;Anoiteceu, a luz diminuiu e o sono começa a chegar. Qual glândula mandou esse sinal?;Mensageiros: situação 3.
+end-mens-2-ok.mp3;Com a escuridão, a pineal libera melatonina e o corpo entra no modo de dormir. A luz da tela do celular atrasa esse sinal.;Mensageiros: explicação ao acertar a situação 3.
+end-mens-3.mp3;Você está num lugar frio. O corpo precisa gastar mais energia para se aquecer. Qual glândula acelera o metabolismo?;Mensageiros: situação 4.
+end-mens-3-ok.mp3;A tireoide aumenta os hormônios T3 e T4, e cada célula passa a gastar mais energia, produzindo calor. Para isso ela precisa de iodo.;Mensageiros: explicação ao acertar a situação 4.
+end-mens-4.mp3;Na adolescência, os ossos crescem rápido e a altura dispara. Qual glândula produz o hormônio do crescimento?;Mensageiros: situação 5.
+end-mens-4-ok.mp3;A hipófise libera o GH, principalmente durante o sono. Ele faz os ossos crescerem nas placas de crescimento, até elas se fecharem no fim da adolescência.;Mensageiros: explicação ao acertar a situação 5.
+end-mens-erro.mp3;Essa glândula não responde a isso. Pense no que mudou no corpo.;Mensageiros: ao errar.
+end-mensageiros-concluido.mp3;Mensageiros concluído. Cada glândula responde a um sinal e manda o seu hormônio pelo sangue até o órgão certo.;Mensageiros: ao concluir.
+end-desafio-endInsulina.mp3;Uma pessoa com diabetes tipo 1 precisa aplicar insulina. O que a insulina faz?;Desafio do Sistema Endócrino: leitura da situação.
+end-desafio-endIodo.mp3;Por que o sal de cozinha no Brasil recebe iodo por lei?;Desafio do Sistema Endócrino: leitura da situação.
+end-desafio-endCelular.mp3;Usar o celular com a tela brilhante até tarde atrapalha o sono. Qual é a explicação?;Desafio do Sistema Endócrino: leitura da situação.
+end-desafio-endAdrenalina.mp3;Antes de uma prova importante, o coração acelera e a boca seca. Qual hormônio está agindo?;Desafio do Sistema Endócrino: leitura da situação.
+end-desafio-endHipofise.mp3;Por que a hipófise é chamada de glândula-mestra?;Desafio do Sistema Endócrino: leitura da situação.
+end-desafio-fim.mp3;Desafio concluído. Compare suas respostas com as explicações e retome as atividades que geraram dúvidas.;Fim do Desafio do Sistema Endócrino.

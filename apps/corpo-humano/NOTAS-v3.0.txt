@@ -154,3 +154,9 @@ v3.8.0 (VR fase B, parte 1: entrar no corpo + um lugar por sistema)
 v3.8.1
 - Volta o chão de referência da v2.4 (disco escuro, anéis e névoa), agora na cor do sistema; altura = piso real do óculos, e no 3D acompanha a base do modelo.
 - Tone mapping ACES removido (escurecia abóbada, partículas e painéis do VR). Abóbada do Respiratório volta ao azul do Portal.
+
+v3.9.0 (todas as fichas visíveis + Tour)
+- Ossos: lista completa dos 21 ossos por região (axial, coluna, membro superior, membro inferior); Músculos: 14; Explorar: 14 (vias aéreas,
+  respiração, circulação). Botão da ficha já investigada fica com borda verde. Contador "Investigados N / total".
+- Tour: "▶ Tour: ouvir um por um" projeta cada estrutura, toca a ficha gravada e passa à próxima sozinho (0,9 s após o fim do áudio);
+  Próximo / Parar; termina com aviso. Sair da missão ou fechar a ficha encerra o tour. Funciona no VR (botões no painel de ações).

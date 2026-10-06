@@ -16,6 +16,9 @@ function organico(mesh,amp=.05,freq=3.1,seed=1){const g=mesh.geometry;const pos=
 function tubo(pts,r,color,extra,seg=48){const curve=new T.CatmullRomCurve3(pts);return new T.Mesh(new T.TubeGeometry(curve,seg,r,12,false),mat(color,extra));}
 function label(text,color='#e7f6ff',width=1.5,size=56){const c=document.createElement('canvas');c.width=512;c.height=128;const ctx=c.getContext('2d');ctx.font='600 '+size+'px Segoe UI,Arial';while(ctx.measureText(text).width>490&&size>17){size-=2;ctx.font='600 '+size+'px Segoe UI,Arial';}ctx.textAlign='center';ctx.textBaseline='middle';ctx.shadowColor='#031220';ctx.shadowBlur=7;ctx.fillStyle=color;ctx.fillText(text,256,64);const tx=new T.CanvasTexture(c);tx.encoding=T.sRGBEncoding;tx.minFilter=T.LinearMipmapLinearFilter;tx.generateMipmaps=true;tx.anisotropy=8;const sp=new T.Sprite(new T.SpriteMaterial({toneMapped:false,map:tx,transparent:true,depthWrite:false,depthTest:true}));sp.scale.set(width,width/4,1);return sp;}
 function textAt(g,text,x,y,z=0,width=1.5,color){const sp=label(text,color,width);sp.position.set(x,y,z);g.add(sp);return sp;}
+/* v4.7.1 · rótulo fixo no mundo (plano, não sprite): no VR as letras dos tabuleiros não giram com a cabeça */
+function rotuloFixo(text,color='#e7f6ff',width=1.5,size=56){const sp=label(text,color,width,size);const m=new T.Mesh(new T.PlaneGeometry(width,width/4),new T.MeshBasicMaterial({map:sp.material.map,transparent:true,depthWrite:false,side:T.DoubleSide}));sp.material.dispose();return m;}
+function textFixo(g,text,x,y,z=0,width=1.5,color){const m=rotuloFixo(text,color,width);m.position.set(x,y,z);g.add(m);return m;}
 
 /* ---------- Órgãos ---------- */
 function coracao(opt={}){
@@ -248,11 +251,11 @@ function respire(state){
 /* ordenação de etapas (caminho do ar / caminho do sangue) */
 function sequencia(state,cfg){
   const g=new T.Group();const n=cfg.ordem.length,dy=.62,top=(n-1)*dy/2+.3;
-  textAt(g,cfg.titulo,.9,top+.75,0,3.4,cfg.cor);
+  textFixo(g,cfg.titulo,.9,top+.75,0,3.4,cfg.cor);
   for(let i=0;i<n;i++){const y=top-i*dy;const key=state.colocados[i];
-    const num=label(String(i+1),i===state.target?'#ffdb9f':'#8fb0c2',.5,96);num.position.set(-.55,y,.05);g.add(num);
+    const num=rotuloFixo(String(i+1),i===state.target?'#ffdb9f':'#8fb0c2',.5,96);num.position.set(-.55,y,.05);g.add(num);
     const placa=new T.Mesh(new T.BoxGeometry(2.6,.46,.16),mat(key?0x1d4f63:0x15303f,{transparent:!key,opacity:key?1:.65}));placa.position.set(.9,y,0);tag(placa,{type:'seqSlot',index:i});g.add(placa);
-    const txt=label(key?cfg.rotulos[key]:'?',key?'#eafaff':'#ffe3a8',2.4,key?72:96);txt.position.set(.9,y,.1);g.add(txt);
+    const txt=rotuloFixo(key?cfg.rotulos[key]:'?',key?'#eafaff':'#ffe3a8',2.4,key?72:96);txt.position.set(.9,y,.1);g.add(txt);
     if(i===state.target&&!key){const marc=new T.Mesh(new T.BoxGeometry(2.72,.56,.06),new T.MeshBasicMaterial({color:0xefd094,wireframe:true}));marc.position.set(.9,y,.02);g.add(marc);}
     if(i<n-1){const seta=new T.ArrowHelper(V(0,-1,0),V(.9,y-.25,0),.12,0x6ca7be,.08,.06);g.add(seta);}
   }
@@ -260,10 +263,10 @@ function sequencia(state,cfg){
   const restantes=state.bandeja.filter(k=>!state.colocados.includes(k));
   restantes.forEach((k,i)=>{const cols=2,c=i%cols,r=Math.floor(i/cols);const x=(cfg.titulo==='CAMINHO DO ALIMENTO'?2.75:-3.75)+c*1.6,y=top-.1-r*.72;
     const peca=new T.Mesh(new T.BoxGeometry(1.48,.56,.2),mat(0x2b6f88,{roughness:.4}));peca.position.set(x,y,.1);peca.userData.draggable=true;tag(peca,{type:'seqPiece',key:k});g.add(peca);
-    const t=label(cfg.rotulos[k],'#ffffff',1.46,66);t.position.set(x,y,.22);g.add(t);
+    const t=rotuloFixo(cfg.rotulos[k],'#ffffff',1.46,66);t.position.set(x,y,.22);g.add(t);
     if(state.selected===k){const anel=new T.Mesh(new T.BoxGeometry(1.6,.68,.08),new T.MeshBasicMaterial({color:0xffffff,wireframe:true}));anel.position.set(x,y,.1);g.add(anel);}
   });
-  if(!state.done)textAt(g,'PEÇAS',cfg.titulo==='CAMINHO DO ALIMENTO'?3.55:-2.95,top+.75,0,1.4,'#9cbed0');
+  if(!state.done)textFixo(g,'PEÇAS',cfg.titulo==='CAMINHO DO ALIMENTO'?3.55:-2.95,top+.75,0,1.4,'#9cbed0');
   const gl=G();
   if(state.done&&cfg.titulo==='CAMINHO DO SANGUE'){
     let pts;const base=V(-2.9,-.2,0),esc=1.15;
@@ -273,14 +276,14 @@ function sequencia(state,cfg){
     else{const co=coracao({cavidades:true});co.scale.setScalar(esc);co.position.copy(base);g.add(co);
       pts=[V(-.55,1.3,-.1),V(-.5,.75,-.08),V(-.38,.48,.1),V(-.28,-.1,.45),V(-.2,.5,.35),V(-.05,.95,.25),V(.4,1.0,.1),V(.95,.55,-.2),V(.45,.5,-.1),V(.3,.52,.15),V(.3,-.25,.4),V(.15,.35,.1),V(.15,.95,.05),V(.05,1.25,-.05),V(-.3,1.25,-.15),V(-.42,.9,-.25)].map(p=>p.clone().multiplyScalar(esc).add(base));}
     const curva=new T.CatmullRomCurve3(pts);const gotas=[];for(let i=0;i<10;i++){const d=ball(.07,COR.veia,V(),{emissive:0x223355});d.userData.f=i/10;g.add(d);gotas.push(d);}
-    textAt(g,'SIGA A GOTA',-2.9,1.75,0,2.2,'#ffb0b0');
+    textFixo(g,'SIGA A GOTA',-2.9,1.75,0,2.2,'#ffb0b0');
     g.userData.tick=(t)=>{gotas.forEach(d=>{const u=(t*.07+d.userData.f)%1;d.position.copy(curva.getPointAt(u));const rico=u>.47&&u<.98;d.material.color.setHex(rico?COR.arteria:COR.veia);d.material.emissive.setHex(rico?0x552222:0x223355);});};
   }
   if(cfg.titulo==='CAMINHO DO ALIMENTO'){
     const esc=gl?.68:.78,base=gl?V(-2.9,.1,0):V(-2.9,-.1,0);
     const d=digestivo();d.scale.setScalar(esc);d.position.copy(base);g.add(d);const si=silhueta({opacidade:.08,nariz:false});si.scale.setScalar(esc);si.position.copy(base);g.add(si);
     if(state.done){const curva=new T.CatmullRomCurve3(d.userData.tubo.map(p=>p.clone().multiplyScalar(esc).add(base)));const bolos=[];for(let i=0;i<8;i++){const b=ball(.07,0xffe08a,V(),{emissive:0x553d10});b.userData.f=i/8;g.add(b);bolos.push(b);}
-      textAt(g,'SIGA O ALIMENTO',-2.9,2.75,0,2.6,'#ffe08a');g.userData.tick=(t)=>{bolos.forEach(b=>{const u=(t*.05+b.userData.f)%1;b.position.copy(curva.getPointAt(u));});};}
+      textFixo(g,'SIGA O ALIMENTO',-2.9,2.75,0,2.6,'#ffe08a');g.userData.tick=(t)=>{bolos.forEach(b=>{const u=(t*.05+b.userData.f)%1;b.position.copy(curva.getPointAt(u));});};}
   }
   if(state.done&&cfg.titulo==='CAMINHO DO AR'){
     const esc=gl?.9:.95,base=gl?V(-2.9,-.1,0):V(-2.9,-.6,0);
@@ -289,7 +292,7 @@ function sequencia(state,cfg){
     const rotas=gl?[[P(0,1.605,.095),P(0,1.53,.035),P(0,1.43,0),P(0,1.33,0),P(-.035,1.30,0),P(-.07,1.26,.0),P(-.08,1.21,.01)],[P(0,1.605,.095),P(0,1.53,.035),P(0,1.43,0),P(0,1.33,0),P(.035,1.30,0),P(.07,1.26,0),P(.08,1.21,.01)]]
       :[[P(0,3.1,.56),P(0,2.6,.15),P(0,2.3,.05),P(0,1.6,.05),P(0,1.05,.05),P(-.42,.7,.07),P(-.8,.4,0),P(-.85,-.1,.02)],[P(0,3.1,.56),P(0,2.6,.15),P(0,2.3,.05),P(0,1.6,.05),P(0,1.05,.05),P(.42,.7,.07),P(.78,.4,0),P(.82,-.1,.02)]];
     const parts=[];rotas.forEach((r,k)=>{const c=new T.CatmullRomCurve3(r);for(let i=0;i<7;i++){const d=ball(.055,COR.gasO2,V(),{emissive:0x2f7f8f});d.userData.f=i/7;d.userData.c=c;g.add(d);parts.push(d);}});
-    textAt(g,'O AR ENTRA',-2.9,2.6,0,2.0,'#c9f7ff');
+    textFixo(g,'O AR ENTRA',-2.9,2.6,0,2.0,'#c9f7ff');
     g.userData.tick=(t)=>{parts.forEach(d=>{const u=(t*.12+d.userData.f)%1;d.position.copy(d.userData.c.getPointAt(u));});};
   }
   g.userData.slots={top,dy};
@@ -341,5 +344,5 @@ function alveolo(state){
   return g;
 }
 function dispose(g){if(!g)return;const geos=new Set(),mats=new Set(),tex=new Set();g.traverse(o=>{if(o.geometry&&!o.isSprite)geos.add(o.geometry);for(const m of [].concat(o.material||[])){if(!m)continue;mats.add(m);if(m.map)tex.add(m.map);}});geos.forEach(x=>x.dispose());mats.forEach(x=>x.dispose());tex.forEach(x=>x.dispose());if(g.parent)g.parent.remove(g);}
-window.CORPO_MODELS={V,COR,mat,ball,tubo,label,textAt,tag,organico,digestivo,digestivoProc,toraxProc,silhuetaProc,coracao,pulmao,traqueia,bronquios,diafragma,costelas,silhueta,torax,contexto,explorar,inspection,respire,sequencia,alveolo,stageBase,dispose};
+window.CORPO_MODELS={V,COR,mat,ball,tubo,label,rotuloFixo,textFixo,textAt,tag,organico,digestivo,digestivoProc,toraxProc,silhuetaProc,coracao,pulmao,traqueia,bronquios,diafragma,costelas,silhueta,torax,contexto,explorar,inspection,respire,sequencia,alveolo,stageBase,dispose};
 })();

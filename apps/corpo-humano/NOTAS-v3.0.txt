@@ -256,3 +256,6 @@ v4.7.0 (VR fase C, parte 2: coração aberto com as duas mãos)
   de corte passa a acompanhar o coração na mão (sobrescrito em updateXR a partir do matrixWorld do órgão). Ao passar de 70%, narra
   'vr-coracao-aberto' (texto no ROTEIRO-AUDIOS.csv). O corte permanece ao soltar; "Desativar corte" (ações do painel) fecha.
 - Cartão "Como usar os controles" atualizado.
+
+v4.7.1
+- Tabuleiros de sequência (Caminho do ar, Caminho do sangue, Caminho do alimento, Coluna, Braço, Arco reflexo): rótulos como planos fixos no mundo (rotuloFixo/textFixo) em vez de sprites, que giravam com a cabeça no VR. Rótulos de órgãos continuam sprites.

@@ -9,6 +9,9 @@ function tag(o,data){o.traverse(x=>{if(x.isMesh)x.userData.hit=data;});o.userDat
 function ball(r,color,pos,extra,seg=24){const m=new T.Mesh(new T.SphereGeometry(r,seg,Math.max(10,seg*.7|0)),mat(color,extra));if(pos)m.position.copy(pos);return m;}
 function label(text,color='#e7f6ff',width=1.5,size=56){const c=document.createElement('canvas');c.width=512;c.height=128;const ctx=c.getContext('2d');ctx.font='600 '+size+'px Segoe UI,Arial';while(ctx.measureText(text).width>490&&size>17){size-=2;ctx.font='600 '+size+'px Segoe UI,Arial';}ctx.textAlign='center';ctx.textBaseline='middle';ctx.shadowColor='#031220';ctx.shadowBlur=7;ctx.fillStyle=color;ctx.fillText(text,256,64);const tx=new T.CanvasTexture(c);tx.encoding=T.sRGBEncoding;tx.minFilter=T.LinearMipmapLinearFilter;tx.generateMipmaps=true;tx.anisotropy=8;const sp=new T.Sprite(new T.SpriteMaterial({map:tx,transparent:true,depthWrite:false,depthTest:true}));sp.scale.set(width,width/4,1);return sp;}
 function textAt(g,text,x,y,z=0,width=1.5,color){const sp=label(text,color,width);sp.position.set(x,y,z);g.add(sp);return sp;}
+/* v4.7.1 · rótulo fixo no mundo (plano, não sprite): no VR as letras dos tabuleiros não giram com a cabeça */
+function rotuloFixo(text,color='#e7f6ff',width=1.5,size=56){const sp=label(text,color,width,size);const m=new T.Mesh(new T.PlaneGeometry(width,width/4),new T.MeshBasicMaterial({map:sp.material.map,transparent:true,depthWrite:false,side:T.DoubleSide}));sp.material.dispose();return m;}
+function textFixo(g,text,x,y,z=0,width=1.5,color){const m=rotuloFixo(text,color,width);m.position.set(x,y,z);g.add(m);return m;}
 function stageBase(g,width=5,y=-3.15,z=0){const m=new T.Mesh(new T.CircleGeometry(width,72),mat(0x0b2637,{roughness:.7,metalness:.12}));m.rotation.x=-Math.PI/2;m.position.set(0,y,z);g.add(m);const rim=new T.Mesh(new T.RingGeometry(width-.016,width+.016,72),new T.MeshBasicMaterial({color:0x305d72,side:T.DoubleSide}));rim.rotation.x=-Math.PI/2;rim.position.set(0,y+.01,z);g.add(rim);}
 const inspectHit=p=>({type:'inspect',key:G().chave(p)});
 const D_=k=>k+'_d';
@@ -85,19 +88,19 @@ function articulacoes(state){
 function sequencia(state,cfg){
   if(state.done)return sequenciaConcluida(cfg);
   const g=new T.Group();const n=cfg.ordem.length,dy=.62,top=(n-1)*dy/2+.3;
-  textAt(g,cfg.titulo,.9,top+.75,0,3.4,cfg.cor);
+  textFixo(g,cfg.titulo,.9,top+.75,0,3.4,cfg.cor);
   for(let i=0;i<n;i++){const y=top-i*dy;const key=state.colocados[i];
-    const num=label(String(i+1),i===state.target?'#ffdb9f':'#8fb0c2',.5,96);num.position.set(-.55,y,.05);g.add(num);
+    const num=rotuloFixo(String(i+1),i===state.target?'#ffdb9f':'#8fb0c2',.5,96);num.position.set(-.55,y,.05);g.add(num);
     const placa=new T.Mesh(new T.BoxGeometry(2.6,.46,.16),mat(key?0x1d4f63:0x15303f,{transparent:!key,opacity:key?1:.65}));placa.position.set(.9,y,0);tag(placa,{type:'seqSlot',index:i});g.add(placa);
-    const txt=label(key?cfg.rotulos[key]:'?',key?'#eafaff':'#ffe3a8',2.4,key?72:96);txt.position.set(.9,y,.1);g.add(txt);
+    const txt=rotuloFixo(key?cfg.rotulos[key]:'?',key?'#eafaff':'#ffe3a8',2.4,key?72:96);txt.position.set(.9,y,.1);g.add(txt);
     if(i===state.target&&!key){const marc=new T.Mesh(new T.BoxGeometry(2.72,.56,.06),new T.MeshBasicMaterial({color:0xefd094,wireframe:true}));marc.position.set(.9,y,.02);g.add(marc);}
     if(i<n-1){const seta=new T.ArrowHelper(V(0,-1,0),V(.9,y-.25,0),.12,0x6ca7be,.08,.06);g.add(seta);}
   }
   const restantes=state.bandeja.filter(k=>!state.colocados.includes(k));
   restantes.forEach((k,i)=>{const cols=2,c=i%cols,r=Math.floor(i/cols);const x=2.75+c*1.6,y=top-.1-r*.72;
     const peca=new T.Mesh(new T.BoxGeometry(1.48,.56,.2),mat(0x2b6f88,{roughness:.4}));peca.position.set(x,y,.1);peca.userData.draggable=true;tag(peca,{type:'seqPiece',key:k});g.add(peca);
-    const t=label(cfg.rotulos[k],'#ffffff',1.46,66);t.position.set(x,y,.22);g.add(t);});
-  if(restantes.length)textAt(g,'PEÇAS',3.55,top+.55,0,1.2,'#8fb0c2');
+    const t=rotuloFixo(cfg.rotulos[k],'#ffffff',1.46,66);t.position.set(x,y,.22);g.add(t);});
+  if(restantes.length)textFixo(g,'PEÇAS',3.55,top+.55,0,1.2,'#8fb0c2');
   g.userData.slots={top,dy};
   /* referência: o recorte real ao lado, com as partes já colocadas em destaque */
   const ref=cfg.titulo==='COLUNA VERTEBRAL'?recorte('esqueleto',['cervical','toracica','lombar','sacro','coccix','cranio'],{cor:p=>state.colocados.includes(p)?0xffd166:p==='cranio'?0xcfc9bb:COR.osso,opacidade:.95,hit:p=>({type:'inspect',key:G().chave(p)})}):recorte('esqueleto',['clavicula_d','escapula_d','umero_d','radio_d','ulna_d','mao_d'],{cor:p=>{const k=G().chave(p);const key=(k==='radio'||k==='ulna')?'antebraco':k;return state.colocados.includes(key)?0xffd166:COR.osso;},hit:p=>({type:'inspect',key:G().chave(p)})});
@@ -107,12 +110,12 @@ function sequencia(state,cfg){
 function sequenciaConcluida(cfg){
   const g=new T.Group();
   if(cfg.titulo==='COLUNA VERTEBRAL'){const r=recorte('esqueleto',['cervical','toracica','lombar','sacro','coccix'],{hit:p=>({type:'inspect',key:G().chave(p)}),cor:p=>({cervical:0xfff0b3,toracica:0xffd166,lombar:0xf4a261,sacro:0xe76f51,coccix:0xc9516b})[p]||COR.osso});r.scale.setScalar(.8);g.add(r);
-    const gl=G();const c=gl.ponto(0,1.17,-.04);[['Cervical · 7',[0,1.49,-.03]],['Torácica · 12',[0,1.28,-.05]],['Lombar · 5',[0,1.045,-.025]],['Sacro',[0,.92,-.05]],['Cóccix',[0,.845,-.077]]].forEach(([t,p],i)=>{const sp=label(t,'#ffffff',1.6,66);sp.position.copy(gl.ponto(...p).sub(c).multiplyScalar(.8)).add(V(1.6,0,0));g.add(sp);});
-    textAt(g,'COLUNA VERTEBRAL · 33 VÉRTEBRAS',0,3.4,0,5,cfg.cor);return g;}
+    const gl=G();const c=gl.ponto(0,1.17,-.04);[['Cervical · 7',[0,1.49,-.03]],['Torácica · 12',[0,1.28,-.05]],['Lombar · 5',[0,1.045,-.025]],['Sacro',[0,.92,-.05]],['Cóccix',[0,.845,-.077]]].forEach(([t,p],i)=>{const sp=rotuloFixo(t,'#ffffff',1.6,66);sp.position.copy(gl.ponto(...p).sub(c).multiplyScalar(.8)).add(V(1.6,0,0));g.add(sp);});
+    textFixo(g,'COLUNA VERTEBRAL · 33 VÉRTEBRAS',0,3.4,0,5,cfg.cor);return g;}
   const r=recorte('esqueleto',['clavicula_d','escapula_d','umero_d','radio_d','ulna_d','mao_d'],{hit:p=>({type:'inspect',key:G().chave(p)}),cor:p=>({clavicula_d:0xfff0b3,escapula_d:0xffd166,umero_d:0xf4a261,radio_d:0xe76f51,ulna_d:0xe76f51,mao_d:0xc9516b})[p]||COR.osso});g.add(r);
-  const gl=G();const c=gl.ponto(-0.2,1.09,-0.02);[['Clavícula',[-0.083,1.407,0]],['Escápula',[-0.117,1.336,-.056]],['Úmero',[-0.199,1.245,-.027]],['Rádio e ulna',[-0.245,.975,-.013]],['Mão',[-0.28,.78,.053]]].forEach(([t,p])=>{const sp=label(t,'#ffffff',1.4,66);sp.position.copy(gl.ponto(...p).sub(c)).add(V(-1.3,0,.2));g.add(sp);});
-  textAt(g,'DO OMBRO À MÃO',0,3.2,0,4,cfg.cor);return g;
+  const gl=G();const c=gl.ponto(-0.2,1.09,-0.02);[['Clavícula',[-0.083,1.407,0]],['Escápula',[-0.117,1.336,-.056]],['Úmero',[-0.199,1.245,-.027]],['Rádio e ulna',[-0.245,.975,-.013]],['Mão',[-0.28,.78,.053]]].forEach(([t,p])=>{const sp=rotuloFixo(t,'#ffffff',1.4,66);sp.position.copy(gl.ponto(...p).sub(c)).add(V(-1.3,0,.2));g.add(sp);});
+  textFixo(g,'DO OMBRO À MÃO',0,3.2,0,4,cfg.cor);return g;
 }
 function dispose(g){if(!g)return;const geos=new Set(),mats=new Set(),tex=new Set();g.traverse(o=>{if(o.geometry&&!o.isSprite)geos.add(o.geometry);for(const m of [].concat(o.material||[])){if(!m)continue;mats.add(m);if(m.map)tex.add(m.map);}});geos.forEach(x=>x.dispose());mats.forEach(x=>x.dispose());tex.forEach(x=>x.dispose());if(g.parent)g.parent.remove(g);}
-window.ESQ_MODELS={V,COR,mat,ball,label,textAt,tag,esqueleto,musculos,silhueta,recorte,contexto,explorar,musculosCena,desafio,inspection,movimento,articulacoes,sequencia,sequenciaConcluida,stageBase,dispose,APOIO,ARTIC};
+window.ESQ_MODELS={V,COR,mat,ball,label,rotuloFixo,textFixo,textAt,tag,esqueleto,musculos,silhueta,recorte,contexto,explorar,musculosCena,desafio,inspection,movimento,articulacoes,sequencia,sequenciaConcluida,stageBase,dispose,APOIO,ARTIC};
 })();

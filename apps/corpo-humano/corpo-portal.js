@@ -88,8 +88,9 @@ Proto.xrBotaoLargo=function(label,cmd,x,y,disabled,cor){
 const VERDE={bg:'#0f6b3a',borda:'#3fd48a',texto:'#ffffff'},VERMELHO={bg:'#7a1f28',borda:'#ff6b6b',texto:'#ffffff'},APAGADO={bg:'#122531',borda:'#243a47',texto:'#5c7484'};
 function estadoDesafio(){const S=Lab.state;if(S.view!=='desafio')return null;const q=Lab.quizAtual(),Q=Lab.questoesAtuais();if(q.phase!==1||q.done)return null;const i=q.index,resp=q.answers[i];if(resp===undefined)return null;const item=Q[i];return{correto:item.correct,escolha:resp,acertou:resp===item.correct};}
 
+const uiPorCima=ui=>{ui.traverse(o=>{if(o.isMesh&&o.material){o.material.depthTest=false;o.material.depthWrite=false;o.renderOrder=1000;}});};
 Proto.buildXRUI=function(){
-  if(!this.xr)return;this.clearXRUI();
+  if(!this.xr)return;this.clearXRUI();this._uiPorCima=true;
   if(this.anchor){this.uiPose=this.uiPose||{};if(this.uiPose.ref!==this.anchor){this.uiPose.ref=this.anchor;this.uiPose.p=this.anchor.p.clone();this.uiPose.yaw=this.anchor.yaw;}this.ui.position.copy(this.uiPose.p);this.ui.rotation.y=this.uiPose.yaw;}
   const S=Lab.state,lesson=document.getElementById('lessonPanel');
   let title=(lesson.querySelector('h2')||{}).textContent||'Corpo Humano';
@@ -237,6 +238,7 @@ function sairAmbiente(){if(ambiente){M.dispose(ambiente);view.scene.remove(ambie
   musicaAntes=null;entrarAmbiente(true);}
 const frameOriginal=Proto.frame;
 Proto.frame=function(time,frame){
+  if(this.xr&&this._uiPorCima){this._uiPorCima=false;uiPorCima(this.ui);}/* v4.7.2: painéis sempre visíveis, mesmo dentro de um túnel ou órgão gigante */
   if(ambiente&&ambiente.userData.sistema!==Lab.state.sistema){const m2=ambiente.userData.modo2d;M.dispose(ambiente);view.scene.remove(ambiente);ambiente=null;ambiente=criarAmbiente(m2);view.scene.add(ambiente);}
   if(ambiente&&ambiente.userData.faisca){/* v4.0 · nervoso: as partículas piscam como sinapses */const t=performance.now()/1000;(ambiente.userData.pontos||[]).forEach((p,i)=>{p.o.material.opacity=p.op*(.45+.55*Math.pow(Math.abs(Math.sin(t*(2.3+i*1.7)+i)),6));});}
   if(ambiente&&ambiente.userData.pulsa&&ambiente.userData.domo&&window.CORPO_TECIDOS){const k=1+.1*window.CORPO_TECIDOS.PULSO.value;ambiente.userData.domo.material.color.setScalar(k);}
@@ -256,6 +258,7 @@ const quizFaseXR=v=>{const S=Lab.state;return S.view==='desafio'&&Lab.quizAtual(
 Proto.placeXR=function(){
   if(Lab.state.view==='viagem'){if(!this.anchor){try{this.anchor=this.head();}catch(_){}}if(this.anchor){this.uiPose=this.uiPose||{};}return;}/* v4.6: a Viagem posiciona o mundo a cada quadro (viagemTick) */
   placeInterno.call(this);
+  if(this.xr&&this.model&&this.anchor&&!this.dentro&&!this.copy&&Lab.state.view==='coracaoLab'){/* v4.7.2: coração de estudo com 0,6 m a 0,9 m do aluno, altura do peito */const a=this.anchor,b=this.boxDe(this.obj||this.model);if(!b.isEmpty()){const sz=b.getSize(new T.Vector3()),k=(0.6*(this.xrZoom||1))/Math.max(sz.y,1e-3);this.root.scale.multiplyScalar(k);this.root.updateMatrixWorld(true);const b2=this.boxDe(this.obj||this.model),c=b2.getCenter(new T.Vector3());const alvo=a.p.clone().addScaledVector(a.f,.9);alvo.y=a.p.y-.15;this.root.position.add(alvo.sub(c));this.root.updateMatrixWorld(true);}}
   /* v4.1: no Desafio o painel fica à frente; o modelo gira 50° para a direita em volta do aluno, sem mudar de tamanho */
   if(this.xr&&this.model&&this.anchor&&quizFaseXR(this)){const a=this.anchor,up=new T.Vector3(0,1,0);this.root.position.sub(a.p).applyAxisAngle(up,-.87).add(a.p);this.root.rotation.y-=.87;this.root.updateMatrixWorld(true);}
 };

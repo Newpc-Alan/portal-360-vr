@@ -19,7 +19,7 @@ D.viagem=[
  {titulo:'Sangue',orgao:'sangue',cena:'sangue',dur:16,text:'Entramos no sangue. As hemácias carregam o oxigênio, preso à hemoglobina. Num capilar bem fino, ele deixa o sangue e entra na célula. Chegamos: o ar que você puxou virou energia.',audio:'viagem-6'}
 ];
 D.VIAGEM_FIM={text:'Viagem completa! Nariz, faringe, laringe, traqueia, brônquios, alvéolo e sangue. Agora você sabe o caminho que cada respiração faz dentro de você.',audio:'viagem-fim'};
-const ESCALA_VR=12;      /* 1 m de anatomia = 90 m no VR (7,5 unidades × 12): a traqueia vira um túnel de 1,8 m */
+const ESCALA_VR=6;       /* 1 m de anatomia = 45 m no VR (7,5 unidades × 6): a traqueia vira um túnel de ~90 cm; Maior/Menor ajustam */
 function doisLados(o){o.traverse(x=>{if(x.isMesh&&x.material){x.material.side=T.DoubleSide;}});}
 function curvaDe(pts){const g=G();return new T.CatmullRomCurve3(pts.map(p=>g.ponto(...p)),false,'catmullrom',.3);}
 /* cena por trecho; devolve Group com userData.viagem = {curva (unidades do app) ou null, escalaVR, olharVR} */
@@ -37,12 +37,12 @@ function cena(state){
     w.userData.tick=t=>{w.traverse(o=>{if(o.userData.trilha!==undefined){o.material.opacity=.35+.5*Math.pow(Math.max(0,Math.sin(t*3-o.userData.trilha*8)),2);}});};
   }else if(tr.cena==='alveolo'){
     const a=Mo.alveolo({o2:true,co2:true});doisLados(a);w.add(a);
-    w.userData.viagem={curva:null,centro:V(0,0,0),escalaVR:4.2,girar:true};
+    w.userData.viagem={curva:null,centro:V(0,0,0),escalaVR:2.6,girar:true};
     const tickA=a.userData.tick;w.userData.tick=t=>{if(tickA)tickA(t);};
   }else{
     const s=Mo.inspection('sangue');doisLados(s);w.add(s);
     const curva=new T.CatmullRomCurve3([V(-1.3,0,0),V(-.6,.14,.08),V(.4,-.12,-.08),V(1.2,0,0)]);
-    w.userData.viagem={curva,escalaVR:4,raioOlhar:0};
+    w.userData.viagem={curva,escalaVR:2.6,raioOlhar:0};
     const tickS=s.userData.tick;w.userData.tick=t=>{if(tickS)tickS(t);};
   }
   w.userData.semGiro=true;

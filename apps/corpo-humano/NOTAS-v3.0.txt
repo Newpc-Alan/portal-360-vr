@@ -259,3 +259,9 @@ v4.7.0 (VR fase C, parte 2: coração aberto com as duas mãos)
 
 v4.7.1
 - Tabuleiros de sequência (Caminho do ar, Caminho do sangue, Caminho do alimento, Coluna, Braço, Arco reflexo): rótulos como planos fixos no mundo (rotuloFixo/textFixo) em vez de sprites, que giravam com a cabeça no VR. Rótulos de órgãos continuam sprites.
+
+v4.7.2 (tamanho e saída no VR)
+- Viagem do ar: escala VR 12 → 6 (traqueia ~90 cm); botões "Túnel menor / maior" (xrZoom 0,4 a 3) e "✕ Sair da viagem" na lateral
+  (e, portanto, no painel de ações do VR). Alvéolo e sangue 4 → 2,6.
+- Coração (coracaoLab): no VR fica em tamanho de estudo, 0,6 m de altura a 0,9 m do aluno, na altura do peito (antes 1,45 m).
+- Painéis e botões do VR sempre por cima (depthTest off, renderOrder 1000): não somem atrás das paredes do túnel nem dos órgãos gigantes.

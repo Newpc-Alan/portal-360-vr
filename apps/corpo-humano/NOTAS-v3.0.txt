@@ -212,4 +212,4 @@ v4.3.0 (Módulos 5 e 6: Urinário e Endócrino)
 - Endócrino ('end'): Contexto (corpo → cabeça e pescoço → abdome), Explorar (7 fichas), Mensageiros químicos (5 situações: susto,
   doce, noite, frio, crescer; a glândula certa dispara o hormônio em partículas até os órgãos-alvo), Desafio (5).
 - CLIMA urinario (azul-água) e endocrino (verde-dourado com faíscas). Sobram em breve: Reprodutor, Linfático, Tegumentar.
-- Áudios a gravar: ROTEIRO-AUDIOS-URINARIO-ENDOCRINO.csv (53).
+- Áudios a gravar: ROTEIRO-AUDIOS-URINARIO-ENDOCRINO.csv (56).

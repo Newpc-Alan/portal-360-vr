@@ -90,7 +90,7 @@ function estadoDesafio(){const S=Lab.state;if(S.view!=='desafio')return null;con
 
 Proto.buildXRUI=function(){
   if(!this.xr)return;this.clearXRUI();
-  if(this.anchor){this.ui.position.copy(this.anchor.p);this.ui.rotation.y=this.anchor.yaw;}
+  if(this.anchor){this.uiPose=this.uiPose||{};if(this.uiPose.ref!==this.anchor){this.uiPose.ref=this.anchor;this.uiPose.p=this.anchor.p.clone();this.uiPose.yaw=this.anchor.yaw;}this.ui.position.copy(this.uiPose.p);this.ui.rotation.y=this.uiPose.yaw;}
   const S=Lab.state,lesson=document.getElementById('lessonPanel');
   let title=(lesson.querySelector('h2')||{}).textContent||'Corpo Humano';
   const instrucao=document.getElementById('captionText').textContent||'';
@@ -99,17 +99,18 @@ Proto.buildXRUI=function(){
   let body=instrucao+(feedback?'  '+feedback:''),tom='neutro';
   const des=estadoDesafio();
   if(des){title=des.acertou?'✅ ACERTOU!':'❌ ERROU';tom=des.acertou?'ok':'erro';body=Lab.questoesAtuais()[Lab.quizAtual().index].why;}
+  else if(S.view==='desafio'&&Lab.quizAtual().phase===1&&!Lab.quizAtual().done){const q=Lab.quizAtual(),Q=Lab.questoesAtuais();title='Situação '+(q.index+1)+' de '+Q.length;body=Q[q.index].q;}/* v4.1: a pergunta sempre na tela, mesmo durante a narração de abertura */
   if(this.xrReport){const r=Lab.report();title='Resumo da experiência';body=S.completed.length+' atividades concluídas. '+r.independent+' respostas independentes. '+r.errors+' tentativas incorretas. '+r.hints+' pistas consultadas. '+r.skips+' posições puladas. Gere o relatório do professor no modo 3D.';tom='neutro';}
   const panel=this.textPlane(title,body,1.06,.86,tom);panel.position.set(1.16,.30,-1.64);panel.rotation.y=-.6;this.ui.add(panel);
   const lista=this.xrReport?[{label:'Voltar à atividade',cmd:'xr:reportclose'}]:this._acoes();
   const max=8,pages=Math.max(1,Math.ceil(lista.length/max));this.uiPage=Math.min(this.uiPage||0,pages-1);
   const quizFase=(S.view==='desafio'&&Lab.quizAtual().phase===1)&&!this.xrReport;
-  if(quizFase){
-    panel.position.set(1.16,.52,-1.64);
-    let yy=-.06;lista.forEach(a=>{let cor=null;const m=/^quiz:answer:(\d+)$/.exec(a.cmd);
+  if(quizFase){/* v4.1: pergunta e alternativas centralizadas à frente, maiores; o modelo vai para a direita (placeXR) */
+    this.ui.remove(panel);const pq=this.textPlane(title,body,1.2,.9,tom);pq.position.set(0,.4,-1.64);this.ui.add(pq);
+    let yy=-.14;lista.forEach(a=>{let cor=null;const m=/^quiz:answer:(\d+)$/.exec(a.cmd);
       if(des&&m){const k=Number(m[1]);cor=k===des.correto?VERDE:k===des.escolha?VERMELHO:APAGADO;}
       if(/^quiz:next$/.test(a.cmd))cor=cor||{bg:'#0f6b3a',borda:'#7CFFB8',texto:'#ffffff'};
-      this.xrBotaoLargo(a.label,a.cmd,1.16,yy,a.disabled,cor);yy-=.22;});
+      const bt=this.xrBotaoLargo(a.label,a.cmd,0,yy,a.disabled,cor);bt.scale.set(.95,.9,1);yy-=.195;});
   }else
   lista.slice(this.uiPage*max,(this.uiPage+1)*max).forEach((a,i)=>{
     let cor=null;const m=/^quiz:answer:(\d+)$/.exec(a.cmd);
@@ -247,7 +248,24 @@ Proto.exitXR=function(){this.dentro=false;sairAmbiente();return exitOriginal2.ca
 
 /* ---------- 6. Modelo maior no VR nas atividades de fita ---------- */
 const placeOriginal=Proto.placeXR;
+const quizFaseXR=v=>{const S=Lab.state;return S.view==='desafio'&&Lab.quizAtual().phase===1&&!v.xrReport;};
 Proto.placeXR=function(){
+  placeInterno.call(this);
+  /* v4.1: no Desafio o painel fica à frente; o modelo gira 50° para a direita em volta do aluno, sem mudar de tamanho */
+  if(this.xr&&this.model&&this.anchor&&quizFaseXR(this)){const a=this.anchor,up=new T.Vector3(0,1,0);this.root.position.sub(a.p).applyAxisAngle(up,-.87).add(a.p);this.root.rotation.y-=.87;this.root.updateMatrixWorld(true);}
+};
+const updateOriginal=Proto.updateXR;
+const dAng=(a,b)=>{let d=a-b;while(d>Math.PI)d-=2*Math.PI;while(d<-Math.PI)d+=2*Math.PI;return d;};
+Proto.updateXR=function(dt){
+  updateOriginal.call(this,dt);
+  /* v4.1: painéis com "seguir preguiçoso" (como o menu do Quest): parados a pequenos movimentos de cabeça; quando o aluno gira
+     mais de 50° ou anda mais de 0,5 m, deslizam suavemente até ficar de novo à frente. O modelo não se move. */
+  if(!this.anchor||!this.uiPose)return;let h;try{h=this.head();}catch(_){return;}
+  const u=this.uiPose,d=dAng(h.yaw,u.yaw),dist=Math.hypot(h.p.x-u.p.x,h.p.z-u.p.z);
+  if(Math.abs(d)>.9||dist>.5)u.seguindo=true;
+  if(u.seguindo){const passo=Math.min(Math.abs(d),2.4*dt)*Math.sign(d);u.yaw+=passo;u.p.lerp(h.p,Math.min(1,dt*3));this.ui.position.copy(u.p);this.ui.rotation.y=u.yaw;if(Math.abs(d)<.06&&dist<.08)u.seguindo=false;}
+};
+function placeInterno(){
   placeOriginal.call(this);
   if(!this.xr||!this.model||!this.anchor)return;
   const S=Lab.state,fita=['caminhoAr','caminhoSangue','alimento','coluna','braco'].includes(S.view);

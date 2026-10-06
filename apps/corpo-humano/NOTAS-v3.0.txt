@@ -182,3 +182,10 @@ v4.0.1
 
 v4.0.3
 - 38 áudios do Sistema Nervoso gravados e normalizados (silenceremove + loudnorm -16 LUFS, mono 44,1 kHz 64 kbps). Situação da panela quente reescrita (gerador de voz recusou o texto original).
+
+v4.1.0 (leitura no VR)
+- Desafio no VR: pergunta e alternativas centralizadas à frente do aluno (painel 1,2 m, botões largos empilhados); o modelo gira 50° para a
+  direita em volta do aluno. Ao entrar/sair do Desafio a interface se recentraliza onde o aluno está olhando. O painel mostra a situação
+  atual mesmo enquanto toca a narração de abertura.
+- Painéis com "seguir preguiçoso" (uiPose separado do anchor): ficam parados com pequenos movimentos de cabeça; ao girar mais de 50° ou
+  andar mais de 0,5 m, deslizam suavemente (2,4 rad/s) até voltar à frente. O modelo permanece no lugar.

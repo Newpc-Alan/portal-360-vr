@@ -246,3 +246,6 @@ v4.6.0 (VR fase C, parte 1: realidade mista + Viagem do ar)
   28%. No 3D a câmera percorre a curva (arrastar = olhar em volta); no VR o mundo se move em volta do aluno em escala 12 (1 m de
   anatomia = 90 m) e o analógico direito avança/recua. Tempo real (independe da taxa de quadros). Marca 'viagem' no fim.
 - Áudios a gravar: ROTEIRO-AUDIOS-VIAGEM.csv (9). Catálogo: 41 missões, "VR + 3D + realidade mista".
+
+v4.6.1
+- 9 áudios da Viagem do ar gravados e normalizados. 260 gravações.

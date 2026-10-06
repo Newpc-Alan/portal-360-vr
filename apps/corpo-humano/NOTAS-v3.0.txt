@@ -265,3 +265,6 @@ v4.7.2 (tamanho e saída no VR)
   (e, portanto, no painel de ações do VR). Alvéolo e sangue 4 → 2,6.
 - Coração (coracaoLab): no VR fica em tamanho de estudo, 0,6 m de altura a 0,9 m do aluno, na altura do peito (antes 1,45 m).
 - Painéis e botões do VR sempre por cima (depthTest off, renderOrder 1000): não somem atrás das paredes do túnel nem dos órgãos gigantes.
+
+v4.7.3 (correção)
+- Órgão segurado com o grip não ficava mais solto: no laboratório (coração), V4.gripEnd assumia o evento antes de soltar() e o órgão permanecia preso ao controle; e clear() (troca de missão) apagava o registro sem desprender o objeto. Agora soltar() roda antes, clear() devolve e varre os filhos do grip.

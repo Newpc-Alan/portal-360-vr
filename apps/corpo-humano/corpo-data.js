@@ -81,7 +81,7 @@ const sources=[
  ['Z-Anatomy · atlas 3D de anatomia (CC BY-SA 4.0)','https://github.com/LluisV/Z-Anatomy'],
  ['Three.js / WebXR','https://threejs.org/docs/pages/WebXRManager.html']
 ];
-window.CORPO_DATA={info,activities,guide,context,sequencias,questions,sources,version:'4.7.2'};
+window.CORPO_DATA={info,activities,guide,context,sequencias,questions,sources,version:'4.7.3'};
 })();
 /* ---------- Módulo 2: Esqueleto e Movimento (v3.0) ---------- */
 (function(D){

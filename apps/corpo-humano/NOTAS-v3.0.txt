@@ -176,3 +176,6 @@ v4.0.0 (Módulo 3: Sistema Nervoso)
 - Tecidos: encefalo (giros e sulcos, relevo .9) e nervo (feixes creme). VR: clima nervoso (índigo/violeta, partículas piscando como sinapses);
   corpo inteiro em nervos / nervContexto níveis 0-1 / desafio.
 - Áudios a gravar: ROTEIRO-AUDIOS-NERVOSO.csv (38 arquivos: 23 fichas + nerv-*). Até lá, voz do navegador.
+
+v4.0.1
+- Roteiros do Sistema Nervoso humanizados (tom de fala) nas fichas, no contexto, na aula guiada e no arco reflexo concluído; CSV regenerado com o mesmo texto da tela.

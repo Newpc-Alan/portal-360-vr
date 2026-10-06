@@ -65,7 +65,7 @@ function tecidoDe(key,parte){
  if(key==='traqueia'||key==='bronquios'||key==='laringe'||(key==='nariz'&&parte==='cartilagens'))return 'cartilagem';
  if(key==='costelas'||key==='esqueleto'||(key==='nariz'&&parte==='ossos')||['femur','tibia','fibula','patela','escapula','clavicula','umero','pelve','sacro','radio','ulna'].includes(parte))return 'osso';
  if(key==='musculos'||key==='diafragma')return 'musculo';
- if(['esofago','estomago','figado','intestino_delgado','intestino_grosso','boca','faringe'].includes(key)||['lingua','palato','uvula','mucosa','conchas'].includes(parte))return 'viscera';
+ if(['esofago','estomago','figado','intestino_delgado','intestino_grosso','boca','faringe','pancreas','vesicula','salivares','duodeno','apendice'].includes(key)||['lingua','palato','uvula','mucosa','conchas'].includes(parte))return 'viscera';
  if(key==='silhueta'||key==='cabeca')return 'pele';
  return null;
 }

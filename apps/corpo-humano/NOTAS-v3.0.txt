@@ -189,3 +189,13 @@ v4.1.0 (leitura no VR)
   atual mesmo enquanto toca a narração de abertura.
 - Painéis com "seguir preguiçoso" (uiPose separado do anchor): ficam parados com pequenos movimentos de cabeça; ao girar mais de 50° ou
   andar mais de 0,5 m, deslizam suavemente (2,4 rad/s) até voltar à frente. O modelo permanece no lugar.
+
+v4.2.0 (Módulo 4: Sistema Digestório completo)
+- O Digestório deixa de ser uma missão única (Ordene) e vira módulo 'dig': Contexto (corpo → tubo → glândulas anexas), Explorar
+  (13 fichas com lista e tour), Jornada do pão (8 paradas com o bolo alimentar pulsando no órgão em destaque, chips do que acontece),
+  Ordene o caminho (missão anterior) e Desafio (5 situações: 2 antigas + amido, bile, vilosidades).
+- Modelos novos Z-Anatomy (za/dig.py): pancreas, vesicula (+ ducto biliar), salivares (parótida, submandibular, sublingual, ductos),
+  duodeno, apendice. Fichas novas: lingua (parte do modelo da boca), salivares, pancreas, vesicula, duodeno, apendice.
+- Inspeção do módulo (DIG_MODELS.inspection): órgão centrado com os vizinhos esmaecidos (fora do enquadre). CORPO_GLTF.orgao ganhou
+  opt.aoCarregar(inst, meshes). Legenda própria; resumo e relatório com Digestório e Jornada.
+- Áudios a gravar: ROTEIRO-AUDIOS-DIGESTORIO.csv (25). Até lá, voz do navegador.

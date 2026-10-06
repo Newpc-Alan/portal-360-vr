@@ -216,3 +216,9 @@ v4.3.0 (Módulos 5 e 6: Urinário e Endócrino)
 
 v4.3.1
 - 55 áudios do Urinário e do Endócrino gravados e normalizados (falta end-mensageiros-concluido; uri-desafio-uriUreter e end-desafio-endIodo parecem truncados). 251 gravações.
+
+v4.4.0 (menu principal)
+- A cada entrada a aplicação abre no menu principal de sistemas (cartões com ícone, cor, o que estuda, exemplos, missões e progresso;
+  os 3 em breve aparecem apagados). Boas-vindas continua uma vez por sessão, antes do menu. Botão ☰ Sistemas no topo reabre;
+  "Continuar onde parei" fecha; "Aula guiada do sistema atual" inicia a aula. Qualquer troca de missão fecha o menu.
+- VR: ao entrar, o menu da esquerda já abre no submenu de sistemas (xrMenu='sistemas'); contagem de "em breve" dinâmica.

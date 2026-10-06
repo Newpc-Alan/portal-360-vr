@@ -37,7 +37,7 @@ if(q.get('vr')==='1'){
     ov.innerHTML='<div class="vrgate-box"><img src="assets/logo.png" alt=""><div class="vrgate-t">Corpo Humano Imersivo</div><div class="vrgate-s">Coloque o óculos e toque para começar</div><button type="button" data-action="vr-entrar">🥽 Entrar em VR</button><button type="button" class="sec" data-action="vr-3d">Explorar em 3D</button></div>';
     document.body.appendChild(ov);
     ov.addEventListener('click',e=>{const b=e.target.closest('[data-action]');if(!b)return;
-      const S=Lab.state,bv=()=>{if(!S.welcomed&&Lab.boasVindas)Lab.boasVindas();};if(b.dataset.action==='vr-entrar'){window.alternarVR().finally(()=>ov.remove());}else{ov.remove();bv();}});
+      const S=Lab.state,bv=()=>{if(!S.welcomed&&Lab.boasVindas)Lab.boasVindas();};if(b.dataset.action==='vr-entrar'){window.alternarVR().finally(()=>ov.remove());}else{ov.remove();bv();if(Lab.abrirMenu)Lab.abrirMenu();}});
   };
   if(!window.isSecureContext)semVR('página sem HTTPS');else if(!navigator.xr)semVR('navegador sem WebXR (navigator.xr ausente)');
   else navigator.xr.isSessionSupported('immersive-vr').then(ok=>ok?mostrarEntrada():semVR('isSessionSupported(immersive-vr) = false')).catch(e=>semVR('isSessionSupported lançou erro: '+(e&&e.message)));
@@ -135,7 +135,7 @@ Proto.buildXRUI=function(){
   }else if(menu==='sistemas'){
     const disp=D.sistemas.filter(x=>!x.breve);
     disp.forEach((x,i)=>this.xrButton((x.id===S.sistema?'● ':'○ ')+x.nome,'sistema:'+x.id,-1.18,.6-i*UI.passo,.5,false,x.id===S.sistema?VD:null));
-    this.xrButton('… mais 6 sistemas em breve','xr:menu:raiz',-1.18,.6-disp.length*UI.passo,.5,true);
+    this.xrButton('… mais '+D.sistemas.filter(x=>x.breve).length+' sistemas em breve','xr:menu:raiz',-1.18,.6-disp.length*UI.passo,.5,true);
     this.xrButton('◀ Voltar','xr:menu:raiz',-1.18,.6-(disp.length+1.3)*UI.passo,.5);
   }else{
     this.xrButton('◎ Centralizar','center',-1.18,.6,.5);this.xrButton(S.autoRotate?'Ⅱ Pausar giro':'▷ Girar modelo','rotate',-1.18,.6-UI.passo,.5);
@@ -181,7 +181,7 @@ function ligarPosicional(){
 ['pointerdown','keydown','touchstart'].forEach(ev=>document.addEventListener(ev,ligarPosicional,{passive:true}));
 document.addEventListener('visibilitychange',()=>{if(!document.hidden&&ligado){try{T.AudioContext.getContext().resume();}catch(e){}}});
 const toggleOriginal=Proto.toggleVR;
-Proto.toggleVR=async function(){const r=await toggleOriginal.call(this);ligarPosicional();if(posicional)posicional.setRefDistance(this.xr?1.2:14);if(this.xr&&typeof entrarAmbiente==='function')entrarAmbiente();/* boas-vindas a cada entrada no VR (v3.5.4) */if(this.xr&&Lab.boasVindas)setTimeout(()=>{if(view.xr){Lab.boasVindas();setTimeout(()=>{if(view.xr)view.buildXRUI();},700);}},900);return r;};
+Proto.toggleVR=async function(){const r=await toggleOriginal.call(this);ligarPosicional();if(posicional)posicional.setRefDistance(this.xr?1.2:14);if(this.xr&&typeof entrarAmbiente==='function')entrarAmbiente();if(this.xr){this.xrMenu='sistemas';this.buildXRUI();if(Lab.fecharMenu)Lab.fecharMenu();}/* v4.4: o VR abre no menu de sistemas */ /* boas-vindas a cada entrada no VR (v3.5.4) */if(this.xr&&Lab.boasVindas)setTimeout(()=>{if(view.xr){Lab.boasVindas();setTimeout(()=>{if(view.xr)view.buildXRUI();},700);}},900);return r;};
 const exitOriginal=Proto.exitXR;
 Proto.exitXR=function(){exitOriginal.call(this);if(posicional)posicional.setRefDistance(14);};
 

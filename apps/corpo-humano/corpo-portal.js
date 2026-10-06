@@ -21,7 +21,7 @@ const view=Lab.view,narrator=Lab.narrator;
 const Proto=Object.getPrototypeOf(view);
 
 /* ---------- 1. Contrato do catálogo ---------- */
-window.alternarVR=function(){try{return Promise.resolve(view.toggleVR());}catch(e){return Promise.reject(e);}};
+window.alternarVR=function(modo){try{return Promise.resolve(view.toggleVR(modo||'vr'));}catch(e){return Promise.reject(e);}};
 window.irCatalogo=function(){Lab.command('catalog');};
 window.PortalCorpo={versao:'2.0.0',get emVR(){return !!view.xr;}};
 
@@ -34,10 +34,10 @@ if(q.get('vr')==='1'){
     try{const d=document.createElement('div');d.className='stage-error';d.style.zIndex='2147483400';d.innerHTML='<p><b>Não consegui abrir o modo VR neste navegador.</b></p><p style="font-size:12px;word-break:break-word">'+det.replace(/</g,'&lt;')+'</p><p class="fine">Toque para fechar. Se você está no Meta Quest, abra este link no navegador do óculos (Meta Quest Browser), fora de qualquer outra janela.</p>';d.addEventListener('click',()=>d.remove());document.getElementById('stage').appendChild(d);}catch(_){}};
   const mostrarEntrada=()=>{
     const ov=document.createElement('div');ov.id='vrGate';
-    ov.innerHTML='<div class="vrgate-box"><img src="assets/logo.png" alt=""><div class="vrgate-t">Corpo Humano Imersivo</div><div class="vrgate-s">Coloque o óculos e toque para começar</div><button type="button" data-action="vr-entrar">🥽 Entrar em VR</button><button type="button" class="sec" data-action="vr-3d">Explorar em 3D</button></div>';
-    document.body.appendChild(ov);
+    ov.innerHTML='<div class="vrgate-box"><img src="assets/logo.png" alt=""><div class="vrgate-t">Corpo Humano Imersivo</div><div class="vrgate-s">Coloque o óculos e toque para começar</div><button type="button" data-action="vr-entrar">🥽 Entrar em VR</button><button type="button" data-action="vr-ar" hidden>⬚ Na minha sala (realidade mista)</button><button type="button" class="sec" data-action="vr-3d">Explorar em 3D</button></div>';
+    document.body.appendChild(ov);navigator.xr.isSessionSupported('immersive-ar').then(ok=>{const b=ov.querySelector('[data-action="vr-ar"]');if(b&&ok)b.hidden=false;}).catch(()=>{});
     ov.addEventListener('click',e=>{const b=e.target.closest('[data-action]');if(!b)return;
-      const S=Lab.state,bv=()=>{if(!S.welcomed&&Lab.boasVindas)Lab.boasVindas();};if(b.dataset.action==='vr-entrar'){window.alternarVR().finally(()=>ov.remove());}else{ov.remove();bv();if(Lab.abrirMenu)Lab.abrirMenu();}});
+      const S=Lab.state,bv=()=>{if(!S.welcomed&&Lab.boasVindas)Lab.boasVindas();};if(b.dataset.action==='vr-entrar'){window.alternarVR('vr').finally(()=>ov.remove());}else if(b.dataset.action==='vr-ar'){window.alternarVR('ar').finally(()=>ov.remove());}else{ov.remove();bv();if(Lab.abrirMenu)Lab.abrirMenu();}});
   };
   if(!window.isSecureContext)semVR('página sem HTTPS');else if(!navigator.xr)semVR('navegador sem WebXR (navigator.xr ausente)');
   else navigator.xr.isSessionSupported('immersive-vr').then(ok=>ok?mostrarEntrada():semVR('isSessionSupported(immersive-vr) = false')).catch(e=>semVR('isSessionSupported lançou erro: '+(e&&e.message)));
@@ -126,9 +126,10 @@ Proto.buildXRUI=function(){
     this.xrButton('Sistema: '+sis.nome,'xr:menu:sistemas',-1.18,.6,.5,false,AZ);
     this.xrButton('▣ Missão '+(idx+1)+' de '+atv.length+': '+atual.label,'xr:menu:missoes',-1.18,.6-UI.passo,.5,false,VD);
     this.xrButton(this.dentro?'⤡ Sair de dentro do corpo':'⤢ Entrar no corpo','xr:dentro',-1.18,.6-2*UI.passo,.5,false,this.dentro?{bg:'#4a2a0f',borda:'#ffc77a',texto:'#fff6e8'}:{bg:'#2a1050',borda:'#c9a6ff',texto:'#ffffff'});
-    this.xrButton('⚙ Controles','xr:menu:controles',-1.18,.6-3*UI.passo,.5);
-    this.xrButton('🔊 Ouvir de novo','voice:repeat',-1.18,.6-4*UI.passo,.5);
-    this.xrButton('🥽 Sair do VR','vr',-1.18,.6-5.3*UI.passo,.5,false,{bg:'#5a2a16',borda:'#ff9f6b',texto:'#fff2ea'});
+    if(window.__arOK||this.xrModo==='ar')this.xrButton(this.xrModo==='ar'?'🥽 Voltar ao VR':'⬚ Ver na minha sala','xr:'+(this.xrModo==='ar'?'vr':'ar'),-1.18,.6-3*UI.passo,.5,false,{bg:'#0f3a4a',borda:'#7fd6ff',texto:'#ffffff'});
+    this.xrButton('⚙ Controles','xr:menu:controles',-1.18,.6-(window.__arOK||this.xrModo==='ar'?4:3)*UI.passo,.5);
+    const kAR=(window.__arOK||this.xrModo==='ar')?1:0;this.xrButton('🔊 Ouvir de novo','voice:repeat',-1.18,.6-(4+kAR)*UI.passo,.5);
+    this.xrButton(this.xrModo==='ar'?'✕ Sair da realidade mista':'🥽 Sair do VR','vr',-1.18,.6-(5.3+kAR)*UI.passo,.5,false,{bg:'#5a2a16',borda:'#ff9f6b',texto:'#fff2ea'});
   }else if(menu==='missoes'){
     atv.forEach((a,i)=>this.xrButton((i+1)+'. '+a.label,'view:'+a.id,-1.18,.6-i*UI.passo,.5,false,a.id===S.view?VD:null));
     this.xrButton('◀ Voltar','xr:menu:raiz',-1.18,.6-(atv.length+.3)*UI.passo,.5);
@@ -153,7 +154,7 @@ Proto.xrSelect=function(ctrl){
   if(this.held.has(ctrl))return xrSelectOriginal.call(this,ctrl);
   const ray=this.controllerRay(ctrl);
   const ui=ray.intersectObjects(this.uiHits,false)[0];
-  if(ui&&ui.object.userData.command==='xr:dentro'){this.alternarDentro();return;}
+  if(ui&&ui.object.userData.command==='xr:dentro'){this.alternarDentro();return;}if(ui&&(ui.object.userData.command==='xr:ar'||ui.object.userData.command==='xr:vr')){Lab.command(ui.object.userData.command.slice(3));return;}
   this.root.updateMatrixWorld(true);
   const hit=ui?null:this.hits(ray)[0];
   if(!ui&&!hit){narrator.stop();return;}
@@ -181,7 +182,7 @@ function ligarPosicional(){
 ['pointerdown','keydown','touchstart'].forEach(ev=>document.addEventListener(ev,ligarPosicional,{passive:true}));
 document.addEventListener('visibilitychange',()=>{if(!document.hidden&&ligado){try{T.AudioContext.getContext().resume();}catch(e){}}});
 const toggleOriginal=Proto.toggleVR;
-Proto.toggleVR=async function(){const r=await toggleOriginal.call(this);ligarPosicional();if(posicional)posicional.setRefDistance(this.xr?1.2:14);if(this.xr&&typeof entrarAmbiente==='function')entrarAmbiente();if(this.xr){this.xrMenu='sistemas';this.buildXRUI();if(Lab.fecharMenu)Lab.fecharMenu();}/* v4.4: o VR abre no menu de sistemas */ /* boas-vindas a cada entrada no VR (v3.5.4) */if(this.xr&&Lab.boasVindas)setTimeout(()=>{if(view.xr){Lab.boasVindas();setTimeout(()=>{if(view.xr)view.buildXRUI();},700);}},900);return r;};
+Proto.toggleVR=async function(modo){const r=await toggleOriginal.call(this,modo);ligarPosicional();if(posicional)posicional.setRefDistance(this.xr?1.2:14);if(this.xr&&this.xrModo!=='ar'&&typeof entrarAmbiente==='function')entrarAmbiente();if(this.xr){this.xrMenu='sistemas';this.buildXRUI();if(Lab.fecharMenu)Lab.fecharMenu();}/* v4.4: o VR abre no menu de sistemas */ /* boas-vindas a cada entrada no VR (v3.5.4) */if(this.xr&&Lab.boasVindas)setTimeout(()=>{if(view.xr){Lab.boasVindas();setTimeout(()=>{if(view.xr)view.buildXRUI();},700);}},900);return r;};
 const exitOriginal=Proto.exitXR;
 Proto.exitXR=function(){exitOriginal.call(this);if(posicional)posicional.setRefDistance(14);};
 
@@ -239,7 +240,8 @@ Proto.frame=function(time,frame){
   if(ambiente&&ambiente.userData.sistema!==Lab.state.sistema){const m2=ambiente.userData.modo2d;M.dispose(ambiente);view.scene.remove(ambiente);ambiente=null;ambiente=criarAmbiente(m2);view.scene.add(ambiente);}
   if(ambiente&&ambiente.userData.faisca){/* v4.0 · nervoso: as partículas piscam como sinapses */const t=performance.now()/1000;(ambiente.userData.pontos||[]).forEach((p,i)=>{p.o.material.opacity=p.op*(.45+.55*Math.pow(Math.abs(Math.sin(t*(2.3+i*1.7)+i)),6));});}
   if(ambiente&&ambiente.userData.pulsa&&ambiente.userData.domo&&window.CORPO_TECIDOS){const k=1+.1*window.CORPO_TECIDOS.PULSO.value;ambiente.userData.domo.material.color.setScalar(k);}
-  if(this.xr){if(!ambiente||ambiente.userData.modo2d)entrarAmbiente(false);}else{if(!ambiente)entrarAmbiente(true);armarMusica2d();
+  if(this.xr&&this.xrModo==='ar'){/* v4.6: realidade mista, sem abóbada/partículas/chão: a sala do aluno é o ambiente */if(ambiente){M.dispose(ambiente);view.scene.remove(ambiente);ambiente=null;}}
+  else if(this.xr){if(!ambiente||ambiente.userData.modo2d)entrarAmbiente(false);}else{if(!ambiente)entrarAmbiente(true);armarMusica2d();
     /* no 3D o piso acompanha a base do modelo (corpo inteiro nunca fica com os pés abaixo do chão) */
     ambiente.userData.n=(ambiente.userData.n||0)+1;if(ambiente.userData.n%15===1&&this.model){const b=this.boxDe?this.boxDe(this.model,true):new T.Box3().setFromObject(this.model);const y=b.isEmpty()?-3.6:Math.min(-3.6,b.min.y-.12);if(Math.abs((ambiente.userData.pisoY??-3.6)-y)>.01){ambiente.userData.pisoY=y;(ambiente.userData.piso||[]).forEach(([o,d])=>{o.position.y=y+d;});}}}
   if(ambiente){const t=(time||performance.now())*0.001;ambiente.children.forEach(o=>{if(o.isPoints){o.rotation.y=t*o.userData.vel;o.position.y=Math.sin(t*0.35+o.userData.vel*50)*0.08;}});}
@@ -252,6 +254,7 @@ Proto.exitXR=function(){this.dentro=false;sairAmbiente();return exitOriginal2.ca
 const placeOriginal=Proto.placeXR;
 const quizFaseXR=v=>{const S=Lab.state;return S.view==='desafio'&&Lab.quizAtual().phase===1&&!v.xrReport;};
 Proto.placeXR=function(){
+  if(Lab.state.view==='viagem'){if(!this.anchor){try{this.anchor=this.head();}catch(_){}}if(this.anchor){this.uiPose=this.uiPose||{};}return;}/* v4.6: a Viagem posiciona o mundo a cada quadro (viagemTick) */
   placeInterno.call(this);
   /* v4.1: no Desafio o painel fica à frente; o modelo gira 50° para a direita em volta do aluno, sem mudar de tamanho */
   if(this.xr&&this.model&&this.anchor&&quizFaseXR(this)){const a=this.anchor,up=new T.Vector3(0,1,0);this.root.position.sub(a.p).applyAxisAngle(up,-.87).add(a.p);this.root.rotation.y-=.87;this.root.updateMatrixWorld(true);}

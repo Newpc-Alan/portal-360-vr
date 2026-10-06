@@ -236,3 +236,13 @@ v4.5.1 (guia do professor)
   mapeamento BNCC por sistema (EF05CI06/07/08, EF06CI06/07/09/10, EF08CI08, EM13CNT202 que cita realidade virtual, EM13CNT207),
   7 planos de aula de 50 min, sequência didática de 6 aulas (6º ano), roteiro de rodízio VR e leitura do relatório do professor.
   Links: rodapé da aplicação e diálogo Resumo. PDF gerado: Guia-do-Professor-Corpo-Humano.pdf (7 páginas).
+
+v4.6.0 (VR fase C, parte 1: realidade mista + Viagem do ar)
+- Realidade mista (passthrough, Quest 3S): toggleVR(modo) com 'immersive-ar'; botão "⬚ Na minha sala" no topo (só aparece quando
+  isSessionSupported('immersive-ar')), na tela de entrada ?vr=1 e no menu raiz do VR ("Ver na minha sala" / "Voltar ao VR", que
+  encerra a sessão atual e abre a outra via xrPendente). Em AR não há abóbada, partículas nem chão: a sala do aluno é o ambiente.
+- Viagem do ar (corpo-viagem.js), missão 08 do Respiratório: 7 trechos (nariz, faringe, laringe, traqueia, brônquios, alvéolo,
+  sangue). Caminhos medidos nas malhas (seções transversais das vias aéreas); materiais DoubleSide, farol na câmera e luzes gerais a
+  28%. No 3D a câmera percorre a curva (arrastar = olhar em volta); no VR o mundo se move em volta do aluno em escala 12 (1 m de
+  anatomia = 90 m) e o analógico direito avança/recua. Tempo real (independe da taxa de quadros). Marca 'viagem' no fim.
+- Áudios a gravar: ROTEIRO-AUDIOS-VIAGEM.csv (9). Catálogo: 41 missões, "VR + 3D + realidade mista".

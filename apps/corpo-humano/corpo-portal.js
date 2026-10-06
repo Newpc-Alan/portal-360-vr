@@ -142,7 +142,7 @@ Proto.buildXRUI=function(){
     this.xrButton('◎ Centralizar','center',-1.18,.6,.5);this.xrButton(S.autoRotate?'Ⅱ Pausar giro':'▷ Girar modelo','rotate',-1.18,.6-UI.passo,.5);
     this.xrButton('■ Parar voz','voice:stop',-1.18,.6-2*UI.passo,.5);this.xrButton('↙ Catálogo','catalog',-1.18,.6-3*UI.passo,.5,false,AZ);
     this.xrButton('◀ Voltar','xr:menu:raiz',-1.18,.6-4.3*UI.passo,.5);
-    const ajuda=this.textPlane('Como usar os controles','Grip (lateral): segura o órgão na mão; gire o pulso para olhar em volta. Duas mãos: afaste para aumentar. Gatilho: seleciona e abre a ficha. Analógico direito: gira o modelo em passos e aproxima ou afasta. Analógico esquerdo: sobe e desce. Botão A: centraliza. Botão B: menu de missões.',.92,.62,'neutro');ajuda.position.set(-1.18,.6-7.2*UI.passo,UI.z);ajuda.rotation.y=.55;this.ui.add(ajuda);
+    const ajuda=this.textPlane('Como usar os controles','Grip (lateral): segura o órgão na mão; gire o pulso para olhar em volta. Duas mãos: afaste para aumentar; na missão Coração, afastar as mãos abre o coração. Gatilho: seleciona e abre a ficha. Analógico direito: gira o modelo em passos e aproxima ou afasta. Analógico esquerdo: sobe e desce. Botão A: centraliza. Botão B: menu de missões.',.92,.62,'neutro');ajuda.position.set(-1.18,.6-7.2*UI.passo,UI.z);ajuda.rotation.y=.55;this.ui.add(ajuda);
   }
 };
 /* lista de ações da lateral (o dna-app monta os botões com data-act; lemos de lá para não depender de variáveis internas) */

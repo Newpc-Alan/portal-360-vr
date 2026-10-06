@@ -249,3 +249,10 @@ v4.6.0 (VR fase C, parte 1: realidade mista + Viagem do ar)
 
 v4.6.1
 - 9 áudios da Viagem do ar gravados e normalizados. 260 gravações.
+
+v4.7.0 (VR fase C, parte 2: coração aberto com as duas mãos)
+- Na missão Coração (coracaoLab), segurar o coração com uma mão e pegá-lo com a outra entra no modo "abrir": afastar as mãos move o
+  corte frontal (cutPosition 100 → 45), em vez de escalar. Materiais do coração viram DoubleSide para o interior aparecer; o plano
+  de corte passa a acompanhar o coração na mão (sobrescrito em updateXR a partir do matrixWorld do órgão). Ao passar de 70%, narra
+  'vr-coracao-aberto' (texto no ROTEIRO-AUDIOS.csv). O corte permanece ao soltar; "Desativar corte" (ações do painel) fecha.
+- Cartão "Como usar os controles" atualizado.

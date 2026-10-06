@@ -50,3 +50,5 @@ nav details.nav-breve[open] summary{color:#8fb0c2}
 
 /* v4.5 · indicador de uso offline */
 .offline{font-size:9px;color:#8fb7c9;white-space:nowrap}.offline.pronto{color:#9ee6cd}.offline.erro{color:#ffb3a7}.offline-box{border:1px solid #365165;background:#102738;border-radius:11px;padding:12px;margin:14px 0}.offline-box b{font-size:13px}.offline-box p{margin:6px 0}
+
+.rodape-link{font-size:9px;color:#9ec6d8;text-decoration:none;margin-right:10px}.rodape-link:hover{text-decoration:underline}

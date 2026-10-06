@@ -230,3 +230,9 @@ v4.5.0 (uso sem internet)
 - precache.json gerado por tools/gerar-precache.py (rodar a cada publicação; também sincroniza a VERSAO do sw.js com corpo-data.js).
 - Rodapé mostra "Preparando uso sem internet… N%" → "✓ Pronto para uso sem internet"; Ajustes tem o detalhe e "Baixar tudo agora".
 - Limite: o catálogo (raiz) não está no cache; o link "Catálogo" precisa de rede. Testado headless: offline total com modelos, fichas narradas e trilha.
+
+v4.5.1 (guia do professor)
+- guia-professor.html (imprimível, no cache offline): como usar em sala (lousa, Chromebook em duplas, estação VR com rodízio),
+  mapeamento BNCC por sistema (EF05CI06/07/08, EF06CI06/07/09/10, EF08CI08, EM13CNT202 que cita realidade virtual, EM13CNT207),
+  7 planos de aula de 50 min, sequência didática de 6 aulas (6º ano), roteiro de rodízio VR e leitura do relatório do professor.
+  Links: rodapé da aplicação e diálogo Resumo. PDF gerado: Guia-do-Professor-Corpo-Humano.pdf (7 páginas).

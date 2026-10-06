@@ -37,6 +37,10 @@ const GERA={
  vaso(){const n=512,h=valorRuido(n,3,51,12);return pintar(n,0,(x,y,i)=>{const v=h[i];const t=.9+v*.2;return [Math.round(255*Math.min(1,t)),Math.round(255*Math.min(1,t)),Math.round(255*Math.min(1,t)),Math.round(255*(.5+v*.5))];});},
  viscera(){const n=512,h=valorRuido(n,5,61,7),h2=valorRuido(n,2,62,30);const c=pintar(n,0,(x,y,i)=>{const v=h[i]*.75+h2[i]*.25;const t=.85+v*.3;return [Math.round(255*Math.min(1,t)),Math.round(255*Math.min(1,t*.97)),Math.round(255*Math.min(1,t*.95)),Math.round(255*(.45+v*.55))];});
   const ctx=c.getContext('2d');ctx.globalAlpha=.22;linhas(ctx,n,45,63,'rgba(120,30,40,0.9)',1.2,2);return c;},
+ encefalo(){/* giros e sulcos: ruído em bandas, com sulcos escuros e vasos finos (v4.0) */const n=512,h=valorRuido(n,4,81,5),s=valorRuido(n,3,82,9);const c=pintar(n,0,(x,y,i)=>{const sulco=Math.pow(Math.max(0,1-Math.abs(s[i]-.5)*7),2);const v=h[i]*.7+(1-sulco)*.3;const t=.78+v*.3-sulco*.3;return [Math.min(255,236*t),Math.min(255,176*t),Math.min(255,170*t),Math.round(255*(.25+v*.75))];});
+  const ctx=c.getContext('2d');ctx.globalAlpha=.3;linhas(ctx,n,22,83,'rgba(170,40,60,0.9)',1.4,2.4);ctx.globalAlpha=.16;linhas(ctx,n,10,84,'rgba(120,30,50,1)',2.6,1.8);return c;},
+ nervo(){/* feixes longitudinais, cor creme (v4.0) */const n=512,h=valorRuido(n,3,91,8);const c=pintar(n,0,(x,y,i)=>{const fibra=.5+.5*Math.sin(x*.22+h[i]*3.2);const v=h[i]*.5+fibra*.5;const t=.86+v*.22;return [Math.min(255,246*t),Math.min(255,232*t),Math.min(255,178*t),Math.round(255*(.35+v*.65))];});
+  const ctx=c.getContext('2d');ctx.globalAlpha=.14;linhas(ctx,n,16,93,'rgba(200,120,80,0.8)',1.1,.5);return c;},
  cartilagem(){const n=256,h=valorRuido(n,3,71,6);return pintar(n,0,(x,y,i)=>{const v=h[i];const t=.92+v*.14;return [Math.round(255*Math.min(1,t)),Math.round(255*Math.min(1,t)),Math.round(255*Math.min(1,t)),Math.round(255*(.5+v*.5))];});}
 };
 function textura(tipo){if(cache[tipo])return cache[tipo];const g=GERA[tipo];if(!g)return null;const tx=new T.CanvasTexture(g());tx.wrapS=tx.wrapT=T.RepeatWrapping;tx.encoding=T.sRGBEncoding;tx.minFilter=T.LinearMipmapLinearFilter;tx.magFilter=T.LinearFilter;tx.generateMipmaps=true;tx.anisotropy=4;cache[tipo]=tx;return tx;}
@@ -49,6 +53,8 @@ const TEC={
  vaso:{tex:'vaso',escala:14,relevo:.3,rug:[.25,.45],rim:0xffffff,rimF:.5,tinta:.25},
  viscera:{tex:'viscera',escala:9,relevo:.7,rug:[.3,.62],rim:0xffd0c0,rimF:.5,tinta:.5},
  cartilagem:{tex:'cartilagem',escala:25,relevo:.4,rug:[.5,.75],rim:0xe0f4ff,rimF:.45,tinta:.3},
+ encefalo:{tex:'encefalo',escala:16,relevo:.9,rug:[.3,.6],rim:0xffc9c0,rimF:.5,tinta:.55},
+ nervo:{tex:'nervo',escala:12,relevo:.5,rug:[.35,.7],rim:0xfff3c8,rimF:.55,tinta:.45},
  pele:{tex:null,escala:1,relevo:0,rug:[.5,.5],rim:0x8fd3ff,rimF:1.4,tinta:0}
 };
 /* chave/parte → tecido */

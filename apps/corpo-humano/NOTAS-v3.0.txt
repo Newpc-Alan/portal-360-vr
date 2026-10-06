@@ -160,3 +160,19 @@ v3.9.0 (todas as fichas visíveis + Tour)
   respiração, circulação). Botão da ficha já investigada fica com borda verde. Contador "Investigados N / total".
 - Tour: "▶ Tour: ouvir um por um" projeta cada estrutura, toca a ficha gravada e passa à próxima sozinho (0,9 s após o fim do áudio);
   Próximo / Parar; termina com aviso. Sair da missão ou fechar a ficha encerra o tour. Funciona no VR (botões no painel de ações).
+
+v4.0.0 (Módulo 3: Sistema Nervoso)
+- Modelos Z-Anatomy (NervousSystem100.fbx → glb via FBX2glTF, agrupados por nome com za/nerv.py, gltfpack -si): encefalo.glb (lobos frontal,
+  parietal, temporal, occipital e límbico _d/_e, cerebelo, tronco, tálamo, hipotálamo, corpo caloso), medula.glb (medula, cauda equina) e
+  nervos.glb (ciático, femoral, mediano, ulnar, radial, intercostais, vago, óptico, facial, trigêmeo, plexo braquial). Centros em ESQ_GLTF.C.
+- nerv-data.js: 23 fichas (D.info), missões nervContexto / encefalo / nervos / reflexo, D.nervContext (3 níveis), D.sequencias.reflexo
+  (receptor → neurônio sensitivo → medula → neurônio motor → músculo, com pistas), D.nervGuide (5 etapas), 5 situações (pref nerv-),
+  sistema nervoso sai do "em breve" (modulo 'nerv'); D.modulos ganha o terceiro módulo.
+- nerv-models.js: contexto (corpo inteiro → SNC sobre o esqueleto → encéfalo com cabeça translúcida), encefaloCena (lobos coloridos
+  didaticamente), nervosCena (corpo inteiro), inspection (estrutura em destaque, demais esmaecidas; nervos com ossos de referência),
+  reflexo (tabuleiro + perna com medula, nervo femoral e quadríceps); concluído, um sinal luminoso percorre o arco pelo tubo.
+- corpo-app: INSPECT/SEQ/NERV_VIEWS, handler nctx, prefixo de áudio por módulo (PREF), CATALOGO encefalo (10) e nervos (13) com lista e tour,
+  marcas encefalo/nervos (3 investigadas), legenda por lobo, menu VR lista todos os outros módulos, resumo e relatório com as novas linhas.
+- Tecidos: encefalo (giros e sulcos, relevo .9) e nervo (feixes creme). VR: clima nervoso (índigo/violeta, partículas piscando como sinapses);
+  corpo inteiro em nervos / nervContexto níveis 0-1 / desafio.
+- Áudios a gravar: ROTEIRO-AUDIOS-NERVOSO.csv (38 arquivos: 23 fichas + nerv-*). Até lá, voz do navegador.

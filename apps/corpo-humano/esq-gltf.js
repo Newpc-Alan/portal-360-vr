@@ -16,13 +16,18 @@ const C={
  ombro:{labrum:[-0.1491,1.3779,-0.0359],capsula:[-0.1629,1.379,-0.0283],ligamentos:[-0.1613,1.3876,-0.0176]},
  quadril:{labrum:[-0.0842,0.865,-0.0059],capsula:[-0.0935,0.8496,-0.0059],ligamentos:[-0.0899,0.8469,-0.0086]},
  cotovelo:{umero:[-0.2,1.16,-0.03],radio:[-0.25,1.02,-0.01],ulna:[-0.23,1.02,-0.02]},
- silhueta:{silhueta:[0,0.854,0]},cabeca:{pele:[0,1.555,0.0047]}
+ silhueta:{silhueta:[0,0.854,0]},cabeca:{pele:[0,1.555,0.0047]},
+ /* v4.0 · sistema nervoso */
+ encefalo:{lobo_frontal_d:[-0.0296,1.6543,0.015],lobo_frontal_e:[0.0296,1.6543,0.015],lobo_parietal_d:[-0.0341,1.6612,-0.042],lobo_parietal_e:[0.0341,1.6612,-0.042],lobo_temporal_d:[-0.0393,1.6189,-0.0223],lobo_temporal_e:[0.0393,1.6189,-0.0223],lobo_occipital_d:[-0.0282,1.6252,-0.0672],lobo_occipital_e:[0.0282,1.6252,-0.0672],lobo_limbico_d:[-0.0341,1.6435,-0.0094],lobo_limbico_e:[0.0341,1.6435,-0.0094],cerebelo:[0,1.5867,-0.0446],tronco:[0,1.5781,-0.0139],talamo:[0,1.6256,-0.0081],hipotalamo:[0,1.6141,0.0124],corpo_caloso:[0,1.6352,-0.0031]},
+ medula:{medula:[-0.0001,1.3,-0.0472],cauda_equina:[0,1.0077,-0.0523]},
+ nervos:{ciatico_e:[0.0697,0.5178,-0.044],ciatico_d:[-0.0697,0.5178,-0.044],femoral_e:[0.0499,0.8646,0.0072],femoral_d:[-0.0499,0.8646,0.0072],mediano_e:[0.1872,1.113,0.0039],mediano_d:[-0.1872,1.113,0.0039],ulnar_e:[0.1688,1.1414,-0.0127],ulnar_d:[-0.1688,1.1414,-0.0127],radial_e:[0.1826,1.2356,-0.0319],radial_d:[-0.1826,1.2356,-0.0319],intercostais_e:[0.0746,1.2085,0.0074],intercostais_d:[-0.0746,1.2085,0.0074],vago_e:[0.0153,1.461,-0.0058],vago_d:[0.0204,1.3404,-0.0016],optico_e:[0.0152,1.6012,0.0401],optico_d:[-0.0152,1.6012,0.0401],facial_e:[0.0329,1.5663,0.0346],facial_d:[-0.0329,1.5663,0.0346],trigemeo_e:[0.0218,1.5885,0.0355],trigemeo_d:[-0.0218,1.5885,0.0355],plexo_braquial_e:[0.0677,1.4416,-0.0203],plexo_braquial_d:[-0.0677,1.4416,-0.0203]}
 };
-const COR={osso:0xe9e4d6,musculo:0xb8343f,musculoClaro:0xd9666c,ligamento:0xf1e9c4,menisco:0xcfe3ee,capsula:0xaad8ef,labrum:0xd8ecf3,pele:0x8fc3dd};
-const corDe=(arq,parte)=>{if(arq==='esqueleto')return COR.osso;if(arq==='musculos')return COR.musculo;if(arq==='silhueta'||arq==='cabeca')return COR.pele;
+const chave=p=>String(p||'').replace(/_[de]$/,'');          /* umero_d → umero */
+const COR={osso:0xe9e4d6,musculo:0xb8343f,musculoClaro:0xd9666c,ligamento:0xf1e9c4,menisco:0xcfe3ee,capsula:0xaad8ef,labrum:0xd8ecf3,pele:0x8fc3dd,nervo:0xf6e3a0,
+ encefalo:{lobo_frontal:0xf2b8a6,lobo_parietal:0xf5c98f,lobo_temporal:0xa9d7a4,lobo_occipital:0x9fc5f0,lobo_limbico:0xd9a6e0,cerebelo:0xe8c7a0,tronco:0xd8a0a0,talamo:0xc9b0e8,hipotalamo:0xffd27f,corpo_caloso:0xf0f0d0}};
+const corDe=(arq,parte)=>{if(arq==='esqueleto')return COR.osso;if(arq==='encefalo')return COR.encefalo[chave(parte)]||0xf0c0b8;if(arq==='medula'||arq==='nervos')return COR.nervo;if(arq==='musculos')return COR.musculo;if(arq==='silhueta'||arq==='cabeca')return COR.pele;
   if(/^(femur|tibia|fibula|patela|escapula|clavicula|umero|pelve|sacro|radio|ulna)$/.test(parte))return COR.osso;if(/menisco/.test(parte))return COR.menisco;if(parte==='capsula')return COR.capsula;if(parte==='labrum')return COR.labrum;return COR.ligamento;};
 const cache={},fila={};let loader=null;
-const chave=p=>String(p||'').replace(/_[de]$/,'');          /* umero_d → umero */
 const lado=p=>/_d$/.test(p)?'d':/_e$/.test(p)?'e':'';
 function toLocal(p){return new T.Vector3(p[0]*ESC,(p[1]-OY)*ESC,p[2]*ESC);}
 function material(arq,parte,opt){
@@ -30,7 +35,7 @@ function material(arq,parte,opt){
   if(arq==='silhueta'||arq==='cabeca'){m.transparent=true;m.opacity=opt.opacidade??.12;m.depthWrite=false;m.side=T.DoubleSide;}
   else if(parte==='capsula'){m.transparent=true;m.opacity=.35;m.depthWrite=false;}
   else if(opt.opacidade!==undefined){m.transparent=true;m.opacity=opt.opacidade;m.depthWrite=opt.opacidade>.5;}
-  if(window.CORPO_TECIDOS){const TT=window.CORPO_TECIDOS;const t=arq==='esqueleto'?'osso':arq==='musculos'?'musculo':(arq==='silhueta'||arq==='cabeca')?'pele':['ligamentos','capsula','labrum','lca','lcp','menisco_medial','menisco_lateral','colateral_tibial','colateral_fibular'].includes(parte)?'cartilagem':'osso';TT.aplicar(m,t);}
+  if(window.CORPO_TECIDOS){const TT=window.CORPO_TECIDOS;const t=arq==='esqueleto'?'osso':arq==='musculos'?'musculo':arq==='encefalo'?'encefalo':(arq==='medula'||arq==='nervos')?'nervo':(arq==='silhueta'||arq==='cabeca')?'pele':['ligamentos','capsula','labrum','lca','lcp','menisco_medial','menisco_lateral','colateral_tibial','colateral_fibular'].includes(parte)?'cartilagem':'osso';TT.aplicar(m,t);}
   return m;
 }
 function carregar(arq,cb){

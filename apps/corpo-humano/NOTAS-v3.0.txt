@@ -199,3 +199,6 @@ v4.2.0 (Módulo 4: Sistema Digestório completo)
 - Inspeção do módulo (DIG_MODELS.inspection): órgão centrado com os vizinhos esmaecidos (fora do enquadre). CORPO_GLTF.orgao ganhou
   opt.aoCarregar(inst, meshes). Legenda própria; resumo e relatório com Digestório e Jornada.
 - Áudios a gravar: ROTEIRO-AUDIOS-DIGESTORIO.csv (25). Até lá, voz do navegador.
+
+v4.2.1
+- 25 áudios do Sistema Digestório gravados e normalizados (mesma régua). Corpo Humano com 196 gravações.

@@ -305,3 +305,8 @@ v4.7.7 (VR · resposta visível ao toque)
 - O retorno de um botão (ex.: "Selecionado: Laringe") não entra mais no fim do texto do painel: aparece numa faixa própria, verde (ok) ou
   âmbar (aviso), entre o painel e os botões. O painel ficou um pouco mais baixo (0,74 m) para abrir espaço.
 - O botão apertado pelo raio acende por 0,7 s (azul claro com borda branca), mesmo quando o comando não altera a lateral.
+
+v4.7.8 (chão)
+- 3D (lousa/Chromebook): sem disco de chão e sem anéis; o modelo fica no espaço. A marca "CORPO HUMANO" sob os pés foi removida.
+- VR: o disco azul com anéis brancos deu lugar a um piso discreto (brilho radial suave na cor do sistema + um anel fraco a 1 m), só como
+  âncora de conforto e de escala. Ajustes → "Chão de referência no VR": Discreto (padrão) ou Nenhum (tudo no espaço), para comparar no óculos.

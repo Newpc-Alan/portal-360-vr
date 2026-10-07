@@ -180,7 +180,7 @@ function digestivo(opt={}){
 function stageBase(g,width=5,y=-3.15,z=0){const m=new T.Mesh(new T.CircleGeometry(width,72),mat(0x0b2637,{roughness:.7,metalness:.12}));m.rotation.x=-Math.PI/2;m.position.set(0,y,z);g.add(m);const rim=new T.Mesh(new T.RingGeometry(width-.016,width+.016,72),new T.MeshBasicMaterial({color:0x305d72,side:T.DoubleSide}));rim.rotation.x=-Math.PI/2;rim.position.set(0,y+.01,z);g.add(rim);}
 function contexto(level){
   const g=new T.Group();
-  if(level===0){const corpo=new T.Group();corpo.add(silhueta({opacidade:.16,nariz:true,enquadrar:true}),torax({costelas:false,hitFn:()=>({type:'context',target:'torax'})}));corpo.scale.setScalar(.5);corpo.position.y=1.55;g.add(corpo);textAt(g,'CORPO HUMANO',0,-3.95,0,4.0,'#89acbd');textAt(g,'TÓRAX',1.5,1.6,.3,1.2,'#ffe3a8');return g;}
+  if(level===0){const corpo=new T.Group();corpo.add(silhueta({opacidade:.16,nariz:true,enquadrar:true}),torax({costelas:false,hitFn:()=>({type:'context',target:'torax'})}));corpo.scale.setScalar(.5);corpo.position.y=1.55;g.add(corpo);textAt(g,'TÓRAX',1.5,1.6,.3,1.2,'#ffe3a8');return g;}
   if(level===1){g.add(torax({hitFn:(key,parte,d)=>({type:'context',target:'orgao',key:d.key})}),silhueta({opacidade:.08}));textAt(g,'DENTRO DO TÓRAX',0,-3.3,0,3.2,'#89acbd');return g;}
   g.add(torax({costelas:false}));return g;
 }

@@ -212,6 +212,7 @@ const CLIMA={
  padrao:{domo:['#04101c','#0a2238','#0e2a44','#0a2238','#04101c'],p1:[0x7fd6ff,.55],p2:[0xa6f0d6,.7]}
 };
 function climaDe(){const S=Lab.state;return CLIMA[S.sistema]||CLIMA.padrao;}
+function chaoVR(){return Lab.state.chaoVR==='nenhum'?'nenhum':'discreto';}
 function criarAmbiente(modo2d){
   const g=new T.Group();g.name='ambienteVR';g.userData.modo2d=!!modo2d;const clima=climaDe();g.userData.sistema=Lab.state.sistema;const E=modo2d?1.9:1,CY=modo2d?-3.6:0;/* no 3D o chão fica abaixo do modelo e os anéis crescem */
   // abóbada em gradiente (azul-profundo do Portal → quase preto no zênite e no chão)
@@ -230,10 +231,15 @@ function criarAmbiente(modo2d){
   g.add(mkPontos(420,14,.09,clima.p1[0],clima.p1[1]),mkPontos(180,6,.05,clima.p2[0],clima.p2[1]));g.userData.pulsa=!!clima.pulsa;g.userData.faisca=!!clima.faisca;g.userData.pontos=g.children.filter(o=>o.isPoints).map(o=>({o,op:o.material.opacity}));
   /* v3.8.1: o chão de referência da v2.4 está de volta (disco escuro + anéis na cor do sistema + névoa), porque dava a sensação de
      lugar que o aluno sentiu falta. A altura é o piso real do óculos (local-floor); no 3D acompanha a base do modelo. */
-  const corAnel=new T.Color(clima.p1[0]);
-  const chao=new T.Mesh(new T.CircleGeometry(9,64),new T.MeshBasicMaterial({color:0x02070e,transparent:true,opacity:.9,depthWrite:false}));chao.rotation.x=-Math.PI/2;chao.position.y=CY+0.005;chao.scale.setScalar(E);g.add(chao);g.userData.piso=[[chao,0.005]];
-  for(const r of [1,2.2,3.6,5.2]){const an=new T.Mesh(new T.RingGeometry(r-.012,r+.012,96),new T.MeshBasicMaterial({color:corAnel,transparent:true,opacity:r===1?.34:.13,side:T.DoubleSide,depthWrite:false}));an.rotation.x=-Math.PI/2;an.position.y=CY+0.01;an.scale.setScalar(E);g.add(an);g.userData.piso.push([an,0.01]);}
-  const fog=new T.Mesh(new T.CircleGeometry(9,64),new T.MeshBasicMaterial({color:corAnel,transparent:true,opacity:.07,depthWrite:false,blending:T.AdditiveBlending}));fog.rotation.x=-Math.PI/2;fog.position.y=CY+0.02;fog.scale.setScalar(E);g.add(fog);g.userData.piso.push([fog,0.02]);
+  /* v4.7.8: no 3D não há chão (tudo no espaço). No VR, por padrão um piso discreto: brilho radial suave na cor do sistema e um anel
+     fraco a 1 m, só como âncora de conforto e escala; Ajustes → "Chão de referência no VR: nenhum" tira tudo. */
+  g.userData.piso=[];g.userData.chao=chaoVR();
+  if(!modo2d&&g.userData.chao!=='nenhum'){
+    const corAnel=new T.Color(clima.p1[0]);
+    const cv=document.createElement('canvas');cv.width=cv.height=256;const q=cv.getContext('2d');const rg=q.createRadialGradient(128,128,0,128,128,128);rg.addColorStop(0,'rgba(255,255,255,.26)');rg.addColorStop(.45,'rgba(255,255,255,.10)');rg.addColorStop(1,'rgba(255,255,255,0)');q.fillStyle=rg;q.fillRect(0,0,256,256);
+    const brilho=new T.Mesh(new T.CircleGeometry(4.5,64),new T.MeshBasicMaterial({map:new T.CanvasTexture(cv),color:corAnel,transparent:true,opacity:1,depthWrite:false,blending:T.AdditiveBlending}));brilho.rotation.x=-Math.PI/2;brilho.position.y=CY+0.005;g.add(brilho);
+    const an=new T.Mesh(new T.RingGeometry(1-.008,1+.008,96),new T.MeshBasicMaterial({color:corAnel,transparent:true,opacity:.14,side:T.DoubleSide,depthWrite:false}));an.rotation.x=-Math.PI/2;an.position.y=CY+0.01;g.add(an);
+  }
   return g;
 }
 function entrarAmbiente(modo2d){if(ambiente&&ambiente.userData.modo2d===!!modo2d)return;if(ambiente){M.dispose(ambiente);view.scene.remove(ambiente);ambiente=null;}ambiente=criarAmbiente(modo2d);view.scene.add(ambiente);
@@ -249,7 +255,7 @@ function sairAmbiente(){if(ambiente){M.dispose(ambiente);view.scene.remove(ambie
 const frameOriginal=Proto.frame;
 Proto.frame=function(time,frame){
   if(this.xr&&this._uiPorCima){this._uiPorCima=false;uiPorCima(this.ui);}/* v4.7.2: painéis sempre visíveis, mesmo dentro de um túnel ou órgão gigante */
-  if(ambiente&&ambiente.userData.sistema!==Lab.state.sistema){const m2=ambiente.userData.modo2d;M.dispose(ambiente);view.scene.remove(ambiente);ambiente=null;ambiente=criarAmbiente(m2);view.scene.add(ambiente);}
+  if(ambiente&&(ambiente.userData.sistema!==Lab.state.sistema||ambiente.userData.chao!==chaoVR())){const m2=ambiente.userData.modo2d;M.dispose(ambiente);view.scene.remove(ambiente);ambiente=null;ambiente=criarAmbiente(m2);view.scene.add(ambiente);}
   if(ambiente&&ambiente.userData.faisca){/* v4.0 · nervoso: as partículas piscam como sinapses */const t=performance.now()/1000;(ambiente.userData.pontos||[]).forEach((p,i)=>{p.o.material.opacity=p.op*(.45+.55*Math.pow(Math.abs(Math.sin(t*(2.3+i*1.7)+i)),6));});}
   if(ambiente&&ambiente.userData.pulsa&&ambiente.userData.domo&&window.CORPO_TECIDOS){const k=1+.1*window.CORPO_TECIDOS.PULSO.value;ambiente.userData.domo.material.color.setScalar(k);}
   if(this.xr&&this.xrModo==='ar'){/* v4.6: realidade mista, sem abóbada/partículas/chão: a sala do aluno é o ambiente */if(ambiente){M.dispose(ambiente);view.scene.remove(ambiente);ambiente=null;}}

@@ -12,8 +12,8 @@
 
 #intro{position:fixed;inset:0;z-index:1000;background:#000;display:flex;align-items:center;justify-content:center;overflow:hidden}
 #intro::after{content:"";position:absolute;inset:0;pointer-events:none;background:linear-gradient(to bottom,rgba(0,0,0,.08),rgba(0,0,0,.12) 55%,rgba(0,0,0,.66))}
-#ytWrap{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;background:#000}
-#ytWrap iframe{width:100vw;height:56.25vw;min-width:177.78vh;min-height:100vh;border:0}
+#videoWrap{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;background:#000}
+#videoWrap video{width:100%;height:100%;object-fit:contain;background:#000}
 .intro-ui{position:absolute;inset:0;z-index:4;display:flex;flex-direction:column;justify-content:space-between;padding:22px 26px;pointer-events:none}
 .brand{display:flex;align-items:center;gap:14px;font-weight:800;letter-spacing:.02em;text-shadow:0 4px 18px rgba(0,0,0,.55)}
 .brand-badge{width:58px;height:58px;border-radius:50%;overflow:hidden;flex:0 0 58px;border:2px solid rgba(87,212,255,.45);display:grid;place-items:center;box-shadow:0 0 26px rgba(55,177,218,.35), inset 0 0 18px rgba(255,255,255,.14);background:rgba(3,10,20,.6)}
@@ -27,9 +27,9 @@
 header.hero{position:relative;padding:24px clamp(18px,4vw,48px) 34px;overflow:hidden;border-bottom:1px solid rgba(255,255,255,.05);min-height:350px}
 header.hero::before{content:"";position:absolute;inset:0;z-index:1;background:linear-gradient(90deg,rgba(5,11,24,.93) 0%,rgba(5,11,24,.84) 34%,rgba(5,11,24,.42) 62%,rgba(5,11,24,.58) 100%), radial-gradient(circle at 72% 42%,rgba(55,177,218,.12),transparent 28%)}
 .hero-bg{position:absolute;inset:0;background:#02060d url('assets/capa-sistema-solar-hero.webp') center/cover no-repeat;opacity:.72;filter:saturate(1.05);overflow:hidden}
-.hero-video-bg iframe{opacity:0;transition:opacity 1.2s ease}
-.hero-video-bg iframe.ready{opacity:.95}
-.hero-video-bg iframe{position:absolute;top:50%;left:50%;width:100vw;height:56.25vw;min-width:177.78vh;min-height:100vh;transform:translate(-50%,-50%);border:0;pointer-events:none;filter:saturate(1.02) contrast(1.02)}
+.hero-video-bg video{opacity:0;transition:opacity 1.2s ease;object-fit:cover}
+.hero-video-bg video.ready{opacity:.95}
+.hero-video-bg video{position:absolute;top:50%;left:50%;width:100vw;height:56.25vw;min-width:177.78vh;min-height:100vh;transform:translate(-50%,-50%);border:0;pointer-events:none;filter:saturate(1.02) contrast(1.02)}
 .stars{position:absolute;inset:0;opacity:.5;background-image:radial-gradient(#fff 1px,transparent 1px),radial-gradient(#9bdfff 1px,transparent 1px);background-size:80px 80px,130px 130px;background-position:0 0,40px 30px}
 .topnav{position:relative;z-index:5;display:flex;align-items:center;justify-content:space-between;gap:16px;flex-wrap:wrap}
 .topnav .navright{display:flex;gap:10px;align-items:center}
@@ -139,10 +139,10 @@ body.intro-fullscreen #btnSkipIntro{cursor:pointer}
       <div class="start-sub">Experiência educacional imersiva</div>
       <button id="btnStartIntro">▶ Iniciar experiência</button>
     </div>
-    <div id="introNote">Carregando apresentação…</div>
+    <div id="introNote"></div>
   </div>
   <button id="btnSkipIntro" type="button">Pular ▸</button>
-  <div id="ytWrap"><div id="ytPlayer"></div></div>
+  <div id="videoWrap"><video id="introVideo" playsinline preload="auto" poster="assets/abertura-poster.jpg" src="assets/abertura.mp4"></video></div>
   <div class="intro-ui">
     <div class="brand">
       <div class="brand-badge"><img src="assets/logo-portal-educador.png" alt="Logo Portal do Educador"></div>
@@ -290,32 +290,25 @@ body.intro-fullscreen #btnSkipIntro{cursor:pointer}
 </section>
 
 <script>
-/* API do YouTube carregada por JS: se a rede da escola bloquear, não trava nada */
-const VIDEO_ID='VvravgLB4V0';
-const YT_TIMEOUT_MS=4000;      // tempo máximo esperando o player ficar pronto após o clique
+/* Vídeo de abertura local (assets/abertura.mp4): funciona na rede da escola, sem YouTube, e entra no cache do navegador.
+   O fundo do herói usa a versão 720p sem áudio (assets/abertura-fundo.mp4), em loop e sem som. */
 const SKIP_AFTER_MS=2000;      // "Pular" aparece depois disso
-let player=null,playerReady=false,ytFailed=false,catalogShown=false,introStarted=false,watchdog=null;
-(function loadYT(){
-  const s=document.createElement('script');s.src='https://www.youtube.com/iframe_api';s.async=true;
-  s.onerror=function(){ytFailed=true;onYTUnavailable();};
-  document.head.appendChild(s);
-  setTimeout(function(){ if(!window.YT||!window.YT.Player){ ytFailed=true; onYTUnavailable(); } },8000);
-})();
-function onYTUnavailable(){
-  const n=document.getElementById('introNote');
-  if(n){n.textContent='Apresentação indisponível nesta rede. Você pode entrar direto no catálogo.';n.classList.add('show');}
-  showSkip();
-}
+const PLAY_TIMEOUT_MS=6000;    // se o vídeo não começar a tocar nesse prazo (rede lenta ou bloqueio), entra no catálogo
+let catalogShown=false,introStarted=false,watchdog=null;
+const introVideo=document.getElementById('introVideo');
 function showSkip(){const b=document.getElementById('btnSkipIntro');if(b)b.classList.add('show');}
 function hideSkip(){const b=document.getElementById('btnSkipIntro');if(b)b.classList.remove('show');}
 function mountHeroVideo(){
-  const bg=document.getElementById('heroBg');if(!bg||bg.querySelector('iframe'))return;
-  const f=document.createElement('iframe');
-  f.src='https://www.youtube.com/embed/'+VIDEO_ID+'?autoplay=1&mute=1&controls=0&loop=1&playlist='+VIDEO_ID+'&modestbranding=1&rel=0&playsinline=1';
-  f.title='Vídeo de abertura em loop';f.loading='lazy';f.referrerPolicy='strict-origin-when-cross-origin';
-  f.setAttribute('allow','autoplay; encrypted-media; picture-in-picture');
-  f.addEventListener('load',function(){ setTimeout(function(){f.classList.add('ready');},600); });
-  bg.appendChild(f);
+  const bg=document.getElementById('heroBg');if(!bg||bg.querySelector('video'))return;
+  if(window.matchMedia&&window.matchMedia('(prefers-reduced-motion: reduce)').matches)return;
+  if(window.innerWidth<760||(navigator.connection&&navigator.connection.saveData))return; // celular ou economia de dados: fica a imagem de capa
+  const v=document.createElement('video');
+  v.src='assets/abertura-fundo.mp4';v.muted=true;v.loop=true;v.autoplay=true;v.playsInline=true;v.setAttribute('playsinline','');v.setAttribute('muted','');
+  v.preload='auto';v.setAttribute('aria-hidden','true');v.title='Vídeo de abertura em loop';
+  v.addEventListener('playing',function(){ v.classList.add('ready'); },{once:true});
+  v.addEventListener('error',function(){ v.remove(); },{once:true});
+  bg.appendChild(v);
+  const p=v.play();if(p&&p.catch)p.catch(function(){ v.remove(); });
 }
 
 function fullscreenElement(){
@@ -347,8 +340,8 @@ function showCatalog(){
   document.body.style.cursor='';
   hideSkip();
   if(watchdog){clearTimeout(watchdog);watchdog=null;}
-  try{ if(player&&player.stopVideo)player.stopVideo(); }catch(e){}
-  if(!ytFailed && window.YT && window.YT.Player) mountHeroVideo();
+  try{ if(introVideo){introVideo.pause();introVideo.currentTime=0;} }catch(e){}
+  mountHeroVideo();
 }
 function hideFallback(){
   const f=document.getElementById('startFallback');
@@ -359,19 +352,20 @@ function showFallback(){
   if(f)f.style.display='flex';
 }
 async function startImmersiveIntro(){
-  if(ytFailed||!player||!playerReady){ showCatalog(); return; }
+  if(!introVideo){ showCatalog(); return; }
   await enterTrueFullscreen();
   setImmersiveMode(true);
   hideFallback();
   const n=document.getElementById('introNote');if(n)n.classList.remove('show');
   setTimeout(showSkip,SKIP_AFTER_MS);
   // Se o vídeo não começar a tocar dentro do prazo, entra no catálogo
-  watchdog=setTimeout(function(){ if(!introStarted) showCatalog(); },YT_TIMEOUT_MS);
+  watchdog=setTimeout(function(){ if(!introStarted) showCatalog(); },PLAY_TIMEOUT_MS);
   try{
-    player.seekTo(0,true);
-    player.unMute();
-    player.setVolume(100);
-    player.playVideo();
+    introVideo.currentTime=0;
+    introVideo.muted=false;
+    introVideo.volume=1;
+    const p=introVideo.play();
+    if(p&&p.catch)p.catch(function(){ showCatalog(); });
   }catch(e){
     showCatalog();
   }
@@ -383,50 +377,22 @@ function showIntro(){
   document.getElementById('intro').classList.remove('hidden');
   showFallback();
 }
-window.onYouTubeIframeAPIReady=function(){
-  player=new YT.Player('ytPlayer',{
-    videoId:VIDEO_ID,
-    playerVars:{
-      autoplay:0,
-      mute:0,
-      controls:0,
-      rel:0,
-      modestbranding:1,
-      playsinline:0,
-      fs:0,
-      iv_load_policy:3,
-      disablekb:1,
-      origin:location.origin
-    },
-    events:{
-      onReady:function(e){
-        playerReady=true;
-        e.target.setVolume(100);
-        e.target.unMute();
-        if(catalogShown) mountHeroVideo();
-      },
-      onError:function(){
-        ytFailed=true;
-        const emAbertura=!catalogShown && document.getElementById('startFallback').style.display==='none';
-        if(emAbertura) showCatalog(); else onYTUnavailable();
-      },
-      onStateChange:function(e){
-        if(e.data===YT.PlayerState.PLAYING){
-          introStarted=true;
-          if(watchdog){clearTimeout(watchdog);watchdog=null;}
-          hideFallback();
-          setImmersiveMode(true);
-          try{
-            e.target.unMute();
-            e.target.setVolume(100);
-          }catch(err){}
-        }
-        if(e.data===YT.PlayerState.ENDED) showCatalog();
-      }
-    }
+if(introVideo){
+  introVideo.addEventListener('playing',function(){
+    introStarted=true;
+    if(watchdog){clearTimeout(watchdog);watchdog=null;}
+    hideFallback();
+    setImmersiveMode(true);
   });
-};
-
+  introVideo.addEventListener('ended',showCatalog);
+  introVideo.addEventListener('error',function(){
+    const emAbertura=!catalogShown && document.getElementById('startFallback').style.display==='none';
+    if(emAbertura){ showCatalog(); return; }
+    const n=document.getElementById('introNote');
+    if(n){n.textContent='Apresentação indisponível nesta rede. Você pode entrar direto no catálogo.';n.classList.add('show');}
+    showSkip();
+  });
+}
 
 function shouldOpenCatalogDirect(){
   try{
@@ -443,7 +409,7 @@ if(shouldOpenCatalogDirect()){
     if(catalog)catalog.classList.remove('hidden');
     setImmersiveMode(false);
     document.body.style.cursor='';
-    if(window.YT&&window.YT.Player) mountHeroVideo();
+    mountHeroVideo();
   });
 }
 
@@ -475,7 +441,7 @@ document.addEventListener('webkitfullscreenchange',function(){
    O app fica pré-carregado num iframe invisível (mesma origem). O clique aqui conta como gesto
    do usuário para o iframe, então a sessão WebXR abre na hora, sem segundo toque. */
 /* BUILD muda a cada publicação: força o navegador do óculos a buscar o index.html novo dos apps (o GitHub Pages ignora a query) */
-const BUILD='20261007a';
+const BUILD='20261007b';
 const appFrames={};
 /* os links dos cartões também levam a versão, para abrir direto sem cache antigo */
 document.querySelectorAll('.card-actions a[href^="apps/"]').forEach(a=>{const u=new URL(a.getAttribute('href'),location.href);u.searchParams.set('v',BUILD);a.setAttribute('href',u.pathname+u.search);});

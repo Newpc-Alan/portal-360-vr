@@ -271,3 +271,8 @@ v4.7.3 (correção)
 
 v4.7.4 (correção)
 - "Ver na minha sala" / "Voltar ao VR" encerrava a sessão e a nova não abria (o navegador do Quest exige toque para requestSession). Agora: tenta abrir em silêncio; se o navegador recusar, mostra a tela de retomada com o botão "Entrar na minha sala" / "Entrar em VR" (ou "Ficar no 3D"). toggleVR devolve true/false.
+
+Portal 360º · catálogo (build 20261007b) · vídeo de abertura local
+- A abertura deixou de depender da API do YouTube (bloqueada em muitas redes escolares). Agora toca assets/abertura.mp4 (1080p, ~17 MB, H.264/AAC) num <video> local, com "Pular" após 2 s, tela cheia e entrada automática no catálogo ao terminar ou se o vídeo não começar em 6 s.
+- Fundo do herói do catálogo: assets/abertura-fundo.mp4 (720p sem áudio, faixas pretas cortadas, ~7 MB) em loop mudo; não carrega em telas < 760 px, com economia de dados ou prefers-reduced-motion (fica a imagem de capa). Pôster: assets/abertura-poster.jpg.
+- Original enviado (Abertura_teste.mp4, 79 MB a 20 Mbps) fica fora do repositório; recodificar com os mesmos parâmetros quando houver versão final.

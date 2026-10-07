@@ -268,3 +268,6 @@ v4.7.2 (tamanho e saída no VR)
 
 v4.7.3 (correção)
 - Órgão segurado com o grip não ficava mais solto: no laboratório (coração), V4.gripEnd assumia o evento antes de soltar() e o órgão permanecia preso ao controle; e clear() (troca de missão) apagava o registro sem desprender o objeto. Agora soltar() roda antes, clear() devolve e varre os filhos do grip.
+
+v4.7.4 (correção)
+- "Ver na minha sala" / "Voltar ao VR" encerrava a sessão e a nova não abria (o navegador do Quest exige toque para requestSession). Agora: tenta abrir em silêncio; se o navegador recusar, mostra a tela de retomada com o botão "Entrar na minha sala" / "Entrar em VR" (ou "Ficar no 3D"). toggleVR devolve true/false.

@@ -183,7 +183,7 @@ function ligarPosicional(){
 ['pointerdown','keydown','touchstart'].forEach(ev=>document.addEventListener(ev,ligarPosicional,{passive:true}));
 document.addEventListener('visibilitychange',()=>{if(!document.hidden&&ligado){try{T.AudioContext.getContext().resume();}catch(e){}}});
 const toggleOriginal=Proto.toggleVR;
-Proto.toggleVR=async function(modo){const r=await toggleOriginal.call(this,modo);ligarPosicional();if(posicional)posicional.setRefDistance(this.xr?1.2:14);if(this.xr&&this.xrModo!=='ar'&&typeof entrarAmbiente==='function')entrarAmbiente();if(this.xr){this.xrMenu='sistemas';this.buildXRUI();if(Lab.fecharMenu)Lab.fecharMenu();}/* v4.4: o VR abre no menu de sistemas */ /* boas-vindas a cada entrada no VR (v3.5.4) */if(this.xr&&Lab.boasVindas)setTimeout(()=>{if(view.xr){Lab.boasVindas();setTimeout(()=>{if(view.xr)view.buildXRUI();},700);}},900);return r;};
+Proto.toggleVR=async function(modo,silencioso){const r=await toggleOriginal.call(this,modo,silencioso);ligarPosicional();if(posicional)posicional.setRefDistance(this.xr?1.2:14);if(this.xr&&this.xrModo!=='ar'&&typeof entrarAmbiente==='function')entrarAmbiente();if(this.xr){this.xrMenu='sistemas';this.buildXRUI();if(Lab.fecharMenu)Lab.fecharMenu();}/* v4.4: o VR abre no menu de sistemas */ /* boas-vindas a cada entrada no VR (v3.5.4) */if(this.xr&&Lab.boasVindas)setTimeout(()=>{if(view.xr){Lab.boasVindas();setTimeout(()=>{if(view.xr)view.buildXRUI();},700);}},900);return r;};
 const exitOriginal=Proto.exitXR;
 Proto.exitXR=function(){exitOriginal.call(this);if(posicional)posicional.setRefDistance(14);};
 

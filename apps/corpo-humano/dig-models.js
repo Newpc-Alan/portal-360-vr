@@ -16,11 +16,11 @@ function sistema(opt={}){
   TODOS.forEach(k=>{const op=opt.opac?opt.opac(k):undefined;const o=g.orgao(k,null,opt.semHit?null:(opt.hit?opt.hit(k):hitDe(k)),op!==undefined?{opacidade:op}:{});if(op!==undefined&&op<.5)o.userData.semEnquadre=!!opt.enquadrarSoDestaque;w.add(o);});
   return w;
 }
-function silhueta(op){const s=M().silhueta({opacidade:op??.08,nariz:true});return s;}
+function silhueta(op){const s=M().silhueta({opacidade:op??.08,nariz:true,hitsVias:'faringe'});return s;}
 /* ---------- Contexto ---------- */
 function contexto(level){
   const w=new T.Group(),Mo=M();
-  if(level===0){w.add(M().silhueta({opacidade:.18,nariz:true,enquadrar:true}));w.add(sistema({hit:()=>()=>({type:'context'})}));Mo.textAt(w,'SISTEMA DIGESTÓRIO · UM TUBO DE 9 METROS',0,-7.9,0,6.2,'#f6c37a');return w;}
+  if(level===0){w.add(M().silhueta({opacidade:.18,nariz:true,hitsVias:false,enquadrar:true}));w.add(sistema({hit:()=>()=>({type:'context'})}));Mo.textAt(w,'SISTEMA DIGESTÓRIO · UM TUBO DE 9 METROS',0,-7.9,0,6.2,'#f6c37a');return w;}
   if(level===1){w.add(silhueta(.06));w.add(sistema({hit:()=>()=>({type:'context'}),opac:k=>GLANDULAS.includes(k)?.12:undefined}));Mo.textAt(w,'TUBO DIGESTÓRIO',0,-3.25,0,3.4,'#f6c37a');return w;}
   w.add(silhueta(.06));w.add(sistema({opac:k=>TUBO.includes(k)?.22:undefined}));
   const g=G(),P=k=>g.ponto(...g.CENTROS[k]);

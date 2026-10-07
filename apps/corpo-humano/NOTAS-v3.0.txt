@@ -280,3 +280,20 @@ Portal 360º · catálogo (build 20261007b) · vídeo de abertura local
 v4.7.5 (áudios)
 - Instaladas as 5 narrações que faltavam: end-mensageiros-concluido, vr-dentro-torax, vr-dentro-corpo, vr-fora, vr-coracao-aberto (265 gravações humanas; nenhuma chave cai mais na voz sintética).
 - Conferido: uri-desafio-uriUreter (1,9 s) e end-desafio-endIodo (2,6 s) terminam em silêncio limpo; são textos curtos, não cortes.
+
+v4.7.6 (revisão etapa por etapa · correções)
+Método: percurso automatizado das 41 missões dos 8 sistemas no 3D (clique real na cena por tipo de alvo, conclusão de cada missão por comando,
+aula guiada de cada sistema, diálogos, 4 tamanhos de tela) e no VR simulado (painéis, botões, alcance do raio, sobreposição, texto cortado,
+entrar no corpo, ficha projetada, desafio centralizado). 240 chaves de narração conferidas contra os MP3 (nenhuma faltando).
+- Erro fatal: trocar de sistema pelo menu ☰ no meio de uma aula guiada avançada (ex.: Respiratório no passo 8 → Circulatório, 5 passos)
+  quebrava a renderização (TypeError em isGuideDone). Agora a troca de sistema encerra a aula guiada; renderGuide/isGuideDone protegidos.
+- Viagem do ar: ao terminar o último trecho, a aula guiada só liberava "Continuar" depois de outro clique (marcava a conclusão depois de
+  redesenhar a lateral). Ordem corrigida.
+- Digestório, Urinário e Endócrino: nariz, faringe e laringe (parte da silhueta com rosto) abriam ficha do sistema respiratório, inclusive no
+  Desafio; o primeiro clique de muitos alunos caía no nariz e projetava uma cabeça gigante. Agora: no Digestório só a faringe tem ficha; no
+  Urinário e no Endócrino as vias aéreas são só visuais e mais discretas (opacidade 0,3).
+- Fitas de sequência (Caminho do ar/sangue/alimento, Coluna, Braço, Arco reflexo): com uma ficha aberta a peça projetada cobria as posições do
+  quadro. O quadro vai mais para a esquerda e menor enquanto a ficha está aberta.
+- Desafio do Esquelético/Muscular: a orientação dizia "oito situações" (são 6 e 2). Passa a usar a orientação genérica (áudio aula-desafio).
+- Modelos pequenos no 3D (encéfalo, alvéolo) enquadram mais perto (distância mínima 4,8 em vez de 6,5).
+- Texto do menu principal não promete "Contexto" em todos os sistemas (Circulatório e Muscular não têm).

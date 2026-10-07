@@ -145,9 +145,10 @@ const G=()=>window.CORPO_GLTF||null;
 function silhueta(opt={}){
   const g=G();if(!g)return silhuetaProc(opt);
   const w=new T.Group();const sil=g.orgao('silhueta',()=>silhuetaProc(opt),null,{opacidade:opt.opacidade??.13});sil.userData.semEnquadre=!opt.enquadrar;w.add(sil);
-  if(opt.nariz){w.add(g.orgao('nariz',()=>{const nz=ball(.13,0xaad8ef,V(0,0,0),{transparent:true,opacity:.85,emissive:0x1a3a4a});return nz;},()=>({type:'inspect',key:'nariz'})));
-    w.add(g.orgao('faringe',null,()=>({type:'inspect',key:'faringe'})));
-    w.add(g.orgao('laringe',null,()=>({type:'inspect',key:'laringe'})));}
+  if(opt.nariz){/* v4.7.6: hitsVias = true (todas com ficha), 'faringe' (só a faringe, no digestório) ou false (só visual, no urinário e no endócrino) */const hv=opt.hitsVias===undefined?true:opt.hitsVias;const o2=opt.viasOpacidade!==undefined?{opacidade:opt.viasOpacidade}:{};
+    w.add(g.orgao('nariz',()=>{const nz=ball(.13,0xaad8ef,V(0,0,0),{transparent:true,opacity:.85,emissive:0x1a3a4a});return nz;},hv===true?()=>({type:'inspect',key:'nariz'}):null,o2));
+    w.add(g.orgao('faringe',null,(hv===true||hv==='faringe')?()=>({type:'inspect',key:'faringe'}):null,o2));
+    w.add(g.orgao('laringe',null,hv===true?()=>({type:'inspect',key:'laringe'}):null,o2));}
   return w;
 }
 function torax(opt={}){

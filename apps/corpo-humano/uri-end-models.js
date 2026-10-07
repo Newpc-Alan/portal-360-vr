@@ -16,7 +16,7 @@ function hipotalamo(opt={}){const e=E();if(!e)return new T.Group();const o=e.mod
 function encefaloFantasma(op){const e=E();if(!e)return new T.Group();const o=e.modelo('encefalo',{opacidade:op||.1});o.position.y=DY();o.userData.semEnquadre=true;return o;}
 function orgaos(lista,opt={}){const g=G(),w=new T.Group();lista.forEach(k=>{const op=opt.opac?opt.opac(k):undefined;const o=g.orgao(k,null,opt.semHit?null:(opt.hit?opt.hit(k):hitInspect()),op!==undefined?{opacidade:op}:{});if(op!==undefined&&op<.5)o.userData.semEnquadre=true;w.add(o);});return w;}
 function glandulas(opt={}){const w=orgaos(END,opt);w.add(hipotalamo(opt.semHit?{semHit:true}:(opt.hit?{hit:opt.hit('hipotalamo')}:{})));return w;}
-const silhueta=op=>M().silhueta({opacidade:op??.08,nariz:true});
+const silhueta=op=>M().silhueta({opacidade:op??.08,nariz:true,hitsVias:false,viasOpacidade:.3});
 
 /* ---------- Néfron procedural ---------- */
 function nefron(opt={}){
@@ -52,7 +52,7 @@ function nefron(opt={}){
 /* ---------- Urinário ---------- */
 function uriContexto(level){
   const Mo=M(),w=new T.Group();
-  if(level===0){w.add(Mo.silhueta({opacidade:.18,nariz:true,enquadrar:true}));w.add(orgaos(URI,{hit:()=>()=>({type:'context'})}));Mo.textAt(w,'SISTEMA URINÁRIO · A ESTAÇÃO DE TRATAMENTO DO SANGUE',0,-7.9,0,6.6,'#9ff3ff');return w;}
+  if(level===0){w.add(Mo.silhueta({opacidade:.18,nariz:true,hitsVias:false,viasOpacidade:.3,enquadrar:true}));w.add(orgaos(URI,{hit:()=>()=>({type:'context'})}));Mo.textAt(w,'SISTEMA URINÁRIO · A ESTAÇÃO DE TRATAMENTO DO SANGUE',0,-7.9,0,6.6,'#9ff3ff');return w;}
   if(level===1){w.add(silhueta(.06));w.add(orgaos(URI,{hit:()=>()=>({type:'context'})}));{const cs=G().orgao('costelas',null,null,{opacidade:.15});cs.userData.semEnquadre=true;w.add(cs);}
     const g=G(),P=(k,p)=>g.ponto(...g.PARTES_POS[k][p]);
     [['Rim',P('rins','rim_e'),1.5],['Ureter',P('ureteres','ureter_e'),1.4],['Bexiga',P('bexiga','bexiga'),1.5],['Uretra',P('bexiga','uretra'),1.4]].forEach(([t,p,dx])=>{const sp=Mo.label(t,'#dff3ff',1.3,64);sp.position.copy(p).add(V(dx,.1,.5));w.add(sp);});
@@ -66,7 +66,7 @@ function filtragem(state){const w=nefron({hit:{type:'inspect',key:'nefron'}});D.
 /* ---------- Endócrino ---------- */
 function endContexto(level){
   const Mo=M(),w=new T.Group();
-  if(level===0){w.add(Mo.silhueta({opacidade:.18,nariz:true,enquadrar:true}));w.add(glandulas({hit:()=>()=>({type:'context'})}));Mo.textAt(w,'SISTEMA ENDÓCRINO · MENSAGENS PELO SANGUE',0,-7.9,0,6.4,'#ffd27f');return w;}
+  if(level===0){w.add(Mo.silhueta({opacidade:.18,nariz:true,hitsVias:false,viasOpacidade:.3,enquadrar:true}));w.add(glandulas({hit:()=>()=>({type:'context'})}));Mo.textAt(w,'SISTEMA ENDÓCRINO · MENSAGENS PELO SANGUE',0,-7.9,0,6.4,'#ffd27f');return w;}
   const g=G();
   if(level===1){const c=g.orgao('cabeca',null,null,{opacidade:.12});c.userData.semEnquadre=true;w.add(c);w.add(encefaloFantasma());w.add(orgaos(['hipofise','pineal','tireoide'],{hit:()=>()=>({type:'context'})}));w.add(hipotalamo({hit:()=>({type:'context'})}));
     const P=k=>g.ponto(...g.CENTROS[k]);[['Hipotálamo',g.ponto(0,1.6141,0.0124),-1.5,.25],['Hipófise',P('hipofise'),1.3,-.1],['Pineal',P('pineal'),1.3,.2],['Tireoide',P('tireoide'),1.4,0]].forEach(([t,p,dx,dy])=>{const sp=Mo.label(t,'#fff3d6',1.3,64);sp.position.copy(p).add(V(dx,dy,.4));w.add(sp);});

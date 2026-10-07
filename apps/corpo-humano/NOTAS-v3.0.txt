@@ -297,3 +297,11 @@ entrar no corpo, ficha projetada, desafio centralizado). 240 chaves de narraçã
 - Desafio do Esquelético/Muscular: a orientação dizia "oito situações" (são 6 e 2). Passa a usar a orientação genérica (áudio aula-desafio).
 - Modelos pequenos no 3D (encéfalo, alvéolo) enquadram mais perto (distância mínima 4,8 em vez de 6,5).
 - Texto do menu principal não promete "Contexto" em todos os sistemas (Circulatório e Muscular não têm).
+
+v4.7.7 (VR · resposta visível ao toque)
+- Causa do "parece que o botão não funciona": os botões do VR eram malhas opacas, desenhadas antes do disco translúcido do chão; as fileiras
+  mais baixas (abaixo da linha do horizonte do disco) ficavam cobertas pelo chão, escurecidas, como se estivessem "abaixo da base".
+  Agora toda a interface do VR é desenhada por cima do ambiente (transparent + renderOrder), em qualquer altura.
+- O retorno de um botão (ex.: "Selecionado: Laringe") não entra mais no fim do texto do painel: aparece numa faixa própria, verde (ok) ou
+  âmbar (aviso), entre o painel e os botões. O painel ficou um pouco mais baixo (0,74 m) para abrir espaço.
+- O botão apertado pelo raio acende por 0,7 s (azul claro com borda branca), mesmo quando o comando não altera a lateral.

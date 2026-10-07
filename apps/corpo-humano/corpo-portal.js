@@ -63,8 +63,14 @@ Proto.textPlane=function(title,body,w,h,tom){
   return m;
 };
 
+Proto.faixaRetorno=function(texto,tom){const c=document.createElement('canvas');c.width=2048;c.height=232;const g=c.getContext('2d');const cores=tom==='aviso'?['rgba(74,42,15,.97)','#ffc77a','#fff6e8']:['rgba(10,70,46,.97)','#3fd48a','#ffffff'];
+  g.fillStyle=cores[0];g.fillRect(0,0,2048,232);g.strokeStyle=cores[1];g.lineWidth=10;g.strokeRect(5,5,2038,222);g.fillStyle=cores[1];g.fillRect(0,0,22,232);
+  let size=64;g.font='600 '+size+'px Segoe UI,Arial';let linhas=quebrar(g,(tom==='aviso'?'⚠ ':'✓ ')+texto,1900);while(linhas.length>2&&size>36){size-=4;g.font='600 '+size+'px Segoe UI,Arial';linhas=quebrar(g,(tom==='aviso'?'⚠ ':'✓ ')+texto,1900);}
+  if(linhas.length>2){linhas=linhas.slice(0,2);linhas[1]=linhas[1].replace(/\s+\S*$/,'')+'…';}
+  g.textAlign='left';g.textBaseline='middle';g.fillStyle=cores[2];const passo=size*1.15,y0=116-(linhas.length-1)*passo/2;linhas.forEach((l,i)=>g.fillText(l,60,y0+i*passo));
+  return new T.Mesh(new T.PlaneGeometry(1.06,.12),new T.MeshBasicMaterial({map:texturaCanvas(c),transparent:true,side:T.DoubleSide,depthWrite:false}));};
 Proto.xrButton=function(label,cmd,x,y,w,disabled,cor){
-  w=w||UI.btnW;
+  w=w||UI.btnW;if(!disabled&&cor!==VERDE&&cor!==VERMELHO)cor=flashCor(this,cmd,cor);
   const c=document.createElement('canvas');c.width=1024;c.height=256;const g=c.getContext('2d');
   const paleta=cor||(disabled?{bg:'#172c3b',borda:'#314756',texto:'#6b8190'}:{bg:'#144957',borda:'#6098a7',texto:'#ebfbff'});
   g.fillStyle=paleta.bg;g.fillRect(0,0,1024,256);g.strokeStyle=paleta.borda;g.lineWidth=10;g.strokeRect(5,5,1014,246);
@@ -75,7 +81,7 @@ Proto.xrButton=function(label,cmd,x,y,w,disabled,cor){
 };
 
 Proto.xrBotaoLargo=function(label,cmd,x,y,disabled,cor){
-  const w=1.08,h=.2;const c=document.createElement('canvas');c.width=2048;c.height=384;const g=c.getContext('2d');
+  const w=1.08,h=.2;if(!disabled&&cor!==VERDE&&cor!==VERMELHO)cor=flashCor(this,cmd,cor);const c=document.createElement('canvas');c.width=2048;c.height=384;const g=c.getContext('2d');
   const paleta=cor||(disabled?{bg:'#172c3b',borda:'#314756',texto:'#6b8190'}:{bg:'#144957',borda:'#6098a7',texto:'#ebfbff'});
   g.fillStyle=paleta.bg;g.fillRect(0,0,2048,384);g.strokeStyle=paleta.borda;g.lineWidth=12;g.strokeRect(6,6,2036,372);
   let size=100;g.font='600 '+size+'px Segoe UI,Arial';let linhas=quebrar(g,label,1900);
@@ -85,10 +91,12 @@ Proto.xrBotaoLargo=function(label,cmd,x,y,disabled,cor){
   const m=new T.Mesh(new T.PlaneGeometry(w,h),new T.MeshBasicMaterial({map:texturaCanvas(c),side:T.DoubleSide}));
   m.position.set(x,y,UI.z);m.rotation.y=-Math.atan2(x,-UI.z);m.userData.command=cmd;this.ui.add(m);if(!disabled)this.uiHits.push(m);return m;
 };
-const VERDE={bg:'#0f6b3a',borda:'#3fd48a',texto:'#ffffff'},VERMELHO={bg:'#7a1f28',borda:'#ff6b6b',texto:'#ffffff'},APAGADO={bg:'#122531',borda:'#243a47',texto:'#5c7484'};
+const VERDE={bg:'#0f6b3a',borda:'#3fd48a',texto:'#ffffff'},VERMELHO={bg:'#7a1f28',borda:'#ff6b6b',texto:'#ffffff'},APAGADO={bg:'#122531',borda:'#243a47',texto:'#5c7484'},APERTADO={bg:'#2a8fa8',borda:'#ffffff',texto:'#ffffff'};
+/* v4.7.7: o botão apertado pelo raio fica aceso por 0,7 s (resposta visível ao toque) */
+const FLASH_MS=700;function flashCor(view,cmd,cor){const a=view._apertado;if(a&&a.cmd===cmd&&performance.now()-a.t<FLASH_MS){if(!view._flashT){view._flashT=setTimeout(()=>{view._flashT=null;if(view.xr)view.buildXRUI();},FLASH_MS+40);}return APERTADO;}return cor;}
 function estadoDesafio(){const S=Lab.state;if(S.view!=='desafio')return null;const q=Lab.quizAtual(),Q=Lab.questoesAtuais();if(q.phase!==1||q.done)return null;const i=q.index,resp=q.answers[i];if(resp===undefined)return null;const item=Q[i];return{correto:item.correct,escolha:resp,acertou:resp===item.correct};}
 
-const uiPorCima=ui=>{ui.traverse(o=>{if(o.isMesh&&o.material){o.material.depthTest=false;o.material.depthWrite=false;o.renderOrder=1000;}});};
+const uiPorCima=ui=>{ui.traverse(o=>{if(o.isMesh&&o.material){o.material.depthTest=false;o.material.depthWrite=false;o.material.transparent=true;/* v4.7.7: botões opacos eram desenhados antes do disco do chão (translúcido), que os cobria: pareciam apagados/abaixo da base */o.renderOrder=1000;}});};
 Proto.buildXRUI=function(){
   if(!this.xr)return;this.clearXRUI();this._uiPorCima=true;
   if(this.anchor){this.uiPose=this.uiPose||{};if(this.uiPose.ref!==this.anchor){this.uiPose.ref=this.anchor;this.uiPose.p=this.anchor.p.clone();this.uiPose.yaw=this.anchor.yaw;}this.ui.position.copy(this.uiPose.p);this.ui.rotation.y=this.uiPose.yaw;}
@@ -96,13 +104,14 @@ Proto.buildXRUI=function(){
   let title=(lesson.querySelector('h2')||{}).textContent||'Corpo Humano';
   const instrucao=document.getElementById('captionText').textContent||'';
   if(Lab.WELCOME&&instrucao===Lab.WELCOME)title='Bem-vindo ao Corpo Humano Imersivo';
-  const fbEl=document.getElementById('feedback');const feedback=fbEl&&!fbEl.hidden?fbEl.textContent:'';
-  let body=instrucao+(feedback?'  '+feedback:''),tom='neutro';
+  const fbEl=document.getElementById('feedback');const feedback=fbEl&&!fbEl.hidden?fbEl.textContent:'';const fbTom=fbEl&&/warning/.test(fbEl.className)?'aviso':'ok';
+  let body=instrucao,tom='neutro';/* v4.7.7: o retorno do botão não entra mais no fim do texto; vai numa faixa própria, colorida, logo acima dos botões */
   const des=estadoDesafio();
   if(des){title=des.acertou?'✅ ACERTOU!':'❌ ERROU';tom=des.acertou?'ok':'erro';body=Lab.questoesAtuais()[Lab.quizAtual().index].why;}
   else if(S.view==='desafio'&&Lab.quizAtual().phase===1&&!Lab.quizAtual().done){const q=Lab.quizAtual(),Q=Lab.questoesAtuais();title='Situação '+(q.index+1)+' de '+Q.length;body=Q[q.index].q;}/* v4.1: a pergunta sempre na tela, mesmo durante a narração de abertura */
   if(this.xrReport){const r=Lab.report();title='Resumo da experiência';body=S.completed.length+' atividades concluídas. '+r.independent+' respostas independentes. '+r.errors+' tentativas incorretas. '+r.hints+' pistas consultadas. '+r.skips+' posições puladas. Gere o relatório do professor no modo 3D.';tom='neutro';}
-  const panel=this.textPlane(title,body,1.06,.86,tom);panel.position.set(1.16,.30,-1.64);panel.rotation.y=-.6;this.ui.add(panel);
+  const panel=this.textPlane(title,body,1.06,.74,tom);panel.position.set(1.16,.37,-1.64);panel.rotation.y=-.6;this.ui.add(panel);
+  if(feedback&&!this.xrReport&&!(S.view==='desafio'&&Lab.quizAtual().phase===1)){const faixa=this.faixaRetorno(feedback,fbTom);faixa.position.set(1.16,-.095,-1.64);faixa.rotation.y=-.6;this.ui.add(faixa);}
   const lista=this.xrReport?[{label:'Voltar à atividade',cmd:'xr:reportclose'}]:this._acoes();
   const max=8,pages=Math.max(1,Math.ceil(lista.length/max));this.uiPage=Math.min(this.uiPage||0,pages-1);
   const quizFase=(S.view==='desafio'&&Lab.quizAtual().phase===1)&&!this.xrReport;
@@ -155,11 +164,12 @@ Proto.xrSelect=function(ctrl){
   if(this.held.has(ctrl))return xrSelectOriginal.call(this,ctrl);
   const ray=this.controllerRay(ctrl);
   const ui=ray.intersectObjects(this.uiHits,false)[0];
+  if(ui&&ui.object.userData.command){this._apertado={cmd:ui.object.userData.command,t:performance.now()};}
   if(ui&&ui.object.userData.command==='xr:dentro'){this.alternarDentro();return;}if(ui&&(ui.object.userData.command==='xr:ar'||ui.object.userData.command==='xr:vr')){Lab.command(ui.object.userData.command.slice(3));return;}
   this.root.updateMatrixWorld(true);
   const hit=ui?null:this.hits(ray)[0];
   if(!ui&&!hit){narrator.stop();return;}
-  return xrSelectOriginal.call(this,ctrl);
+  const r=xrSelectOriginal.call(this,ctrl);if(ui&&this.xr)this.buildXRUI();/* v4.7.7: redesenha para o botão apertado acender mesmo quando o comando não mexe na lateral */return r;
 };
 /* v3.8 · "Entrar no corpo": o modelo cresce até virar uma sala em volta do aluno */
 const DENTRO_TXT={torax:'Você está dentro do tórax. Olhe em volta: as costelas protegem o coração e os pulmões, e a traqueia desce logo acima de você. Aponte para qualquer estrutura para ouvir sobre ela.',corpo:'Você está ao lado de um corpo gigante. Dê a volta, olhe de perto as articulações e aponte para o que quiser conhecer.',fora:'De volta ao tamanho natural.'};

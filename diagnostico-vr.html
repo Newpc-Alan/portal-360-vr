@@ -2,18 +2,28 @@
 <style>body{margin:0;background:#0f2c4a;color:#fff;font:16px/1.6 Segoe UI,Arial;padding:24px}h1{font-size:22px;margin:0 0 12px}pre{background:#071526;padding:14px;border-radius:10px;white-space:pre-wrap;word-break:break-word;font-size:14px}button{font:inherit;padding:14px 22px;border-radius:999px;border:0;background:#37b1da;color:#fff;font-weight:700;margin:10px 8px 0 0}.ok{color:#7cffb8}.bad{color:#ff9f6b}</style></head>
 <body><h1>Diagnóstico de VR · Portal 360º</h1><p>Esta página mostra o que o navegador informa sobre WebXR. Tire uma foto ou leia para o suporte.</p>
 <pre id="out">Verificando…</pre>
-<button id="btn" data-action="testar">Testar sessão imersiva</button><button data-action="voltar">Voltar ao catálogo</button>
+<button id="btn" data-action="testar">Testar sessão imersiva</button><button data-action="testar-app">Testar como o app (mãos + 3D)</button><button data-action="voltar">Voltar ao catálogo</button>
 <script>
 (function(){const out=document.getElementById('out');const L=[];const add=(k,v,ok)=>L.push((ok===undefined?'• ':ok?'✔ ':'✖ ')+k+': '+v);
 add('Navegador',navigator.userAgent);add('HTTPS (isSecureContext)',window.isSecureContext,window.isSecureContext);
 let emFrame=false;try{emFrame=window.top!==window;}catch(_){emFrame=true;}add('Dentro de iframe',emFrame,!emFrame);
 add('navigator.xr',!!navigator.xr,!!navigator.xr);add('WebGL2',!!document.createElement('canvas').getContext('webgl2'),true);
+try{const g=document.createElement('canvas').getContext('webgl2',{powerPreference:'high-performance'});const d=g&&g.getExtension('WEBGL_debug_renderer_info');add('Placa de vídeo usada pelo 3D',d?g.getParameter(d.UNMASKED_RENDERER_WEBGL):'não informada');}catch(_){}
 const render=()=>out.textContent=L.join('\n');render();
 if(navigator.xr){navigator.xr.isSessionSupported('immersive-vr').then(ok=>{add('immersive-vr suportado',ok,ok);render();}).catch(e=>{add('isSessionSupported erro',e.message,false);render();});
  if(navigator.xr.isSessionSupported)navigator.xr.isSessionSupported('immersive-ar').then(ok=>{add('immersive-ar (passthrough) suportado',ok);render();}).catch(()=>{});}
 document.body.addEventListener('click',async e=>{const b=e.target.closest('[data-action]');if(!b)return;
  if(b.dataset.action==='voltar'){location.href='./?catalog=1';return;}
  if(!navigator.xr){add('Teste','sem navigator.xr',false);render();return;}
+ if(b.dataset.action==='testar-app'){let s=null;const passo=(n,t,ok)=>{add('App '+n,t,ok);render();};
+  try{s=await navigator.xr.requestSession('immersive-vr',{optionalFeatures:['local-floor','hand-tracking']});passo('1 sessão com mãos','abriu',true);
+   try{await s.requestReferenceSpace('local-floor');passo('2 espaço local-floor','ok',true);}catch(e){passo('2 espaço local-floor',e.name+': '+e.message,false);}
+   const gl=document.createElement('canvas').getContext('webgl2',{xrCompatible:true,powerPreference:'high-performance'});const d=gl.getExtension('WEBGL_debug_renderer_info');passo('3 placa do 3D',d?gl.getParameter(d.UNMASKED_RENDERER_WEBGL):'?');
+   await gl.makeXRCompatible();passo('4 3D compatível com o óculos','ok',true);
+   s.updateRenderState({baseLayer:new XRWebGLLayer(s,gl)});passo('5 camada de imagem','criada',true);
+  }catch(err){passo('FALHOU',err.name+': '+err.message,false);}
+  finally{if(s){try{await s.end();passo('6 sessão','encerrada',true);}catch(_){}}}
+  return;}
  try{const s=await navigator.xr.requestSession('immersive-vr',{optionalFeatures:['local-floor']});add('requestSession','ABRIU a sessão imersiva (vai fechar em 3 s)',true);render();setTimeout(()=>s.end(),3000);}
  catch(err){add('requestSession falhou',err.name+': '+err.message,false);render();}});
 })();

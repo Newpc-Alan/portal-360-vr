@@ -9,7 +9,9 @@ APP=sys.argv[1] if len(sys.argv)>1 else 'corpo-humano';DADOS=sys.argv[2] if len(
 raiz=os.path.join(os.path.dirname(os.path.abspath(__file__)),'..','apps',APP);raiz=os.path.normpath(raiz)
 html=open(os.path.join(raiz,'index.html'),encoding='utf-8').read()
 casca=['./','index.html']+sorted(set(re.findall(r'(?:src|href)="((?!https?:|\.\./)[^"]+\.(?:js|css|png|webp|svg|ico)(?:\?v=[^"]*)?)"',html)))
-for extra in ['assets/logo.png','guia-professor.html']:
+extras=['assets/logo.png','guia-professor.html']
+if os.path.isdir(os.path.join(raiz,'assets')):extras+=['assets/'+n for n in sorted(os.listdir(os.path.join(raiz,'assets'))) if n.endswith(('.webp','.png','.jpg'))]
+for extra in extras:
     if extra not in casca and os.path.exists(os.path.join(raiz,extra)):casca.append(extra)
 def h(p):
     m=hashlib.md5()

@@ -24,16 +24,29 @@ function ruido2(){const P=new Uint8Array(512);let s=1337;const rnd=()=>{s=(s*168
   const fade=t=>t*t*t*(t*(t*6-15)+10),lerp=(a,b,t)=>a+t*(b-a),grad=(h,x,y)=>{const u=(h&1)?-x:x,v=(h&2)?-y:y;return u+v;};
   const n=(x,y)=>{const X=Math.floor(x)&255,Y=Math.floor(y)&255;x-=Math.floor(x);y-=Math.floor(y);const u=fade(x),v=fade(y);const A=P[X]+Y,B=P[X+1]+Y;return lerp(lerp(grad(P[A],x,y),grad(P[B],x-1,y),u),lerp(grad(P[A+1],x,y-1),grad(P[B+1],x-1,y-1),u),v);};
   return(x,y)=>{let a=0,f=1,amp=1,tot=0;for(let o=0;o<5;o++){a+=n(x*f,y*f)*amp;tot+=amp;amp*=.5;f*=2.1;}return a/tot;};}
-let texSuperficie=null,mascara=null;
-function superficie(){if(texSuperficie)return texSuperficie;const W=1024,H=512,c=document.createElement('canvas');c.width=W;c.height=H;const x=c.getContext('2d');const img=x.createImageData(W,H),d=img.data;const nz=ruido2();mascara=new Uint8Array(W*H);
-  for(let j=0;j<H;j++){const lat=(j/H-.5)*Math.PI;const polar=Math.pow(Math.abs(Math.sin(lat)),9);for(let i=0;i<W;i++){const lon=i/W*Math.PI*2;/* coordenadas na esfera para a textura fechar sem emenda */const px=Math.cos(lat)*Math.cos(lon)*1.6,py=Math.cos(lat)*Math.sin(lon)*1.6,pz=Math.sin(lat)*1.6;const v=nz(px+pz*.7,py-pz*.4)*.5+.5;const terra=v>.56;const k=(j*W+i)*4;let r,g,b;
-    if(terra){const alt=(v-.56)/.3;const mont=alt>.55;r=mont?150+alt*60:70+alt*90;g=mont?135+alt*50:120+alt*60;b=mont?120+alt*60:55+alt*40;mascara[j*W+i]=1;}
-    else{const prof=Math.min(1,(.56-v)/.25);r=18+prof*6;g=60+prof*40*(1-prof);b=120+prof*50;}
-    if(polar>.35){const k2=Math.min(1,(polar-.35)/.4);r=r+(235-r)*k2;g=g+(240-g)*k2;b=b+(245-b)*k2;}
-    d[k]=r;d[k+1]=g;d[k+2]=b;d[k+3]=255;}}
-  x.putImageData(img,0,0);const tx=new T.CanvasTexture(c);tx.encoding=T.sRGBEncoding;tx.anisotropy=8;texSuperficie=tx;return tx;}
+/* superfície: Blue Marble da NASA (domínio público; cópias dos exemplos do three.js r128, convertidas para WebP) */
+const TEX={};const loader=new T.TextureLoader();
+function textura(nome,opt={}){if(TEX[nome])return TEX[nome];const tx=loader.load('assets/'+nome,t=>{if(opt.aoCarregar)opt.aoCarregar(t);});if(opt.srgb!==false)tx.encoding=T.sRGBEncoding;tx.anisotropy=8;TEX[nome]=tx;return tx;}
+let mascara=null;
+function carregarMascara(){if(mascara||carregarMascara.indo)return;carregarMascara.indo=true;const im=new Image();im.onload=()=>{const W=1024,H=512,c=document.createElement('canvas');c.width=W;c.height=H;const x=c.getContext('2d');x.drawImage(im,0,0,W,H);const d=x.getImageData(0,0,W,H).data;mascara=new Uint8Array(W*H);for(let k=0;k<W*H;k++)mascara[k]=d[k*4]>110?0:1;/* mapa especular: oceano claro, continente escuro */};im.src='assets/terra-oceano.webp';}
+function superficie(){carregarMascara();return textura('terra-cor.webp');}
 /* é continente ou oceano no ponto (uv) tocado? */
 function tipoCrosta(uv){if(!mascara||!uv)return 'crosta';const W=1024,H=512;const i=Math.floor(uv.x*W)&(W-1),j=Math.min(H-1,Math.floor((1-uv.y)*H));return mascara[j*W+i]?'crosta_continental':'crosta_oceanica';}
+/* texturas procedurais (geradas uma vez): rocha/magma por camada para a secção; rocha e veias para o túnel */
+const TEXP={};
+function texRuido(nome,W,fn){if(TEXP[nome])return TEXP[nome];const c=document.createElement('canvas');c.width=c.height=W;const x=c.getContext('2d');const img=x.createImageData(W,W),d=img.data;const nz=ruido2();for(let j=0;j<W;j++)for(let i=0;i<W;i++){const k=(j*W+i)*4;const [r,g,b,a]=fn(i/W,j/W,nz);d[k]=r;d[k+1]=g;d[k+2]=b;d[k+3]=a===undefined?255:a;}x.putImageData(img,0,0);const tx=new T.CanvasTexture(c);tx.encoding=T.sRGBEncoding;tx.wrapS=tx.wrapT=T.MirroredRepeatWrapping;tx.anisotropy=8;TEXP[nome]=tx;return tx;}
+const GRAO={crosta:[.55,.3],manto_superior:[.6,.35],manto_inferior:[.6,.4],nucleo_externo:[.3,.5],nucleo_interno:[.2,.3]};
+function texTampa(key){const cam=CAMADAS.find(c=>c.key===key);const base=new T.Color(cam.cor);const [amp,vei]=GRAO[key]||[.5,.3];
+  return texRuido('tampa-'+key,512,(u,v,nz)=>{const dx=u-.5,dy=v-.5;const rr=Math.sqrt(dx*dx+dy*dy)*2;/* raio normalizado da Terra (a tampa usa UV centrado) */
+    const g1=nz(u*48,v*48)*.5+.5,g2=nz(u*160+9,v*160)*.5+.5,g3=Math.abs(nz(u*22+40,v*22+7));/* grão, grão fino, veios */
+    let k=(1-amp)+amp*(0.45*g1+0.55*g2);if(key!=='crosta'&&key!=='nucleo_interno')k*=1-vei*Math.pow(1-Math.min(1,g3*2.2),6)*.9;/* veios escuros ou claros */
+    if(key==='nucleo_externo')k*=.9+.35*Math.pow(1-Math.min(1,g3*2.5),4);/* metal líquido: veios claros */
+    const calor=key==='crosta'?1:1+(1-rr)*.25;/* mais claro para dentro */const r=Math.min(255,base.r*255*k*calor),g=Math.min(255,base.g*255*k*calor),b=Math.min(255,base.b*255*k*calor);return [r,g,b];});}
+function texVeias(){return texRuido('veias',512,(u,v,nz)=>{const g3=Math.abs(nz(u*22+40,v*22+7));const w=Math.pow(1-Math.min(1,g3*2.2),7);const k=255*w;return [k,k*.7,k*.3];});}
+function texRocha(){return texRuido('rocha',512,(u,v,nz)=>{const g1=nz(u*9,v*9)*.5+.5,g2=nz(u*40+3,v*40)*.5+.5,g3=Math.abs(nz(u*14+40,v*14+7));const fenda=Math.pow(Math.min(1,g3*3),.5);const k=(.35+.65*(0.5*g1+0.5*g2))*(.45+.55*fenda);const c=255*k;return [c,c,c];});}
+function texMagma(){return texRuido('magma',512,(u,v,nz)=>{const g3=Math.abs(nz(u*7+40,v*7+7)),g4=nz(u*60,v*60)*.5+.5;const w=Math.pow(1-Math.min(1,g3*2.6),9)*(.5+.5*g4);const k=255*w;return [k,k*.5,k*.12];});}
+/* núcleo externo: metal líquido em redemoinhos largos, sem veios */
+function texMetal(){return texRuido('metal',512,(u,v,nz)=>{const g1=nz(u*4+11,v*4)*.5+.5,g2=nz(u*18+3,v*18+9)*.5+.5;const w=.25+.75*Math.pow(.35*g1+.65*g2,1.6);const k=255*w;return [k,k*.72,k*.3];});}
 /* a Terra: esferas aninhadas; com corte, plano de recorte + tampas (anéis) na secção; destaque opcional de camadas */
 function terra(opt={}){
   const g=new T.Group();const R0=opt.raio||R;const corte=!!opt.corte;const d=(opt.cortePos||0)*R0;/* 0 = pelo centro */
@@ -41,16 +54,18 @@ function terra(opt={}){
   const giro=new T.Group();g.add(giro);const tampas=new T.Group();tampas.rotation.y=opt.anguloCorte!==undefined?opt.anguloCorte:1.0;/* corte oblíquo: vê-se a secção e um pedaço da superfície */g.add(tampas);
   const plano=new T.Plane(V(0,0,-1),d);const local=plano.clone();
   CAMADAS.forEach((c,i)=>{const esf=new T.Mesh(new T.SphereGeometry(c.r*R0,i===0?64:40,i===0?48:28),mat(c.cor,{emissive:c.emis,roughness:i>=3?.45:.8,metalness:i>=3?.25:.02}));
-    if(i===0){esf.material.map=superficie();esf.material.color.setHex(0xffffff);esf.material.emissive.setHex(0x05101c);esf.material.roughness=.85;}
+    if(i===0){esf.material.dispose();esf.material=new T.MeshPhongMaterial({map:superficie(),normalMap:textura('terra-normal.webp',{srgb:false}),normalScale:new T.Vector2(.85,.85),specularMap:textura('terra-oceano.webp',{srgb:false}),specular:new T.Color(0x3a4a5a),shininess:18});}
     if(corte){esf.material.clippingPlanes=[plano];esf.material.clipShadows=true;}
     if(dim(c.key)){esf.material.transparent=true;esf.material.opacity=.22;esf.material.depthWrite=false;}
     if(destaque&&destaque.includes(c.key)&&c.key!=='crosta'){esf.material.emissive=new T.Color(c.cor).multiplyScalar(.35);}
     esf.userData.camada=c.key;const hit=opt.hitFn?opt.hitFn(c.key):null;if(hit)esf.userData.hit=hit;if(i===0)esf.userData.dinamico='crosta';
     giro.add(esf);});
+  /* nuvens e halo atmosférico (acompanham o corte) */
+  if(!opt.semNuvens){const nuv=new T.Mesh(new T.SphereGeometry(R0*1.012,48,32),new T.MeshLambertMaterial({map:textura('terra-nuvens.webp'),transparent:true,opacity:.85,depthWrite:false}));if(corte)nuv.material.clippingPlanes=[plano];if(destaque)nuv.material.opacity=.25;nuv.userData.semEnquadre=true;giro.add(nuv);g.userData.nuvens=nuv;
+    const halo=new T.Mesh(new T.SphereGeometry(R0*1.045,48,32),new T.MeshBasicMaterial({color:0x5aa8ff,transparent:true,opacity:.14,side:T.BackSide,depthWrite:false,blending:T.AdditiveBlending}));if(corte)halo.material.clippingPlanes=[plano];halo.userData.semEnquadre=true;giro.add(halo);}
   if(corte){CAMADAS.forEach(c=>{const ro=c.r*R0,ri=c.r0*R0;if(ro<=Math.abs(d))return;const rout=Math.sqrt(ro*ro-d*d),rin=ri>Math.abs(d)?Math.sqrt(ri*ri-d*d):0;
       const anel=new T.Mesh(rin>0?new T.RingGeometry(rin,rout,96):new T.CircleGeometry(rout,96),mat(c.cor,{emissive:c.emis,roughness:.9,side:T.DoubleSide}));
-      /* gradiente de calor na secção: a face ganha um brilho que cresce para dentro */const cv=document.createElement('canvas');cv.width=cv.height=256;const q=cv.getContext('2d');const grd=q.createRadialGradient(128,128,0,128,128,128);const base=new T.Color(c.cor);const claro=base.clone().lerp(new T.Color(0xffffff),.25),escuro=base.clone().multiplyScalar(.72);grd.addColorStop(0,'#'+claro.getHexString());grd.addColorStop(1,'#'+escuro.getHexString());q.fillStyle=grd;q.fillRect(0,0,256,256);
-      const tx=new T.CanvasTexture(cv);tx.encoding=T.sRGBEncoding;anel.material.map=tx;anel.material.color.setHex(0xffffff);
+      const tx=texTampa(c.key);anel.material.map=tx;anel.material.color.setHex(0xffffff);if(c.key==='nucleo_externo'||c.key==='nucleo_interno'){anel.material.emissiveMap=tx;anel.material.emissive=new T.Color(c.key==='nucleo_interno'?0xffe9a0:0xff9a30);anel.material.emissiveIntensity=c.key==='nucleo_interno'?.55:.35;}else if(c.key!=='crosta'){anel.material.emissiveMap=texVeias();anel.material.emissive=new T.Color(0xff6a20);anel.material.emissiveIntensity=c.key==='manto_inferior'?.45:.28;}
       /* mapeia a textura radial da tampa pelo raio */const uv=anel.geometry.attributes.uv,pos=anel.geometry.attributes.position;for(let k=0;k<uv.count;k++){const px=pos.getX(k),py=pos.getY(k);const rr=Math.sqrt(px*px+py*py)/(R0);uv.setXY(k,.5+px/(2*R0),.5+py/(2*R0));}uv.needsUpdate=true;
       anel.position.z=d+.002;anel.userData.camada=c.key;if(dim(c.key)){anel.material.transparent=true;anel.material.opacity=.3;}
       if(destaque&&destaque.includes(c.key)){anel.material.emissive=new T.Color(c.cor).multiplyScalar(.5);}
@@ -67,7 +82,7 @@ function terra(opt={}){
   if(opt.kola){const mk=new T.Mesh(new T.CylinderGeometry(.012,.012,.1,8),new T.MeshBasicMaterial({color:0xffe08a}));mk.position.set(0,R0-.05,d+.02);tampas.add(mk);textFixo(tampas,'Poço de Kola · 12 km',1.3,R0+.25,d+.03,2.2,'#ffe08a');}
   g.userData.plano=plano;g.userData.local=local;g.userData.giro=giro;g.userData.tampas=tampas;g.userData.raio=R0;
   const girar=opt.girar!==false;
-  g.userData.tick=(t)=>{if(girar)giro.rotation.y=t*.08;if(corte){tampas.updateMatrixWorld(true);plano.copy(local).applyMatrix4(tampas.matrixWorld);}
+  g.userData.tick=(t)=>{if(girar)giro.rotation.y=t*.08;if(g.userData.nuvens)g.userData.nuvens.rotation.y=t*.012;if(corte){tampas.updateMatrixWorld(true);plano.copy(local).applyMatrix4(tampas.matrixWorld);}
     const nuc=giro.children[4];if(nuc&&nuc.material&&nuc.material.emissive)nuc.material.emissiveIntensity=.8+.3*Math.sin(t*1.6);
     if(g.userData.ondas){const R1=g.userData.ondasR;g.userData.ondas.children.forEach(an=>{if(an.userData.f===undefined)return;const u=((t*.22)+an.userData.f)%1;const r=.15+u*R1*1.85;/* só o arco que está dentro da Terra: círculo centrado no epicentro, recortado pelo disco */const a0=Math.asin(Math.min(1,r/(2*R1)));an.geometry.dispose();an.geometry=new T.RingGeometry(Math.max(.01,r-.035),r,72,1,Math.PI+a0,Math.PI-2*a0);an.material.opacity=.9*(1-u*.8);});}
     if(g.userData.campo)g.userData.campo.rotation.y=t*.08;};
@@ -128,9 +143,11 @@ function tunel(){if(tuboCache)return tuboCache;const pts=[];for(let i=0;i<=420;i
   for(let i=0;i<=seg;i++){const t=i/seg;const base=corTrecho(t);for(let j=0;j<=rad;j++){const k=i*(rad+1)+j;v.fromBufferAttribute(pos,k);nn.fromBufferAttribute(nor,k);const r1=nz(t*1300,j*.9)*.5+.5,r2=nz(t*2800+5,j*1.3)*.5+.5;/* ~1 ciclo a cada 6 cm de parede */const amp=t<.3?.16:t<.72?.11:.05;v.addScaledVector(nn,(r1-.5)*amp);pos.setXYZ(k,v.x,v.y,v.z);const fenda=Math.pow(Math.abs(nz(t*4600+30,j*2.2)),.35);/* rachaduras escuras */
       /* cores em espaço linear: valores baixos para não ficarem pastel depois da conversão sRGB */const r3=r2*r2;const brilho=(t>.72?.22+.6*r3:t>.44?.05+.42*r3:.04+.38*r3)*(.55+.45*fenda);const c=base.clone().multiplyScalar(brilho);cols[k*3]=Math.min(1,c.r);cols[k*3+1]=Math.min(1,c.g);cols[k*3+2]=Math.min(1,c.b);}}
   pos.needsUpdate=true;geo.computeVertexNormals();geo.setAttribute('color',new T.BufferAttribute(cols,3));
+  /* repetição da textura ao longo do túnel (u) e em volta (v) */const uv=geo.attributes.uv;for(let k=0;k<uv.count;k++)uv.setXY(k,uv.getX(k)*160,uv.getY(k)*3);uv.needsUpdate=true;
+  /* grupos de material: crosta (voltas 0-1), manto (2-4), núcleo (5-6) */const porSeg=rad*6;geo.clearGroups();const s1=Math.round(seg*2/VOLTAS),s2=Math.round(seg*5/VOLTAS);geo.addGroup(0,s1*porSeg,0);geo.addGroup(s1*porSeg,(s2-s1)*porSeg,1);geo.addGroup(s2*porSeg,(seg-s2)*porSeg,2);
   tuboCache={geo,curva};return tuboCache;}
 function viagemCena(state){const g=new T.Group();const {geo,curva}=tunel();const i=state.trecho||0;
-  const tubo=new T.Mesh(geo,new T.MeshStandardMaterial({vertexColors:true,side:T.BackSide,roughness:.9,metalness:i>=5?.35:.0,emissive:i>=5?0x241000:0x000000}));g.add(tubo);
+  const mats=[new T.MeshStandardMaterial({vertexColors:true,map:texRocha(),side:T.BackSide,roughness:.95,metalness:0}),new T.MeshStandardMaterial({vertexColors:true,map:texRocha(),emissiveMap:texMagma(),emissive:new T.Color(0xff7a20),emissiveIntensity:.5,side:T.BackSide,roughness:.9,metalness:0}),new T.MeshStandardMaterial({vertexColors:true,map:texMetal(),emissiveMap:texMetal(),emissive:new T.Color(0xffb030),emissiveIntensity:.45,side:T.BackSide,roughness:.3,metalness:.7})];const tubo=new T.Mesh(geo,mats);g.add(tubo);
   /* partículas quentes dentro do túnel (faíscas no manto, metal no núcleo) */const n=1400;const pos=new Float32Array(n*3),col=new Float32Array(n*3);let s=7;const rnd=()=>{s=(s*9301+49297)%233280;return s/233280;};
   for(let k=0;k<n;k++){const t=rnd();const p=helice(t);const a=rnd()*Math.PI*2,rr=.16+rnd()*.2;p.x+=Math.cos(a)*rr;p.z+=Math.sin(a)*rr;p.y+=(rnd()-.5)*.3;pos[k*3]=p.x;pos[k*3+1]=p.y;pos[k*3+2]=p.z;const c=corTrecho(t).lerp(new T.Color(0xffffff),.35);col[k*3]=c.r;col[k*3+1]=c.g;col[k*3+2]=c.b;}
   const pg=new T.BufferGeometry();pg.setAttribute('position',new T.BufferAttribute(pos,3));pg.setAttribute('color',new T.BufferAttribute(col,3));
@@ -142,6 +159,6 @@ function viagemCena(state){const g=new T.Group();const {geo,curva}=tunel();const
   g.userData.tick=t=>{g.traverse(o=>{if(o.userData.trilha!==undefined){o.material.opacity=.3+.6*Math.pow(Math.max(0,Math.sin(t*3-o.userData.trilha*8)),2);}});pts.material.opacity=.7+.25*Math.sin(t*2.1);};
   return g;}
 function desafio(){const g=new T.Group();const te=terra({corte:true,hitFn:k=>({type:'inspect',key:k})});g.add(te);g.userData.tick=te.userData.tick;return g;}
-function dispose(g){if(!g)return;const geos=new Set(),mats=new Set(),tex=new Set();g.traverse(o=>{if(o.geometry&&!o.isSprite&&o.geometry!==(tuboCache&&tuboCache.geo))geos.add(o.geometry);for(const m of [].concat(o.material||[])){if(!m)continue;mats.add(m);if(m.map&&m.map!==texSuperficie)tex.add(m.map);}});geos.forEach(x=>x.dispose());mats.forEach(x=>x.dispose());tex.forEach(x=>x.dispose());if(g.parent)g.parent.remove(g);}
+function dispose(g){if(!g)return;const geos=new Set(),mats=new Set(),tex=new Set();g.traverse(o=>{if(o.geometry&&!o.isSprite&&o.geometry!==(tuboCache&&tuboCache.geo))geos.add(o.geometry);for(const m of [].concat(o.material||[])){if(!m)continue;mats.add(m);const comp=new Set([...Object.values(TEX),...Object.values(TEXP)]);for(const t of [m.map,m.emissiveMap,m.normalMap,m.specularMap]){if(t&&!comp.has(t))tex.add(t);}}});geos.forEach(x=>x.dispose());mats.forEach(x=>x.dispose());tex.forEach(x=>x.dispose());if(g.parent)g.parent.remove(g);}
 window.TERRA_MODELS={V,R,CAMADAS,mat,ball,label,rotuloFixo,textFixo,textAt,tag,terra,contexto,explorar,inspection,sequencia,viagemCena,desafio,tipoCrosta,dispose,ESCALA_VR};
 })();

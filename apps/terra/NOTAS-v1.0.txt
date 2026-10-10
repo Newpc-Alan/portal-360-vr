@@ -10,3 +10,11 @@ v1.0.0 (primeira versão testável · 10/10/2026)
 - Modelos 100% procedurais: continentes por ruído, camadas em esferas aninhadas com corte oblíquo por plano de recorte e tampas em anel,
   túnel com relevo e cores por camada (espaço linear), partículas quentes, linhas do campo magnético, ondas sísmicas em arcos.
 - Ainda sem narração gravada: 43 roteiros em ROTEIRO-AUDIOS.csv (voz do navegador enquanto isso). Sem relatório do professor (v1.1).
+
+v1.0.1 (realismo)
+- Superfície com as imagens Blue Marble da NASA (cor, relevo/normal, máscara de oceano para decidir crosta continental × oceânica ao toque),
+  nuvens em esfera própria e halo atmosférico; tudo acompanha o corte.
+- Secção com textura procedural de rocha e magma por camada (grão, veios escuros no manto, veios luminosos no núcleo externo, núcleo
+  interno brilhante); túnel da viagem com três materiais: rocha escura na crosta, rocha rachada com veios de magma no manto, metal líquido
+  em redemoinhos no núcleo. Texturas geradas uma vez e compartilhadas (não entram no dispose das cenas).
+- Decisão: sem modelo de terceiros (Sketchfab) por licença/interação; realismo via texturas públicas + procedural. +650 KB de cache offline.

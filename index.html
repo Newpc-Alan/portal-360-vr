@@ -244,6 +244,20 @@ body.intro-fullscreen #btnSkipIntro{cursor:pointer}
         </div>
       </article>
 
+      <article class="card available experience-card" data-keywords="terra geologia geociencias crosta manto nucleo camadas vulcoes terremotos placas tectonicas interior do planeta viagem ao centro kola ondas sismicas campo magnetico vr 3d" data-tema="geociencias" data-serie="efii em" data-status="disponivel" style="--bgimg:url('assets/capa-terra-card.webp?v=1')">
+        <div class="media"></div><div class="glow"></div>
+        <div class="card-content">
+          <span class="tag">Disponível agora</span>
+          <h3>Terra por Dentro</h3>
+          <p>A Terra aberta ao meio: crosta, manto, núcleo externo e núcleo interno, com fichas narradas, a montagem das camadas e uma viagem em primeira pessoa até o centro do planeta, em sete trechos com profundidade, temperatura e pressão. Como sabemos o que há lá embaixo: ondas sísmicas, campo magnético e o poço de Kola. Placas tectônicas, vulcões e rochas em breve.</p>
+          <div class="meta"><span>Geociências</span><span>Fundamental II e Médio</span><span>5 missões · 13 fichas</span><span>VR + 3D + realidade mista</span></div>
+          <div class="card-actions">
+            <a href="apps/terra/" class="primary-btn">Explorar em 3D</a>
+            <a href="apps/terra/?vr=1" class="vr-btn" data-vr-app="terra">🥽 Entrar em VR</a>
+          </div>
+        </div>
+      </article>
+
       <article class="card experience-card" data-keywords="celula biologia organelas microscopio" data-tema="biologia" data-serie="efii em" data-status="embreve" style="--bgimg:linear-gradient(135deg,#122641,#11213b)">
         <div class="media"></div><div class="glow"></div>
         <div class="card-content">
@@ -254,15 +268,6 @@ body.intro-fullscreen #btnSkipIntro{cursor:pointer}
         </div>
       </article>
 
-      <article class="card experience-card" data-keywords="terra geologia geociencias crosta manto nucleo vulcoes" data-tema="geociencias" data-serie="efii em" data-status="embreve" style="--bgimg:linear-gradient(135deg,#132746,#0f213a)">
-        <div class="media"></div><div class="glow"></div>
-        <div class="card-content">
-          <span class="tag soon">Em breve</span>
-          <h3>Terra por Dentro</h3>
-          <p>Explore crosta, manto, núcleo e fenômenos geológicos em profundidade.</p>
-          <div class="meta"><span>Geociências</span><span>Fundamental II e Médio</span></div>
-        </div>
-      </article>
 
       <article class="card experience-card" data-keywords="historia civilizacoes brasil mundo antiga" data-tema="historia" data-serie="efi efii" data-status="embreve" style="--bgimg:linear-gradient(135deg,#11243e,#0c1b30)">
         <div class="media"></div><div class="glow"></div>
@@ -441,7 +446,7 @@ document.addEventListener('webkitfullscreenchange',function(){
    O app fica pré-carregado num iframe invisível (mesma origem). O clique aqui conta como gesto
    do usuário para o iframe, então a sessão WebXR abre na hora, sem segundo toque. */
 /* BUILD muda a cada publicação: força o navegador do óculos a buscar o index.html novo dos apps (o GitHub Pages ignora a query) */
-const BUILD='20261008a';
+const BUILD='20261010a';
 const appFrames={};
 /* os links dos cartões também levam a versão, para abrir direto sem cache antigo */
 document.querySelectorAll('.card-actions a[href^="apps/"]').forEach(a=>{const u=new URL(a.getAttribute('href'),location.href);u.searchParams.set('v',BUILD);a.setAttribute('href',u.pathname+u.search);});

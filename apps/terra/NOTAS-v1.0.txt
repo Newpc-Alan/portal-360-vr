@@ -1,0 +1,12 @@
+TERRA POR DENTRO · notas de versão
+
+v1.0.0 (primeira versão testável · 10/10/2026)
+- Quarta experiência do Portal 360º VR, na arquitetura do Corpo Humano v4.7.8 (menu por tema, Explorar com fichas, missões, Desafio, aula
+  guiada, resumo, offline com service worker, VR + 3D + realidade mista, chão discreto, faixa de retorno e botão aceso no VR).
+- Tema "Camadas da Terra": Contexto (3 etapas: planeta, Terra aberta, a casca fina em escala), Explorar (13 fichas: 5 camadas, crosta
+  continental e oceânica, litosfera, astenosfera, Moho, ondas sísmicas, campo magnético, poço de Kola), Monte as camadas (fita de 5 peças),
+  Viagem ao centro (túnel helicoidal, 7 trechos com profundidade, temperatura e pressão no painel) e Desafio (8 situações).
+- Temas "em breve": Placas tectônicas, Vulcões, Rochas e minerais.
+- Modelos 100% procedurais: continentes por ruído, camadas em esferas aninhadas com corte oblíquo por plano de recorte e tampas em anel,
+  túnel com relevo e cores por camada (espaço linear), partículas quentes, linhas do campo magnético, ondas sísmicas em arcos.
+- Ainda sem narração gravada: 43 roteiros em ROTEIRO-AUDIOS.csv (voz do navegador enquanto isso). Sem relatório do professor (v1.1).

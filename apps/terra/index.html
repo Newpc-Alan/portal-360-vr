@@ -1,0 +1,66 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#08192c"><meta name="description" content="Terra por Dentro: camadas da Terra (crosta, manto, núcleo externo e interno), a Terra aberta ao meio, montagem das camadas e uma viagem em primeira pessoa até o centro do planeta. Modelos procedurais, narração em português, 3D e VR.">
+<title>Terra por Dentro · Laboratório de aprendizagem | Portal do Educador</title>
+<link rel="icon" href="assets/logo.png"><link rel="stylesheet" href="terra-lab.css?v=1.0.0"><link rel="stylesheet" href="terra-portal.css?v=1.0.0">
+<script defer src="vendor/three.r128.min.js"></script>
+<script defer src="terra-data.js?v=1.0.0"></script>
+<script defer src="terra-models.js?v=1.0.0"></script>
+<script defer src="terra-audio.js?v=1.0.0"></script>
+<script defer src="terra-app.js?v=1.0.0"></script>
+<script defer src="terra-portal.js?v=1.0.0"></script>
+</head>
+<body>
+<div id="lab">
+<header class="topbar">
+ <a id="backPortal" class="back" href="../../?catalog=1" data-action="catalog" title="Voltar ao catálogo">← Catálogo</a>
+ <img class="brand-logo" src="assets/logo.png" alt="Portal do Educador">
+ <div class="brand"><h1>Terra <span>por Dentro</span></h1><small>LABORATÓRIO DE APRENDIZAGEM</small></div>
+ <div class="top-actions"><button id="sistemasBtn" data-action="sistemas" title="Menu principal: escolher o tema">☰ Temas</button><button id="guideStart" data-action="guide" class="primary">▷ Aula guiada</button><button id="summaryBtn" data-action="summary">Resumo</button><button id="settingsBtn" data-action="settings" aria-label="Abrir ajustes de áudio, exibição e qualidade">Ajustes</button><button id="fullscreenBtn" data-action="fullscreen" title="Ativar ou sair da tela cheia">⛶ <span>Tela cheia</span></button><button id="arBtn" data-action="ar" class="vr" hidden title="Realidade mista: o modelo na sua sala, pelas câmeras do óculos">⬚ Na minha sala</button><button id="vrBtn" data-action="vr" class="vr">Entrar em VR</button></div>
+</header>
+<div class="workspace">
+ <section id="menuSistemas" class="menu-sistemas" hidden aria-label="Menu principal: escolha um tema"></section>
+ <nav id="activityNav" class="activity-nav" aria-label="Atividades do laboratório"></nav>
+ <main class="stage" id="stage">
+  <canvas id="scene" aria-label="Modelo tridimensional interativo da Terra" tabindex="0"></canvas>
+  <div class="stage-heading"><span class="eyebrow" id="sceneKicker">LOCALIZE</span><h2 id="sceneTitle">O que existe debaixo dos seus pés?</h2><p id="sceneSub">Do planeta visto do espaço até a casca fina em que vivemos.</p></div>
+  <div id="sceneLegend" class="scene-legend" aria-label="Legenda do modelo"></div>
+  <div id="stageTools" class="stage-tools"><button id="closeInspect" data-action="closeInspect" hidden>← Voltar ao modelo</button><button id="centerBtn" data-action="center">◎ Centralizar</button><button id="rotateBtn" data-action="rotate" aria-pressed="false">▷ Girar</button><button id="zoomIn" data-action="zoomIn" aria-label="Aproximar o modelo">＋</button><button id="zoomOut" data-action="zoomOut" aria-label="Afastar o modelo">−</button></div>
+    <div id="stageHint" class="stage-hint">Arraste o fundo para girar · use a roda do mouse para aproximar</div>
+  <div id="webglError" class="stage-error" hidden><h2>Visualização 3D indisponível</h2><p>O navegador não conseguiu iniciar o WebGL. Ative a aceleração gráfica ou abra em outro navegador. As orientações e atividades por botões continuam disponíveis.</p></div>
+ </main>
+ <aside class="sidebar" id="sidebar" aria-label="Orientações e atividades">
+  <div id="guidePanel" class="guide-panel" hidden></div>
+  <section id="lessonPanel" class="lesson-panel"></section>
+  <div id="feedback" class="feedback" role="status" aria-live="polite" hidden></div>
+  <section class="voice-panel" aria-label="Narração e orientação">
+   <div class="voice-head"><span id="voiceStatus">ORIENTAÇÃO DA ATIVIDADE</span><button id="stopVoice" data-action="stopVoice" hidden>Parar voz</button></div>
+   <p id="captionText"></p><button id="repeatVoice" data-action="repeatVoice">▷ Ouvir orientação</button>
+  </section>
+  <div class="side-note" id="modelNote">Modelos procedurais; espessuras das camadas são didáticas.</div>
+ </aside>
+</div>
+<footer><span><b>Portal do Educador</b> · NEWPC · Terra por Dentro v1.0</span><span id="sessionStatus">Aprenda fazendo, no seu ritmo.</span><span id="offlineStatus" class="offline" title="Depois da primeira abertura, as narrações ficam guardados neste dispositivo e a aplicação funciona sem internet."></span><button id="sourcesBtn" data-action="sources">Fontes e limites do modelo</button></footer>
+</div>
+<dialog id="welcomeDialog" class="welcome" aria-labelledby="welcomeTitle"><img src="assets/logo.png" alt=""><span class="eyebrow">PORTAL 360º VR</span><h2 id="welcomeTitle">Bem-vindo ao Terra por Dentro</h2><p>Aqui você vai abrir o planeta ao meio, conhecer cada camada, montar a Terra de fora para dentro e fazer uma viagem até o centro, onde ninguém nunca chegou.</p><div class="button-row"><button data-action="welcomeStart" class="primary">▶ Começar com a narração</button><button data-action="welcomeSkip">Entrar sem narração</button></div></dialog>
+<dialog id="settingsDialog"><form method="dialog"><div class="dialog-head"><h2>Ajustes da experiência</h2><button aria-label="Fechar ajustes" class="icon">✕</button></div></form>
+ <label>Profundidade da explicação<select id="level"><option value="intro">Introdutória</option><option value="medio">Ensino Médio</option></select></label>
+ <label>Voz <output id="voiceValue">100%</output><input id="voiceVolume" type="range" min="0" max="100" value="100"></label>
+ <label>Trilha de fundo <output id="musicValue">20%</output><input id="musicVolume" type="range" min="0" max="60" value="20"></label>
+ <label class="check"><input id="musicEnabled" type="checkbox"> Tocar a trilha enviada em loop</label>
+ <label class="check"><input id="autoVoice" type="checkbox" checked> Narrar ao selecionar ou mudar de etapa</label>
+ <label class="check"><input id="syntheticVoice" type="checkbox" checked> Usar voz do navegador quando não houver MP3</label>
+ <label class="check"><input id="captionsEnabled" type="checkbox" checked> Mostrar texto da orientação na lateral</label>
+ <label class="check"><input id="reducedMotion" type="checkbox"> Reduzir animações de transição</label>
+ <div class="offline-box"><b>Uso sem internet</b><p id="offlineDetalhe" class="fine">Verificando…</p><div class="button-row"><button type="button" data-action="offlineBaixar">Baixar tudo agora</button></div></div>
+ <label>Chão de referência no VR<select id="chaoVR"><option value="discreto">Discreto (brilho e um anel no piso)</option><option value="nenhum">Nenhum (tudo no espaço)</option></select></label>
+ <label>Qualidade gráfica<select id="quality"><option value="balanced">Equilibrada</option><option value="low">Econômica</option><option value="high">Detalhada</option></select></label>
+ <p class="fine">A voz humana gravada tem prioridade quando seu MP3 está na pasta <code>audio/</code>. A trilha baixa automaticamente durante uma fala. Não há cadastro do aluno.</p>
+ <button id="newStudent" data-action="newStudent" class="danger">Iniciar novo aluno</button>
+</dialog>
+<dialog id="summaryDialog"><div class="dialog-head"><h2>Resumo da experiência</h2><button id="closeSummary" data-action="closeSummary" class="icon" aria-label="Fechar resumo">✕</button></div><div id="summaryContent"></div><details><summary>Exportar registros brutos</summary><div class="button-row"><button id="downloadJSON" data-action="downloadJSON">Exportar JSON</button><button id="downloadCSV" data-action="downloadCSV">Exportar CSV</button></div></details><p class="fine">Registros desta aba; a identificação do aluno ou grupo é opcional e fica apenas neste dispositivo. O resumo descreve ações e tentativas; não é um diagnóstico de aprendizagem.</p></dialog>
+<dialog id="sourcesDialog"><form method="dialog"><div class="dialog-head"><h2>Fontes e limites</h2><button class="icon" aria-label="Fechar fontes">✕</button></div></form><div id="sourcesContent"></div></dialog>
+<script>window.addEventListener('error',function(e){console.error('Corpo Humano:',e.message);});</script>
+</body></html>

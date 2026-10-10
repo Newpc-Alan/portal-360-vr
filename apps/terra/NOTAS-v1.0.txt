@@ -61,3 +61,13 @@ v1.2.1 (realismo do vulcão)
 - Nuvem de cinzas e fumarolas refeitas com sprites de fumaça (alfa), subindo, abrindo em cogumelo e dissipando; coluna escura e
   brilho na base nas erupções explosiva e de fonte; alvo invisível mantém o toque e a seleção no VR. Câmera passa a enquadrar a coluna.
 - Correção: os elementos da face de corte (conduto, câmara, funil) não respondiam ao toque por causa do plano de recorte; folga aplicada.
+
+v1.2.2 (relevo real)
+- Volta ao mundo dos vulcões com 7 paradas: entra o Monte St. Helens (erupção lateral de 1980), entre o Fuji e o Krakatoa.
+- Fuji e St. Helens ganham o botão "Ver o relevo real em 3D": maquete feita do Copernicus DEM GLO-30 (30 m por ponto), com a janela de
+  34 km (Fuji, com os lagos ao norte) e 22 km (St. Helens, com a cratera em ferradura e o leque cinza da explosão virados para o aluno).
+  Alturas 1,35× para leitura. Cor gerada do próprio relevo (floresta, linha das árvores, rocha, neve, água, sombreado), sem imagem de
+  satélite. Cada maquete pesa ~130 KB (PNG de alturas 16 bits em R/G + WebP de cor).
+- VR: a maquete fica como uma mesa, mais baixa e mais perto, para olhar de cima. Crédito do Copernicus DEM em Fontes.
+- Pipeline: scratchpad/dem/gen.py recorta o GeoTIFF, gera o PNG de alturas e a textura; os outros cinco vulcões entram com as fatias
+  N40_00_E014 (Vesúvio), N37_00_E015 (Etna), N19_00_W156 (Kilauea), S07_00_E105 (Krakatoa) e S22_00_W047 (Poços de Caldas).

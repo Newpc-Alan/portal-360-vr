@@ -80,7 +80,7 @@ function terra(opt={}){
   if(opt.ondas){const ond=new T.Group();for(let k=0;k<6;k++){const an=new T.Mesh(new T.RingGeometry(.1,.14,64),new T.MeshBasicMaterial({color:0x9fd0ff,transparent:true,opacity:.8,side:T.DoubleSide,depthWrite:false}));an.position.set(0,R0,d+.02);an.userData.f=k/6;ond.add(an);}const epi=new T.Mesh(new T.SphereGeometry(.07,12,10),new T.MeshBasicMaterial({color:0xffffff}));epi.position.set(0,R0,d+.02);ond.add(epi);tampas.add(ond);g.userData.ondas=ond;g.userData.ondasR=R0;}
   /* poço de Kola: marcador na superfície, na secção */
   if(opt.kola){const mk=new T.Mesh(new T.CylinderGeometry(.012,.012,.1,8),new T.MeshBasicMaterial({color:0xffe08a}));mk.position.set(0,R0-.05,d+.02);tampas.add(mk);textFixo(tampas,'Poço de Kola · 12 km',1.3,R0+.25,d+.03,2.2,'#ffe08a');}
-  g.userData.plano=plano;g.userData.local=local;g.userData.giro=giro;g.userData.tampas=tampas;g.userData.raio=R0;
+  if(corte){g.userData.plano=plano;g.userData.local=local;}g.userData.giro=giro;g.userData.tampas=tampas;g.userData.raio=R0;
   const girar=opt.girar!==false;
   g.userData.tick=(t)=>{if(girar)giro.rotation.y=t*.08;if(g.userData.nuvens)g.userData.nuvens.rotation.y=t*.012;if(corte){tampas.updateMatrixWorld(true);plano.copy(local).applyMatrix4(tampas.matrixWorld);}
     const nuc=giro.children[4];if(nuc&&nuc.material&&nuc.material.emissive)nuc.material.emissiveIntensity=.8+.3*Math.sin(t*1.6);
@@ -107,7 +107,10 @@ function contexto(level){const g=new T.Group();
 function explorar(){const g=new T.Group();const te=terra({corte:true,hitFn:k=>({type:'inspect',key:k})});g.add(te);g.userData.tick=te.userData.tick;return g;}
 /* ficha projetada: a Terra aberta com a camada em destaque (ou o fenômeno) */
 const DESTAQUE={crosta:['crosta'],crosta_continental:['crosta'],crosta_oceanica:['crosta'],litosfera:['crosta','manto_superior'],astenosfera:['manto_superior'],moho:['crosta','manto_superior'],manto_superior:['manto_superior'],manto_inferior:['manto_inferior'],nucleo_externo:['nucleo_externo'],nucleo_interno:['nucleo_interno'],kola:['crosta']};
-function inspection(key){const g=new T.Group();const o={corte:true,raio:1.6,destaque:DESTAQUE[key]||null};
+function inspection(key){const g=new T.Group();
+  if(D.placas.some(p=>p.key===key)||['terremoto','tsunami','anel_fogo','pangeia'].includes(key)){const ov=D.placas.some(p=>p.key===key)?{destaque:key}:key==='pangeia'?{tinta:false}:{sismos:true,tinta:false};const te=globoPlacas({overlay:ov,hit:{type:'inspect',key},girar:false});te.scale.setScalar(.55);const pl=D.placas.find(p=>p.key===key);if(pl){/* vira o globo para a placa ficar de frente */const c=centroide(pl);te.userData.giro.rotation.y=-c.lon*Math.PI/180-Math.PI/2;te.rotation.x=c.lat*Math.PI/180;}g.add(te);g.userData.tick=te.userData.tick;g.userData.pegavel=true;return g;}
+  if(['divergente','convergente','transformante'].includes(key)){const d=diorama(key,{rotulo:true});g.add(d);g.userData.tick=d.userData.tick;g.userData.pegavel=true;return g;}
+  const o={corte:true,raio:1.6,destaque:DESTAQUE[key]||null};
   if(key==='campo_magnetico'){o.campo=true;o.corte=false;}if(key==='ondas_sismicas'){o.ondas=true;}if(key==='kola'){o.kola=true;}if(key==='terra'){o.corte=false;}
   if(key==='crosta_continental'||key==='crosta_oceanica'){o.corte=false;}
   const te=terra(o);g.add(te);g.userData.tick=te.userData.tick;g.userData.pegavel=true;return g;}
@@ -158,7 +161,58 @@ function viagemCena(state){const g=new T.Group();const {geo,curva}=tunel();const
   g.userData.viagem={curva:curvaTrecho,escalaVR:ESCALA_VR,raioOlhar:0};g.userData.semGiro=true;
   g.userData.tick=t=>{g.traverse(o=>{if(o.userData.trilha!==undefined){o.material.opacity=.3+.6*Math.pow(Math.max(0,Math.sin(t*3-o.userData.trilha*8)),2);}});pts.material.opacity=.7+.25*Math.sin(t*2.1);};
   return g;}
-function desafio(){const g=new T.Group();const te=terra({corte:true,hitFn:k=>({type:'inspect',key:k})});g.add(te);g.userData.tick=te.userData.tick;return g;}
-function dispose(g){if(!g)return;const geos=new Set(),mats=new Set(),tex=new Set();g.traverse(o=>{if(o.geometry&&!o.isSprite&&o.geometry!==(tuboCache&&tuboCache.geo))geos.add(o.geometry);for(const m of [].concat(o.material||[])){if(!m)continue;mats.add(m);const comp=new Set([...Object.values(TEX),...Object.values(TEXP)]);for(const t of [m.map,m.emissiveMap,m.normalMap,m.specularMap]){if(t&&!comp.has(t))tex.add(t);}}});geos.forEach(x=>x.dispose());mats.forEach(x=>x.dispose());tex.forEach(x=>x.dispose());if(g.parent)g.parent.remove(g);}
-window.TERRA_MODELS={V,R,CAMADAS,mat,ball,label,rotuloFixo,textFixo,textAt,tag,terra,contexto,explorar,inspection,sequencia,viagemCena,desafio,tipoCrosta,dispose,ESCALA_VR};
+
+/* ---------- Placas tectônicas ---------- */
+const MOV={pacifica:[-1,.6],norteamericana:[-1,-.3],sulamericana:[-1,0],africana:[.35,.5],euroasiatica:[.6,0],indoaustraliana:[.3,1],antartica:[0,0],nazca:[1,0]};
+let mascaraPlacas=null;const OVER={};
+function lonx(lon,W){return (lon+180)/360*W;}function laty(lat,H){return (90-lat)/180*H;}
+function poligono(x,pts,W,H,off){x.beginPath();pts.forEach(([lo,la],i)=>{const px=lonx(lo+off,W),py=laty(la,H);if(i)x.lineTo(px,py);else x.moveTo(px,py);});x.closePath();}
+/* máscara: índice da placa por pixel (1024×512) */
+function mascaraDePlacas(){if(mascaraPlacas)return mascaraPlacas;const W=1024,H=512,c=document.createElement('canvas');c.width=W;c.height=H;const x=c.getContext('2d');x.fillStyle='#000';x.fillRect(0,0,W,H);
+  D.placas.forEach((p,i)=>{x.fillStyle='rgb('+(i+1)+','+(i+1)+','+(i+1)+')';for(const off of [-360,0,360]){poligono(x,p.pts,W,H,off);x.fill();}});
+  const d=x.getImageData(0,0,W,H).data;mascaraPlacas=new Uint8Array(W*H);for(let k=0;k<W*H;k++)mascaraPlacas[k]=d[k*4];return mascaraPlacas;}
+function placaEm(uv){const m=mascaraDePlacas();if(!uv)return null;const W=1024,H=512;const i=Math.floor(uv.x*W)&(W-1),j=Math.min(H-1,Math.floor((1-uv.y)*H));const idx=m[j*W+i];return idx?D.placas[idx-1].key:null;}
+/* sobreposição: tinta por placa, fronteiras, setas de movimento, terremotos, destaque de uma placa */
+function overlayPlacas(opt={}){const chave=JSON.stringify(opt);if(OVER[chave])return OVER[chave];const W=2048,H=1024,c=document.createElement('canvas');c.width=W;c.height=H;const x=c.getContext('2d');
+  D.placas.forEach(p=>{const forte=opt.destaque===p.key,fraco=opt.destaque&&!forte;x.fillStyle=p.cor;x.globalAlpha=forte?.55:fraco?.06:(opt.tinta===false?0:.2);for(const off of [-360,0,360]){poligono(x,p.pts,W,H,off);x.fill();}});
+  x.globalAlpha=1;x.strokeStyle=opt.corLinha||'#ffe08a';x.lineWidth=opt.destaque?3:4;x.lineJoin='round';D.placas.forEach(p=>{for(const off of [-360,0,360]){poligono(x,p.pts,W,H,off);x.stroke();}});
+  if(opt.setas){x.fillStyle='#ffffff';x.strokeStyle='#ffffff';x.lineWidth=6;D.placas.forEach(p=>{const m=MOV[p.key];if(!m||(!m[0]&&!m[1]))return;let cx=0,cy=0;p.pts.forEach(([lo,la])=>{cx+=lo;cy+=la;});cx/=p.pts.length;cy/=p.pts.length;if(p.key==='pacifica'){cx=-160;cy=10;}if(p.key==='euroasiatica'){cx=70;cy=55;}if(p.key==='norteamericana'){cx=-100;cy=45;}
+      const L=60;const px=lonx(cx,W),py=laty(cy,H),dx=m[0]/Math.hypot(m[0],m[1]),dy=-m[1]/Math.hypot(m[0],m[1]);const ex=px+dx*L,ey=py+dy*L;x.beginPath();x.moveTo(px,py);x.lineTo(ex,ey);x.stroke();x.beginPath();x.moveTo(ex+dx*18,ey+dy*18);x.lineTo(ex-dy*12,ey+dx*12);x.lineTo(ex+dy*12,ey-dx*12);x.closePath();x.fill();});}
+  if(opt.sismos){let sd=11;const rnd=()=>{sd=(sd*9301+49297)%233280;return sd/233280;};x.fillStyle='#ff5a5a';D.placas.forEach(p=>{if(p.key==='antartica')return;const n=p.pts.length;for(let i=0;i<n;i++){const [a,b]=[p.pts[i],p.pts[(i+1)%n]];if(Math.abs(a[1])>=55&&Math.abs(b[1])>=55)continue;const seg=8;for(let k=0;k<seg;k++){const t=k/seg+rnd()/seg;const lo=a[0]+(b[0]-a[0])*t+(rnd()-.5)*4,la=a[1]+(b[1]-a[1])*t+(rnd()-.5)*4;const r=1.5+rnd()*4;for(const off of [-360,0,360]){x.beginPath();x.arc(lonx(lo+off,W),laty(la,H),r,0,Math.PI*2);x.fill();}}}});}
+  const tx=new T.CanvasTexture(c);tx.encoding=T.sRGBEncoding;tx.anisotropy=8;OVER[chave]=tx;return tx;}
+/* globo com a camada das placas (sem nuvens, para as fronteiras ficarem visíveis) */
+function centroide(pl){const pts=pl.pts||[];let lo=0,la=0;pts.forEach(p=>{lo+=p[0];la+=p[1];});return {lon:lo/pts.length,lat:la/pts.length};}
+function globoPlacas(opt={}){const te=terra({semNuvens:true,girar:opt.girar!==false,hitFn:()=>null});const giro=te.userData.giro;const R0=te.userData.raio;
+  const ov=new T.Mesh(new T.SphereGeometry(R0*1.006,64,48),new T.MeshBasicMaterial({map:overlayPlacas(opt.overlay||{}),transparent:true,depthWrite:false}));ov.userData.dinamico=opt.contexto?null:'placa';if(opt.hit)ov.userData.hit=opt.hit;giro.add(ov);te.userData.overlay=ov;
+  /* a crosta por baixo não deve capturar o toque nesta cena */giro.children[0].userData.dinamico=null;giro.children[0].userData.hit=null;
+  mascaraDePlacas();return te;}
+function placContexto(level){const g=new T.Group();const te=globoPlacas({contexto:true,hit:{type:'context'},overlay:level===0?{}:level===1?{setas:true}:{sismos:true,tinta:false}});g.add(te);
+  textAt(g,level===0?'A LITOSFERA É UM QUEBRA-CABEÇA DE PLACAS':level===1?'SETAS: PARA ONDE CADA PLACA SE MOVE':'PONTOS VERMELHOS: TERREMOTOS',0,-R-1.0,0,level===0?6.0:5.4,level===2?'#ff9a9a':'#ffe08a');g.userData.tick=te.userData.tick;return g;}
+function placasExp(){const g=new T.Group();const te=globoPlacas({hit:{type:'inspect',key:'pacifica'}});g.add(te);g.userData.tick=te.userData.tick;return g;}
+/* posição na esfera a partir de lat/lon (coerente com o mapeamento UV da SphereGeometry) */
+function pontoGeo(lat,lon,r){const la=lat*Math.PI/180,lo=lon*Math.PI/180;return V(r*Math.cos(la)*Math.cos(lo),r*Math.sin(la),-r*Math.cos(la)*Math.sin(lo));}
+function voltaCena(state){const g=new T.Group();const par=D.volta[state.etapa]||D.volta[0];const te=globoPlacas({girar:false,overlay:{sismos:true},hit:{type:'inspect',key:'pacifica'}});g.add(te);const giro=te.userData.giro,R0=te.userData.raio;
+  /* pino na parada */const pin=new T.Group();const haste=new T.Mesh(new T.CylinderGeometry(.02,.02,.35,8),new T.MeshBasicMaterial({color:0xffffff}));haste.position.y=.17;pin.add(haste);const bola=new T.Mesh(new T.SphereGeometry(.09,16,12),new T.MeshBasicMaterial({color:0xff5a5a}));bola.position.y=.4;pin.add(bola);const anel=new T.Mesh(new T.RingGeometry(.12,.16,32),new T.MeshBasicMaterial({color:0xffe08a,transparent:true,opacity:.9,side:T.DoubleSide}));anel.rotation.x=-Math.PI/2;anel.position.y=.01;pin.add(anel);
+  const p=pontoGeo(par.lat,par.lon,R0*1.0);pin.position.copy(p);pin.lookAt(p.clone().multiplyScalar(2));pin.rotateX(Math.PI/2);giro.add(pin);pin.userData.semEnquadre=true;
+  const rot=rotuloFixo(par.titulo,'#ffffff',2.0,60);rot.position.copy(pontoGeo(par.lat+9,par.lon,R0*1.1));rot.lookAt(rot.position.clone().multiplyScalar(2));giro.add(rot);rot.userData.semEnquadre=true;
+  /* o globo gira até a parada ficar de frente (+z) */const alvo=-par.lon*Math.PI/180-Math.PI/2;giro.rotation.y=alvo;g.userData.alvoGiro=alvo;g.userData.giro=giro;g.userData.lat=par.lat;
+  const t0=te.userData.tick;g.userData.tick=t=>{if(t0)t0(t);let d=alvo-giro.rotation.y;while(d>Math.PI)d-=2*Math.PI;while(d<-Math.PI)d+=2*Math.PI;giro.rotation.y+=d*.06;anel.scale.setScalar(1+.35*Math.sin(t*4));bola.position.y=.4+.04*Math.sin(t*3);};
+  return g;}
+/* maquetes dos três limites */
+function diorama(tipo,opt={}){const g=new T.Group();const Wb=1.5,Hb=.5,Pb=1.2;
+  const manto=new T.Mesh(new T.BoxGeometry(3.3,.5,Pb),mat(0xe07a3c,{emissive:0x4a1a05,emissiveIntensity:.6,roughness:.9}));manto.position.y=-.5;g.add(manto);
+  const bloco=(x,w,h,cor,oce)=>{const b=new T.Mesh(new T.BoxGeometry(w,h,Pb),mat(cor,{roughness:.85}));b.position.set(x,h/2-.25,0);if(oce){const agua=new T.Mesh(new T.BoxGeometry(w,.12,Pb),mat(0x2c6fa8,{transparent:true,opacity:.75,roughness:.3}));agua.position.y=h/2+.06;b.add(agua);}g.add(b);return b;};
+  if(tipo==='divergente'){const a=bloco(-.85,Wb,.42,0x5fa8c8,true),b=bloco(.85,Wb,.42,0x5fa8c8,true);const magma=new T.Mesh(new T.BoxGeometry(.22,.95,Pb*.98),mat(0xff7a20,{emissive:0xff5a10,emissiveIntensity:.9}));magma.position.y=-.25;g.add(magma);const nova1=new T.Mesh(new T.BoxGeometry(.18,.4,Pb),mat(0x3a3a3a,{roughness:.95}));nova1.position.set(-.3,-.05,0);g.add(nova1);const nova2=nova1.clone();nova2.position.x=.3;g.add(nova2);
+    g.userData.tick=t=>{const k=(Math.sin(t*.9)+1)/2;a.position.x=-.85-k*.25;b.position.x=.85+k*.25;nova1.position.x=-.3-k*.2;nova2.position.x=.3+k*.2;magma.scale.y=.9+.2*Math.sin(t*2.3);};}
+  else if(tipo==='convergente'){const cont=bloco(.8,1.7,.62,0x8fd0a0,false);const oce=bloco(-1.0,1.9,.4,0x5fa8c8,true);oce.rotation.z=-.42;oce.position.set(-.75,-.1,0);const cone=new T.Mesh(new T.ConeGeometry(.3,.5,16),mat(0x6a4a3a,{roughness:.95}));cone.position.set(.55,.5,0);g.add(cone);const lava=new T.Mesh(new T.ConeGeometry(.07,.12,10),mat(0xff7a20,{emissive:0xff5a10,emissiveIntensity:1}));lava.position.set(.55,.78,0);g.add(lava);const cam=new T.Mesh(new T.SphereGeometry(.18,12,10),mat(0xff7a20,{emissive:0xff5a10,emissiveIntensity:.8}));cam.position.set(.45,-.15,0);g.add(cam);
+    g.userData.tick=t=>{const k=(t*.25)%1;oce.position.x=-.55-k*.4;oce.position.y=.05-k*.28;lava.scale.setScalar(.8+.5*Math.abs(Math.sin(t*3)));cam.scale.setScalar(1+.08*Math.sin(t*2));};}
+  else{const a=bloco(-.8,1.6,.5,0x8fd0a0,false),b=bloco(.8,1.6,.5,0xa8c890,false);const rio1=new T.Mesh(new T.BoxGeometry(1.6,.03,.14),mat(0x2c6fa8,{roughness:.3}));rio1.position.set(0,.26,0);a.add(rio1);const rio2=rio1.clone();b.add(rio2);const falha=new T.Mesh(new T.BoxGeometry(.03,.52,Pb),mat(0x2a1a10));falha.position.y=0;g.add(falha);
+    g.userData.tick=t=>{const k=((t*.18)%1);const z=(k<.5?k:1-k)*1.2-.3;a.position.z=z;b.position.z=-z;};}
+  const titulo=opt.rotulo?D.info[tipo].name:'?';const rot=rotuloFixo(titulo,opt.rotulo?'#ffe08a':'#9cbed0',2.2,opt.rotulo?62:110);rot.position.set(0,-1.15,.65);g.add(rot);
+  g.traverse(o=>{if(o.isMesh)o.userData.hit={type:'lim',tipo};});
+  return g;}
+function limitesCena(state){const g=new T.Group();['divergente','convergente','transformante'].forEach((tipo,i)=>{const d=diorama(tipo,{rotulo:!!(state&&state[tipo])});d.position.x=(i-1)*3.7;g.add(d);});textFixo(g,'TOQUE EM CADA MAQUETE',0,1.6,0,3.6,'#ffe08a');const ticks=g.children.filter(c=>c.userData.tick).map(c=>c.userData.tick);g.userData.tick=t=>ticks.forEach(f=>f(t));return g;}
+function desafio(modulo){const g=new T.Group();const te=modulo==='pla'?globoPlacas({hit:{type:'inspect',key:'pacifica'}}):terra({corte:true,hitFn:k=>({type:'inspect',key:k})});g.add(te);g.userData.tick=te.userData.tick;return g;}
+function dispose(g){if(!g)return;const geos=new Set(),mats=new Set(),tex=new Set();g.traverse(o=>{if(o.geometry&&!o.isSprite&&o.geometry!==(tuboCache&&tuboCache.geo))geos.add(o.geometry);for(const m of [].concat(o.material||[])){if(!m)continue;mats.add(m);const comp=new Set([...Object.values(TEX),...Object.values(TEXP),...Object.values(OVER)]);for(const t of [m.map,m.emissiveMap,m.normalMap,m.specularMap]){if(t&&!comp.has(t))tex.add(t);}}});geos.forEach(x=>x.dispose());mats.forEach(x=>x.dispose());tex.forEach(x=>x.dispose());if(g.parent)g.parent.remove(g);}
+window.TERRA_MODELS={V,R,CAMADAS,mat,ball,label,rotuloFixo,textFixo,textAt,tag,terra,contexto,explorar,inspection,sequencia,viagemCena,desafio,tipoCrosta,dispose,ESCALA_VR,placContexto,placasExp,limitesCena,voltaCena,placaEm,globoPlacas,overlayPlacas};
 })();

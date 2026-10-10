@@ -18,3 +18,20 @@ v1.0.1 (realismo)
   interno brilhante); túnel da viagem com três materiais: rocha escura na crosta, rocha rachada com veios de magma no manto, metal líquido
   em redemoinhos no núcleo. Texturas geradas uma vez e compartilhadas (não entram no dispose das cenas).
 - Decisão: sem modelo de terceiros (Sketchfab) por licença/interação; realismo via texturas públicas + procedural. +650 KB de cache offline.
+
+v1.1.0 (tema Placas tectônicas · 10/10/2026)
+- Segundo tema completo, com 5 missões: Contexto (3 etapas: a litosfera quebrada, setas de movimento, pontos de terremotos), Explorar
+  (15 fichas: 8 placas, 3 tipos de limite, terremoto, tsunami, Pangeia e Anel de Fogo; toque numa placa do globo abre a ficha dela),
+  Que limite é esse? (três maquetes animadas: divergente, convergente, transformante), Volta ao mundo tectônica (6 paradas: Andes,
+  San Andreas, Islândia, Himalaia, Japão, Brasil; o globo gira até a parada e cada uma traz chips de tipo de limite e placas) e
+  Desafio (6 situações, com resumo próprio).
+- Globo das placas: máscara de índice por polígono (lon/lat) para saber qual placa foi tocada; sobreposição com fronteiras, tinta por placa,
+  setas de movimento e sismos gerados ao longo das fronteiras. Ficha de placa: globo-cópia girado para a placa ficar de frente.
+- Enquadramento da ficha revisto nos dois temas: com modelo largo (globo), o contexto vai para o fundo à esquerda e a cópia ampliada é
+  enquadrada à direita (antes as duas esferas se sobrepunham). Câmera passa a enquadrar a cópia, não o conjunto.
+- Correções: globo sem corte deixava metade da esfera sem toque (plano de recorte ficava registrado mesmo sem corte); botões da sidebar
+  passam a quebrar linha em vez de estourar (Transformante); rodapé do menu no plural; texto do tour por tema.
+- VR: todas as missões do tema funcionam no modo VR (menu "Tema: Placas tectônicas", fichas, maquetes dos limites, globo da volta ao mundo).
+- Áudios: ROTEIRO-AUDIOS.csv regenerado a partir dos dados, 81 roteiros (43 do tema Camadas + 38 do tema Placas, prefixo "plac-" nas
+  orientações, contextos e desafio; fichas usam a própria chave). Voz do navegador até os MP3 chegarem.
+- Catálogo: card atualizado (2 temas · 10 missões · 28 fichas).

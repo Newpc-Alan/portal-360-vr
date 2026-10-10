@@ -249,8 +249,8 @@ body.intro-fullscreen #btnSkipIntro{cursor:pointer}
         <div class="card-content">
           <span class="tag">Disponível agora</span>
           <h3>Terra por Dentro</h3>
-          <p>A Terra aberta ao meio: crosta, manto, núcleo externo e núcleo interno, com fichas narradas, a montagem das camadas e uma viagem em primeira pessoa até o centro do planeta, em sete trechos com profundidade, temperatura e pressão. Como sabemos o que há lá embaixo: ondas sísmicas, campo magnético e o poço de Kola. Placas tectônicas, vulcões e rochas em breve.</p>
-          <div class="meta"><span>Geociências</span><span>Fundamental II e Médio</span><span>5 missões · 13 fichas</span><span>VR + 3D + realidade mista</span></div>
+          <p>A Terra aberta ao meio: crosta, manto, núcleo externo e núcleo interno, com fichas narradas, a montagem das camadas e uma viagem em primeira pessoa até o centro do planeta, em sete trechos com profundidade, temperatura e pressão. Como sabemos o que há lá embaixo: ondas sísmicas, campo magnético e o poço de Kola. No tema Placas tectônicas, o globo das placas que se tocam para abrir a ficha, as três maquetes de limites e uma volta ao mundo pelos lugares onde a Terra treme. Vulcões e rochas em breve.</p>
+          <div class="meta"><span>Geociências</span><span>Fundamental II e Médio</span><span>2 temas · 10 missões · 28 fichas</span><span>VR + 3D + realidade mista</span></div>
           <div class="card-actions">
             <a href="apps/terra/" class="primary-btn">Explorar em 3D</a>
             <a href="apps/terra/?vr=1" class="vr-btn" data-vr-app="terra">🥽 Entrar em VR</a>
@@ -446,7 +446,7 @@ document.addEventListener('webkitfullscreenchange',function(){
    O app fica pré-carregado num iframe invisível (mesma origem). O clique aqui conta como gesto
    do usuário para o iframe, então a sessão WebXR abre na hora, sem segundo toque. */
 /* BUILD muda a cada publicação: força o navegador do óculos a buscar o index.html novo dos apps (o GitHub Pages ignora a query) */
-const BUILD='20261010b';
+const BUILD='20261010c';
 const appFrames={};
 /* os links dos cartões também levam a versão, para abrir direto sem cache antigo */
 document.querySelectorAll('.card-actions a[href^="apps/"]').forEach(a=>{const u=new URL(a.getAttribute('href'),location.href);u.searchParams.set('v',BUILD);a.setAttribute('href',u.pathname+u.search);});

@@ -2,7 +2,7 @@
    Conteúdo: tema Camadas da Terra (Contexto, Explorar, Monte as camadas, Viagem ao centro, Desafio).
    Temas: Camadas da Terra, Placas tectônicas, Vulcões e Rochas e minerais. Textos no tom falado das narrações (chaves = nomes dos MP3 em audio/). */
 (function(){'use strict';
-const D={version:'1.3.0'};
+const D={version:'1.3.1'};
 D.temas=[
  {id:'camadas',nome:'Camadas da Terra',estuda:'Do que a Terra é feita por dentro.',exemplos:'Crosta, manto, núcleo externo e núcleo interno',modulo:'cam',atividades:['contexto','explorar','montar','viagem'],questoes:['liquida','kola','manto','magnetico','sismicas','interno','oceanica','temperatura']},
  {id:'placas',nome:'Placas tectônicas',estuda:'Por que a crosta se mexe, treme e se quebra.',exemplos:'Placas, limites, terremotos, vulcões e a deriva dos continentes',modulo:'pla',atividades:['placContexto','placasExp','limites','volta'],questoes:['placasMovem','andes','atlantico','sanandreas','brasil','pangeia']},

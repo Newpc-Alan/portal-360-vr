@@ -93,3 +93,7 @@ v1.3.0 (tema Rochas e minerais · 10/10/2026)
   camadas do arenito, furos da pomes, vidro da obsidiana), cristais de quartzo em prisma hexagonal, feldspato em blocos, mica em
   lâminas; magma e sedimento como estados próprios. Bancada, anel do ciclo e contexto ficam como mesa no VR; botão "Bancada gigante".
 - App completo: 4 temas, 20 missões, 55 fichas, 26 situações de desafio. Menu sem "em breve". ROTEIRO-AUDIOS.csv com 169 roteiros.
+
+v1.3.1 (celular)
+- Menu de temas no celular refeito: temas em fichas que quebram linha e as missões do tema ativo numa linha rolável (antes, cada
+  tema virava uma coluna alta e os últimos ficavam cortados). Mesma correção no Corpo Humano (v4.7.10) e etapas do DNA ajustadas.

@@ -52,3 +52,16 @@ nav details.nav-breve[open] summary{color:#8fb0c2}
 .offline{font-size:9px;color:#8fb7c9;white-space:nowrap}.offline.pronto{color:#9ee6cd}.offline.erro{color:#ffb3a7}.offline-box{border:1px solid #365165;background:#102738;border-radius:11px;padding:12px;margin:14px 0}.offline-box b{font-size:13px}.offline-box p{margin:6px 0}
 
 .rodape-link{font-size:9px;color:#9ec6d8;text-decoration:none;margin-right:10px}.rodape-link:hover{text-decoration:underline}
+
+/* celular (v1.3.1 / v4.7.10): menu de temas em fichas que quebram linha, missões do tema ativo numa linha rolável */
+@media(max-width:800px){
+ .activity-nav{display:flex;flex-direction:row;flex-wrap:wrap;align-items:stretch;gap:5px;padding:7px 8px}
+ .activity-nav .nav-grupo{display:none}
+ .activity-nav .nav-sistema{order:1;flex:0 0 auto;min-width:0;min-height:30px;padding:6px 9px;font-size:10.5px;align-items:center;border-radius:999px;white-space:nowrap}
+ .activity-nav .nav-sistema.active{background:#143a2e;border-color:#2f8f72;color:#e7fff3}
+ .activity-nav .nav-missoes{order:2;flex:0 0 100%;flex-direction:row;overflow-x:auto;gap:5px;margin:2px 0 0;padding:4px 0 6px;border-left:0;border-top:1px dashed #2f6f62;scrollbar-width:thin}
+ .activity-nav .nav-missao{flex:0 0 auto;min-width:0;min-height:34px;padding:6px 10px;font-size:10.5px;white-space:nowrap;border-radius:999px;gap:5px}
+ .activity-nav .nav-missao .nav-num{font-size:10px}
+ .activity-nav .nav-breve{order:3;flex:0 0 100%}
+ .activity-nav .nav-breve button{min-height:28px;font-size:10px}
+}

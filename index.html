@@ -98,7 +98,7 @@ main{padding:22px clamp(18px,4vw,48px) 80px}
 footer{padding:24px clamp(18px,4vw,48px);border-top:1px solid var(--border);color:#8396a8;font-size:13px}
 .hide{display:none !important}
 @media(max-width:1100px){.filters{grid-template-columns:repeat(2,minmax(0,1fr))}.grid{grid-template-columns:1fr 1fr}}
-@media(max-width:760px){.topnav .navright{display:none}.filters{grid-template-columns:1fr}.grid{grid-template-columns:1fr}.card,.card.available{min-height:240px}header.hero{min-height:380px}h1{max-width:500px}}
+@media(max-width:760px){.topnav .navright{display:none}.filters{grid-template-columns:1fr}.grid{grid-template-columns:1fr}.card{min-height:auto}.card.available{min-height:250px}.card-actions{gap:8px}.card-actions a,.card-actions button{flex:1 1 100%;justify-content:center;min-height:46px}header.hero{min-height:380px}h1{max-width:500px}}
 
 html.intro-fullscreen, body.intro-fullscreen{
   width:100%;height:100%;overflow:hidden;background:#000;
@@ -488,7 +488,7 @@ document.addEventListener('webkitfullscreenchange',function(){
    O app fica pré-carregado num iframe invisível (mesma origem). O clique aqui conta como gesto
    do usuário para o iframe, então a sessão WebXR abre na hora, sem segundo toque. */
 /* BUILD muda a cada publicação: força o navegador do óculos a buscar o index.html novo dos apps (o GitHub Pages ignora a query) */
-const BUILD='20261010p';
+const BUILD='20261010q';
 const appFrames={};
 /* os links dos cartões também levam a versão, para abrir direto sem cache antigo */
 document.querySelectorAll('.card-actions a[href^="apps/"]').forEach(a=>{const u=new URL(a.getAttribute('href'),location.href);u.searchParams.set('v',BUILD);a.setAttribute('href',u.pathname+u.search);});

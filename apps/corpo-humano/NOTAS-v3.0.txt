@@ -310,3 +310,7 @@ v4.7.8 (chão)
 - 3D (lousa/Chromebook): sem disco de chão e sem anéis; o modelo fica no espaço. A marca "CORPO HUMANO" sob os pés foi removida.
 - VR: o disco azul com anéis brancos deu lugar a um piso discreto (brilho radial suave na cor do sistema + um anel fraco a 1 m), só como
   âncora de conforto e de escala. Ajustes → "Chão de referência no VR": Discreto (padrão) ou Nenhum (tudo no espaço), para comparar no óculos.
+
+v4.7.10 (celular)
+- Menu de sistemas no celular refeito: sistemas em fichas que quebram linha e as missões do sistema ativo numa linha rolável
+  (antes cada sistema virava uma coluna alta e os últimos ficavam cortados fora da tela). Sem mudança no VR.

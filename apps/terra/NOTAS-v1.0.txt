@@ -81,3 +81,15 @@ v1.2.3 (relevo real em seis paradas)
 v1.2.4 (Etna)
 - Sétima maquete: Etna (34 km), costurando as fatias N37_00_E014 e E015 (o cume fica a 0,5 km da borda da E015). Cume nevado, lava
   escura acima da linha das árvores, o Vale do Bove a leste e o mar Jônico no canto. Todas as sete paradas com relevo real.
+
+v1.3.0 (tema Rochas e minerais · 10/10/2026)
+- Quarto e último tema, com 5 missões: Contexto (3 etapas: três famílias na bancada, granito ampliado com quartzo, feldspato e mica,
+  o anel do ciclo), Explorar (bancada com 12 amostras: granito, basalto, obsidiana, pedra-pomes, arenito, calcário, carvão, mármore,
+  ardósia, quartzo, feldspato, mica; etiquetas aparecem conforme o aluno investiga), Ciclo das rochas (cinco estados num anel com
+  setas; o aluno aplica processos [esfriar, erodir, compactar, calor e pressão, derreter] por botão ou tocando no estado de destino;
+  objetivo: visitar os cinco), Que rocha é essa? (cinco amostras misteriosas giram no pedestal; pistas de cor, grão, camadas, brilho
+  e bolhas; três opções; a amostra vira ficha depois da resposta) e Desafio (6 situações).
+- Amostras procedurais: pedra irregular por icosaedro deslocado, texturas geradas por rocha (pintas do granito, veios do mármore,
+  camadas do arenito, furos da pomes, vidro da obsidiana), cristais de quartzo em prisma hexagonal, feldspato em blocos, mica em
+  lâminas; magma e sedimento como estados próprios. Bancada, anel do ciclo e contexto ficam como mesa no VR; botão "Bancada gigante".
+- App completo: 4 temas, 20 missões, 55 fichas, 26 situações de desafio. Menu sem "em breve". ROTEIRO-AUDIOS.csv com 169 roteiros.

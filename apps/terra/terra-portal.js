@@ -172,10 +172,10 @@ Proto.xrSelect=function(ctrl){
   const r=xrSelectOriginal.call(this,ctrl);if(ui&&this.xr)this.buildXRUI();/* v4.7.7: redesenha para o botão apertado acender mesmo quando o comando não mexe na lateral */return r;
 };
 /* "Terra gigante": a Terra aberta cresce até 3,4 m à frente do aluno, à altura dos olhos, para ver as camadas como uma parede */
-const DENTRO_TXT={dentro:'A Terra agora tem mais de três metros. Chegue perto e olhe as camadas: a crosta fininha por fora, o manto enorme, o núcleo brilhando no centro. Aponte para qualquer camada para ouvir sobre ela.',fora:'De volta ao tamanho normal.',vulcao:'O vulcão agora tem mais de três metros. Chegue perto da câmara de magma, siga o conduto até a cratera e olhe as cinzas lá no alto. Aponte para qualquer parte para ouvir sobre ela.'};
-function nomeGigante(){const S=Lab.state;return S.tema==='vulcao'&&['vulcaoExp','erupcao','desafio'].includes(S.view)?'Vulcão':'Terra';}
+const DENTRO_TXT={dentro:'A Terra agora tem mais de três metros. Chegue perto e olhe as camadas: a crosta fininha por fora, o manto enorme, o núcleo brilhando no centro. Aponte para qualquer camada para ouvir sobre ela.',fora:'De volta ao tamanho normal.',rochas:'A bancada agora é gigante: as amostras ficaram do tamanho de pedras de verdade. Chegue perto, olhe os grãos e as camadas, e aponte para qualquer uma para ouvir sobre ela.',vulcao:'O vulcão agora tem mais de três metros. Chegue perto da câmara de magma, siga o conduto até a cratera e olhe as cinzas lá no alto. Aponte para qualquer parte para ouvir sobre ela.'};
+function nomeGigante(){const S=Lab.state;if(S.tema==='rochas')return 'Bancada';return S.tema==='vulcao'&&['vulcaoExp','erupcao','desafio'].includes(S.view)?'Vulcão':'Terra';}
 Proto.alternarDentro=function(){this.dentro=!this.dentro;this.anchor=null;this.xrZoom=1;if(this.copy)Lab.command('inspect:close');this.placeXR();this.buildXRUI();
-  const S=Lab.state;const vul=nomeGigante()==='Vulcão';if(S.autoVoice)narrator.say(this.dentro?(vul?DENTRO_TXT.vulcao:DENTRO_TXT.dentro):DENTRO_TXT.fora,this.dentro?(vul?'vul-vr-dentro':'vr-dentro'):'vr-fora');};
+  const S=Lab.state;const ng=nomeGigante();const txt=this.dentro?(ng==='Vulcão'?DENTRO_TXT.vulcao:ng==='Bancada'?DENTRO_TXT.rochas:DENTRO_TXT.dentro):DENTRO_TXT.fora;const chave=this.dentro?(ng==='Vulcão'?'vul-vr-dentro':ng==='Bancada'?'roc-vr-dentro':'vr-dentro'):'vr-fora';if(S.autoVoice)narrator.say(txt,chave);};
 
 /* ---------- 4. Narração posicional ---------- */
 let posicional=null,ligado=false;

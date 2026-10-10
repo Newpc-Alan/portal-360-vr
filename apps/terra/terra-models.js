@@ -113,6 +113,7 @@ function explorar(){const g=new T.Group();const te=terra({corte:true,hitFn:k=>({
 /* ficha projetada: a Terra aberta com a camada em destaque (ou o fenômeno) */
 const DESTAQUE={crosta:['crosta'],crosta_continental:['crosta'],crosta_oceanica:['crosta'],litosfera:['crosta','manto_superior'],astenosfera:['manto_superior'],moho:['crosta','manto_superior'],manto_superior:['manto_superior'],manto_inferior:['manto_inferior'],nucleo_externo:['nucleo_externo'],nucleo_interno:['nucleo_interno'],kola:['crosta']};
 function inspection(key){const g=new T.Group();
+  if(ROCHAS_KEYS.includes(key)){const a=amostra(key,{r:1.0});g.add(a);g.userData.tick=a.userData.tick;g.userData.pegavel=true;return g;}
   if(VUL_PARTES.includes(key)){const alvo={magma:'camara_magmatica',vulcao_ativo:'cratera'}[key]||key;const v=vulcao({destaque:alvo,hitFn:()=>({type:'inspect',key})});v.scale.setScalar(.6);g.add(v);g.userData.tick=v.userData.tick;g.userData.pegavel=true;return g;}
   if(['estratovulcao','escudo','caldeira'].includes(key)){const v=tipoVulcao(key);v.scale.setScalar(.6);g.add(v);g.userData.tick=v.userData.tick;g.userData.pegavel=true;return g;}
   if(key==='ponto_quente'){const v=painelOrigem('pontoquente',{hit:{type:'inspect',key}});g.add(v);g.userData.tick=v.userData.tick;g.userData.pegavel=true;return g;}
@@ -317,6 +318,80 @@ function erupcaoCena(state){const g=new T.Group();const r=state.resultado;let v;
   else if(r==='domo')v=vulcao({lava:false,nuvem:.5,piroclastos:false,domo:true,lago:false,hitFn:()=>({type:'erup'})});
   else v=vulcao({lava:false,nuvem:2.4,piroclastos:'muitos',brilho:true,hitFn:()=>({type:'erup'})});
   g.add(v);const titulo=r?D.ERUPCAO.resultados[r].nome.toUpperCase():(state.pressao>=1?'ERUPÇÃO!':'PRESSÃO: '+Math.round((state.pressao||0)*100)+'%');textAt(g,titulo,0,-1.45,.4,r?4.2:3.2,r==='explosiva'?'#ff9a9a':'#ffe08a');g.userData.tick=v.userData.tick;return g;}
+/* ===== Rochas e minerais ===== */
+const ROCHAS_KEYS=['granito','basalto','obsidiana','pomes','arenito','calcario','carvao','marmore','ardosia','quartzo','feldspato','mica'];
+const ROC_ESTADO_AMOSTRA={ignea:'granito',sedimentar:'arenito',metamorfica:'marmore'};
+/* texturas procedurais por rocha (256 px, cache em TEXP) */
+function texRocha2(key){const W=256;const F={
+  granito:(u,v,nz)=>{const a=nz(u*70,v*70),b=nz(u*45+9,v*45+3),c=nz(u*120+5,v*120+8);if(c>.55)return [40,38,40];if(a>.25)return [232,170,150];if(b>.1)return [228,224,220];return [180,176,178];},
+  basalto:(u,v,nz)=>{const g=nz(u*90,v*90)*.5+.5,h=nz(u*30+7,v*30+2);const k=52+28*g;return h>.62?[26,24,24]:[k,k-2,k-4];},
+  obsidiana:(u,v,nz)=>{const g=nz(u*6,v*6)*.5+.5;const k=14+22*g;return [k,k,k+6];},
+  pomes:(u,v,nz)=>{const g=nz(u*80,v*80),h=nz(u*140+3,v*140+9);const buraco=g>.35||h>.5;const k=buraco?70:200+30*nz(u*20,v*20);return [k,k-4,k-10];},
+  arenito:(u,v,nz)=>{const banda=.5+.5*Math.sin(v*40+nz(u*3,v*3)*2);const g=nz(u*150,v*150)*.5+.5;const k=.82+.18*g;return [(205+25*banda)*k,(170+22*banda)*k,(115+18*banda)*k];},
+  calcario:(u,v,nz)=>{const g=nz(u*12,v*12)*.5+.5,h=nz(u*90+4,v*90+1)*.5+.5;const f=Math.abs(nz(u*25+40,v*25+7));const fossil=f<.05?.75:1;const k=(.86+.12*g+.06*h)*fossil;return [232*k,222*k,196*k];},
+  carvao:(u,v,nz)=>{const banda=.5+.5*Math.sin(v*60+nz(u*4,v*4)*3);const g=nz(u*100,v*100)*.5+.5;const k=18+14*banda+10*g;return [k,k-1,k-2];},
+  marmore:(u,v,nz)=>{const veio=Math.pow(1-Math.min(1,Math.abs(nz(u*5+20,v*5+3))*4),3);const veio2=Math.pow(1-Math.min(1,Math.abs(nz(u*9+50,v*9+9))*6),3)*.6;const g=nz(u*40,v*40)*.5+.5;const k=.9+.1*g;const cinza=Math.max(veio,veio2);return [(240-90*cinza)*k,(236-90*cinza)*k,(232-80*cinza)*k];},
+  ardosia:(u,v,nz)=>{const linha=.5+.5*Math.sin(v*140+nz(u*6,v*6)*1.5);const g=nz(u*60,v*60)*.5+.5;const k=58+18*linha+14*g;return [k,k+4,k+12];},
+  quartzo:(u,v,nz)=>{const g=nz(u*8,v*8)*.5+.5;return [232+20*g,240+12*g,250];},
+  feldspato:(u,v,nz)=>{const g=nz(u*14,v*14)*.5+.5,h=nz(u*80,v*80)*.5+.5;return [236-20*h,190+20*g,176+12*g];},
+  mica:(u,v,nz)=>{const g=nz(u*30,v*5)*.5+.5;return [180+50*g,140+40*g,80+30*g];}
+ };return texRuido('roc-'+key,W,F[key]||F.basalto);}
+/* pedra irregular: icosaedro deslocado por ruído determinístico */
+function pedra(r,seed,det=2,amp=.16,esc=[1,.8,.95]){const geo=new T.IcosahedronGeometry(r,det);const pos=geo.attributes.position;const v=new T.Vector3();for(let i=0;i<pos.count;i++){v.fromBufferAttribute(pos,i);const n=Math.sin(v.x*5.1+seed)*Math.cos(v.y*4.3-seed*.7)*Math.sin(v.z*6.2+seed*1.3)+.5*Math.sin(v.x*11+v.z*9+seed);v.multiplyScalar(1+amp*n);pos.setXYZ(i,v.x*esc[0],v.y*esc[1],v.z*esc[2]);}geo.computeVertexNormals();return geo;}
+/* amostra de rocha ou mineral; r = tamanho base */
+function amostra(key,opt={}){const g=new T.Group();const r=opt.r||.5;const seed=ROCHAS_KEYS.indexOf(key)+1;const tx=texRocha2(key);
+  if(key==='quartzo'){const mQ=new T.MeshStandardMaterial({color:0xffffff,map:tx,transparent:true,opacity:.82,roughness:.12,metalness:.05});[[0,0,0,0,1],[.22,.05,.1,.5,.7],[-.2,.02,.12,-.6,.6]].forEach(([x,z,tz,rz,sc])=>{const p=new T.Group();const prisma=new T.Mesh(new T.CylinderGeometry(r*.3,r*.34,r*1.4,6),mQ);prisma.position.y=r*.7;p.add(prisma);const ponta=new T.Mesh(new T.ConeGeometry(r*.3,r*.45,6),mQ);ponta.position.y=r*1.62;p.add(ponta);p.scale.setScalar(sc);p.position.set(x*r*2,0,z*r*2);p.rotation.z=rz*.5;p.rotation.y=tz;g.add(p);});const base=new T.Mesh(pedra(r*.55,3,1,.2,[1.6,.5,1.3]),mat(0xd8d0c8,{roughness:.9}));g.add(base);}
+  else if(key==='feldspato'){const mF=mat(0xffffff,{map:tx,roughness:.45});const b=new T.Mesh(new T.BoxGeometry(r*1.3,r*.9,r*.8),mF);b.rotation.set(.15,.4,-.1);b.position.y=r*.45;g.add(b);const b2=new T.Mesh(new T.BoxGeometry(r*.7,r*.6,r*.5),mF);b2.position.set(r*.6,r*.55,r*.3);b2.rotation.set(.3,-.5,.2);g.add(b2);}
+  else if(key==='mica'){const mM=mat(0xffffff,{map:tx,roughness:.25,metalness:.55});for(let i=0;i<8;i++){const pl=new T.Mesh(new T.CylinderGeometry(r*.9,r*.9,r*.035,6),mM);pl.position.set(Math.sin(i*1.7)*r*.06,r*.04+i*r*.05,Math.cos(i*2.1)*r*.06);pl.rotation.y=i*.12;pl.rotation.x=(i%2?1:-1)*.03;g.add(pl);}}
+  else if(key==='ardosia'){const mA=mat(0xffffff,{map:tx,roughness:.7});for(let i=0;i<3;i++){const geo=new T.BoxGeometry(r*2.1-i*r*.25,r*.11,r*1.5-i*r*.2);const pl=new T.Mesh(geo,mA);pl.position.set(i*r*.08,r*.06+i*r*.12,-i*r*.05);pl.rotation.y=i*.06;g.add(pl);}}
+  else if(key==='arenito'||key==='carvao'){const mL=mat(0xffffff,{map:tx,roughness:.95});const geo=pedra(r*.95,seed,2,.07,[1.35,.65,1.0]);const m=new T.Mesh(geo,mL);m.position.y=r*.6;g.add(m);}
+  else if(key==='obsidiana'){const m=new T.Mesh(pedra(r*.9,seed,1,.22,[1.1,.85,1]),new T.MeshStandardMaterial({color:0xffffff,map:tx,roughness:.08,metalness:.15,flatShading:true}));m.position.y=r*.75;g.add(m);}
+  else{const ext={granito:{roughness:.85},basalto:{roughness:.9},pomes:{roughness:1},calcario:{roughness:.85},marmore:{roughness:.35,metalness:.05}}[key]||{roughness:.85};const m=new T.Mesh(pedra(r*.9,seed,2,key==='pomes'?.22:.16),mat(0xffffff,Object.assign({map:tx},ext)));m.position.y=r*.75;g.add(m);}
+  g.traverse(o=>{if(o.isMesh)o.userData.hit=opt.hit||{type:'inspect',key};});g.userData.tick=t=>{if(opt.girar)g.rotation.y=t*.35;};return g;}
+/* magma e sedimento (estados do ciclo que não são rochas) */
+function amostraEstado(estado,r=.5,hit){if(ROC_ESTADO_AMOSTRA[estado])return amostra(ROC_ESTADO_AMOSTRA[estado],{r,hit});const g=new T.Group();
+  if(estado==='magma'){const m=new T.Mesh(pedra(r*.9,7,2,.1),mat(0xffffff,LAVA('roc',1.5,1.5)));m.position.y=r*.75;g.add(m);const brilho=new T.Sprite(new T.SpriteMaterial({alphaMap:fumaca(),color:0xff7a2a,transparent:true,opacity:.5,depthWrite:false,blending:T.AdditiveBlending}));brilho.scale.setScalar(r*3.2);brilho.position.y=r*.75;g.add(brilho);g.userData.tick=t=>{m.material.emissiveIntensity=.8+.3*Math.sin(t*2.5);brilho.material.opacity=.4+.15*Math.sin(t*3);};}
+  else{/* sedimento: monte de grãos */const mG=mat(0xd8b878,{roughness:1,map:texRocha2('arenito')});for(let i=0;i<40;i++){const a=i*2.39,d=r*.9*Math.sqrt(i/40);const s=new T.Mesh(new T.SphereGeometry(r*(.08+.07*((i*7)%3)/2),8,6),mG);s.position.set(Math.cos(a)*d,r*.08+(1-i/40)*r*.45*Math.random(),Math.sin(a)*d*.8);s.scale.y=.7;g.add(s);}const monte=new T.Mesh(new T.ConeGeometry(r*1.0,r*.5,24),mG);monte.position.y=r*.25;g.add(monte);}
+  g.traverse(o=>{if(o.isMesh&&hit)o.userData.hit=hit;});return g;}
+/* bancada: 12 amostras em 4 x 3 */
+function bancada(opt={}){const g=new T.Group();const W=7.0,P=3.4;const mesa=new T.Mesh(new T.BoxGeometry(W,.22,P),mat(0x3a2e26,{roughness:.9,map:texRep('vulcao-rocha.webp',4,2)}));mesa.position.y=-.11;g.add(mesa);const borda=new T.Mesh(new T.BoxGeometry(W+.1,.05,P+.1),mat(0x7a6a5c,{roughness:.8}));borda.position.y=.0;g.add(borda);
+  const vistos=opt.vistos||[];const rot=opt.rotulos;const ticks=[];
+  ROCHAS_KEYS.forEach((k,i)=>{const col=i%4,lin=Math.floor(i/4);const x=(col-1.5)*1.7,z=(lin-1)*1.05;const ped=new T.Mesh(new T.CylinderGeometry(.5,.55,.08,24),mat(0x2a2220,{roughness:.9}));ped.position.set(x,.06,z);g.add(ped);const a=amostra(k,{r:.36,hit:opt.hitFn?opt.hitFn(k):{type:'inspect',key:k}});a.position.set(x,.1,z);a.rotation.y=i*.7;g.add(a);if(a.userData.tick)ticks.push(a.userData.tick);
+    const nome=(rot||vistos.includes(k))?D.info[k].name:'?';const r=rotuloFixo(nome,(rot||vistos.includes(k))?'#ffe08a':'#9cbed0',1.3,(rot||vistos.includes(k))?60:96);r.position.set(x,.03,z+.5);r.rotation.x=-Math.PI/2.6;g.add(r);});
+  if(opt.grupos){[['ÍGNEAS','#b09080',-2.55],['SEDIMENTARES','#e0c08a',-.85],['METAMÓRFICAS','#c8c0d8',.85],['MINERAIS','#e8f0f8',2.55]].forEach(([t,c,x])=>{});}
+  g.userData.mesa=true;g.userData.tick=t=>ticks.forEach(f=>f(t));return g;}
+function rocContexto(level){const g=new T.Group();
+  if(level===0){/* três famílias: amostras agrupadas por família, com rótulo */const fam=[['ÍGNEAS',['granito','basalto','obsidiana','pomes'],-2.6,'#d8c0b0'],['SEDIMENTARES',['arenito','calcario','carvao'],0,'#e0c08a'],['METAMÓRFICAS',['marmore','ardosia'],2.6,'#d0c8e0']];const mesa=new T.Mesh(new T.BoxGeometry(8.2,.22,2.6),mat(0x3a2e26,{roughness:.9,map:texRep('vulcao-rocha.webp',4,2)}));mesa.position.y=-.11;g.add(mesa);const ticks=[];
+    fam.forEach(([nome,keys,x0,cor])=>{keys.forEach((k,i)=>{const n=keys.length;const x=x0+(i-(n-1)/2)*.75;const z=(i%2?.35:-.35);const a=amostra(k,{r:.3,hit:{type:'context'}});a.position.set(x,.0,z);a.rotation.y=i*1.1;g.add(a);if(a.userData.tick)ticks.push(a.userData.tick);});textFixo(g,nome,x0,-.05,1.55,2.4,cor).rotation.x=-Math.PI/2.4;});
+    textFixo(g,'TRÊS FAMÍLIAS DE ROCHAS',0,1.5,0,3.6,'#ffe08a');g.traverse(o=>{if(o.isMesh&&!o.userData.hit)o.userData.hit={type:'context'};});g.userData.mesa=true;g.userData.tick=t=>ticks.forEach(f=>f(t));}
+  else if(level===1){/* granito gigante com os três minerais */const gr=new T.Mesh(pedra(1.5,1,3,.12),mat(0xffffff,{map:texRocha2('granito'),roughness:.85}));gr.position.y=1.2;gr.userData.hit={type:'context'};g.add(gr);const base=new T.Mesh(new T.CylinderGeometry(1.9,2.1,.2,32),mat(0x2a2220,{roughness:.9}));base.position.y=-.1;g.add(base);
+    [['quartzo',-2.9,'Quartzo: branco, duro'],['feldspato',0,'Feldspato: rosado, faces retas'],['mica',2.9,'Mica: lâminas brilhantes']].forEach(([k,x,t],i)=>{const a=amostra(k,{r:.55,hit:{type:'context'},girar:true});a.position.set(x,i===1?2.9:.2,i===1?-.3:.9);g.add(a);textFixo(g,t,x,i===1?2.7:-.05,i===1?-.3:1.9,2.3,'#ffe08a');});
+    textFixo(g,'ROCHA É FEITA DE MINERAIS',0,3.9,0,3.8,'#ffe08a');const ticks=[];g.traverse(o=>{if(o.userData.tick&&o!==g)ticks.push(o.userData.tick);});g.userData.tick=t=>{ticks.forEach(f=>f(t));gr.rotation.y=t*.12;};}
+  else{const c=cicloCena({estado:null,contexto:true});g.add(c);g.userData.mesa=true;g.userData.tick=c.userData.tick;}
+  return g;}
+function rochasExp(state){const g=new T.Group();const b=bancada({vistos:state&&state.visited||[]});g.add(b);g.userData.mesa=true;g.userData.tick=b.userData.tick;return g;}
+/* ciclo das rochas: anel com cinco estados, setas e a rocha atual no centro */
+function cicloCena(state){const g=new T.Group();const R0=2.9;const ordem=D.CICLO.ordem;const atual=state.estado;const ticks=[];const nos={};
+  const posDe=i=>{const a=Math.PI/2-i*Math.PI*2/ordem.length;return V(Math.cos(a)*R0,0,-Math.sin(a)*R0);};
+  ordem.forEach((e,i)=>{const p=posDe(i);const est=D.CICLO.estados[e];const on=atual===e;const disco=new T.Mesh(new T.CylinderGeometry(.62,.68,.1,32),mat(on?0x5a4a2a:0x2a2220,{roughness:.9,emissive:on?0xffa040:0x000000,emissiveIntensity:on?.6:0}));disco.position.copy(p);disco.position.y=-.05;disco.userData.hit={type:state.contexto?'context':'cicloNo',estado:e};g.add(disco);nos[e]=disco;
+    const a=amostraEstado(e,.42,{type:state.contexto?'context':'cicloNo',estado:e});a.position.copy(p);g.add(a);if(a.userData.tick)ticks.push(a.userData.tick);
+    const r=rotuloFixo(est.nome,on?'#ffe08a':'#e7f6ff',1.8,58);r.position.copy(p);r.position.y=-.02;r.position.z+=.95;r.rotation.x=-Math.PI/2.4;g.add(r);});
+  /* setas do anel (estado i -> i+1) e atalhos internos */
+  const seta=(i,j,cor,interno)=>{const a=posDe(i),b=posDe(j);const pts=[];const n=14;for(let k=0;k<=n;k++){const t=k/n;let p;if(interno){p=a.clone().lerp(b,t);p.multiplyScalar(1-.18*Math.sin(t*Math.PI));}else{const ang0=Math.atan2(-a.z,a.x),ang1=Math.atan2(-b.z,b.x);let d=ang1-ang0;while(d>0)d-=Math.PI*2;const ang=ang0+d*t;p=V(Math.cos(ang)*R0,0,-Math.sin(ang)*R0);}p.y=.06;pts.push(p);}
+    const cut=pts.slice(2,n-1);const tubo=new T.Mesh(new T.TubeGeometry(new T.CatmullRomCurve3(cut),24,interno?.025:.04,8,false),mat(cor,{emissive:cor,emissiveIntensity:.5}));g.add(tubo);const fim=cut[cut.length-1],ant=cut[cut.length-2];const cone=new T.Mesh(new T.ConeGeometry(interno?.09:.13,.3,12),mat(cor,{emissive:cor,emissiveIntensity:.6}));cone.position.copy(fim);cone.lookAt(fim.clone().add(fim.clone().sub(ant)));cone.rotateX(Math.PI/2);g.add(cone);};
+  for(let i=0;i<ordem.length;i++)seta(i,(i+1)%ordem.length,0xffd27a,false);
+  seta(1,4,0xc8a0ff,true);seta(4,2,0xa0d8ff,true);seta(3,0,0xff9a6a,true);
+  /* centro: a rocha atual, grande */if(atual){const c=amostraEstado(atual,.95,{type:'cicloNo',estado:atual});c.position.y=.1;g.add(c);if(c.userData.tick)ticks.push(c.userData.tick);const r=rotuloFixo(D.CICLO.estados[atual].nome.toUpperCase(),'#ffe08a',2.6,62);r.position.set(0,-.05,1.5);r.rotation.x=-Math.PI/2.4;g.add(r);g.userData.centro=c;}
+  else{textFixo(g,'O CICLO DAS ROCHAS',0,.9,0,3.4,'#ffe08a');}
+  const chao=new T.Mesh(new T.RingGeometry(R0-.9,R0+.9,64),new T.MeshBasicMaterial({color:0x1a1410,transparent:true,opacity:.5,side:T.DoubleSide}));chao.rotation.x=-Math.PI/2;chao.position.y=-.11;g.add(chao);
+  g.userData.mesa=true;g.userData.tick=t=>{ticks.forEach(f=>f(t));if(atual&&nos[atual]){nos[atual].material.emissiveIntensity=.45+.3*Math.sin(t*3);}if(g.userData.centro)g.userData.centro.rotation.y=t*.3;};return g;}
+/* que rocha é essa? pedestal com a amostra misteriosa */
+function identificarCena(state){const g=new T.Group();const rod=D.IDENTIFICAR[state.rodada]||D.IDENTIFICAR[0];const resolvido=state.resposta!==null&&state.resposta!==undefined;
+  const ped=new T.Mesh(new T.CylinderGeometry(1.1,1.3,.35,32),mat(0x2a2220,{roughness:.9}));ped.position.y=-.18;g.add(ped);
+  const a=amostra(rod.amostra,{r:1.0,hit:resolvido?{type:'inspect',key:rod.amostra}:{type:'ident'},girar:true});g.add(a);
+  const r=rotuloFixo(resolvido?D.info[rod.amostra].name.toUpperCase():'?',resolvido?'#ffe08a':'#9cbed0',2.6,resolvido?62:120);r.position.set(0,2.4,0);g.add(r);
+  textFixo(g,'AMOSTRA '+(state.rodada+1)+' DE '+D.IDENTIFICAR.length,0,-.55,1.3,2.2,'#9cbed0').rotation.x=-Math.PI/2.4;
+  g.userData.tick=t=>{a.rotation.y=t*.4;r.position.y=2.4+.05*Math.sin(t*2);};return g;}
 /* ===== terreno real (Copernicus DEM 30 m): PNG de alturas (R alto, G baixo) + textura de cor gerada do próprio relevo ===== */
 function terrenoReal(key,opt={}){const g=new T.Group();const meta=D.TERRENOS[key];const L=opt.largura||5.6,seg=255,exag=opt.exagero||meta.exag||1.35;
   const geo=new T.PlaneGeometry(L,L,seg,seg);geo.rotateX(-Math.PI/2);
@@ -328,7 +403,7 @@ function terrenoReal(key,opt={}){const g=new T.Group();const meta=D.TERRENOS[key
   g.rotation.y=opt.giro!==undefined?opt.giro:(meta.giro||0);
   const rot=rotuloFixo(meta.nome+' · '+meta.alt+' · relevo real, '+meta.km+' km de lado',"#ffe08a",4.6,54);rot.userData.semEnquadre=true;const wrap=new T.Group();wrap.add(g);
   /* o rótulo fica fixo de frente, fora do giro do terreno */rot.position.set(0,-.34,L/2+.08);wrap.add(rot);wrap.userData.tick=t=>{};wrap.userData.terreno=g;return wrap;}
-function desafio(modulo){const g=new T.Group();const te=modulo==='vul'?vulcao({}):modulo==='pla'?globoPlacas({hit:{type:'inspect',key:'pacifica'}}):terra({corte:true,hitFn:k=>({type:'inspect',key:k})});g.add(te);g.userData.tick=te.userData.tick;return g;}
+function desafio(modulo){const g=new T.Group();const te=modulo==='roc'?bancada({rotulos:true}):modulo==='vul'?vulcao({}):modulo==='pla'?globoPlacas({hit:{type:'inspect',key:'pacifica'}}):terra({corte:true,hitFn:k=>({type:'inspect',key:k})});g.add(te);g.userData.tick=te.userData.tick;return g;}
 function dispose(g){if(!g)return;const geos=new Set(),mats=new Set(),tex=new Set();g.traverse(o=>{if(o.geometry&&!o.isSprite&&o.geometry!==(tuboCache&&tuboCache.geo))geos.add(o.geometry);for(const m of [].concat(o.material||[])){if(!m)continue;mats.add(m);const comp=new Set([...Object.values(TEX),...Object.values(TEXP),...Object.values(OVER)]);for(const t of [m.map,m.emissiveMap,m.normalMap,m.specularMap]){if(t&&!comp.has(t))tex.add(t);}}});geos.forEach(x=>x.dispose());mats.forEach(x=>x.dispose());tex.forEach(x=>x.dispose());if(g.parent)g.parent.remove(g);}
-window.TERRA_MODELS={V,R,CAMADAS,mat,ball,label,rotuloFixo,textFixo,textAt,tag,terra,contexto,explorar,inspection,sequencia,viagemCena,desafio,tipoCrosta,dispose,ESCALA_VR,placContexto,placasExp,limitesCena,voltaCena,placaEm,globoPlacas,overlayPlacas,vulcao,vulContexto,vulcaoExp,erupcaoCena,origemMagma,tipoVulcao,painelOrigem,terrenoReal};
+window.TERRA_MODELS={V,R,CAMADAS,mat,ball,label,rotuloFixo,textFixo,textAt,tag,terra,contexto,explorar,inspection,sequencia,viagemCena,desafio,tipoCrosta,dispose,ESCALA_VR,placContexto,placasExp,limitesCena,voltaCena,placaEm,globoPlacas,overlayPlacas,vulcao,vulContexto,vulcaoExp,erupcaoCena,origemMagma,tipoVulcao,painelOrigem,terrenoReal,amostra,bancada,rocContexto,rochasExp,cicloCena,identificarCena,ROCHAS_KEYS};
 })();

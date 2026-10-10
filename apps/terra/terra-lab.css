@@ -60,3 +60,6 @@ nav details.nav-breve[open] summary{color:#8fb0c2}
 .gauge small{display:block;font-size:8.5px;letter-spacing:.12em;color:#c9a070}
 .gauge b{display:block;font-size:13px;color:#ffe3a8;margin-top:2px;line-height:1.2}
 .menu-card .ic{font-size:30px}
+
+ul.pistas{margin:6px 0 12px;padding-left:18px;line-height:1.5}
+ul.pistas li{margin:3px 0}

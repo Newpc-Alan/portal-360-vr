@@ -51,3 +51,13 @@ v1.2.0 (tema Vulcões · 10/10/2026)
 - VR: botão "Vulcão gigante" (texto e áudio próprios) nas missões do vulcão; demais missões funcionam no VR com o painel espelhado.
 - Áudios: ROTEIRO-AUDIOS.csv com 123 roteiros (81 anteriores + 42 do tema Vulcões, prefixo "vul-").
 - Catálogo: card atualizado (3 temas · 15 missões · 42 fichas). Falta apenas o tema Rochas e minerais.
+
+v1.2.1 (realismo do vulcão)
+- Pesquisa de modelos prontos: os vulcões em corte realistas disponíveis são CC BY-NC (não comercial) ou cartoon; decisão: manter o
+  modelo procedural e vestir com texturas reais de licença limpa.
+- Lava real (foto, exemplos do three.js, MIT) como cor e emissivo no lago da cratera, na câmara, no conduto, nos rios e nas fontes, com
+  o mapa deslizando (a lava escorre); rocha com normal map (Babylon.js Assets, CC BY 4.0) no cone, no solo, nas bombas, nas maquetes
+  dos tipos e nos painéis das origens do magma. Créditos em Fontes.
+- Nuvem de cinzas e fumarolas refeitas com sprites de fumaça (alfa), subindo, abrindo em cogumelo e dissipando; coluna escura e
+  brilho na base nas erupções explosiva e de fonte; alvo invisível mantém o toque e a seleção no VR. Câmera passa a enquadrar a coluna.
+- Correção: os elementos da face de corte (conduto, câmara, funil) não respondiam ao toque por causa do plano de recorte; folga aplicada.

@@ -2,7 +2,7 @@
    Conteúdo: tema Camadas da Terra (Contexto, Explorar, Monte as camadas, Viagem ao centro, Desafio).
    Temas: Camadas da Terra, Placas tectônicas e Vulcões; Rochas entra como tema "em breve". Textos no tom falado das narrações (chaves = nomes dos MP3 em audio/). */
 (function(){'use strict';
-const D={version:'1.2.0'};
+const D={version:'1.2.1'};
 D.temas=[
  {id:'camadas',nome:'Camadas da Terra',estuda:'Do que a Terra é feita por dentro.',exemplos:'Crosta, manto, núcleo externo e núcleo interno',modulo:'cam',atividades:['contexto','explorar','montar','viagem'],questoes:['liquida','kola','manto','magnetico','sismicas','interno','oceanica','temperatura']},
  {id:'placas',nome:'Placas tectônicas',estuda:'Por que a crosta se mexe, treme e se quebra.',exemplos:'Placas, limites, terremotos, vulcões e a deriva dos continentes',modulo:'pla',atividades:['placContexto','placasExp','limites','volta'],questoes:['placasMovem','andes','atlantico','sanandreas','brasil','pangeia']},
@@ -195,6 +195,6 @@ D.guide=[
  {view:'vulDesafio',title:'Mostre o que entendeu',goal:'Hora de mostrar o que você entendeu. Responda às situações e, no final, confira o seu resumo.',check:'vulDesafio',audio:'vul-aula-desafio'}
 ];
 D.WELCOME='Bem-vindo ao Terra por Dentro! Aqui você vai abrir o planeta ao meio, conhecer cada camada, montar a Terra de fora para dentro e fazer uma viagem até o centro, onde ninguém nunca chegou. Vamos começar?';
-D.sources=[['NASA Visible Earth · Blue Marble (texturas da superfície, domínio público; cópias distribuídas com o three.js)','https://visibleearth.nasa.gov/collection/1484/blue-marble'],['Smithsonian Global Volcanism Program (vulcões ativos do Holoceno; pontos do globo simplificados)','https://volcano.si.edu/'],['USGS · Volcano Hazards Program','https://www.usgs.gov/programs/VHP'],['USGS · Earth\'s interior','https://www.usgs.gov/faqs/what-are-earths-layers'],['IRIS · Exploring the Earth using seismology','https://www.iris.edu/hq/inclass/animation/exploring_the_earth_using_seismology'],['Kola Superdeep Borehole · dados históricos','https://en.wikipedia.org/wiki/Kola_Superdeep_Borehole'],['BNCC · EF06CI11 (camadas da Terra); EF06CI12, EF07CI15 e EF07CI16 nos temas seguintes','http://basenacionalcomum.mec.gov.br/']];
+D.sources=[['three.js · textura de lava dos exemplos (licença MIT)','https://github.com/mrdoob/three.js/tree/r128/examples/textures/lava'],['Babylon.js Assets · texturas de rocha e normal map (CC BY 4.0)','https://github.com/BabylonJS/Assets'],['NASA Visible Earth · Blue Marble (texturas da superfície, domínio público; cópias distribuídas com o three.js)','https://visibleearth.nasa.gov/collection/1484/blue-marble'],['Smithsonian Global Volcanism Program (vulcões ativos do Holoceno; pontos do globo simplificados)','https://volcano.si.edu/'],['USGS · Volcano Hazards Program','https://www.usgs.gov/programs/VHP'],['USGS · Earth\'s interior','https://www.usgs.gov/faqs/what-are-earths-layers'],['IRIS · Exploring the Earth using seismology','https://www.iris.edu/hq/inclass/animation/exploring_the_earth_using_seismology'],['Kola Superdeep Borehole · dados históricos','https://en.wikipedia.org/wiki/Kola_Superdeep_Borehole'],['BNCC · EF06CI11 (camadas da Terra); EF06CI12, EF07CI15 e EF07CI16 nos temas seguintes','http://basenacionalcomum.mec.gov.br/']];
 window.TERRA_DATA=D;
 })();

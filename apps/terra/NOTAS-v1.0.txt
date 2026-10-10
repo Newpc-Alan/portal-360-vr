@@ -35,3 +35,19 @@ v1.1.0 (tema Placas tectônicas · 10/10/2026)
 - Áudios: ROTEIRO-AUDIOS.csv regenerado a partir dos dados, 81 roteiros (43 do tema Camadas + 38 do tema Placas, prefixo "plac-" nas
   orientações, contextos e desafio; fichas usam a própria chave). Voz do navegador até os MP3 chegarem.
 - Catálogo: card atualizado (2 temas · 10 missões · 28 fichas).
+
+v1.2.0 (tema Vulcões · 10/10/2026)
+- Terceiro tema completo, com 5 missões: Contexto (3 etapas: vulcões ativos no globo, três origens do magma em maquetes animadas
+  [subducção, dorsal, ponto quente], o vulcão aberto ao meio com rótulos), Explorar (14 fichas: câmara, conduto, cratera, cone, magma,
+  lava, nuvem de cinzas, piroclastos, gases, estratovulcão, escudo, caldeira, ponto quente, ativo/dormente/extinto), Laboratório de
+  erupção (escolhe magma fluido/viscoso e gás pouco/médio/muito, sobe a pressão em três toques e vê um de quatro resultados: efusiva,
+  fonte de lava, domo, explosiva; objetivo = uma mansa e uma explosiva), Volta ao mundo dos vulcões (Kilauea, Vesúvio, Etna, Fuji,
+  Krakatoa, Poços de Caldas) e Desafio (6 situações).
+- Vulcão procedural em corte: cone com plano de recorte (acompanha a cópia da ficha), face de corte com estratos de lava e cinza,
+  conduto com nível de magma, câmara pulsante, cratera com lago de lava, rios de lava em tubo, coluna e cogumelo de cinzas, bombas em
+  arco, fumarolas, domo e fontes de lava para o laboratório. Maquetes dos tipos (estratovulcão, escudo, caldeira) e painel do ponto quente.
+- Globo das placas ganhou a camada de vulcões ativos (triângulos laranja, 60 pontos); a volta ao mundo passou a aceitar outra lista de
+  paradas e outra sobreposição.
+- VR: botão "Vulcão gigante" (texto e áudio próprios) nas missões do vulcão; demais missões funcionam no VR com o painel espelhado.
+- Áudios: ROTEIRO-AUDIOS.csv com 123 roteiros (81 anteriores + 42 do tema Vulcões, prefixo "vul-").
+- Catálogo: card atualizado (3 temas · 15 missões · 42 fichas). Falta apenas o tema Rochas e minerais.

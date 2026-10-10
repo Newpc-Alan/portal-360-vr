@@ -135,7 +135,7 @@ Proto.buildXRUI=function(){
   if(menu==='raiz'){
     this.xrButton('Tema: '+sis.nome,'xr:menu:sistemas',-1.18,.6,.5,false,AZ);
     this.xrButton('▣ Missão '+(idx+1)+' de '+atv.length+': '+atual.label,'xr:menu:missoes',-1.18,.6-UI.passo,.5,false,VD);
-    this.xrButton(this.dentro?'⤡ Terra em tamanho normal':'⤢ Terra gigante','xr:dentro',-1.18,.6-2*UI.passo,.5,false,this.dentro?{bg:'#4a2a0f',borda:'#ffc77a',texto:'#fff6e8'}:{bg:'#2a1050',borda:'#c9a6ff',texto:'#ffffff'});
+    this.xrButton(this.dentro?'⤡ '+nomeGigante()+' em tamanho normal':'⤢ '+nomeGigante()+' gigante','xr:dentro',-1.18,.6-2*UI.passo,.5,false,this.dentro?{bg:'#4a2a0f',borda:'#ffc77a',texto:'#fff6e8'}:{bg:'#2a1050',borda:'#c9a6ff',texto:'#ffffff'});
     if(window.__arOK||this.xrModo==='ar')this.xrButton(this.xrModo==='ar'?'🥽 Voltar ao VR':'⬚ Ver na minha sala','xr:'+(this.xrModo==='ar'?'vr':'ar'),-1.18,.6-3*UI.passo,.5,false,{bg:'#0f3a4a',borda:'#7fd6ff',texto:'#ffffff'});
     this.xrButton('⚙ Controles','xr:menu:controles',-1.18,.6-(window.__arOK||this.xrModo==='ar'?4:3)*UI.passo,.5);
     const kAR=(window.__arOK||this.xrModo==='ar')?1:0;this.xrButton('🔊 Ouvir de novo','voice:repeat',-1.18,.6-(4+kAR)*UI.passo,.5);
@@ -172,9 +172,10 @@ Proto.xrSelect=function(ctrl){
   const r=xrSelectOriginal.call(this,ctrl);if(ui&&this.xr)this.buildXRUI();/* v4.7.7: redesenha para o botão apertado acender mesmo quando o comando não mexe na lateral */return r;
 };
 /* "Terra gigante": a Terra aberta cresce até 3,4 m à frente do aluno, à altura dos olhos, para ver as camadas como uma parede */
-const DENTRO_TXT={dentro:'A Terra agora tem mais de três metros. Chegue perto e olhe as camadas: a crosta fininha por fora, o manto enorme, o núcleo brilhando no centro. Aponte para qualquer camada para ouvir sobre ela.',fora:'De volta ao tamanho normal.'};
+const DENTRO_TXT={dentro:'A Terra agora tem mais de três metros. Chegue perto e olhe as camadas: a crosta fininha por fora, o manto enorme, o núcleo brilhando no centro. Aponte para qualquer camada para ouvir sobre ela.',fora:'De volta ao tamanho normal.',vulcao:'O vulcão agora tem mais de três metros. Chegue perto da câmara de magma, siga o conduto até a cratera e olhe as cinzas lá no alto. Aponte para qualquer parte para ouvir sobre ela.'};
+function nomeGigante(){const S=Lab.state;return S.tema==='vulcao'&&['vulcaoExp','erupcao','desafio'].includes(S.view)?'Vulcão':'Terra';}
 Proto.alternarDentro=function(){this.dentro=!this.dentro;this.anchor=null;this.xrZoom=1;if(this.copy)Lab.command('inspect:close');this.placeXR();this.buildXRUI();
-  const S=Lab.state;if(S.autoVoice)narrator.say(this.dentro?DENTRO_TXT.dentro:DENTRO_TXT.fora,this.dentro?'vr-dentro':'vr-fora');};
+  const S=Lab.state;const vul=nomeGigante()==='Vulcão';if(S.autoVoice)narrator.say(this.dentro?(vul?DENTRO_TXT.vulcao:DENTRO_TXT.dentro):DENTRO_TXT.fora,this.dentro?(vul?'vul-vr-dentro':'vr-dentro'):'vr-fora');};
 
 /* ---------- 4. Narração posicional ---------- */
 let posicional=null,ligado=false;

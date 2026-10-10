@@ -95,6 +95,8 @@ D.rocContext=[
  {name:'Rocha é feita de minerais',target:'ciclo',text:'Olhe o granito de perto: ele não é uma coisa só. Tem grãos brancos ou cinza de quartzo, grãos rosados de feldspato e lâminas brilhantes de mica. Mineral é o tijolo; rocha é a parede feita de vários tijolos. Cada mineral tem a sua cor, o seu brilho e a sua dureza.'},
  {name:'O ciclo das rochas',text:'E nenhuma rocha fica igual para sempre. O magma esfria e vira rocha ígnea; a chuva e o vento quebram a rocha em grãos, que se juntam e viram rocha sedimentar; o calor e a pressão transformam qualquer rocha em metamórfica; e, lá no fundo, tudo pode derreter e virar magma de novo. É o ciclo das rochas, que leva milhões de anos para dar uma volta.'}
 ];
+/* rochas com foto real (assets/rocha-<chave>.webp + -normal.webp); ausente = textura procedural */
+D.ROCHAS_FOTO={};
 D.CICLO={
  estados:{
   magma:{nome:'Magma',cor:'#ff7a20',text:'Rocha derretida, a mais de 700 graus, dentro da Terra. Daqui tudo começa.',audio:'roc-ciclo-magma'},

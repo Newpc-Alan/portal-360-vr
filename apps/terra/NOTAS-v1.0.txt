@@ -71,3 +71,9 @@ v1.2.2 (relevo real)
 - VR: a maquete fica como uma mesa, mais baixa e mais perto, para olhar de cima. Crédito do Copernicus DEM em Fontes.
 - Pipeline: scratchpad/dem/gen.py recorta o GeoTIFF, gera o PNG de alturas e a textura; os outros cinco vulcões entram com as fatias
   N40_00_E014 (Vesúvio), N37_00_E015 (Etna), N19_00_W156 (Kilauea), S07_00_E105 (Krakatoa) e S22_00_W047 (Poços de Caldas).
+
+v1.2.3 (relevo real em seis paradas)
+- Entram Kilauea (24 km: caldeira, campos de lava escuros e a encosta do Mauna Loa), Vesúvio (22 km, com a baía de Nápoles), Krakatoa
+  (20 km: as ilhas que sobraram da borda e o Anak no meio) e Poços de Caldas (40 km: o anel de serras da caldeira, alturas 3×).
+  Exagero vertical por maquete (D.TERRENOS.exag). Mar pintado onde a altura é zero.
+- Etna fica para a próxima: o cume (14,99° L) está na fatia N37_00_E014, não na E015; falta essa fatia para costurar as duas.

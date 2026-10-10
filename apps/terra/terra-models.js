@@ -318,7 +318,7 @@ function erupcaoCena(state){const g=new T.Group();const r=state.resultado;let v;
   else v=vulcao({lava:false,nuvem:2.4,piroclastos:'muitos',brilho:true,hitFn:()=>({type:'erup'})});
   g.add(v);const titulo=r?D.ERUPCAO.resultados[r].nome.toUpperCase():(state.pressao>=1?'ERUPÇÃO!':'PRESSÃO: '+Math.round((state.pressao||0)*100)+'%');textAt(g,titulo,0,-1.45,.4,r?4.2:3.2,r==='explosiva'?'#ff9a9a':'#ffe08a');g.userData.tick=v.userData.tick;return g;}
 /* ===== terreno real (Copernicus DEM 30 m): PNG de alturas (R alto, G baixo) + textura de cor gerada do próprio relevo ===== */
-function terrenoReal(key,opt={}){const g=new T.Group();const meta=D.TERRENOS[key];const L=opt.largura||5.6,seg=255,exag=opt.exagero||1.35;
+function terrenoReal(key,opt={}){const g=new T.Group();const meta=D.TERRENOS[key];const L=opt.largura||5.6,seg=255,exag=opt.exagero||meta.exag||1.35;
   const geo=new T.PlaneGeometry(L,L,seg,seg);geo.rotateX(-Math.PI/2);
   const m=new T.Mesh(geo,mat(0xffffff,{roughness:.95,map:textura('terreno-'+key+'.webp')}));m.userData.hit=opt.hit||{type:'inspect',key:'estratovulcao'};g.add(m);
   const escala=L/(meta.km*1000)*exag;

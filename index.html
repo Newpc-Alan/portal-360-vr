@@ -58,9 +58,9 @@ main{padding:22px clamp(18px,4vw,48px) 80px}
 .empty{display:none;grid-column:1/-1;padding:40px;text-align:center;color:var(--muted);border:1px dashed var(--border);border-radius:18px}
 .empty.show{display:block}
 .filter-box option{color:#000}
-.grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:14px}
-.card{position:relative;min-height:235px;border:1px solid var(--border);border-radius:22px;overflow:hidden;background:linear-gradient(160deg,var(--card2),var(--card));box-shadow:0 18px 42px rgba(0,0,0,.18)}
-.card.available{grid-column:span 2;min-height:250px}
+.grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:14px;align-items:stretch}
+.card{position:relative;min-height:260px;border:1px solid var(--border);border-radius:22px;overflow:hidden;background:linear-gradient(160deg,var(--card2),var(--card));box-shadow:0 18px 42px rgba(0,0,0,.18)}
+.card.available{min-height:260px}
 .card .media{position:absolute;inset:0;background:linear-gradient(180deg,rgba(7,18,34,.1),rgba(7,18,34,.75) 60%,rgba(7,18,34,.94) 100%), var(--bgimg) var(--bgpos,center)/cover no-repeat;}
 .card .glow{position:absolute;inset:0;background:radial-gradient(circle at 80% 30%,rgba(87,212,255,.18),transparent 24%),radial-gradient(circle at 25% 75%,rgba(255,255,255,.05),transparent 28%)}
 .card-content{position:relative;z-index:2;padding:18px 18px 16px;height:100%;display:flex;flex-direction:column}
@@ -74,8 +74,8 @@ main{padding:22px clamp(18px,4vw,48px) 80px}
 .card-actions a{text-decoration:none}
 footer{padding:24px clamp(18px,4vw,48px);border-top:1px solid var(--border);color:#8396a8;font-size:13px}
 .hide{display:none !important}
-@media(max-width:1100px){.filters{grid-template-columns:repeat(2,minmax(0,1fr))}.grid{grid-template-columns:1fr 1fr}.card.available{grid-column:span 2}}
-@media(max-width:760px){.topnav .navright{display:none}.filters{grid-template-columns:1fr}.grid{grid-template-columns:1fr}.card.available{grid-column:auto;min-height:280px}header.hero{min-height:380px}h1{max-width:500px}}
+@media(max-width:1100px){.filters{grid-template-columns:repeat(2,minmax(0,1fr))}.grid{grid-template-columns:1fr 1fr}}
+@media(max-width:760px){.topnav .navright{display:none}.filters{grid-template-columns:1fr}.grid{grid-template-columns:1fr}.card,.card.available{min-height:240px}header.hero{min-height:380px}h1{max-width:500px}}
 
 html.intro-fullscreen, body.intro-fullscreen{
   width:100%;height:100%;overflow:hidden;background:#000;
@@ -446,7 +446,7 @@ document.addEventListener('webkitfullscreenchange',function(){
    O app fica pré-carregado num iframe invisível (mesma origem). O clique aqui conta como gesto
    do usuário para o iframe, então a sessão WebXR abre na hora, sem segundo toque. */
 /* BUILD muda a cada publicação: força o navegador do óculos a buscar o index.html novo dos apps (o GitHub Pages ignora a query) */
-const BUILD='20261010e';
+const BUILD='20261010f';
 const appFrames={};
 /* os links dos cartões também levam a versão, para abrir direto sem cache antigo */
 document.querySelectorAll('.card-actions a[href^="apps/"]').forEach(a=>{const u=new URL(a.getAttribute('href'),location.href);u.searchParams.set('v',BUILD);a.setAttribute('href',u.pathname+u.search);});

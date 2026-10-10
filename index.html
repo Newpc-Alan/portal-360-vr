@@ -230,7 +230,7 @@ body.intro-fullscreen #btnSkipIntro{cursor:pointer}
         </div>
       </article>
 
-      <article class="card available experience-card" data-keywords="corpo humano biologia orgaos sistemas anatomia rins bexiga hormonios glandulas tireoide coracao pulmoes respiracao circulacao digestao sangue diafragma alveolos oxigenio esqueleto ossos musculos articulacoes movimento coluna nervoso cerebro encefalo medula nervos reflexo vr 3d" data-tema="biologia" data-serie="efi efii em" data-status="disponivel" style="--bgimg:url('assets/capa-corpo-humano-card.webp?v=2')">
+      <article class="card available experience-card" data-keywords="corpo humano biologia orgaos sistemas anatomia rins bexiga hormonios glandulas tireoide coracao pulmoes respiracao circulacao digestao sangue diafragma alveolos oxigenio esqueleto ossos musculos articulacoes movimento coluna nervoso cerebro encefalo medula nervos reflexo vr 3d" data-tema="biologia" data-serie="efi efii em" data-status="disponivel" style="--bgimg:url('assets/capa-corpo-humano-card.webp?v=3')">
         <div class="media"></div><div class="glow"></div>
         <div class="card-content">
           <span class="tag">Disponível agora</span>
@@ -244,7 +244,7 @@ body.intro-fullscreen #btnSkipIntro{cursor:pointer}
         </div>
       </article>
 
-      <article class="card available experience-card" data-keywords="terra geologia geociencias crosta manto nucleo camadas vulcoes terremotos placas tectonicas interior do planeta viagem ao centro kola ondas sismicas campo magnetico vr 3d" data-tema="geociencias" data-serie="efii em" data-status="disponivel" style="--bgimg:url('assets/capa-terra-card.webp?v=2')">
+      <article class="card available experience-card" data-keywords="terra geologia geociencias crosta manto nucleo camadas vulcoes terremotos placas tectonicas interior do planeta viagem ao centro kola ondas sismicas campo magnetico vr 3d" data-tema="geociencias" data-serie="efii em" data-status="disponivel" style="--bgimg:url('assets/capa-terra-card.webp?v=3')">
         <div class="media"></div><div class="glow"></div>
         <div class="card-content">
           <span class="tag">Disponível agora</span>
@@ -446,7 +446,7 @@ document.addEventListener('webkitfullscreenchange',function(){
    O app fica pré-carregado num iframe invisível (mesma origem). O clique aqui conta como gesto
    do usuário para o iframe, então a sessão WebXR abre na hora, sem segundo toque. */
 /* BUILD muda a cada publicação: força o navegador do óculos a buscar o index.html novo dos apps (o GitHub Pages ignora a query) */
-const BUILD='20261010c';
+const BUILD='20261010d';
 const appFrames={};
 /* os links dos cartões também levam a versão, para abrir direto sem cache antigo */
 document.querySelectorAll('.card-actions a[href^="apps/"]').forEach(a=>{const u=new URL(a.getAttribute('href'),location.href);u.searchParams.set('v',BUILD);a.setAttribute('href',u.pathname+u.search);});

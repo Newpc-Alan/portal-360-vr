@@ -77,3 +77,7 @@ v1.2.3 (relevo real em seis paradas)
   (20 km: as ilhas que sobraram da borda e o Anak no meio) e Poços de Caldas (40 km: o anel de serras da caldeira, alturas 3×).
   Exagero vertical por maquete (D.TERRENOS.exag). Mar pintado onde a altura é zero.
 - Etna fica para a próxima: o cume (14,99° L) está na fatia N37_00_E014, não na E015; falta essa fatia para costurar as duas.
+
+v1.2.4 (Etna)
+- Sétima maquete: Etna (34 km), costurando as fatias N37_00_E014 e E015 (o cume fica a 0,5 km da borda da E015). Cume nevado, lava
+  escura acima da linha das árvores, o Vale do Bove a leste e o mar Jônico no canto. Todas as sete paradas com relevo real.

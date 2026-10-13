@@ -200,7 +200,7 @@ class LabView {
  fit(){if(!this.model)return;const box=this.boxDe(this.model);if(box.isEmpty())return;const size=box.getSize(new T.Vector3()),aspect=this.stage.clientWidth/Math.max(this.stage.clientHeight,1),height=Math.max(size.y,2.4),width=Math.max(size.x,2.2);const vf=Math.tan(44*Math.PI/360);this.dist=Math.max(4.8,Math.max(height,width/aspect)/(2*vf)*1.25+size.z*.6);/* v4.7.6: modelos pequenos (encéfalo, alvéolo) enquadram mais perto */const c=box.getCenter(new T.Vector3());this.target.set(0,c.y,0);this.cameraPosition();}
  cameraPosition(){if(this.xr)return;const d=this.dist;this.camera.position.set(this.target.x+d*Math.cos(this.elev)*Math.sin(this.az),this.target.y+d*Math.sin(this.elev),this.target.z+d*Math.cos(this.elev)*Math.cos(this.az));this.camera.lookAt(this.target);this.camera.updateMatrixWorld(true);}
  resize(){if(this.xr)return;const w=Math.max(1,this.stage.clientWidth),h=Math.max(1,this.stage.clientHeight),p=Math.min(devicePixelRatio||1,S.quality==='low'?1:S.quality==='high'?2:1.5);if(w!==this.width||h!==this.height||p!==this.pixel){this.renderer.setPixelRatio(p);this.renderer.setSize(w,h,false);this.camera.aspect=w/h;this.camera.updateProjectionMatrix();this.width=w;this.height=h;this.pixel=p;}}
- center(){if(this.model)this.model.rotation.y=0;if(this.xr){this.anchor=null;this.placeXR();this.buildXRUI();}else{this.az=SEQ_VIEWS.includes(S.view)||S.view==='troca'?0:S.view==='movimento'?-1.25:.25;this.elev=.08;this.fit();}}
+ center(){if(this.model){this.model.rotation.y=0;this.model.rotation.x=0;}if(this.copy)this.copy.rotation.x=0;if(this.xr){this.anchor=null;this.placeXR();this.buildXRUI();}else{this.az=SEQ_VIEWS.includes(S.view)||S.view==='troca'?0:S.view==='movimento'?-1.25:.25;this.elev=.08;this.fit();}}
  zoom(delta){if(this.xr){this.xrZoom=Math.max(.65,Math.min(1.5,(this.xrZoom||1)+delta*.1));this.placeXR();}else{this.dist=Math.max(3.5,Math.min(40,this.dist*(delta>0?.86:1.16)));this.cameraPosition();}}
  pointerRay(e){const r=this.canvas.getBoundingClientRect();this.pointer.set((e.clientX-r.left)/r.width*2-1,-(e.clientY-r.top)/r.height*2+1);this.camera.updateMatrixWorld();this.scene.updateMatrixWorld(true);this.ray.setFromCamera(this.pointer,this.camera);return this.ray;}
  hits(ray=this.ray,exclude=null){return ray.intersectObjects(this.modelHitTargets||[],false).filter(h=>{let o=h.object;while(o){if(!o.visible||o===exclude)return false;o=o.parent;}return true;});}
@@ -301,10 +301,12 @@ class LabView {
   /* corte frontal acompanha o coração quando ele está na mão (v4.7) */
   if(V4&&S.view==='coracaoLab'&&S.v4.cut){const r=V4.runtime;const g=[...this.held.values()].find(o=>o.userData&&o.userData.v4organ);if(r&&r.plane&&g){g.updateMatrixWorld(true);r.plane.set(new T.Vector3(0,0,-1),(S.v4.cutPosition/100-.5)*1.0).applyMatrix4(g.matrixWorld);}}
   if(this.xrSession)for(const src of this.xrSession.inputSources){const gp=src.gamepad;if(!gp)continue;const x=gp.axes[2]||0,y=gp.axes[3]||0;const st=src.userData||(src.userData={});
-   if(src.handedness==='left'){/* esquerdo: altura (contínuo) e aproximar (vertical) */if(Math.abs(y)>.3)this.root.position.y=Math.max(.2,Math.min(2.6,this.root.position.y-y*dt*.3));}
-   else{/* direito: giro em passos de 30° e aproximar/afastar em passos de 25 cm */
-    if(Math.abs(x)>.6&&!st.snapX){st.snapX=true;const alvo=this.copy||this.model;if(alvo)alvo.rotation.y-=Math.sign(x)*Math.PI/6;}else if(Math.abs(x)<.3)st.snapX=false;
-    if(Math.abs(y)>.6&&!st.snapY){st.snapY=true;if(S.view==='viagem'){const v=S.viagem;v.u=Math.max(0,Math.min(1,v.u-Math.sign(y)*.08));v.andando=false;renderSidebar();}else if(this.anchor){this.root.position.addScaledVector(this.anchor.f,-Math.sign(y)*.25);}}else if(Math.abs(y)<.3)st.snapY=false;}
+   /* v4.7.11: os dois analógicos giram para os dois lados (contínuo); o direito para cima/baixo inclina o modelo (ver de cima/de baixo);
+      o esquerdo para cima/baixo ajusta a altura. Na Viagem do ar o direito avança/recua. */
+   const alvo=this.copy||this.model,zona=.2;if(alvo&&Math.abs(x)>zona)alvo.rotation.y+=x*dt*1.8;
+   if(src.handedness==='left'){if(Math.abs(y)>.3)this.root.position.y=Math.max(.2,Math.min(2.6,this.root.position.y-y*dt*.3));}
+   else if(S.view==='viagem'){if(Math.abs(y)>.6&&!st.snapY){st.snapY=true;const v=S.viagem;v.u=Math.max(0,Math.min(1,v.u-Math.sign(y)*.08));v.andando=false;renderSidebar();}else if(Math.abs(y)<.3)st.snapY=false;}
+   else if(alvo&&Math.abs(y)>zona){alvo.rotation.x=Math.max(-1.25,Math.min(1.25,alvo.rotation.x+y*dt*1.4));}
    const bA=gp.buttons[4]&&gp.buttons[4].pressed;if(bA&&!st.bA){st.bA=true;this.center();}else if(!bA)st.bA=false;
    const bB=gp.buttons[5]&&gp.buttons[5].pressed;if(bB&&!st.bB){st.bB=true;this.xrMenu=this.xrMenu==='raiz'?'missoes':'raiz';this.buildXRUI();}else if(!bB)st.bB=false;}}
  /* v4.6: modo 'vr' (imersivo) ou 'ar' (realidade mista / passthrough do Quest 3S). Trocar de modo encerra a sessão atual e abre a outra. */

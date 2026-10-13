@@ -52,3 +52,9 @@ O Sistema Solar vira uma maquete inclinada à frente do usuário (ao alcance das
 - Camada carregada depois do `index.html` que redefine funções do app: Comparar diâmetros, missão Dia e Noite, Aula guiada, Resumo exportável (JSON local), estações pelo Hemisfério Sul, Terra com nuvens/oceanos (`media/`), atmosferas, cometas com partículas, legendas, qualidade gráfica e console completo no VR (atividades sem sair do óculos, cópias seguráveis com o grip).
 - Narração passou a usar um player único (`new Audio`), sem áudio posicional. Correção aplicada: `S.narrSeq` iniciava indefinido e o fim do áudio não liberava o estado (botão ficava em "Parar" e a música abaixada).
 - A pasta `vendor/` continua obrigatória: o pacote v8.6 não a incluía.
+
+## Uso sem internet (todos os apps)
+- Corpo Humano e Terra: `sw.js` cache primeiro (versões publicadas por commit).
+- DNA e Sistema Solar (out/2026): `sw.js` **rede primeiro** para html/css/js (pacotes atualizados por fora aparecem na hora; sem rede ou após 4 s usa a cópia guardada) e cache persistente para os `.mp3`. O registro fica em `offline.js`, carregado no fim do `index.html`.
+- **Ao trocar o index.html por um pacote novo, mantenha** `<script defer src="offline.js"></script>` antes de `</body>` e rode `python3 tools/gerar-precache.py <app> <arquivo-de-dados>` (dna: `dna-data.js`; sistema-solar: `solar-v8.js`).
+- A VERSAO do `sw.js` leva um hash da casca: qualquer arquivo alterado renova a cópia guardada.

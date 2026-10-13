@@ -10,7 +10,8 @@ raiz=os.path.join(os.path.dirname(os.path.abspath(__file__)),'..','apps',APP);ra
 html=open(os.path.join(raiz,'index.html'),encoding='utf-8').read()
 casca=['./','index.html']+sorted(set(re.findall(r'(?:src|href)="((?!https?:|\.\./)[^"]+\.(?:js|css|png|webp|svg|ico)(?:\?v=[^"]*)?)"',html)))
 extras=['assets/logo.png','guia-professor.html']
-if os.path.isdir(os.path.join(raiz,'assets')):extras+=['assets/'+n for n in sorted(os.listdir(os.path.join(raiz,'assets'))) if n.endswith(('.webp','.png','.jpg'))]
+for pasta in ('assets','media','vendor'):
+    if os.path.isdir(os.path.join(raiz,pasta)):extras+=[pasta+'/'+n for n in sorted(os.listdir(os.path.join(raiz,pasta))) if n.endswith(('.webp','.png','.jpg','.js'))]
 for extra in extras:
     if extra not in casca and os.path.exists(os.path.join(raiz,extra)):casca.append(extra)
 def h(p):
@@ -27,6 +28,12 @@ for pasta,ext in [('modelos','.glb'),('audio','.mp3')]:
         pesados.append({'u':pasta+'/'+n,'h':h(p),'t':tam})
 # sincroniza a VERSAO do sw.js com a versão da aplicação (corpo-data.js)
 ver=re.search(r"version:'([^']+)'",open(os.path.join(raiz,DADOS),encoding='utf-8').read()).group(1)
+# a VERSAO do sw.js também carrega um hash da casca: qualquer arquivo alterado (inclusive pacotes atualizados por fora) renova a cache
+mc=hashlib.md5()
+for u in casca:
+    f=os.path.join(raiz,u.split('?')[0]) if u not in ('./',) else None
+    if f and os.path.isfile(f):mc.update(open(f,'rb').read())
+ver=ver+'-'+mc.hexdigest()[:6]
 swp=os.path.join(raiz,'sw.js');sw=open(swp,encoding='utf-8').read();sw2=re.sub(r"const VERSAO='[^']+'","const VERSAO='"+ver+"'",sw)
 if sw2!=sw:open(swp,'w',encoding='utf-8').write(sw2)
 out={'versao':ver,'gerado':__import__('datetime').datetime.now().strftime('%Y-%m-%d %H:%M'),'casca':casca,'pesados':pesados,'bytes':total}

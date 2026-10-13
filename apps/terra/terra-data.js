@@ -2,7 +2,7 @@
    Conteúdo: tema Camadas da Terra (Contexto, Explorar, Monte as camadas, Viagem ao centro, Desafio).
    Temas: Camadas da Terra, Placas tectônicas, Vulcões e Rochas e minerais. Textos no tom falado das narrações (chaves = nomes dos MP3 em audio/). */
 (function(){'use strict';
-const D={version:'1.4.0'};
+const D={version:'1.4.1'};
 D.temas=[
  {id:'camadas',nome:'Camadas da Terra',estuda:'Do que a Terra é feita por dentro.',exemplos:'Crosta, manto, núcleo externo e núcleo interno',modulo:'cam',atividades:['contexto','explorar','montar','viagem'],questoes:['liquida','kola','manto','magnetico','sismicas','interno','oceanica','temperatura']},
  {id:'placas',nome:'Placas tectônicas',estuda:'Por que a crosta se mexe, treme e se quebra.',exemplos:'Placas, limites, terremotos, vulcões e a deriva dos continentes',modulo:'pla',atividades:['placContexto','placasExp','limites','volta'],questoes:['placasMovem','andes','atlantico','sanandreas','brasil','pangeia']},
@@ -96,8 +96,8 @@ D.rocContext=[
  {name:'O ciclo das rochas',text:'E nenhuma rocha fica igual para sempre. O magma esfria e vira rocha ígnea; a chuva e o vento quebram a rocha em grãos, que se juntam e viram rocha sedimentar; o calor e a pressão transformam qualquer rocha em metamórfica; e, lá no fundo, tudo pode derreter e virar magma de novo. É o ciclo das rochas, que leva milhões de anos para dar uma volta.'}
 ];
 /* texturas das amostras (assets/rocha-<chave>.webp + -normal.webp), geradas por tools/gerar-texturas-rochas.py;
-   uma foto real com o mesmo nome substitui a textura sem mexer no código. rx/ry = repetições, relevo = força do normal map, reflexo = brilho do ambiente */
-D.ROCHAS_FOTO={granito:{roughness:.62,relevo:.9,reflexo:.55},basalto:{roughness:.85,relevo:1.1,reflexo:.3},obsidiana:{roughness:.06,relevo:.5,reflexo:1.4,metalness:.1},pomes:{roughness:1,relevo:1.4,reflexo:.15},arenito:{roughness:.95,relevo:1,reflexo:.2},calcario:{roughness:.85,relevo:1,reflexo:.3},carvao:{roughness:.4,relevo:.9,reflexo:.9},marmore:{roughness:.3,relevo:.5,reflexo:.8},ardosia:{roughness:.6,relevo:.8,reflexo:.5,rx:1.2,ry:1.2},quartzo:{roughness:.08,relevo:.4,reflexo:1.3,rx:1,ry:1},feldspato:{roughness:.42,relevo:.7,reflexo:.6,rx:1,ry:1},mica:{roughness:.18,relevo:.5,reflexo:1.2,metalness:.35,rx:1,ry:1}};
+   granito, basalto e obsidiana vêm de imagens (tools/fontes-texturas/terra) tratadas por tools/foto-para-textura.py; uma foto com o mesmo nome substitui a textura sem mexer no código. rx/ry = repetições, relevo = força do normal map, reflexo = brilho do ambiente */
+D.ROCHAS_FOTO={granito:{roughness:.62,relevo:.9,reflexo:.55},basalto:{roughness:.85,relevo:1.1,reflexo:.3},obsidiana:{roughness:.06,relevo:.6,reflexo:.9,metalness:.1},pomes:{roughness:1,relevo:1.4,reflexo:.15},arenito:{roughness:.95,relevo:1,reflexo:.2},calcario:{roughness:.85,relevo:1,reflexo:.3},carvao:{roughness:.4,relevo:.9,reflexo:.9},marmore:{roughness:.3,relevo:.5,reflexo:.8},ardosia:{roughness:.6,relevo:.8,reflexo:.5,rx:1.2,ry:1.2},quartzo:{roughness:.08,relevo:.4,reflexo:1.3,rx:1,ry:1},feldspato:{roughness:.42,relevo:.7,reflexo:.6,rx:1,ry:1},mica:{roughness:.18,relevo:.5,reflexo:1.2,metalness:.35,rx:1,ry:1}};
 D.CICLO={
  estados:{
   magma:{nome:'Magma',cor:'#ff7a20',text:'Rocha derretida, a mais de 700 graus, dentro da Terra. Daqui tudo começa.',audio:'roc-ciclo-magma'},

@@ -110,3 +110,6 @@ v1.3.4 (13/10/2026)
 
 v1.3.5 (13/10/2026)
 - Narração humana do tema Vulcões: 43 áudios. Total gravado: 123 de 169 (falta pacifica.mp3 e o lote Rochas).
+
+v1.3.6 (13/10/2026)
+- pacifica.mp3 gravado: tema Placas tectônicas completo (38/38). Total: 124 de 169; falta o lote Rochas e minerais (45).

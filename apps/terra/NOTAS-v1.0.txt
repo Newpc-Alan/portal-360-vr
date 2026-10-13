@@ -113,3 +113,6 @@ v1.3.5 (13/10/2026)
 
 v1.3.6 (13/10/2026)
 - pacifica.mp3 gravado: tema Placas tectônicas completo (38/38). Total: 124 de 169; falta o lote Rochas e minerais (45).
+
+v1.3.7 (13/10/2026)
+- Narração humana do tema Rochas e minerais: 44 de 45 (falta roc-vr-dentro.mp3). Total: 168 de 169.

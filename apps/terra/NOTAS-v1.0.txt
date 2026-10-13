@@ -97,3 +97,7 @@ v1.3.0 (tema Rochas e minerais · 10/10/2026)
 v1.3.1 (celular)
 - Menu de temas no celular refeito: temas em fichas que quebram linha e as missões do tema ativo numa linha rolável (antes, cada
   tema virava uma coluna alta e os últimos ficavam cortados). Mesma correção no Corpo Humano (v4.7.10) e etapas do DNA ajustadas.
+
+v1.3.2 (13/10/2026)
+- Narração humana do tema Camadas da Terra: 43 áudios gravados por Alan, normalizados (-16 LUFS, mono, 64 kbps, silêncio aparado) em audio/.
+- Faltam os lotes Placas (38), Vulcões (43) e Rochas (45); até chegarem, esses temas usam a voz do navegador.

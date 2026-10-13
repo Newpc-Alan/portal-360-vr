@@ -1,0 +1,123 @@
+<!DOCTYPE html><html lang="pt-BR"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Guia do professor · Terra por Dentro · Portal 360º VR</title><style>
+:root{--verde:#1a6b2a;--azul:#0f2c4a;--cinza:#5b6b7a;--linha:#d7e4da;--fundo:#f3f7f4;--texto:#17202a}
+*{box-sizing:border-box}
+body{margin:0;font:14px/1.6 "Segoe UI",Roboto,Arial,sans-serif;color:var(--texto);background:#e9edf0}
+.folha{max-width:210mm;margin:0 auto;background:#fff;padding:16mm 16mm 20mm;box-shadow:0 8px 40px #0002}
+.cab{display:flex;align-items:center;gap:16px;border-bottom:3px solid var(--verde);padding-bottom:12px;margin-bottom:18px}
+.cab img{width:56px;height:56px;object-fit:contain}.cab .k{font-size:10px;letter-spacing:2.4px;color:var(--verde);font-weight:700}
+.cab h1{margin:2px 0 0;font-size:26px;color:var(--azul);letter-spacing:-.5px}.cab small{display:block;color:var(--cinza);font-size:11px}
+.barra{display:flex;gap:8px;justify-content:flex-end;margin:0 0 14px}.barra a,.barra button{font:inherit;font-size:12px;padding:7px 12px;border-radius:8px;border:1px solid var(--linha);background:#fff;color:var(--azul);cursor:pointer;text-decoration:none}.barra .pri{background:var(--verde);border-color:var(--verde);color:#fff;font-weight:600}
+h2{font-size:18px;color:var(--azul);border-left:4px solid var(--verde);padding-left:10px;margin:28px 0 10px}
+h3{font-size:14px;color:var(--azul);margin:18px 0 6px}
+p{margin:8px 0}.sub{color:var(--cinza);font-size:12px}
+table{width:100%;border-collapse:collapse;margin:10px 0 14px;font-size:12px}
+th{background:var(--azul);color:#fff;text-align:left;padding:7px 8px;font-weight:600;font-size:11px}
+td{padding:7px 8px;border-bottom:1px solid #e3e9ee;vertical-align:top}
+.cod{font-family:ui-monospace,Consolas,monospace;font-size:11px;color:var(--verde);font-weight:700;white-space:nowrap}
+.caixa{background:var(--fundo);border:1px solid var(--linha);border-radius:10px;padding:12px 14px;margin:12px 0}
+.caixa b{color:var(--azul)}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.plano{break-inside:avoid;border:1px solid var(--linha);border-radius:12px;padding:14px 16px;margin:14px 0}
+.plano h3{margin-top:0;font-size:16px}.plano .meta{display:flex;flex-wrap:wrap;gap:6px 16px;font-size:11px;color:var(--cinza);margin-bottom:8px}
+.plano .meta b{color:var(--azul)}
+ol,ul{padding-left:20px;margin:6px 0}li{margin:4px 0}
+.tempo{display:inline-block;min-width:52px;font-weight:700;color:var(--verde)}
+.nota{font-size:11px;color:var(--cinza)}
+.rod{margin-top:24px;padding-top:10px;border-top:1px solid var(--linha);font-size:10px;color:#6b7a88;line-height:1.5}
+@media print{@page{size:A4;margin:14mm}body{background:#fff}.folha{box-shadow:none;padding:0;max-width:none}.barra{display:none}h2{break-after:avoid}.plano,table,.caixa{break-inside:avoid}}
+@media (max-width:640px){.folha{padding:18px 14px}.grid2{grid-template-columns:1fr}}
+</style></head>
+<body>
+<div class="folha">
+<header class="cab"><img src="assets/logo.png" alt=""><div><div class="k">PORTAL 360º VR · TERRA POR DENTRO</div><h1>Guia do professor</h1><small>Mapeamento BNCC, planos de aula por tema e sequência didática · versão 1.3 · Portal do Educador · NEWPC Tecnologia</small></div></header>
+<div class="barra"><a href="./">← Abrir a aplicação</a><button class="pri" data-action="imprimir">Imprimir / salvar em PDF</button></div>
+
+<h2>1. O que é e como usar em sala</h2>
+<p>A Terra por Dentro é um laboratório de geociências em 3D e realidade virtual: o aluno abre o planeta ao meio, desce até o núcleo, acompanha o movimento das placas, provoca erupções e identifica rochas. São <b>4 temas</b>, <b>20 missões</b> e <b>55 fichas narradas</b> por voz humana, organizados sempre na mesma sequência: <b>Contexto</b> (localizar) → <b>Explorar</b> (fichas) → <b>missão prática</b> (montar, decidir, experimentar) → <b>Volta ao mundo ou Desafio</b> (aplicar em casos reais). Funciona em três formatos:</p>
+<table><thead><tr><th>Formato</th><th>Como fica a aula</th><th>Equipamento</th></tr></thead><tbody>
+<tr><td><b>Lousa ou projetor</b> (professor conduz)</td><td>O professor gira e corta o planeta, a turma responde em voz alta. Ideal para abrir o tema e para o Desafio como quiz coletivo.</td><td>Lousa digital, TV ou projetor + um computador</td></tr>
+<tr><td><b>Chromebook em duplas</b></td><td>Cada dupla faz a Aula guiada do tema no próprio ritmo; o relatório do professor sai por dupla. Ideal para as missões práticas.</td><td>1 Chromebook a cada 2 alunos; fone opcional</td></tr>
+<tr><td><b>Estação VR com rodízio</b></td><td>Enquanto 4 a 8 alunos exploram nos óculos (8 a 10 min cada), o restante trabalha no Chromebook ou na lousa. Ver seção 5.</td><td>Óculos VR autônomo (navegador do óculos, link HTTPS)</td></tr>
+</tbody></table>
+<div class="caixa"><b>Funciona sem internet.</b> Depois da primeira abertura, modelos e áudios ficam guardados no dispositivo (cerca de 18 MB). Um selo no rodapé indica "Pronto para uso sem internet".</div>
+
+<h2>2. Mapeamento BNCC por tema</h2>
+<p class="sub">Habilidades de Ciências da Natureza do Ensino Fundamental, com indicação para o Ensino Médio. O relatório do professor registra as evidências de cada missão.</p>
+<table><thead><tr><th>Tema</th><th>Missões</th><th>Habilidades BNCC</th><th>O que o aluno evidencia</th></tr></thead><tbody>
+<tr><td><b>Camadas da Terra</b></td><td>Contexto · Explorar · Monte as camadas · Viagem ao centro · Desafio</td><td><span class="cod">EF06CI11</span> camadas que estruturam o planeta e suas características</td><td>Nomeia e ordena crosta, manto, núcleo externo e interno; relaciona profundidade, temperatura e estado físico; explica como as ondas sísmicas revelam o interior.</td></tr>
+<tr><td><b>Placas tectônicas</b></td><td>Contexto · Explorar · Que limite é esse? · Volta ao mundo · Desafio</td><td><span class="cod">EF07CI15</span> vulcões, terremotos e tsunamis pelo modelo das placas, e sua rara ocorrência no Brasil<br><span class="cod">EF07CI16</span> formato das costas brasileira e africana pela deriva dos continentes</td><td>Diferencia limites divergente, convergente e transformante; localiza o Anel de Fogo; explica por que o Brasil, no meio da placa Sul-Americana, quase não tem terremotos fortes.</td></tr>
+<tr><td><b>Vulcões</b></td><td>Contexto · Explorar · Laboratório de erupção · Volta ao mundo · Desafio</td><td><span class="cod">EF07CI15</span></td><td>Identifica câmara, conduto, cratera e cone; relaciona magma fluido ou viscoso e quantidade de gás ao tipo de erupção; diferencia magma e lava.</td></tr>
+<tr><td><b>Rochas e minerais</b></td><td>Contexto · Explorar · Ciclo das rochas · Que rocha é essa? · Desafio</td><td><span class="cod">EF06CI12</span> tipos de rocha e formação de fósseis em rochas sedimentares</td><td>Classifica rochas ígneas, sedimentares e metamórficas; percorre o ciclo das rochas; explica por que os fósseis aparecem em rochas sedimentares.</td></tr>
+<tr><td><b>Ensino Médio</b> (aprofundamento)</td><td>Qualquer tema, com o nível Ensino Médio em Ajustes</td><td><span class="cod">EM13CNT201</span> modelos e teorias sobre a evolução da Terra em diferentes épocas</td><td>Compara a deriva continental de Wegener (1912) com a tectônica de placas; discute como modelos científicos mudam com novas evidências.</td></tr>
+</tbody></table>
+<p class="nota">Códigos conforme a BNCC (Ciências da Natureza). O 6º ano trabalha a estrutura da Terra e as rochas; o 7º ano, placas, fenômenos naturais e deriva continental. Confirme com o currículo da rede. O modelo é didático: as espessuras das camadas e o relevo dos vulcões estão em escala ajustada para leitura em sala.</p>
+
+<h2>3. Planos de aula por tema (50 minutos)</h2>
+<p class="sub">Estrutura comum: abertura (5) · Contexto na lousa (8) · Explorar em duplas (12) · missão prática (15) · Desafio e fechamento (10).</p>
+
+<div class="plano"><h3>Camadas da Terra · O que existe debaixo dos nossos pés?</h3>
+<div class="meta"><span><b>Ano:</b> 6º</span><span><b>BNCC:</b> EF06CI11</span><span><b>Missões:</b> Contexto, Explorar, Monte as camadas, Viagem ao centro</span></div>
+<ol><li><span class="tempo">5 min</span>Pergunte: "Se cavássemos um buraco aqui na escola, até onde chegaríamos?" Anote as hipóteses.</li>
+<li><span class="tempo">8 min</span>Lousa: Contexto, da Terra vista do espaço ao corte. Mostre como a crosta é fina perto do resto.</li>
+<li><span class="tempo">12 min</span>Duplas: Explorar, pelo menos quatro camadas. Cada dupla anota profundidade e estado (sólido ou líquido).</li>
+<li><span class="tempo">15 min</span>Monte as camadas (ordem de fora para dentro) e Viagem ao centro: os 6.371 km em sete trechos.</li>
+<li><span class="tempo">10 min</span>Desafio coletivo; volte às hipóteses: o poço mais fundo já feito tem só 12 quilômetros.</li></ol>
+<p><b>Avaliação:</b> ordem das camadas sem erros; viagem concluída; situações do Desafio. <b>Gancho:</b> se ninguém foi lá, como sabemos? (ondas sísmicas).</p></div>
+
+<div class="plano"><h3>Placas tectônicas · Por que a Terra treme e os continentes se movem?</h3>
+<div class="meta"><span><b>Ano:</b> 7º</span><span><b>BNCC:</b> EF07CI15 · EF07CI16</span><span><b>Missões:</b> Contexto, Explorar, Que limite é esse?, Volta ao mundo</span></div>
+<ol><li><span class="tempo">5 min</span>Mostre um mapa-múndi e pergunte: "O contorno da América do Sul lembra o de algum outro continente?"</li>
+<li><span class="tempo">8 min</span>Lousa: Contexto, a casca quebrada em placas. Destaque a placa Sul-Americana e o Anel de Fogo.</li>
+<li><span class="tempo">12 min</span>Duplas: Explorar, pelo menos três placas, registrando se são oceânicas, continentais ou mistas.</li>
+<li><span class="tempo">15 min</span>Que limite é esse? (as três maquetes) e Volta ao mundo tectônica, com seis lugares reais.</li>
+<li><span class="tempo">10 min</span>Desafio; feche com a pergunta: por que no Brasil quase não há terremotos fortes?</li></ol>
+<p><b>Avaliação:</b> três limites identificados; seis paradas da volta ao mundo; situações do Desafio. <b>Ensino Médio:</b> debate Wegener × tectônica de placas (EM13CNT201).</p></div>
+
+<div class="plano"><h3>Vulcões · De onde vem o fogo que sai da Terra?</h3>
+<div class="meta"><span><b>Ano:</b> 7º</span><span><b>BNCC:</b> EF07CI15</span><span><b>Missões:</b> Contexto, Explorar, Laboratório de erupção, Volta ao mundo</span></div>
+<ol><li><span class="tempo">5 min</span>Pergunte: "Magma e lava são a mesma coisa?" Registre as respostas sem corrigir.</li>
+<li><span class="tempo">8 min</span>Lousa: Contexto, os vulcões ativos no globo e as três origens do magma.</li>
+<li><span class="tempo">12 min</span>Duplas: Explorar o vulcão aberto ao meio (câmara, conduto, cratera, cone e mais duas fichas).</li>
+<li><span class="tempo">15 min</span>Laboratório de erupção: cada dupla testa pelo menos duas combinações de magma e gás e registra o resultado. Depois, Volta ao mundo com o relevo real de sete vulcões.</li>
+<li><span class="tempo">10 min</span>Desafio; feche com Pompeia e com Poços de Caldas, a cratera de um vulcão antigo no Brasil.</li></ol>
+<p><b>Avaliação:</b> combinações testadas no laboratório; relação entre viscosidade, gás e tipo de erupção; situações do Desafio.</p></div>
+
+<div class="plano"><h3>Rochas e minerais · De que é feito o chão, e como ele muda?</h3>
+<div class="meta"><span><b>Ano:</b> 6º</span><span><b>BNCC:</b> EF06CI12</span><span><b>Missões:</b> Contexto, Explorar, Ciclo das rochas, Que rocha é essa?</span></div>
+<ol><li><span class="tempo">5 min</span>Peça que os alunos tragam ou observem pedras do pátio. "Todas são iguais? Como se formaram?"</li>
+<li><span class="tempo">8 min</span>Lousa: Contexto, as três famílias de rochas e os minerais que as formam.</li>
+<li><span class="tempo">12 min</span>Duplas: Explorar a bancada, pelo menos uma rocha de cada família e dois minerais.</li>
+<li><span class="tempo">15 min</span>Ciclo das rochas (os cinco estados) e Que rocha é essa? (cinco amostras misteriosas com pistas).</li>
+<li><span class="tempo">10 min</span>Desafio; compare as pedras do pátio com as amostras: a qual família pertencem?</li></ol>
+<p><b>Avaliação:</b> ciclo completo; amostras identificadas com poucas pistas; situações do Desafio. <b>Gancho:</b> por que os fósseis estão quase sempre em rochas sedimentares?</p></div>
+
+<h2>4. Sequência didática · "A Terra por dentro e por fora" (5 aulas, 6º e 7º anos)</h2>
+<table><thead><tr><th>Aula</th><th>Tema e pergunta</th><th>Na aplicação</th><th>Produto do aluno</th></tr></thead><tbody>
+<tr><td>1</td><td><b>A estrutura do planeta</b> · Do que a Terra é feita?</td><td>Camadas: Contexto, Explorar, Monte as camadas.</td><td>Desenho em corte com as camadas e suas profundidades</td></tr>
+<tr><td>2</td><td><b>Viagem ao centro</b> · Como sabemos o que nunca vimos?</td><td>Viagem ao centro; fichas de ondas sísmicas e do poço de Kola.</td><td>Diário de bordo da viagem, trecho por trecho</td></tr>
+<tr><td>3</td><td><b>A casca em movimento</b> · Por que a Terra treme?</td><td>Placas: Que limite é esse?, Volta ao mundo; ficha da Pangeia.</td><td>Mapa com placas, limites e o Anel de Fogo</td></tr>
+<tr><td>4</td><td><b>Fogo que vem de dentro</b> · Toda erupção é igual?</td><td>Vulcões: Laboratório de erupção, Volta ao mundo.</td><td>Tabela "magma × gás × tipo de erupção"</td></tr>
+<tr><td>5</td><td><b>O chão que muda</b> · Uma rocha vira outra?</td><td>Rochas: Ciclo das rochas, Que rocha é essa?; Desafios dos quatro temas; Relatório do professor.</td><td>Esquema do ciclo das rochas + relatório impresso</td></tr>
+</tbody></table>
+
+<h2>5. Rodízio na estação VR</h2>
+<div class="caixa"><b>Turma de 30 alunos, 8 óculos, 50 minutos</b><br>4 grupos de 7 a 8 alunos; cada grupo passa 10 minutos nos óculos e 40 nas outras estações (Chromebook em duplas, lousa com o professor, registro no caderno). No óculos, as experiências mais marcantes são a <b>Viagem ao centro</b> em primeira pessoa, o <b>vulcão gigante</b> e a <b>bancada de rochas em escala real</b>. Um aluno-monitor por grupo ajuda a colocar o óculos; o professor acompanha pela lousa (modo 3D) o mesmo conteúdo.</div>
+<div class="grid2"><div class="caixa"><b>Antes da aula</b><br>Abra a aplicação em cada dispositivo uma vez (download de cerca de 18 MB) e confira "Pronto para uso sem internet". Nos óculos: navegador do óculos, link em HTTPS, botão "Entrar em VR". Teste o som.</div>
+<div class="caixa"><b>Controles no VR</b><br>Analógicos para os lados giram o planeta; o direito para cima ou para baixo inclina para mostrar os polos; o esquerdo ajusta a altura. Gatilho abre a ficha; botão A centraliza. Em Ajustes, use "Novo aluno" para reiniciar o registro.</div></div>
+
+<h2>6. Avaliação com o relatório do professor</h2>
+<p>Ao final, <b>Resumo → Relatório do professor</b> gera uma página com escola, turma, aluno ou grupo, missões concluídas por tema, tentativas, pistas e o resultado do Desafio. Pode ser impresso, salvo em PDF ou arquivado em HTML. Os dados ficam só no dispositivo.</p>
+<table><thead><tr><th>O que ler</th><th>Como interpretar</th></tr></thead><tbody>
+<tr><td>Missões práticas</td><td>Monte as camadas e o Ciclo das rochas mostram se o aluno organiza a sequência; o Laboratório de erupção mostra se ele testa hipóteses (várias combinações) ou só repete uma.</td></tr>
+<tr><td>Tentativas incorretas e pistas</td><td>Não penalizam. Erros repetidos na mesma posição indicam a etapa a retomar em aula.</td></tr>
+<tr><td>Situações do Desafio</td><td>A opção escolhida quando errou revela a concepção alternativa mais comum (ex.: "o centro da Terra é todo líquido", "lava e magma são diferentes materiais").</td></tr>
+<tr><td>Aula guiada concluída</td><td>O aluno percorreu todas as etapas na ordem; bom indicador para a nota de participação.</td></tr>
+</tbody></table>
+
+<footer class="rod">Terra por Dentro · Portal 360º VR · Portal do Educador · NEWPC Tecnologia. Superfície: imagens Blue Marble da NASA (domínio público). Relevo dos vulcões: Copernicus DEM GLO-30 (© DLR e Airbus, fornecido pela ESA no âmbito do Copernicus). Conteúdo elaborado para o Ensino Fundamental e Médio com revisão docente recomendada. Códigos da BNCC conforme a Base Nacional Comum Curricular (Ciências da Natureza).</footer>
+</div>
+<script>
+document.body.addEventListener('click',function(e){var b=e.target.closest('[data-action="imprimir"]');if(b)window.print();});
+</script>
+</body>
+</html>

@@ -119,3 +119,7 @@ v1.3.7 (13/10/2026)
 
 v1.3.8 (13/10/2026)
 - roc-vr-dentro.mp3 gravado: narração humana completa nos 4 temas (169 de 169 áudios).
+
+v1.3.9 (13/10/2026)
+- Relatório do professor (núcleo comum tools/relatorio-core.js): por tema, missões, Desafio situação por situação, impressão/PDF e HTML, no Resumo.
+- Guia do professor (guia-professor.html): BNCC por tema, 4 planos de aula de 50 min, sequência didática de 5 aulas, rodízio VR e leitura do relatório.

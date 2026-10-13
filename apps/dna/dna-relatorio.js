@@ -67,7 +67,7 @@ window.PDERelatorio={ligar,html,imprimir,baixar,abrir};
 /* ---------- adaptador do DNA Imersivo ---------- */
 (function(){'use strict';
 const SKILL={componentes:'Componentes do nucleotídeo',replicacao:'Replicação semiconservativa',orientacao:'Orientação das fitas (5′ e 3′)',pareamento:'Pareamento de bases'};
-window.PDERelatorio.ligar({app:'DNA Imersivo',arquivo:'DNA',chave:'pde_dna_turma',logo:'assets/logo.png',dialogo:'#summaryDialog',antes:'#summaryDialog > .button-row',
+window.PDERelatorio.ligar({guia:'guia-professor.html',app:'DNA Imersivo',arquivo:'DNA',chave:'pde_dna_turma',logo:'assets/logo.png',dialogo:'#summaryDialog',antes:'#summaryDialog > .button-row',
  creditos:'Estrutura molecular 1BNA: RCSB Protein Data Bank.',
  dados(){const L=window.DNALab,D=window.DNA_DATA,S=L.state,r=L.report(),c=S.completed||[];
   const par=S.pair||{answers:[],sequence:[]},feitosPar=(par.answers||[]).filter(Boolean).length,totPar=(par.sequence||[]).length;

@@ -441,6 +441,6 @@ setupXRActivity=function(){setupN();if(NARR_VISTAS[chaveVistaAtual()])xrButton('
 const acaoN=acaoBotaoVR;
 acaoBotaoVR=function(a){if(a==='narrarVista'){if(narrAtual===NARR_VISTAS[chaveVistaAtual()].key)narrParar();else narrarVista();return;}if(a.startsWith('eclipse:')){acaoN(a);return;}acaoN(a);};
 
-window.PortalSolarV8={version:'8.9',state:S,seasons,daylight,setDay,beginMission,checkMission,finishMission,enterView:entrarVista,exportSummary,setupXRActivity,resetStudent};
+window.PortalSolarV8={version:'8.9.1',state:S,seasons,daylight,setDay,beginMission,checkMission,finishMission,enterView:entrarVista,exportSummary,setupXRActivity,resetStudent};
 entrarVista(S.views.includes(estado.vista)?estado.vista:'sistema');renderer.setAnimationLoop(animate);
 })();

@@ -66,7 +66,7 @@ window.PDERelatorio={ligar,html,imprimir,baixar,abrir};
 
 /* ---------- adaptador do Sistema Solar VR ---------- */
 (function(){'use strict';
-window.PDERelatorio.ligar({app:'Sistema Solar VR',arquivo:'SistemaSolar',chave:'pde_solar_turma',logo:'media/logo.png',dialogo:'#v8Summary',dentro:'#v8Summary > div',observar:true,
+window.PDERelatorio.ligar({guia:'guia-professor.html',app:'Sistema Solar VR',arquivo:'SistemaSolar',chave:'pde_solar_turma',logo:'media/logo.png',dialogo:'#v8Summary',dentro:'#v8Summary > div',observar:true,
  dados(){const P=window.PortalSolarV8,S=P.state,B=(typeof BADGES!=='undefined')?BADGES:{},C=(typeof CORPOS!=='undefined')?CORPOS:{},Q=(typeof quiz!=='undefined')?quiz:{acertos:0,total:0};
   const vis=[...(S.visited||[])],ativ=S.activities||new Set();
   const atividades=Object.keys(B).map(k=>({label:B[k],feito:ativ.has(k),detalhe:''}));

@@ -116,3 +116,6 @@ v1.3.6 (13/10/2026)
 
 v1.3.7 (13/10/2026)
 - Narração humana do tema Rochas e minerais: 44 de 45 (falta roc-vr-dentro.mp3). Total: 168 de 169.
+
+v1.3.8 (13/10/2026)
+- roc-vr-dentro.mp3 gravado: narração humana completa nos 4 temas (169 de 169 áudios).

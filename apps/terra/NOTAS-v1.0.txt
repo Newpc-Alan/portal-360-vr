@@ -101,3 +101,6 @@ v1.3.1 (celular)
 v1.3.2 (13/10/2026)
 - Narração humana do tema Camadas da Terra: 43 áudios gravados por Alan, normalizados (-16 LUFS, mono, 64 kbps, silêncio aparado) em audio/.
 - Faltam os lotes Placas (38), Vulcões (43) e Rochas (45); até chegarem, esses temas usam a voz do navegador.
+
+v1.3.3 (13/10/2026)
+- Narração humana do tema Placas tectônicas: 37 de 38 áudios (falta pacifica.mp3, que segue na voz do navegador).

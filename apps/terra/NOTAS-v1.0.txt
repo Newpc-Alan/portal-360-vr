@@ -107,3 +107,6 @@ v1.3.3 (13/10/2026)
 
 v1.3.4 (13/10/2026)
 - VR: os dois analógicos giram o modelo para os dois lados, de forma contínua (antes: só o direito, em passos de 30°); analógico direito para cima/baixo inclina o planeta (polos e eixo, limite de ±72°); esquerdo para cima/baixo segue ajustando a altura; botão A também zera a inclinação. Na Viagem ao centro o direito segue avançando/recuando o trecho. Ajuda dos controles atualizada.
+
+v1.3.5 (13/10/2026)
+- Narração humana do tema Vulcões: 43 áudios. Total gravado: 123 de 169 (falta pacifica.mp3 e o lote Rochas).

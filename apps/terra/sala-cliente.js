@@ -7,7 +7,7 @@
    Arquivo-mestre: assets/sala/sala-cliente.js (cópia idêntica em cada apps/<app>/). Regra 9: sem onclick inline. */
 (function(){'use strict';
 if(window.Portal360Sala)return;
-const VERSAO='1.0.1';
+const VERSAO='1.0.2';
 /* endereço do banco: preenchido quando o projeto Firebase da sala for criado (sem barra no fim) */
 const DB_PADRAO='https://portal360-sala-default-rtdb.firebaseio.com';
 const q=new URLSearchParams(location.search);
@@ -138,6 +138,10 @@ document.addEventListener('click',async e=>{const b=e.target.closest('[data-acti
   else if(ac==='p360s-entrar'){const cod=(dlg.querySelector('#p360s-cod').value||'').replace(/\D/g,''),num=dlg.querySelector('#p360s-num').value,er=dlg.querySelector('#p360s-erro');
     if(cod.length!==4){er.textContent='O código tem 4 números.';return;}
     er.textContent='Procurando a sala…';const s=await rede('GET','salas/'+cod+'/aberta');if(s!==true){er.textContent='Sala '+cod+' não encontrada. Confira o código na lousa.';return;}
+    /* número já usado por outro óculos ativo nesta sala? sugere o próximo livre */
+    const oc=await rede('GET','salas/'+cod+'/oculos')||{};const ativo=o=>o&&!o.saindo&&typeof o.visto==='number'&&Math.abs(Date.now()-o.visto)<60000;
+    const usados=new Set(Object.entries(oc).filter(([id,o])=>id!==ID&&ativo(o)).map(([,o])=>String(o.rotulo||'').replace(/\D/g,'')));
+    if(usados.has(num)){let n=1;while(usados.has(String(n))&&n<40)n++;const sel=dlg.querySelector('#p360s-num');sel.value=String(n);er.textContent='O Óculos '+num+' já está nesta sala. Sugeri o Óculos '+n+': confira a etiqueta e toque em Entrar.';return;}
     LS.set('portal360_oculos_num',num);await entrar(cod,'Óculos '+num);fecharDialogo();}
 },true);
 document.addEventListener('keydown',e=>{if(dlg&&e.key==='Enter'){const b=dlg.querySelector('[data-action="p360s-entrar"]');if(b)b.click();}});

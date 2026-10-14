@@ -25,6 +25,12 @@ window.alternarVR=function(){try{return Promise.resolve(view.toggleVR());}catch(
 window.irCatalogo=function(){Lab.command('catalog');};
 window.PortalDNA={versao:'2.1.0',get emVR(){return !!view.xr;}};
 
+
+/* ---------- Portal de entrada (abertura cinematográfica ao entrar no VR e no 3D) ---------- */
+if(window.PortalEntrada)window.PortalEntrada.configurar({titulo:'DNA Imersivo',cor:'#57d4ff',logo:'assets/logo.png',auto3D:!EMBED,obter:()=>({renderer:view.renderer,scene:view.scene,camera:view.camera})});
+const depoisAbertura=(fn,ms)=>{if(window.PortalEntrada)window.PortalEntrada.depois(fn,ms);else setTimeout(fn,ms||0);};
+const abertura3D=()=>{if(window.PortalEntrada)window.PortalEntrada.tocar3D();};
+
 /* ---------- 2. Tela de entrada (?vr=1) ---------- */
 function mensagem(txt){const f=document.getElementById('feedback');if(!f)return;f.hidden=false;f.className='feedback warning';f.textContent=txt;}
 if(q.get('vr')==='1'){
@@ -34,7 +40,7 @@ if(q.get('vr')==='1'){
     ov.innerHTML='<div class="vrgate-box"><img src="assets/logo.png" alt=""><div class="vrgate-t">DNA Imersivo</div><div class="vrgate-s">Coloque o óculos e toque para começar</div><button type="button" data-action="vr-entrar">🥽 Entrar em VR</button><button type="button" class="sec" data-action="vr-3d">Explorar em 3D</button></div>';
     document.body.appendChild(ov);
     ov.addEventListener('click',e=>{const b=e.target.closest('[data-action]');if(!b)return;
-      if(b.dataset.action==='vr-entrar'){window.alternarVR().finally(()=>ov.remove());}else ov.remove();});
+      if(b.dataset.action==='vr-entrar'){window.alternarVR().finally(()=>ov.remove());}else{ov.remove();abertura3D();}});
   };
   if(!window.isSecureContext||!navigator.xr)semVR();
   else navigator.xr.isSessionSupported('immersive-vr').then(ok=>ok?mostrarEntrada():semVR()).catch(semVR);

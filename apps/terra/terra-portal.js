@@ -25,6 +25,12 @@ window.alternarVR=function(modo){try{return Promise.resolve(view.toggleVR(modo||
 window.irCatalogo=function(){Lab.command('catalog');};
 window.PortalTerra={versao:'1.0.0',get emVR(){return !!view.xr;}};
 
+
+/* ---------- Portal de entrada (abertura cinematográfica ao entrar no VR e no 3D) ---------- */
+if(window.PortalEntrada)window.PortalEntrada.configurar({titulo:'Terra por Dentro',cor:'#ff8a3d',logo:'assets/logo.png',auto3D:!EMBED,obter:()=>({renderer:view.renderer,scene:view.scene,camera:view.camera})});
+const depoisAbertura=(fn,ms)=>{if(window.PortalEntrada)window.PortalEntrada.depois(fn,ms);else setTimeout(fn,ms||0);};
+const abertura3D=()=>{if(window.PortalEntrada)window.PortalEntrada.tocar3D();};
+
 /* ---------- 2. Tela de entrada (?vr=1) ---------- */
 function mensagem(txt){const f=document.getElementById('feedback');if(!f)return;f.hidden=false;f.className='feedback warning';f.textContent=txt;}
 if(q.get('vr')==='1'){
@@ -37,7 +43,7 @@ if(q.get('vr')==='1'){
     ov.innerHTML='<div class="vrgate-box"><img src="assets/logo.png" alt=""><div class="vrgate-t">Terra por Dentro</div><div class="vrgate-s">Coloque o óculos e toque para começar</div><button type="button" data-action="vr-entrar">🥽 Entrar em VR</button><button type="button" data-action="vr-ar" hidden>⬚ Na minha sala (realidade mista)</button><button type="button" class="sec" data-action="vr-3d">Explorar em 3D</button></div>';
     document.body.appendChild(ov);navigator.xr.isSessionSupported('immersive-ar').then(ok=>{const b=ov.querySelector('[data-action="vr-ar"]');if(b&&ok)b.hidden=false;}).catch(()=>{});
     ov.addEventListener('click',e=>{const b=e.target.closest('[data-action]');if(!b)return;
-      const S=Lab.state,bv=()=>{if(!S.welcomed&&Lab.boasVindas)Lab.boasVindas();};if(b.dataset.action==='vr-entrar'){window.alternarVR('vr').finally(()=>ov.remove());}else if(b.dataset.action==='vr-ar'){window.alternarVR('ar').finally(()=>ov.remove());}else{ov.remove();bv();if(Lab.abrirMenu)Lab.abrirMenu();}});
+      const S=Lab.state,bv=()=>{if(!S.welcomed&&Lab.boasVindas)Lab.boasVindas();};if(b.dataset.action==='vr-entrar'){window.alternarVR('vr').finally(()=>ov.remove());}else if(b.dataset.action==='vr-ar'){window.alternarVR('ar').finally(()=>ov.remove());}else{ov.remove();abertura3D();if(Lab.abrirMenu)Lab.abrirMenu();depoisAbertura(bv);}});
   };
   if(!window.isSecureContext)semVR('página sem HTTPS');else if(!navigator.xr)semVR('navegador sem WebXR (navigator.xr ausente)');
   else navigator.xr.isSessionSupported('immersive-vr').then(ok=>ok?mostrarEntrada():semVR('isSessionSupported(immersive-vr) = false')).catch(e=>semVR('isSessionSupported lançou erro: '+(e&&e.message)));
@@ -193,7 +199,7 @@ function ligarPosicional(){
 ['pointerdown','keydown','touchstart'].forEach(ev=>document.addEventListener(ev,ligarPosicional,{passive:true}));
 document.addEventListener('visibilitychange',()=>{if(!document.hidden&&ligado){try{T.AudioContext.getContext().resume();}catch(e){}}});
 const toggleOriginal=Proto.toggleVR;
-Proto.toggleVR=async function(modo,silencioso){const r=await toggleOriginal.call(this,modo,silencioso);ligarPosicional();if(posicional)posicional.setRefDistance(this.xr?1.2:14);if(this.xr&&this.xrModo!=='ar'&&typeof entrarAmbiente==='function')entrarAmbiente();if(this.xr){this.xrMenu='sistemas';this.buildXRUI();if(Lab.fecharMenu)Lab.fecharMenu();}/* v4.4: o VR abre no menu de sistemas */ /* boas-vindas a cada entrada no VR (v3.5.4) */if(this.xr&&Lab.boasVindas)setTimeout(()=>{if(view.xr){Lab.boasVindas();setTimeout(()=>{if(view.xr)view.buildXRUI();},700);}},900);return r;};
+Proto.toggleVR=async function(modo,silencioso){const r=await toggleOriginal.call(this,modo,silencioso);ligarPosicional();if(posicional)posicional.setRefDistance(this.xr?1.2:14);if(this.xr&&this.xrModo!=='ar'&&typeof entrarAmbiente==='function')entrarAmbiente();if(this.xr){this.xrMenu='sistemas';this.buildXRUI();if(Lab.fecharMenu)Lab.fecharMenu();}/* v4.4: o VR abre no menu de sistemas */ /* boas-vindas a cada entrada no VR (v3.5.4) *//* v-portal: a boas-vindas espera a abertura revelar o app */if(this.xr&&Lab.boasVindas)depoisAbertura(()=>{if(view.xr){Lab.boasVindas();setTimeout(()=>{if(view.xr)view.buildXRUI();},700);}},900);return r;};
 const exitOriginal=Proto.exitXR;
 Proto.exitXR=function(){exitOriginal.call(this);if(posicional)posicional.setRefDistance(14);};
 

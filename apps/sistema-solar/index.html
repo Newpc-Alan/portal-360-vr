@@ -8,6 +8,7 @@
 <!-- Bibliotecas locais (funcionam sem internet / com CDN bloqueado na escola); CDN só como reserva -->
 <script src="vendor/three.r128.min.js"></script>
 <script>if(!window.THREE){document.write('<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"><\/script>');}</script>
+<script src="portal-entrada.js?v=1.0.0"></script>
 <script src="vendor/qrcode.min.js"></script>
 <script>if(!window.QRCode){document.write('<script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"><\/script>');}</script>
 <style>
@@ -1429,6 +1430,8 @@ try{
   selecionar('terra');
   if(!aplicarDeepLink())entrarVista('sistema');
   setKiosk(true); // abre já em tela cheia, sem cabeçalho/rodapé do Portal
+  // Portal de entrada: abertura cinematográfica ao entrar no VR (e uma vez por sessão no 3D)
+  if(window.PortalEntrada)PortalEntrada.configurar({titulo:'Sistema Solar VR',cor:'#ffb347',logo:'media/logo.png',auto3D:!/[?&]embed=1/.test(location.search),obter:()=>({renderer,scene,camera})});
   if(/[?&]vr=1/.test(location.search)){
     // O WebXR só abre a sessão a partir de um toque nesta página: mostramos uma tela de entrada com um único botão.
     const semVR=()=>vrMensagem('🥽 Para a experiência em VR, abra este mesmo link no navegador do óculos (Meta Quest). Aqui você pode explorar em 3D normalmente.',9000);
@@ -1438,7 +1441,7 @@ try{
       document.body.appendChild(ov);
       ov.addEventListener('click',e=>{const b=e.target.closest('[data-action]');if(!b)return;
         if(b.dataset.action==='vr-entrar'){alternarVR().finally(()=>{ov.remove();});}
-        else ov.remove();});
+        else{ov.remove();if(window.PortalEntrada)PortalEntrada.tocar3D();}});
     };
     if(!navigator.xr) semVR();
     else navigator.xr.isSessionSupported('immersive-vr').then(ok=>ok?mostrarEntrada():semVR()).catch(semVR);

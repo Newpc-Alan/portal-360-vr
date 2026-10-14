@@ -7,7 +7,7 @@
    Arquivo-mestre: assets/sala/sala-cliente.js (cópia idêntica em cada apps/<app>/). Regra 9: sem onclick inline. */
 (function(){'use strict';
 if(window.Portal360Sala)return;
-const VERSAO='1.3.0';
+const VERSAO='1.4.0';
 /* endereço do banco: preenchido quando o projeto Firebase da sala for criado (sem barra no fim) */
 const DB_PADRAO='https://portal360-sala-default-rtdb.firebaseio.com';
 const q=new URLSearchParams(location.search);
@@ -137,9 +137,24 @@ function executar(c){
   if(c.tipo==='encerrar'){fecharAviso();aviso('Aula encerrada','Obrigado! Pode tirar o óculos.',false,6000);sair(true);return;}
   if(c.tipo==='ir'){fecharAviso();
     if(c.app==='catalogo'){if(APP!=='catalogo')location.href=BASE;return;}
+    if(c.app&&c.app!==APP&&PASTA[c.app])SS.set('portal360_prof_abriu',APPS[c.app]||'1');
     if(c.app&&c.app!==APP&&PASTA[c.app]){SS.set('portal360_irpara',JSON.stringify({sec:c.sec||'',view:c.view||''}));location.href=BASE+'apps/'+PASTA[c.app]+'/?vr=1';return;}
     fecharBoasVindas();try{if(A.ok())A.ir(c.sec,c.view);}catch(e){console.warn('Sala: não consegui ir para a missão',e);}setTimeout(()=>enviar(true),600);}
 }
+/* ---------- chegou ao app por ordem do professor: entrar no VR com o mínimo de toques ----------
+   1) Se o aluno já estava em VR, o Quest Browser concede a sessão à página nova (evento "sessiongranted",
+      navegação WebXR): entramos sozinhos, sem toque.
+   2) Se não (vinha do catálogo em 2D), o navegador exige um toque: a tela de entrada inteira vira o botão. */
+let xrConcedido=false;
+try{if(navigator.xr&&navigator.xr.addEventListener)navigator.xr.addEventListener('sessiongranted',()=>{xrConcedido=true;});}catch(_){}
+function chegadaPeloProfessor(){const nome=SS.get('portal360_prof_abriu');if(!nome||APP==='catalogo')return;SS.del('portal360_prof_abriu');
+  let n=0;const t=setInterval(()=>{const g=document.getElementById('vrGate'),bt=g&&g.querySelector('[data-action="vr-entrar"]');
+    if(!bt){if(++n>60)clearInterval(t);return;}clearInterval(t);
+    if(xrConcedido){bt.click();return;}
+    g.classList.add('p360s-gate');const sub=g.querySelector('.vrgate-s');if(sub)sub.textContent='O professor abriu esta atividade · toque em qualquer lugar para entrar';
+    g.addEventListener('click',e=>{if(!e.target.closest('button'))bt.click();});
+    /* o evento pode chegar depois da tela montada */
+    const t2=setInterval(()=>{if(!document.body.contains(g)){clearInterval(t2);return;}if(xrConcedido){clearInterval(t2);bt.click();}},200);setTimeout(()=>clearInterval(t2),8000);},250);}
 /* a turma chega direto na missão: fecha a boas-vindas (marcando como vista) */
 function fecharBoasVindas(){try{const w=document.getElementById('welcomeDialog');if(w&&w.open){w.close();const L=window.CorpoLab||window.TerraLab||window.DNALab;if(L&&L.state){L.state.welcomed=true;}}}catch(_){}}
 function ouvirComandos(){
@@ -187,6 +202,7 @@ function estilo(){if(document.getElementById('p360s-css'))return;const s=documen
  '.p360s-box h3{margin:0 0 6px;font-size:22px}.p360s-box p{margin:0 0 14px;color:#b9d3e6;font-size:14px;line-height:1.45}.p360s-box label{display:block;font-size:13px;color:#9fdcff;margin:10px 0 4px}'+
  '.p360s-box input,.p360s-box select{width:100%;box-sizing:border-box;font:700 28px system-ui;letter-spacing:.3em;text-align:center;padding:10px;border-radius:12px;border:1px solid rgba(255,255,255,.25);background:#081d33;color:#fff}.p360s-box select{font-size:20px;letter-spacing:0}'+
  '.p360s-box .acoes{display:flex;gap:10px;margin-top:18px}.p360s-box button{flex:1;padding:13px;border-radius:12px;border:0;font:700 16px system-ui;cursor:pointer;background:rgba(255,255,255,.1);color:#fff}.p360s-box button.pri{background:#1a6b2a}.p360s-box button.perigo{background:#7a2a1a}.p360s-box .erro{color:#ffb4a0;font-size:13px;min-height:18px;margin-top:8px}'+
+ '.p360s-gate{cursor:pointer}.p360s-gate .vrgate-s{color:#8ff0b8!important;font-size:18px!important;font-weight:700}.p360s-gate [data-action="vr-entrar"]{font-size:24px!important;padding:20px 44px!important;animation:p360pulse 1.6s ease-in-out infinite}@keyframes p360pulse{50%{box-shadow:0 0 0 14px rgba(61,220,132,.25)}}'+
  '.p360s-aviso{position:fixed;inset:0;width:100vw;height:100vh;max-width:none;max-height:none;margin:0;padding:0;border:0;z-index:2147483200;background:rgba(2,8,18,.94);display:flex;align-items:center;justify-content:center;text-align:center;font-family:system-ui,Segoe UI,Arial}.p360s-aviso::backdrop{background:transparent}.p360s-aviso b{display:block;color:#fff;font-size:clamp(34px,7vw,80px);font-weight:800}.p360s-aviso span{display:block;color:#9fdcff;font-size:clamp(16px,2.6vw,26px);margin-top:12px}';
  document.head.appendChild(s);}
 let chipEl=null;
@@ -215,6 +231,6 @@ document.addEventListener('click',async e=>{const b=e.target.closest('[data-acti
 document.addEventListener('keydown',e=>{if(dlg&&e.key==='Enter'){const b=dlg.querySelector('[data-action="p360s-entrar"]');if(b)b.click();}});
 
 window.Portal360Sala={versao:VERSAO,get sala(){return sala;},id:ID,app:APP,entrar,sair,abrir:abrirDialogo,estado:pacote,midiaExterna,_executar:executar};
-const pronto=()=>{chip();if(sala)iniciar();};
+const pronto=()=>{chip();if(sala)iniciar();chegadaPeloProfessor();};
 if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',pronto);else pronto();
 })();

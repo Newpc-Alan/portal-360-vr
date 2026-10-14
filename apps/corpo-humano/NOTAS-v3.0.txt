@@ -327,3 +327,6 @@ Integração: ganchos genéricos no corpo-app.js (window.CORPO_EXTRA) e no corpo
 Modelos: todos procedurais por enquanto. Ponto de troca: baço, timo e tonsilas (CENTROS_LTR em ltr-models.js) passam a usar
 modelos/<chave>.glb do Z-Anatomy quando a chave for incluída em D.LTR_GLB. Pendentes do Z-Anatomy: sistema linfático, pele e vísceras pélvicas.
 Áudios: 77 narrações a gravar (fichas = chave; orientações lin-*, teg-*, rep-*). Até lá, voz do navegador.
+
+==== v4.8.1 (out/2026) · narração humana dos módulos 9, 10 e 11 ====
+76 de 77 áudios gravados por Alan, normalizados (mono, 64 kbps, -17 LUFS, silêncio aparado). Falta: rep-contexto-2.mp3 (Reprodutor · Contexto etapa 3, sistema masculino); até chegar, voz do navegador.

@@ -7,7 +7,7 @@
    Arquivo-mestre: assets/sala/sala-cliente.js (cópia idêntica em cada apps/<app>/). Regra 9: sem onclick inline. */
 (function(){'use strict';
 if(window.Portal360Sala)return;
-const VERSAO='1.4.1';
+const VERSAO='1.5.0';
 /* endereço do banco: preenchido quando o projeto Firebase da sala for criado (sem barra no fim) */
 const DB_PADRAO='https://portal360-sala-default-rtdb.firebaseio.com';
 const q=new URLSearchParams(location.search);
@@ -131,11 +131,15 @@ function executar(c){
   if(c.alvo&&c.alvo!=='todos'&&c.alvo!==ID)return;
   if(c.t&&Math.abs(Date.now()-c.t)>120000)return; /* comando antigo: ignorado (margem larga para relógios diferentes) */
   SS.set(CMD_ULT,c.id);
-  if(c.tipo==='pausa'){aviso('⏸ Olhe para o professor','A atividade foi pausada.',true);return;}
-  if(c.tipo==='retomar'){fecharAviso();return;}
+  if(c.tipo==='video'){abrirVideo(c.src,c.titulo);return;}
+  if(c.tipo==='video-pausa'){if(telao)telao.v.pause();return;}
+  if(c.tipo==='video-play'){if(telao)tocarVideo();return;}
+  if(c.tipo==='video-fim'){fecharVideo();return;}
+  if(c.tipo==='pausa'){if(telao)telao.v.pause();aviso('⏸ Olhe para o professor','A atividade foi pausada.',true);return;}
+  if(c.tipo==='retomar'){fecharAviso();if(telao)tocarVideo();return;}
   if(c.tipo==='chamar'){aviso(sala.rotulo.toUpperCase(),'O professor está procurando este óculos.',false,5000);return;}
   if(c.tipo==='encerrar'){fecharAviso();aviso('Aula encerrada','Obrigado! Pode tirar o óculos.',false,6000);sair(true);return;}
-  if(c.tipo==='ir'){fecharAviso();
+  if(c.tipo==='ir'){fecharAviso();fecharVideo();
     if(c.app==='catalogo'){if(APP!=='catalogo')location.href=BASE;return;}
     if(c.app&&c.app!==APP&&PASTA[c.app]){SS.set('portal360_prof_abriu',APPS[c.app]||'1');SS.set('portal360_estava_vr',emVR()?'1':'0');}
     if(c.app&&c.app!==APP&&PASTA[c.app]){SS.set('portal360_irpara',JSON.stringify({sec:c.sec||'',view:c.view||''}));location.href=BASE+'apps/'+PASTA[c.app]+'/?vr=1';return;}
@@ -195,6 +199,38 @@ function aviso(titulo,sub,fixo,ms){fecharAviso();
   const t=ms?setTimeout(fecharAviso,ms):0;avisoAtual={fim,t};}
 function fecharAviso(){if(!avisoAtual)return;clearTimeout(avisoAtual.t);avisoAtual.fim.forEach(f=>{try{f();}catch(_){}});avisoAtual=null;}
 
+/* ---------- vídeo-aula conduzida pelo professor ----------
+   No VR: telão fixo no espaço, à frente de onde o aluno olhava (não acompanha a cabeça, para não enjoar), com a cena escurecida.
+   Fora do VR: tela cheia. Só aceita MP4 hospedado no próprio Portal (caminho relativo). Conta no painel como "Assistindo". */
+let telao=null;
+const srcValido=s=>typeof s==='string'&&/^[\w\-/.]+\.mp4$/i.test(s)&&!s.includes('..')&&!s.startsWith('/');
+function tocarVideo(){if(!telao)return;const v=telao.v;const pr=v.play();if(pr&&pr.catch)pr.catch(()=>{telao.precisaToque=true;});}
+function abrirVideo(src,titulo){if(!srcValido(src))return;fecharVideo();fecharAviso();fecharBoasVindas();
+  const v=document.createElement('video');v.src=BASE+src;v.playsInline=true;v.setAttribute('playsinline','');v.preload='auto';v.crossOrigin='anonymous';
+  const T=window.THREE,ctx=ctxApp(),xr=!!(T&&ctx&&ctx.renderer&&ctx.renderer.xr&&ctx.renderer.xr.isPresenting);const fim=[];
+  if(xr){const {renderer,scene,camera}=ctx;const g=new T.Group();
+    const p=new T.Vector3(),q=new T.Quaternion(),sc=new T.Vector3();camera.matrixWorld.decompose(p,q,sc);
+    const f=new T.Vector3(0,0,-1).applyQuaternion(q);f.y=0;if(f.lengthSq()<1e-4)f.set(0,0,-1);f.normalize();
+    g.position.copy(p);g.rotation.y=Math.atan2(-f.x,-f.z);
+    const veu=new T.Mesh(new T.SphereGeometry(8,32,20),new T.MeshBasicMaterial({color:0x02060e,side:T.BackSide,transparent:true,opacity:.9,depthTest:false,depthWrite:false}));veu.renderOrder=9990;
+    const tex=new T.VideoTexture(v);tex.encoding=T.sRGBEncoding;tex.minFilter=T.LinearFilter;tex.generateMipmaps=false;
+    const mat=new T.MeshBasicMaterial({map:tex,depthTest:false,depthWrite:false});mat.toneMapped=false;
+    const tela=new T.Mesh(new T.PlaneGeometry(3.2,1.8),mat);tela.position.set(0,0,-2.6);tela.renderOrder=9992;
+    const moldura=new T.Mesh(new T.PlaneGeometry(3.32,1.92),new T.MeshBasicMaterial({color:0x37b1da,transparent:true,opacity:.35,depthTest:false,depthWrite:false}));moldura.position.set(0,0,-2.62);moldura.renderOrder=9991;
+    const c=document.createElement('canvas');c.width=1024;c.height=128;const x=c.getContext('2d');x.textAlign='center';x.fillStyle='#9fdcff';x.font='700 54px system-ui,Segoe UI,Arial';x.fillText(String(titulo||'Vídeo-aula').slice(0,48),512,80);
+    const tt=new T.CanvasTexture(c);tt.encoding=T.sRGBEncoding;const titu=new T.Mesh(new T.PlaneGeometry(2.4,.3),new T.MeshBasicMaterial({map:tt,transparent:true,depthTest:false,depthWrite:false}));titu.position.set(0,1.15,-2.6);titu.renderOrder=9992;
+    g.add(veu,moldura,tela,titu);scene.add(g);
+    /* se o navegador bloquear o som sem toque: o primeiro gatilho do controle dá o play */
+    const sess=renderer.xr.getSession();const toque=()=>{if(telao&&telao.v===v&&v.paused&&telao.precisaToque){telao.precisaToque=false;tocarVideo();}};if(sess)sess.addEventListener('select',toque);
+    fim.push(()=>{if(sess)sess.removeEventListener('select',toque);scene.remove(g);[veu,moldura,tela,titu].forEach(m=>{m.geometry.dispose();m.material.dispose();});tex.dispose();tt.dispose();});}
+  else{const modal=typeof HTMLDialogElement==='function';const d=document.createElement(modal?'dialog':'div');d.className='p360s-aviso p360s-video';d.appendChild(v);document.body.appendChild(d);
+    if(modal){try{d.showModal();}catch(_){d.setAttribute('open','');}d.addEventListener('cancel',e=>e.preventDefault());}
+    const toque=()=>{if(telao&&telao.v===v&&v.paused&&telao.precisaToque){telao.precisaToque=false;tocarVideo();}};d.addEventListener('click',toque);
+    fim.push(()=>{try{if(d.open&&d.close)d.close();}catch(_){}d.remove();});}
+  v.addEventListener('ended',()=>setTimeout(()=>{if(telao&&telao.v===v)fecharVideo();},1500));
+  telao={v,fim,precisaToque:false};tocarVideo();}
+function fecharVideo(){if(!telao)return;const t=telao;telao=null;try{t.v.pause();}catch(_){}t.fim.forEach(f=>{try{f();}catch(_){}});try{t.v.removeAttribute('src');t.v.load();}catch(_){}}
+
 /* ---------- interface 2D: chip e diálogo de entrada ---------- */
 function estilo(){if(document.getElementById('p360s-css'))return;const s=document.createElement('style');s.id='p360s-css';s.textContent=
  '.p360s-chip{position:fixed;left:14px;bottom:14px;z-index:2147483000;border:1px solid rgba(255,255,255,.25);border-radius:999px;padding:9px 15px;background:rgba(15,44,74,.92);color:#fff;font:700 14px system-ui,Segoe UI,Arial;cursor:pointer;box-shadow:0 6px 20px rgba(0,0,0,.35)}'+
@@ -205,6 +241,7 @@ function estilo(){if(document.getElementById('p360s-css'))return;const s=documen
  '.p360s-box input,.p360s-box select{width:100%;box-sizing:border-box;font:700 28px system-ui;letter-spacing:.3em;text-align:center;padding:10px;border-radius:12px;border:1px solid rgba(255,255,255,.25);background:#081d33;color:#fff}.p360s-box select{font-size:20px;letter-spacing:0}'+
  '.p360s-box .acoes{display:flex;gap:10px;margin-top:18px}.p360s-box button{flex:1;padding:13px;border-radius:12px;border:0;font:700 16px system-ui;cursor:pointer;background:rgba(255,255,255,.1);color:#fff}.p360s-box button.pri{background:#1a6b2a}.p360s-box button.perigo{background:#7a2a1a}.p360s-box .erro{color:#ffb4a0;font-size:13px;min-height:18px;margin-top:8px}'+
  '.p360s-gate{cursor:pointer}.p360s-gate .vrgate-s{color:#8ff0b8!important;font-size:18px!important;font-weight:700}.p360s-gate [data-action="vr-entrar"]{font-size:24px!important;padding:20px 44px!important;animation:p360pulse 1.6s ease-in-out infinite}@keyframes p360pulse{50%{box-shadow:0 0 0 14px rgba(61,220,132,.25)}}'+
+ '.p360s-video video{width:min(100vw,177vh);height:auto;max-height:100vh;background:#000}'+
  '.p360s-aviso{position:fixed;inset:0;width:100vw;height:100vh;max-width:none;max-height:none;margin:0;padding:0;border:0;z-index:2147483200;background:rgba(2,8,18,.94);display:flex;align-items:center;justify-content:center;text-align:center;font-family:system-ui,Segoe UI,Arial}.p360s-aviso::backdrop{background:transparent}.p360s-aviso b{display:block;color:#fff;font-size:clamp(34px,7vw,80px);font-weight:800}.p360s-aviso span{display:block;color:#9fdcff;font-size:clamp(16px,2.6vw,26px);margin-top:12px}';
  document.head.appendChild(s);}
 let chipEl=null;

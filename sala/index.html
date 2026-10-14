@@ -80,6 +80,8 @@ const DB=(LS.get('portal360_sala_db')||DB_PADRAO||'').replace(/\/+$/,'');
 const $=id=>document.getElementById(id);
 const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 const APPS={corpo:'Corpo Humano Imersivo',terra:'Terra por Dentro',dna:'DNA Imersivo',solar:'Sistema Solar VR'};
+/* vídeo-aulas em MP4 hospedadas no Portal (caminho a partir da raiz do site). Para incluir uma aula: suba o MP4 em assets/aulas/ e acrescente aqui. */
+const AULAS_VIDEO=[{titulo:'Abertura do Portal 360º (teste)',src:'assets/abertura.mp4'}];
 const APPS_BOTOES=[['solar','🪐','Sistema Solar'],['corpo','🫀','Corpo Humano'],['terra','🌍','Terra por Dentro'],['dna','🧬','DNA'],['catalogo','🏠','Catálogo']];
 /* mapas das missões: os desta sala + os guardados de aulas anteriores (o painel lembra, assim as missões aparecem antes de algum óculos abrir o app) */
 function mapas(){let c={};try{c=JSON.parse(localStorage.getItem('portal360_mapas')||'{}')||{};}catch(_){c={};}const m=Object.assign(c,(sala&&sala.mapas)||{});
@@ -101,6 +103,7 @@ function telaSala(){
    '<div class="resumo"><span class="chip"><span class="ponto"></span><span id="nOn">0 conectados</span></span><span class="chip">🥽 <span id="nVR">0 no VR</span></span><span class="chip">⏱ <span id="tempo">00:00</span></span><span class="chip alerta" id="nAlerta" hidden>⚠ <span>0 parados</span></span></div>'+
    '<div class="linha apps"><label>1 · Abrir nos óculos</label>'+APPS_BOTOES.map(([k,ic,n])=>'<button class="btn app-btn" data-action="abrir-app" data-app="'+k+'">'+ic+' '+n+'<span class="qt" id="qt-'+k+'" hidden></span></button>').join('')+'</div>'+
    '<div class="linha"><label>2 · Levar para a missão</label><select id="selApp"></select><select id="selSec"></select><select id="selMis"></select><button class="btn pri" data-action="ir-todos">➜ Levar todos</button></div>'+
+   '<div class="linha"><label>3 · Vídeo-aula</label><select id="selVideo">'+AULAS_VIDEO.map((a,i)=>'<option value="'+i+'">'+esc(a.titulo)+'</option>').join('')+'</select><button class="btn pri" data-action="video">▶ Passar para todos</button><button class="btn" data-action="video-pausa">⏸ Pausar vídeo</button><button class="btn" data-action="video-play">▶ Continuar</button><button class="btn" data-action="video-fim">■ Fechar vídeo</button></div>'+
    '<div class="linha"><button class="btn azul" data-action="pausa">⏸ Pausar todos</button><button class="btn" data-action="retomar">▶ Retomar</button><button class="btn" data-action="chamar-todos">🔔 Identificar óculos</button><span class="esp" style="flex:1"></span><button class="btn perigo" data-action="encerrar">■ Encerrar aula</button></div>'+
    '</div></section><section class="grade" id="grade"></section>';
   preencherSelects();desenhar();}
@@ -174,6 +177,10 @@ document.addEventListener('click',async e=>{const b=e.target.closest('[data-acti
   if(!codigo)return;
   if(ac==='abrir-app'){const ap=b.dataset.app,nome=ap==='catalogo'?'o catálogo':APPS[ap];if(!confirm('Abrir '+nome+' em todos os óculos?'+(ap==='catalogo'?'':' Cada aluno toca em "Entrar em VR" quando o app abrir.')))return;
     if(await comando({tipo:'ir',app:ap,sec:'',view:''})!==null){toast('Abrindo '+nome+' em todos os óculos.');if(APPS[ap]){$('selApp').value=ap;secoes();}}return;}
+  if(ac==='video'){const a=AULAS_VIDEO[+$('selVideo').value||0];if(a&&await comando({tipo:'video',src:a.src,titulo:a.titulo})!==null)toast('Vídeo-aula no telão de todos: '+a.titulo);return;}
+  if(ac==='video-pausa'){if(await comando({tipo:'video-pausa'})!==null)toast('Vídeo pausado em todos os óculos.');return;}
+  if(ac==='video-play'){if(await comando({tipo:'video-play'})!==null)toast('Vídeo continuando.');return;}
+  if(ac==='video-fim'){if(await comando({tipo:'video-fim'})!==null)toast('Vídeo fechado.');return;}
   if(ac==='ir-todos'){const d=destino();if(await comando(Object.assign({tipo:'ir'},d))!==null)toast('Turma a caminho: '+nomeDestino(d));}
   else if(ac==='ir-um'){const d=destino();if(await comando(Object.assign({tipo:'ir',alvo:id},d))!==null)toast((sala.oculos[id]||{}).rotulo+' → '+nomeDestino(d));}
   else if(ac==='pausa'){if(await comando({tipo:'pausa'})!==null)toast('Óculos pausados: "Olhe para o professor".');}

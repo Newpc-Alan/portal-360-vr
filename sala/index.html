@@ -82,13 +82,15 @@ const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&
 const APPS={corpo:'Corpo Humano Imersivo',terra:'Terra por Dentro',dna:'DNA Imersivo',solar:'Sistema Solar VR'};
 let codigo=null,sala={},es=null,poll=0,offset=0,inicio=0,timer=0,refetch=0;
 const SV={'.sv':'timestamp'};
-async function rede(m,p,b){try{const r=await fetch(DB+'/'+p+'.json',{method:m,headers:{'Content-Type':'application/json'},body:b===undefined?undefined:JSON.stringify(b),cache:'no-store'});return r.ok?await r.json():null;}catch(_){return null;}}
+let ultimoErro='';
+async function rede(m,p,b){try{const r=await fetch(DB+'/'+p+'.json',{method:m,headers:{'Content-Type':'application/json'},body:b===undefined?undefined:JSON.stringify(b),cache:'no-store'});if(!r.ok){ultimoErro='HTTP '+r.status+(r.status===401?' (regras do Firebase não permitem: confira a aba Regras)':'');return null;}ultimoErro='';return await r.json();}catch(e){ultimoErro='rede: '+(e&&e.message||e);return null;}}
+const codValido=c=>typeof c==='string'&&/^\d{4}$/.test(c);
 function toast(t){const e=$('toast');e.textContent=t;e.classList.add('on');clearTimeout(e._t);e._t=setTimeout(()=>e.classList.remove('on'),2600);}
 const agora=()=>Date.now()+offset;
 
 /* ---------- telas ---------- */
 function telaConfig(){$('app').innerHTML='<div class="aviso-cfg"><h2>Sala ainda não configurada</h2><p>O endereço do banco de dados da Sala do professor ainda não foi definido. Depois de criar o projeto Firebase (Realtime Database), ele entra nas constantes <code>DB_PADRAO</code> deste painel e do <code>sala-cliente.js</code>.</p><p>Para teste, abra este painel com <code>?saladb=https://SEU-PROJETO.firebaseio.com</code>.</p></div>';}
-function telaAbrir(){const ant=LS.get('portal360_sala_prof');
+function telaAbrir(){let ant=LS.get('portal360_sala_prof');if(!codValido(ant)){LS.del('portal360_sala_prof');ant=null;}
   $('app').innerHTML='<section class="abrir"><h1>Conduza a turma no VR</h1><p>Abra a sala, mostre o código na lousa e cada óculos entra digitando os 4 números. Você acompanha o que cada aluno está fazendo e leva todos para a mesma missão com um toque.</p><div class="acoes"><button class="btn pri grande" data-action="abrir">▶ Abrir nova sala</button>'+(ant?'<button class="btn azul grande" data-action="reabrir">↻ Reabrir sala '+esc(ant)+'</button>':'')+'</div><div class="passos"><div><b>1 · ABRA A SALA</b><span>Mostre o código na lousa ou na TV.</span></div><div><b>2 · NOS ÓCULOS</b><span>No catálogo, toque em "🎓 Entrar na sala", digite o código e o número do óculos.</span></div><div><b>3 · CONDUZA</b><span>Acompanhe os cards, leve todos para uma missão, pause e chame a atenção.</span></div></div></section>';}
 function telaSala(){
   $('app').innerHTML='<section class="barra"><div class="codigo"><small>Código da sala</small><b id="cod">'+codigo+'</b><span>No óculos: 🎓 Entrar na sala</span></div><div class="controle">'+
@@ -101,9 +103,10 @@ function telaSala(){
 /* ---------- sala: abrir, ouvir, comandar ---------- */
 async function medirRelogio(){const t0=Date.now();const r=await rede('PUT','relogio/professor',SV);const t1=Date.now();if(typeof r==='number')offset=r-(t0+t1)/2;}
 async function abrir(cod){
+  if(!codValido(cod))cod=null;
   if(!cod){for(let i=0;i<12;i++){const c=String(1000+Math.floor(Math.random()*9000));const ex=await rede('GET','salas/'+c+'/aberta');if(ex!==true){cod=c;break;}}}
   if(!cod){toast('Não consegui criar a sala. Verifique a internet.');return;}
-  const ok=await rede('PATCH','salas/'+cod,{aberta:true,criada:SV});if(ok===null){toast('Sem conexão com o banco da sala.');return;}
+  const ok=await rede('PATCH','salas/'+cod,{aberta:true,criada:SV});if(ok===null||ok.aberta!==true){toast('Não abriu a sala: '+(ultimoErro||'resposta inesperada do banco'));return;}
   codigo=cod;LS.set('portal360_sala_prof',cod);inicio=Date.now();await medirRelogio();telaSala();ouvir();
   clearInterval(timer);timer=setInterval(()=>{const s=Math.floor((Date.now()-inicio)/1000);const t=$('tempo');if(t)t.textContent=String(Math.floor(s/60)).padStart(2,'0')+':'+String(s%60).padStart(2,'0');desenhar();},1000);}
 function ouvir(){parar();const busca=()=>{clearTimeout(refetch);refetch=setTimeout(async()=>{const d=await rede('GET','salas/'+codigo);if(d){sala=d;preencherSelects();desenhar();}},150);};

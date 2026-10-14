@@ -7,7 +7,7 @@
    Arquivo-mestre: assets/sala/sala-cliente.js (cópia idêntica em cada apps/<app>/). Regra 9: sem onclick inline. */
 (function(){'use strict';
 if(window.Portal360Sala)return;
-const VERSAO='1.5.0';
+const VERSAO='1.6.0';
 /* endereço do banco: preenchido quando o projeto Firebase da sala for criado (sem barra no fim) */
 const DB_PADRAO='https://portal360-sala-default-rtdb.firebaseio.com';
 const q=new URLSearchParams(location.search);
@@ -131,7 +131,7 @@ function executar(c){
   if(c.alvo&&c.alvo!=='todos'&&c.alvo!==ID)return;
   if(c.t&&Math.abs(Date.now()-c.t)>120000)return; /* comando antigo: ignorado (margem larga para relógios diferentes) */
   SS.set(CMD_ULT,c.id);
-  if(c.tipo==='video'){abrirVideo(c.src,c.titulo);return;}
+  if(c.tipo==='video'){if(c.yt)abrirYouTube(c.yt,c.titulo);else abrirVideo(c.src,c.titulo);return;}
   if(c.tipo==='video-pausa'){if(telao)telao.v.pause();return;}
   if(c.tipo==='video-play'){if(telao)tocarVideo();return;}
   if(c.tipo==='video-fim'){fecharVideo();return;}
@@ -229,6 +229,28 @@ function abrirVideo(src,titulo){if(!srcValido(src))return;fecharVideo();fecharAv
     fim.push(()=>{try{if(d.open&&d.close)d.close();}catch(_){}d.remove();});}
   v.addEventListener('ended',()=>setTimeout(()=>{if(telao&&telao.v===v)fecharVideo();},1500));
   telao={v,fim,precisaToque:false};tocarVideo();}
+/* Aula no YouTube: o YouTube não toca dentro do VR. O óculos sai do VR, mostra a aula em tela cheia
+   (acompanhada pela API do YouTube: assistindo, minuto, fim) e, ao terminar, oferece "Toque para voltar ao VR" (1 toque). */
+const ytValido=id=>typeof id==='string'&&/^[\w-]{11}$/.test(id);
+function ytApi(cb){if(window.YT&&YT.Player)return cb();const antes=window.onYouTubeIframeAPIReady;window.onYouTubeIframeAPIReady=function(){if(antes)try{antes();}catch(_){}cb();};
+  if(!document.getElementById('ytApi')){const sc=document.createElement('script');sc.id='ytApi';sc.src='https://www.youtube.com/iframe_api';document.head.appendChild(sc);}}
+async function abrirYouTube(id,titulo){if(!ytValido(id))return;fecharVideo();fecharAviso();fecharBoasVindas();
+  const ctx=ctxApp();let estavaVR=false;
+  try{if(ctx&&ctx.renderer&&ctx.renderer.xr&&ctx.renderer.xr.isPresenting){estavaVR=true;await ctx.renderer.xr.getSession().end();}}catch(_){}
+  const modal=typeof HTMLDialogElement==='function';const d=document.createElement(modal?'dialog':'div');d.className='p360s-aviso p360s-yt';
+  d.innerHTML='<div class="p360s-yt-box"><div class="p360s-yt-top"><b></b><button type="button" data-action="p360s-yt-fechar">✕ Fechar</button></div><div class="p360s-yt-frame"><iframe id="p360sYT" allow="autoplay; fullscreen; picture-in-picture" allowfullscreen referrerpolicy="strict-origin-when-cross-origin"></iframe></div></div>';
+  d.querySelector('b').textContent=titulo||'Aula';const fr=d.querySelector('iframe');fr.src='https://www.youtube-nocookie.com/embed/'+id+'?autoplay=1&rel=0&modestbranding=1&playsinline=1&hl=pt-BR&enablejsapi=1&origin='+encodeURIComponent(location.origin);
+  document.body.appendChild(d);if(modal){try{d.showModal();}catch(_){d.setAttribute('open','');}d.addEventListener('cancel',e=>e.preventDefault());}
+  let player=null,ytFim=false;
+  const ctrl={pause(){try{player&&player.pauseVideo();}catch(_){}},play(){try{player&&player.playVideo();}catch(_){}return Promise.resolve();},paused:false};
+  const est=()=>{if(!player||!player.getPlayerState)return null;const st=player.getPlayerState();return{tocando:st===1||st===3,pos:player.getCurrentTime(),dur:player.getDuration(),fim:ytFim||st===0};};
+  ytApi(()=>{try{player=new YT.Player(fr,{events:{onStateChange:e=>{if(e.data===0){ytFim=true;setTimeout(()=>{if(telao&&telao.v===ctrl)fecharVideo();},1500);}}}});}catch(_){player=null;}
+    midiaExterna({tipo:'video',nome:titulo||'Aula',estado:est});});
+  telao={v:ctrl,precisaToque:false,fim:[()=>{let ult=null;try{ult=est();}catch(_){}if(ult&&ult.dur)midiaExterna({tipo:'video',nome:titulo||'Aula',estado:()=>Object.assign({},ult,{tocando:false})});
+    try{if(d.open&&d.close)d.close();}catch(_){}d.remove();if(estavaVR)voltarAoVR();}]};}
+function voltarAoVR(){if(typeof window.alternarVR!=='function')return;const modal=typeof HTMLDialogElement==='function';const d=document.createElement(modal?'dialog':'div');d.className='p360s-aviso p360s-voltar';
+  d.innerHTML='<div><b>🥽 Voltar ao VR</b><span>Toque em qualquer lugar para continuar a aula</span></div>';document.body.appendChild(d);if(modal){try{d.showModal();}catch(_){d.setAttribute('open','');}}
+  d.addEventListener('click',()=>{try{if(d.open&&d.close)d.close();}catch(_){}d.remove();try{const r=window.alternarVR('vr');if(r&&r.catch)r.catch(()=>{});}catch(_){}});}
 function fecharVideo(){if(!telao)return;const t=telao;telao=null;try{t.v.pause();}catch(_){}t.fim.forEach(f=>{try{f();}catch(_){}});try{t.v.removeAttribute('src');t.v.load();}catch(_){}}
 
 /* ---------- interface 2D: chip e diálogo de entrada ---------- */
@@ -241,6 +263,7 @@ function estilo(){if(document.getElementById('p360s-css'))return;const s=documen
  '.p360s-box input,.p360s-box select{width:100%;box-sizing:border-box;font:700 28px system-ui;letter-spacing:.3em;text-align:center;padding:10px;border-radius:12px;border:1px solid rgba(255,255,255,.25);background:#081d33;color:#fff}.p360s-box select{font-size:20px;letter-spacing:0}'+
  '.p360s-box .acoes{display:flex;gap:10px;margin-top:18px}.p360s-box button{flex:1;padding:13px;border-radius:12px;border:0;font:700 16px system-ui;cursor:pointer;background:rgba(255,255,255,.1);color:#fff}.p360s-box button.pri{background:#1a6b2a}.p360s-box button.perigo{background:#7a2a1a}.p360s-box .erro{color:#ffb4a0;font-size:13px;min-height:18px;margin-top:8px}'+
  '.p360s-gate{cursor:pointer}.p360s-gate .vrgate-s{color:#8ff0b8!important;font-size:18px!important;font-weight:700}.p360s-gate [data-action="vr-entrar"]{font-size:24px!important;padding:20px 44px!important;animation:p360pulse 1.6s ease-in-out infinite}@keyframes p360pulse{50%{box-shadow:0 0 0 14px rgba(61,220,132,.25)}}'+
+ '.p360s-yt-top b{display:inline!important;font-size:18px!important;font-weight:700!important}.p360s-yt-box{width:min(96vw,calc((100vh - 80px)*1.7778));display:flex;flex-direction:column;gap:10px}.p360s-yt-top{display:flex;align-items:center;justify-content:space-between;color:#fff;font:700 18px system-ui}.p360s-yt-top button{background:rgba(255,255,255,.12);color:#fff;border:1px solid rgba(255,255,255,.3);border-radius:10px;padding:8px 14px;font:700 14px system-ui;cursor:pointer}.p360s-yt-frame{position:relative;width:100%;aspect-ratio:16/9;background:#000}.p360s-yt-frame iframe{position:absolute;inset:0;width:100%;height:100%;border:0}.p360s-voltar{cursor:pointer}'+
  '.p360s-video video{width:min(100vw,177vh);height:auto;max-height:100vh;background:#000}'+
  '.p360s-aviso{position:fixed;inset:0;width:100vw;height:100vh;max-width:none;max-height:none;margin:0;padding:0;border:0;z-index:2147483200;background:rgba(2,8,18,.94);display:flex;align-items:center;justify-content:center;text-align:center;font-family:system-ui,Segoe UI,Arial}.p360s-aviso::backdrop{background:transparent}.p360s-aviso b{display:block;color:#fff;font-size:clamp(34px,7vw,80px);font-weight:800}.p360s-aviso span{display:block;color:#9fdcff;font-size:clamp(16px,2.6vw,26px);margin-top:12px}';
  document.head.appendChild(s);}
@@ -258,6 +281,7 @@ function abrirDialogo(){fecharDialogo();estilo();dlg=document.createElement('div
 function fecharDialogo(){if(dlg){dlg.remove();dlg=null;}}
 document.addEventListener('click',async e=>{const b=e.target.closest('[data-action^="p360s-"]');if(!b)return;const ac=b.dataset.action;
   if(ac==='p360s-abrir')abrirDialogo();else if(ac==='p360s-fechar'||(ac==='p360s-fora'&&e.target===b))fecharDialogo();else if(ac==='p360s-sair')sair();
+  else if(ac==='p360s-yt-fechar'){fecharVideo();}
   else if(ac==='p360s-entrar'){const cod=(dlg.querySelector('#p360s-cod').value||'').replace(/\D/g,''),num=dlg.querySelector('#p360s-num').value,er=dlg.querySelector('#p360s-erro');
     if(cod.length!==4){er.textContent='O código tem 4 números.';return;}
     er.textContent='Procurando a sala…';const s=await rede('GET','salas/'+cod+'/aberta');if(s!==true){er.textContent='Sala '+cod+' não encontrada. Confira o código na lousa.';return;}

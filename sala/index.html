@@ -80,8 +80,9 @@ const DB=(LS.get('portal360_sala_db')||DB_PADRAO||'').replace(/\/+$/,'');
 const $=id=>document.getElementById(id);
 const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 const APPS={corpo:'Corpo Humano Imersivo',terra:'Terra por Dentro',dna:'DNA Imersivo',solar:'Sistema Solar VR'};
-/* vídeo-aulas em MP4 hospedadas no Portal (caminho a partir da raiz do site). Para incluir uma aula: suba o MP4 em assets/aulas/ e acrescente aqui. */
-const AULAS_VIDEO=[{titulo:'Abertura do Portal 360º (teste)',src:'assets/abertura.mp4'}];
+/* vídeo-aulas. YouTube (yt = código de 11 caracteres do link youtu.be/XXXXXXXXXXX): o óculos sai do VR, assiste em tela cheia e volta com 1 toque.
+   MP4 hospedado no Portal (src): toca num telão dentro do VR, sem sair. Para incluir uma aula, acrescente uma linha aqui. */
+const AULAS_VIDEO=[{titulo:'Sistema Solar · aula',yt:'ZtPpHocvT7A'},{titulo:'Abertura do Portal 360º (MP4, telão no VR)',src:'assets/abertura.mp4'}];
 const APPS_BOTOES=[['solar','🪐','Sistema Solar'],['corpo','🫀','Corpo Humano'],['terra','🌍','Terra por Dentro'],['dna','🧬','DNA'],['catalogo','🏠','Catálogo']];
 /* mapas das missões: os desta sala + os guardados de aulas anteriores (o painel lembra, assim as missões aparecem antes de algum óculos abrir o app) */
 function mapas(){let c={};try{c=JSON.parse(localStorage.getItem('portal360_mapas')||'{}')||{};}catch(_){c={};}const m=Object.assign(c,(sala&&sala.mapas)||{});
@@ -177,7 +178,7 @@ document.addEventListener('click',async e=>{const b=e.target.closest('[data-acti
   if(!codigo)return;
   if(ac==='abrir-app'){const ap=b.dataset.app,nome=ap==='catalogo'?'o catálogo':APPS[ap];if(!confirm('Abrir '+nome+' em todos os óculos?'+(ap==='catalogo'?'':' Cada aluno toca em "Entrar em VR" quando o app abrir.')))return;
     if(await comando({tipo:'ir',app:ap,sec:'',view:''})!==null){toast('Abrindo '+nome+' em todos os óculos.');if(APPS[ap]){$('selApp').value=ap;secoes();}}return;}
-  if(ac==='video'){const a=AULAS_VIDEO[+$('selVideo').value||0];if(a&&await comando({tipo:'video',src:a.src,titulo:a.titulo})!==null)toast('Vídeo-aula no telão de todos: '+a.titulo);return;}
+  if(ac==='video'){const a=AULAS_VIDEO[+$('selVideo').value||0];if(a&&await comando({tipo:'video',src:a.src||'',yt:a.yt||'',titulo:a.titulo})!==null)toast((a.yt?'Aula do YouTube em todos os óculos (saem do VR durante o vídeo): ':'Vídeo-aula no telão de todos: ')+a.titulo);return;}
   if(ac==='video-pausa'){if(await comando({tipo:'video-pausa'})!==null)toast('Vídeo pausado em todos os óculos.');return;}
   if(ac==='video-play'){if(await comando({tipo:'video-play'})!==null)toast('Vídeo continuando.');return;}
   if(ac==='video-fim'){if(await comando({tipo:'video-fim'})!==null)toast('Vídeo fechado.');return;}

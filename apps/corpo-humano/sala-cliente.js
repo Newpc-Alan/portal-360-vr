@@ -7,7 +7,7 @@
    Arquivo-mestre: assets/sala/sala-cliente.js (cópia idêntica em cada apps/<app>/). Regra 9: sem onclick inline. */
 (function(){'use strict';
 if(window.Portal360Sala)return;
-const VERSAO='1.2.1';
+const VERSAO='1.3.0';
 /* endereço do banco: preenchido quando o projeto Firebase da sala for criado (sem barra no fim) */
 const DB_PADRAO='https://portal360-sala-default-rtdb.firebaseio.com';
 const q=new URLSearchParams(location.search);
@@ -136,6 +136,7 @@ function executar(c){
   if(c.tipo==='chamar'){aviso(sala.rotulo.toUpperCase(),'O professor está procurando este óculos.',false,5000);return;}
   if(c.tipo==='encerrar'){fecharAviso();aviso('Aula encerrada','Obrigado! Pode tirar o óculos.',false,6000);sair(true);return;}
   if(c.tipo==='ir'){fecharAviso();
+    if(c.app==='catalogo'){if(APP!=='catalogo')location.href=BASE;return;}
     if(c.app&&c.app!==APP&&PASTA[c.app]){SS.set('portal360_irpara',JSON.stringify({sec:c.sec||'',view:c.view||''}));location.href=BASE+'apps/'+PASTA[c.app]+'/?vr=1';return;}
     fecharBoasVindas();try{if(A.ok())A.ir(c.sec,c.view);}catch(e){console.warn('Sala: não consegui ir para a missão',e);}setTimeout(()=>enviar(true),600);}
 }

@@ -33,7 +33,7 @@ main{padding:22px;max-width:1500px;margin:0 auto}
 .codigo{background:linear-gradient(135deg,var(--azul2),#0b2440);border:1px solid rgba(55,177,218,.5);border-radius:18px;padding:16px 22px;text-align:center;min-width:240px}
 .codigo small{display:block;color:var(--suave);font-size:12px;letter-spacing:.12em;text-transform:uppercase}.codigo b{display:block;font-size:64px;letter-spacing:.18em;line-height:1.05;color:#fff}.codigo span{font-size:12px;color:var(--suave)}
 .controle{background:var(--card);border:1px solid var(--borda);border-radius:18px;padding:14px 16px;display:flex;flex-direction:column;gap:12px}
-.linha{display:flex;gap:10px;flex-wrap:wrap;align-items:center}
+.linha{display:flex;gap:10px;flex-wrap:wrap;align-items:center}.linha>label{min-width:165px}.app-btn{display:inline-flex;align-items:center;gap:6px}.app-btn .qt{background:var(--verde2);color:#fff;border-radius:999px;font-size:11px;padding:1px 7px;margin-left:2px}
 .linha label{font-size:12px;color:var(--suave);letter-spacing:.06em;text-transform:uppercase;margin-right:2px}
 select{background:#081d33;color:var(--texto);border:1px solid var(--borda);border-radius:10px;padding:9px 10px;font:600 14px system-ui;min-width:170px}
 .resumo{display:flex;gap:10px;flex-wrap:wrap}
@@ -80,6 +80,10 @@ const DB=(LS.get('portal360_sala_db')||DB_PADRAO||'').replace(/\/+$/,'');
 const $=id=>document.getElementById(id);
 const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 const APPS={corpo:'Corpo Humano Imersivo',terra:'Terra por Dentro',dna:'DNA Imersivo',solar:'Sistema Solar VR'};
+const APPS_BOTOES=[['solar','🪐','Sistema Solar'],['corpo','🫀','Corpo Humano'],['terra','🌍','Terra por Dentro'],['dna','🧬','DNA'],['catalogo','🏠','Catálogo']];
+/* mapas das missões: os desta sala + os guardados de aulas anteriores (o painel lembra, assim as missões aparecem antes de algum óculos abrir o app) */
+function mapas(){let c={};try{c=JSON.parse(localStorage.getItem('portal360_mapas')||'{}')||{};}catch(_){c={};}const m=Object.assign(c,(sala&&sala.mapas)||{});
+  try{if(sala&&sala.mapas&&Object.keys(sala.mapas).length)localStorage.setItem('portal360_mapas',JSON.stringify(m));}catch(_){}return m;}
 let codigo=null,sala={},es=null,poll=0,offset=0,inicio=0,timer=0,refetch=0;
 const SV={'.sv':'timestamp'};
 let ultimoErro='';
@@ -95,7 +99,8 @@ function telaAbrir(){let ant=LS.get('portal360_sala_prof');if(!codValido(ant)){L
 function telaSala(){
   $('app').innerHTML='<section class="barra"><div class="codigo"><small>Código da sala</small><b id="cod">'+codigo+'</b><span>No óculos: 🎓 Entrar na sala</span></div><div class="controle">'+
    '<div class="resumo"><span class="chip"><span class="ponto"></span><span id="nOn">0 conectados</span></span><span class="chip">🥽 <span id="nVR">0 no VR</span></span><span class="chip">⏱ <span id="tempo">00:00</span></span><span class="chip alerta" id="nAlerta" hidden>⚠ <span>0 parados</span></span></div>'+
-   '<div class="linha"><label>Levar todos para</label><select id="selApp"></select><select id="selSec"></select><select id="selMis"></select><button class="btn pri" data-action="ir-todos">➜ Levar todos</button></div>'+
+   '<div class="linha apps"><label>1 · Abrir nos óculos</label>'+APPS_BOTOES.map(([k,ic,n])=>'<button class="btn app-btn" data-action="abrir-app" data-app="'+k+'">'+ic+' '+n+'<span class="qt" id="qt-'+k+'" hidden></span></button>').join('')+'</div>'+
+   '<div class="linha"><label>2 · Levar para a missão</label><select id="selApp"></select><select id="selSec"></select><select id="selMis"></select><button class="btn pri" data-action="ir-todos">➜ Levar todos</button></div>'+
    '<div class="linha"><button class="btn azul" data-action="pausa">⏸ Pausar todos</button><button class="btn" data-action="retomar">▶ Retomar</button><button class="btn" data-action="chamar-todos">🔔 Identificar óculos</button><span class="esp" style="flex:1"></span><button class="btn perigo" data-action="encerrar">■ Encerrar aula</button></div>'+
    '</div></section><section class="grade" id="grade"></section>';
   preencherSelects();desenhar();}
@@ -120,6 +125,7 @@ async function comando(c){c.id=Date.now().toString(36)+Math.random().toString(36
 const online=o=>o&&!o.saindo&&typeof o.visto==='number'&&agora()-o.visto<20000;
 function desenhar(){const g=$('grade');if(!g)return;const lista=Object.entries(sala.oculos||{}).sort((a,b)=>String(a[1].rotulo).localeCompare(String(b[1].rotulo),'pt',{numeric:true}));
   const on=lista.filter(([,o])=>online(o)),vr=on.filter(([,o])=>o.emVR&&o.atividade!=='tirou');$('nOn').textContent=on.length+(on.length===1?' conectado':' conectados');$('nVR').textContent=vr.length+' no VR';
+  APPS_BOTOES.forEach(([k])=>{const e=$('qt-'+k);if(!e)return;const n=on.filter(([,o])=>o.app===k).length;e.textContent=n||'';e.hidden=!n;});
   const bem=a=>!a||a==='ativo'||a==='assistindo';const al=on.filter(([,o])=>!bem(o.atividade)).length,na=$('nAlerta');if(na){na.hidden=!al;na.lastElementChild.textContent=al+(al===1?' precisa de atenção':' precisam de atenção');}
   if(!lista.length){g.innerHTML='<div class="vazio">Nenhum óculos na sala ainda. No óculos, abra o catálogo do Portal 360º, toque em <b>🎓 Entrar na sala</b> e digite <b>'+codigo+'</b>.</div>';return;}
   const cont={};on.forEach(([,o])=>{const r=String(o.rotulo||'');cont[r]=(cont[r]||0)+1;});
@@ -149,15 +155,15 @@ function mmss(s){s=Math.max(0,Math.round(s||0));return Math.floor(s/60)+':'+Stri
 function tempo(ms){const s=Math.round(ms/1000);return s<60?s+' s':Math.round(s/60)+' min';}
 
 /* ---------- seletores "levar para" a partir do que os óculos informaram ---------- */
-function preencherSelects(){const sa=$('selApp');if(!sa)return;const mapas=sala.mapas||{};const apps=Object.keys(APPS);
-  const v0=sa.value;sa.innerHTML=apps.map(a=>'<option value="'+a+'">'+esc(APPS[a])+(mapas[a]?'':' (abrir app)')+'</option>').join('');if(v0)sa.value=v0;else{const quem=Object.values(sala.oculos||{}).find(online);if(quem&&APPS[quem.app])sa.value=quem.app;}
+function preencherSelects(){const sa=$('selApp');if(!sa)return;const mp=mapas();const apps=Object.keys(APPS);
+  const v0=sa.value;sa.innerHTML=apps.map(a=>'<option value="'+a+'">'+esc(APPS[a])+'</option>').join('');if(v0)sa.value=v0;else{const quem=Object.values(sala.oculos||{}).find(online);if(quem&&APPS[quem.app])sa.value=quem.app;}
   secoes();}
-function secoes(){const sa=$('selApp'),ss=$('selSec');const m=(sala.mapas||{})[sa.value];const v0=ss.value;
+function secoes(){const sa=$('selApp'),ss=$('selSec');const m=mapas()[sa.value];const v0=ss.value;
   ss.innerHTML=m?m.secoes.map(s=>'<option value="'+esc(s.id)+'">'+esc(s.nome)+'</option>').join(''):'<option value="">Início do app</option>';if(v0&&[...ss.options].some(o=>o.value===v0))ss.value=v0;ss.disabled=!m;missoes();}
-function missoes(){const sa=$('selApp'),ss=$('selSec'),sm=$('selMis');const m=(sala.mapas||{})[sa.value];const s=m&&m.secoes.find(x=>x.id===ss.value);const v0=sm.value;
+function missoes(){const sa=$('selApp'),ss=$('selSec'),sm=$('selMis');const m=mapas()[sa.value];const s=m&&m.secoes.find(x=>x.id===ss.value);const v0=sm.value;
   sm.innerHTML=s?s.missoes.map(x=>'<option value="'+esc(x.id)+'">'+esc(x.nome)+'</option>').join(''):'<option value="">—</option>';if(v0&&[...sm.options].some(o=>o.value===v0))sm.value=v0;sm.disabled=!s;}
 function destino(){return{app:$('selApp').value,sec:$('selSec').value||'',view:$('selMis').value||''};}
-function nomeDestino(d){const m=(sala.mapas||{})[d.app];const s=m&&m.secoes.find(x=>x.id===d.sec);const mi=s&&s.missoes.find(x=>x.id===d.view);return APPS[d.app]+(s?' · '+s.nome:'')+(mi?' · '+mi.nome:'');}
+function nomeDestino(d){const m=mapas()[d.app];const s=m&&m.secoes.find(x=>x.id===d.sec);const mi=s&&s.missoes.find(x=>x.id===d.view);return APPS[d.app]+(s?' · '+s.nome:'')+(mi?' · '+mi.nome:'');}
 
 /* ---------- eventos (Regra 9: delegação) ---------- */
 document.addEventListener('change',e=>{if(e.target.id==='selApp')secoes();else if(e.target.id==='selSec')missoes();});
@@ -166,6 +172,8 @@ document.addEventListener('click',async e=>{const b=e.target.closest('[data-acti
   if(ac==='abrir'){b.disabled=true;await abrir(null);b.disabled=false;return;}
   if(ac==='reabrir'){await abrir(LS.get('portal360_sala_prof'));return;}
   if(!codigo)return;
+  if(ac==='abrir-app'){const ap=b.dataset.app,nome=ap==='catalogo'?'o catálogo':APPS[ap];if(!confirm('Abrir '+nome+' em todos os óculos?'+(ap==='catalogo'?'':' Cada aluno toca em "Entrar em VR" quando o app abrir.')))return;
+    if(await comando({tipo:'ir',app:ap,sec:'',view:''})!==null){toast('Abrindo '+nome+' em todos os óculos.');if(APPS[ap]){$('selApp').value=ap;secoes();}}return;}
   if(ac==='ir-todos'){const d=destino();if(await comando(Object.assign({tipo:'ir'},d))!==null)toast('Turma a caminho: '+nomeDestino(d));}
   else if(ac==='ir-um'){const d=destino();if(await comando(Object.assign({tipo:'ir',alvo:id},d))!==null)toast((sala.oculos[id]||{}).rotulo+' → '+nomeDestino(d));}
   else if(ac==='pausa'){if(await comando({tipo:'pausa'})!==null)toast('Óculos pausados: "Olhe para o professor".');}

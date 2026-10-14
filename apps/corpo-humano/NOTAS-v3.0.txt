@@ -330,3 +330,4 @@ modelos/<chave>.glb do Z-Anatomy quando a chave for incluída em D.LTR_GLB. Pend
 
 ==== v4.8.1 (out/2026) · narração humana dos módulos 9, 10 e 11 ====
 76 de 77 áudios gravados por Alan, normalizados (mono, 64 kbps, -17 LUFS, silêncio aparado). Falta: rep-contexto-2.mp3 (Reprodutor · Contexto etapa 3, sistema masculino); até chegar, voz do navegador.
+v4.8.2: rep-contexto-2.mp3 recebido; narração humana completa dos módulos 9, 10 e 11 (77/77).

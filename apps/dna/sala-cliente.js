@@ -1,4 +1,4 @@
-/* Sala do professor · cliente dos óculos (Portal 360º VR · Portal do Educador) v1.0.0 (out/2026)
+/* Sala do professor · cliente dos óculos (Portal 360º VR · Portal do Educador) v1.1.0 (out/2026)
    Roda no catálogo e em cada app. O óculos entra numa sala (código de 4 dígitos), informa a cada poucos segundos
    o que o aluno está fazendo (app, sistema/tema, missão, progresso, Desafio, se está no VR, bateria) e obedece aos
    comandos do professor: levar para uma missão, pausar/retomar, chamar (identificar o óculos) e encerrar.
@@ -7,7 +7,7 @@
    Arquivo-mestre: assets/sala/sala-cliente.js (cópia idêntica em cada apps/<app>/). Regra 9: sem onclick inline. */
 (function(){'use strict';
 if(window.Portal360Sala)return;
-const VERSAO='1.0.2';
+const VERSAO='1.1.0';
 /* endereço do banco: preenchido quando o projeto Firebase da sala for criado (sem barra no fim) */
 const DB_PADRAO='https://portal360-sala-default-rtdb.firebaseio.com';
 const q=new URLSearchParams(location.search);
@@ -53,8 +53,54 @@ const url=p=>DB()+'/'+p+'.json';
 async function rede(metodo,p,corpo){if(!DB())return null;try{const r=await fetch(url(p),{method:metodo,headers:{'Content-Type':'application/json'},body:corpo===undefined?undefined:JSON.stringify(corpo),cache:'no-store'});return r.ok?await r.json():null;}catch(_){return null;}}
 let bateria=null;try{if(navigator.getBattery)navigator.getBattery().then(b=>{const f=()=>{bateria={nivel:Math.round(b.level*100),carregando:!!b.charging};};f();b.addEventListener('levelchange',f);b.addEventListener('chargingchange',f);});}catch(_){}
 let ultimoEnvio='',hb=0,es=null,poll=0,ligado=false;
-function pacote(){let e={};try{if(A.ok())e=A.estado();}catch(_){e={};}return Object.assign({rotulo:sala.rotulo,app:APP,appNome:APPS[APP],emVR:emVR(),bateria,saindo:false,versao:VERSAO},e);}
-async function enviar(forcar){if(!sala)return;const p=pacote();const sig=JSON.stringify(p);if(!forcar&&sig===ultimoEnvio&&Date.now()-hb<5000)return;ultimoEnvio=sig;hb=Date.now();p.visto={'.sv':'timestamp'};await rede('PATCH','salas/'+sala.codigo+'/oculos/'+ID,p);}
+function pacote(){let e={};try{if(A.ok())e=A.estado();}catch(_){e={};}
+  const chave=APP+'/'+(e.secId||'')+'/'+(e.view||'');if(chave!==ENG.chave){ENG.chave=chave;ENG.interacoes=0;ENG.novaMissao=true;}
+  return Object.assign({rotulo:sala.rotulo,app:APP,appNome:APPS[APP],emVR:emVR(),bateria,saindo:false,versao:VERSAO,atividade:ENG.status,atencao:atencao(),interacoes:ENG.interacoes},e);}
+async function enviar(forcar){if(!sala)return;const p=pacote();const sig=JSON.stringify(p);if(!forcar&&sig===ultimoEnvio&&Date.now()-hb<5000)return;ultimoEnvio=sig;hb=Date.now();p.visto={'.sv':'timestamp'};
+  /* marcos com a hora do servidor: desde quando está neste status e nesta missão */
+  if(ENG.novoStatus){p.statusDesde={'.sv':'timestamp'};ENG.novoStatus=false;}if(ENG.novaMissao){p.missaoDesde={'.sv':'timestamp'};ENG.novaMissao=false;}
+  await rede('PATCH','salas/'+sala.codigo+'/oculos/'+ID,p);}
+
+/* ---------- engajamento (sinais automáticos) ----------
+   ativo  = cabeça se mexendo ou aluno interagindo nos últimos 90 s
+   parado = 90 s sem mexer a cabeça e sem interagir (óculos largado na mesa, aluno "desligado")
+   menu   = menu do sistema do Quest aberto por cima do app
+   tirou  = sessão VR oculta (óculos fora do rosto) ou página em segundo plano
+   atencao = % do último minuto com a cabeça voltada para o conteúdo (direção da cabeça; o Quest 3S não rastreia os olhos) */
+const PARADO_MS=90000;
+const ENG={status:'ativo',ultMov:Date.now(),ultInt:Date.now(),ref:null,amostras:[],interacoes:0,chave:'',novoStatus:true,novaMissao:true,visib:null,sess:null};
+function ctxApp(){try{return window.PortalEntrada&&window.PortalEntrada.contexto&&window.PortalEntrada.contexto();}catch(_){return null;}}
+function atencao(){if(!emVR()||ENG.amostras.length<20)return null;let s=0;for(const x of ENG.amostras)s+=x;return Math.round(10*s/ENG.amostras.length)*10;}
+function interagiu(conta){ENG.ultInt=Date.now();if(conta)ENG.interacoes++;}
+let focoC=null,focoT=0,V=null;
+/* centro e raio do conteúdo: une as malhas visíveis de tamanho "de objeto" (ignora céu, estrelas, controles e avisos) */
+function foco(ctx,T){if(focoC&&Date.now()-focoT<10000)return focoC;focoT=Date.now();
+  const fora=new Set([ctx.camera]);try{for(let i=0;i<2;i++){fora.add(ctx.renderer.xr.getController(i));fora.add(ctx.renderer.xr.getControllerGrip(i));}}catch(_){}
+  const caixa=new T.Box3(),b=new T.Box3(),esf=new T.Sphere();let n=0;
+  const dentro=o=>{for(let x=o;x;x=x.parent)if(fora.has(x))return true;return false;};
+  ctx.scene.traverseVisible(o=>{if(!o.isMesh||!o.geometry||o.renderOrder>=9990)return;const g=o.geometry;
+    try{if(!g.boundingSphere)g.computeBoundingSphere();if(!g.boundingSphere)return;esf.copy(g.boundingSphere).applyMatrix4(o.matrixWorld);if(!(esf.radius<8)||esf.center.length()>40||dentro(o))return;
+      if(!g.boundingBox)g.computeBoundingBox();b.copy(g.boundingBox).applyMatrix4(o.matrixWorld);caixa.union(b);n++;}catch(_){}});
+  focoC=n?{c:caixa.getCenter(new T.Vector3()),r:caixa.getSize(new T.Vector3()).length()/2}:null;return focoC;}
+function amostrar(){if(!sala)return;const T=window.THREE,ctx=ctxApp(),agoraMs=Date.now();
+  if(T&&ctx&&ctx.camera&&ctx.renderer&&ctx.renderer.xr&&ctx.renderer.xr.isPresenting){
+    const sess=ctx.renderer.xr.getSession();
+    if(sess&&sess!==ENG.sess){ENG.sess=sess;ENG.visib=sess.visibilityState||'visible';ENG.amostras=[];ENG.ref=null;
+      sess.addEventListener('select',()=>interagiu(true));sess.addEventListener('squeeze',()=>interagiu(false));
+      sess.addEventListener('visibilitychange',()=>{ENG.visib=sess.visibilityState;amostrar();});
+      sess.addEventListener('end',()=>{ENG.sess=null;ENG.visib=null;ENG.ultMov=Date.now();amostrar();});}
+    if(!V)V={p:new T.Vector3(),q:new T.Quaternion(),s:new T.Vector3(),f:new T.Vector3(),d:new T.Vector3()};
+    ctx.camera.matrixWorld.decompose(V.p,V.q,V.s);V.f.set(0,0,-1).applyQuaternion(V.q);
+    if(!ENG.ref)ENG.ref={p:V.p.clone(),f:V.f.clone()};
+    else if(ENG.ref.p.distanceTo(V.p)>0.04||ENG.ref.f.angleTo(V.f)>0.07){ENG.ref.p.copy(V.p);ENG.ref.f.copy(V.f);ENG.ultMov=agoraMs;}
+    if(ENG.visib==='visible'){const fc=foco(ctx,T);if(fc){V.d.copy(fc.c).sub(V.p);const dist=Math.max(V.d.length(),0.3);
+      const cone=Math.min(2.6,Math.max(0.6,Math.atan(fc.r/dist)+0.26));ENG.amostras.push(V.f.angleTo(V.d)<cone?1:0);if(ENG.amostras.length>240)ENG.amostras.shift();}}
+  }
+  const st=(ENG.visib==='hidden'||document.visibilityState==='hidden')?'tirou':ENG.visib==='visible-blurred'?'menu':(agoraMs-Math.max(ENG.ultMov,ENG.ultInt)>PARADO_MS?'parado':'ativo');
+  if(st!==ENG.status){ENG.status=st;ENG.novoStatus=true;enviar(true);}}
+['pointerdown','keydown','wheel'].forEach(t=>addEventListener(t,()=>interagiu(t==='pointerdown'),{capture:true,passive:true}));
+addEventListener('pointermove',()=>{ENG.ultInt=Date.now();},{passive:true});
+document.addEventListener('visibilitychange',()=>amostrar());
 async function enviarMapa(){if(!sala||!A.ok())return;const m=A.mapa();if(m)await rede('PUT','salas/'+sala.codigo+'/mapas/'+APP,{nome:APPS[APP],secoes:m});}
 
 /* ---------- comandos ---------- */
@@ -88,7 +134,7 @@ function iniciar(){if(ligado||!sala||!DB())return;ligado=true;
   /* chegou por um comando "ir" vindo de outro app: completa a navegação quando o app estiver pronto */
   const ir=SS.get('portal360_irpara');if(ir){SS.del('portal360_irpara');let tent=0;const t=setInterval(()=>{if(A.ok()||++tent>40){clearInterval(t);try{const o=JSON.parse(ir);fecharBoasVindas();if(A.ok())A.ir(o.sec,o.view);setTimeout(fecharBoasVindas,400);}catch(_){}}},250);}
   let tent=0;const esperar=setInterval(()=>{if(A.ok()||++tent>40){clearInterval(esperar);enviarMapa();}},250);
-  enviar(true);setInterval(()=>enviar(false),1500);ouvirComandos();chip();}
+  enviar(true);setInterval(()=>enviar(false),1500);setInterval(amostrar,250);ouvirComandos();chip();}
 async function entrar(codigo,rotulo){sala={codigo,rotulo};LS.set('portal360_sala',JSON.stringify(sala));ligado=false;iniciar();chip();}
 async function sair(silencioso){if(sala){await rede('DELETE','salas/'+sala.codigo+'/oculos/'+ID);}pararComandos();sala=null;LS.del('portal360_sala');ligado=false;chip();if(!silencioso)fecharDialogo();}
 addEventListener('pagehide',()=>{if(sala&&DB()){try{fetch(url('salas/'+sala.codigo+'/oculos/'+ID),{method:'PATCH',body:JSON.stringify({saindo:true,visto:{'.sv':'timestamp'}}),keepalive:true});}catch(_){}}});

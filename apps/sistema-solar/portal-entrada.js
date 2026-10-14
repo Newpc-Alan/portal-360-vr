@@ -14,7 +14,7 @@
 (function(){
 'use strict';
 if(window.PortalEntrada)return;
-const VERSAO='1.0.0';
+const VERSAO='1.0.1';
 const DUR=9.4,REVELA_FIM=7.6,INICIO_CURTO=5.2;
 let cfg=null,ativo=null,entradasXR=0,fila=[];
 const agoraS=()=>(typeof window.__peRelogio==='function'?window.__peRelogio():performance.now()/1000); /* relógio substituível só em teste */
@@ -282,6 +282,8 @@ window.PortalEntrada={
   },
   tocar3D,
   pular(){if(ativo)ativo.pular();},
+  /* renderer, cena e câmera do app (usado pela Sala do professor para os avisos no VR) */
+  contexto(){try{return cfg&&cfg.obter?cfg.obter():null;}catch(_){return null;}},
   get ativo(){return !!ativo;},
   depois(fn,atraso){if(typeof fn!=='function')return;if(ativo)fila.push(fn);else setTimeout(fn,atraso||0);}
 };

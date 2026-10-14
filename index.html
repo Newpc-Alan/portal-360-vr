@@ -463,8 +463,17 @@ document.addEventListener('keydown',function(e){
 /* Aula de abertura (teste com YouTube; produção usará MP4 local) */
 (function(){var modal=document.getElementById('aulaModal'),frame=document.getElementById('aulaFrame'),titulo=document.getElementById('aulaTitulo'),link=document.getElementById('aulaLink'),explorar=document.getElementById('aulaExplorar');
  function abrir(btn){var id=btn.getAttribute('data-yt');titulo.textContent=btn.getAttribute('data-titulo')||'Aula de abertura';link.href='https://www.youtube.com/watch?v='+id;var card=btn.closest('.card');var ex=card&&card.querySelector('.primary-btn');explorar.href=ex?ex.getAttribute('href'):'#';
-  frame.innerHTML='<iframe src="https://www.youtube-nocookie.com/embed/'+id+'?autoplay=1&rel=0&modestbranding=1&hl=pt-BR" title="Aula de abertura" allow="autoplay; fullscreen; picture-in-picture" allowfullscreen referrerpolicy="strict-origin-when-cross-origin"></iframe>';modal.classList.add('open');document.body.style.overflow='hidden';/* tela cheia nativa (precisa do gesto do clique; o modal fica como reserva se o navegador recusar) */try{var rf=modal.requestFullscreen||modal.webkitRequestFullscreen;if(rf){var pr=rf.call(modal);if(pr&&pr.catch)pr.catch(function(){});}}catch(_){}}
- function fechar(){modal.classList.remove('open');frame.innerHTML='';document.body.style.overflow='';var fs=document.fullscreenElement||document.webkitFullscreenElement;if(fs===modal){try{(document.exitFullscreen||document.webkitExitFullscreen).call(document);}catch(_){}}}
+  frame.innerHTML='<iframe id="aulaYT" src="https://www.youtube-nocookie.com/embed/'+id+'?autoplay=1&rel=0&modestbranding=1&hl=pt-BR&playsinline=1&enablejsapi=1&origin='+encodeURIComponent(location.origin)+'" title="Aula de abertura" allow="autoplay; fullscreen; picture-in-picture" allowfullscreen referrerpolicy="strict-origin-when-cross-origin"></iframe>';modal.classList.add('open');document.body.style.overflow='hidden';/* tela cheia nativa (precisa do gesto do clique; o modal fica como reserva se o navegador recusar) */try{var rf=modal.requestFullscreen||modal.webkitRequestFullscreen;if(rf){var pr=rf.call(modal);if(pr&&pr.catch)pr.catch(function(){});}}catch(_){}
+  acompanhar(btn.getAttribute('data-titulo')||'Aula de abertura');}
+ /* Sala do professor: acompanha a aula pelo player do YouTube (play, minuto, duração, fim). Sem a API, o vídeo toca normalmente. */
+ var player=null,ytFim=false;
+ function api(cb){if(window.YT&&YT.Player)return cb();var antes=window.onYouTubeIframeAPIReady;window.onYouTubeIframeAPIReady=function(){if(antes)try{antes();}catch(_){}cb();};
+  if(!document.getElementById('ytApi')){var s=document.createElement('script');s.id='ytApi';s.src='https://www.youtube.com/iframe_api';document.head.appendChild(s);}}
+ function acompanhar(nome){ytFim=false;player=null;if(!window.Portal360Sala||!Portal360Sala.sala)return;
+  api(function(){var el=document.getElementById('aulaYT');if(!el)return;try{player=new YT.Player(el,{events:{onStateChange:function(e){if(e.data===0)ytFim=true;}}});}catch(_){player=null;return;}
+   Portal360Sala.midiaExterna({tipo:'video',nome:nome,estado:function(){if(!player||!player.getPlayerState)return null;var st=player.getPlayerState();return{tocando:st===1||st===3,pos:player.getCurrentTime(),dur:player.getDuration(),fim:ytFim||st===0};}});});}
+ function fechar(){if(player&&window.Portal360Sala&&Portal360Sala.midiaExterna){var ult=null;try{ult={tocando:false,pos:player.getCurrentTime(),dur:player.getDuration(),fim:ytFim||player.getPlayerState()===0};}catch(_){}var nome=titulo.textContent;Portal360Sala.midiaExterna(ult&&ult.dur?{tipo:'video',nome:nome,estado:function(){return ult;}}:null);}player=null;
+  modal.classList.remove('open');frame.innerHTML='';document.body.style.overflow='';var fs=document.fullscreenElement||document.webkitFullscreenElement;if(fs===modal){try{(document.exitFullscreen||document.webkitExitFullscreen).call(document);}catch(_){}}}
  document.addEventListener('fullscreenchange',function(){if(!document.fullscreenElement&&modal.classList.contains('open'))fechar();});document.addEventListener('webkitfullscreenchange',function(){if(!document.webkitFullscreenElement&&modal.classList.contains('open'))fechar();});
  document.addEventListener('click',function(e){var b=e.target.closest('[data-action="aula"]');if(b){e.preventDefault();abrir(b);return;}if(e.target.closest('[data-action="aula-fechar"]')){fechar();return;}if(e.target.closest('[data-action="aula-explorar"]')){fechar();return;}if(e.target===modal)fechar();});
  document.addEventListener('keydown',function(e){if(e.key==='Escape'&&modal.classList.contains('open'))fechar();});})();
@@ -548,6 +557,6 @@ function applyFilters(){
 fBusca.addEventListener('input',applyFilters);
 
 </script>
-<script defer src="assets/sala/sala-cliente.js?v=1.2.0"></script>
+<script defer src="assets/sala/sala-cliente.js?v=1.2.1"></script>
 </body>
 </html>

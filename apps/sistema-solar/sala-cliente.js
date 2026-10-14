@@ -7,7 +7,7 @@
    Arquivo-mestre: assets/sala/sala-cliente.js (cópia idêntica em cada apps/<app>/). Regra 9: sem onclick inline. */
 (function(){'use strict';
 if(window.Portal360Sala)return;
-const VERSAO='1.2.0';
+const VERSAO='1.2.1';
 /* endereço do banco: preenchido quando o projeto Firebase da sala for criado (sem barra no fim) */
 const DB_PADRAO='https://portal360-sala-default-rtdb.firebaseio.com';
 const q=new URLSearchParams(location.search);
@@ -103,7 +103,10 @@ function amostrar(){if(!sala)return;const T=window.THREE,ctx=ctxApp(),agoraMs=Da
    Vale para <video>/<audio> e new Audio() com som, sem loop e com mais de 3 s (fica de fora trilha de fundo e vídeo de capa mudo). */
 const MID={el:null,max:0,fim:false};
 const midiaValida=m=>m&&!m.muted&&!m.loop&&m.volume>0&&isFinite(m.duration)&&m.duration>3;
-const tocando=()=>!!(MID.el&&!MID.el.paused&&!MID.el.ended);
+/* mídia externa (ex.: aula do YouTube no catálogo): a página informa {tipo,nome,estado:()=>({tocando,pos,dur,fim})} */
+let EXT=null;const extEstado=()=>{try{return EXT&&EXT.estado();}catch(_){return null;}};
+const tocando=()=>{const x=extEstado();if(x&&x.tocando)return true;return !!(MID.el&&!MID.el.paused&&!MID.el.ended);};
+function midiaExterna(o){EXT=o||null;MID.extMax=0;MID.extFim=false;MID.extUlt=null;enviar(true);}
 function vigiar(m){if(!m||m.__p360)return;m.__p360=1;
   m.addEventListener('playing',()=>{if(!midiaValida(m))return;const src=m.currentSrc||m.src;if(MID.el!==m||MID.src!==src){MID.el=m;MID.src=src;MID.max=0;MID.fim=false;}interagiu(false);amostrar();enviar(true);});
   m.addEventListener('timeupdate',()=>{if(MID.el===m&&m.duration)MID.max=Math.max(MID.max,m.currentTime/m.duration);});
@@ -111,7 +114,10 @@ function vigiar(m){if(!m||m.__p360)return;m.__p360=1;
   m.addEventListener('pause',()=>{if(MID.el===m){interagiu(false);amostrar();enviar(true);}});}
 try{const _play=HTMLMediaElement.prototype.play;HTMLMediaElement.prototype.play=function(){try{vigiar(this);}catch(_){}return _play.apply(this,arguments);};}catch(_){}
 document.addEventListener('play',e=>{if(e.target instanceof HTMLMediaElement)vigiar(e.target);},true);
-function midia(){const m=MID.el;if(!m)return null;let nome='';try{nome=decodeURIComponent((m.currentSrc||m.src||'').split('?')[0].split('/').pop()).replace(/\.[a-z0-9]+$/i,'');}catch(_){}
+function midia(){if(EXT){let x=extEstado();if(x&&x.dur>0)MID.extUlt=x;else x=MID.extUlt;
+    if(x&&x.dur>0){if(x.fim)MID.extFim=true;MID.extMax=MID.extFim?1:Math.max(MID.extMax||0,(x.pos||0)/x.dur);
+      return{tipo:EXT.tipo||'video',nome:EXT.nome||'',tocando:!!x.tocando,pos:Math.floor((x.pos||0)/5)*5,dur:Math.round(x.dur),visto:Math.round(MID.extMax*10)*10,fim:MID.extFim};}}
+  const m=MID.el;if(!m)return null;let nome='';try{nome=decodeURIComponent((m.currentSrc||m.src||'').split('?')[0].split('/').pop()).replace(/\.[a-z0-9]+$/i,'');}catch(_){}
   return{tipo:m.tagName==='VIDEO'?'video':'audio',nome,tocando:tocando(),pos:Math.floor((m.currentTime||0)/5)*5,dur:Math.round(m.duration||0),visto:Math.round(MID.max*10)*10,fim:MID.fim};}
 ['pointerdown','keydown','wheel'].forEach(t=>addEventListener(t,()=>interagiu(t==='pointerdown'),{capture:true,passive:true}));
 addEventListener('pointermove',()=>{ENG.ultInt=Date.now();},{passive:true});
@@ -207,7 +213,7 @@ document.addEventListener('click',async e=>{const b=e.target.closest('[data-acti
 },true);
 document.addEventListener('keydown',e=>{if(dlg&&e.key==='Enter'){const b=dlg.querySelector('[data-action="p360s-entrar"]');if(b)b.click();}});
 
-window.Portal360Sala={versao:VERSAO,get sala(){return sala;},id:ID,app:APP,entrar,sair,abrir:abrirDialogo,estado:pacote,_executar:executar};
+window.Portal360Sala={versao:VERSAO,get sala(){return sala;},id:ID,app:APP,entrar,sair,abrir:abrirDialogo,estado:pacote,midiaExterna,_executar:executar};
 const pronto=()=>{chip();if(sala)iniciar();};
 if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',pronto);else pronto();
 })();

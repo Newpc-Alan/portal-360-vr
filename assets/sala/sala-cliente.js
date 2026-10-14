@@ -1,4 +1,4 @@
-/* Sala do professor · cliente dos óculos (Portal 360º VR · Portal do Educador) v1.1.0 (out/2026)
+/* Sala do professor · cliente dos óculos (Portal 360º VR · Portal do Educador) v1.2.0 (out/2026)
    Roda no catálogo e em cada app. O óculos entra numa sala (código de 4 dígitos), informa a cada poucos segundos
    o que o aluno está fazendo (app, sistema/tema, missão, progresso, Desafio, se está no VR, bateria) e obedece aos
    comandos do professor: levar para uma missão, pausar/retomar, chamar (identificar o óculos) e encerrar.
@@ -7,7 +7,7 @@
    Arquivo-mestre: assets/sala/sala-cliente.js (cópia idêntica em cada apps/<app>/). Regra 9: sem onclick inline. */
 (function(){'use strict';
 if(window.Portal360Sala)return;
-const VERSAO='1.1.0';
+const VERSAO='1.2.0';
 /* endereço do banco: preenchido quando o projeto Firebase da sala for criado (sem barra no fim) */
 const DB_PADRAO='https://portal360-sala-default-rtdb.firebaseio.com';
 const q=new URLSearchParams(location.search);
@@ -54,8 +54,8 @@ async function rede(metodo,p,corpo){if(!DB())return null;try{const r=await fetch
 let bateria=null;try{if(navigator.getBattery)navigator.getBattery().then(b=>{const f=()=>{bateria={nivel:Math.round(b.level*100),carregando:!!b.charging};};f();b.addEventListener('levelchange',f);b.addEventListener('chargingchange',f);});}catch(_){}
 let ultimoEnvio='',hb=0,es=null,poll=0,ligado=false;
 function pacote(){let e={};try{if(A.ok())e=A.estado();}catch(_){e={};}
-  const chave=APP+'/'+(e.secId||'')+'/'+(e.view||'');if(chave!==ENG.chave){ENG.chave=chave;ENG.interacoes=0;ENG.novaMissao=true;}
-  return Object.assign({rotulo:sala.rotulo,app:APP,appNome:APPS[APP],emVR:emVR(),bateria,saindo:false,versao:VERSAO,atividade:ENG.status,atencao:atencao(),interacoes:ENG.interacoes},e);}
+  const chave=APP+'/'+(e.secId||'')+'/'+(e.view||'');if(chave!==ENG.chave){ENG.chave=chave;ENG.interacoes=0;ENG.novaMissao=true;if(!tocando())MID.el=null;}
+  return Object.assign({rotulo:sala.rotulo,app:APP,appNome:APPS[APP],emVR:emVR(),bateria,saindo:false,versao:VERSAO,atividade:ENG.status,atencao:atencao(),interacoes:ENG.interacoes,midia:midia()},e);}
 async function enviar(forcar){if(!sala)return;const p=pacote();const sig=JSON.stringify(p);if(!forcar&&sig===ultimoEnvio&&Date.now()-hb<5000)return;ultimoEnvio=sig;hb=Date.now();p.visto={'.sv':'timestamp'};
   /* marcos com a hora do servidor: desde quando está neste status e nesta missão */
   if(ENG.novoStatus){p.statusDesde={'.sv':'timestamp'};ENG.novoStatus=false;}if(ENG.novaMissao){p.missaoDesde={'.sv':'timestamp'};ENG.novaMissao=false;}
@@ -96,8 +96,23 @@ function amostrar(){if(!sala)return;const T=window.THREE,ctx=ctxApp(),agoraMs=Da
     if(ENG.visib==='visible'){const fc=foco(ctx,T);if(fc){V.d.copy(fc.c).sub(V.p);const dist=Math.max(V.d.length(),0.3);
       const cone=Math.min(2.6,Math.max(0.6,Math.atan(fc.r/dist)+0.26));ENG.amostras.push(V.f.angleTo(V.d)<cone?1:0);if(ENG.amostras.length>240)ENG.amostras.shift();}}
   }
-  const st=(ENG.visib==='hidden'||document.visibilityState==='hidden')?'tirou':ENG.visib==='visible-blurred'?'menu':(agoraMs-Math.max(ENG.ultMov,ENG.ultInt)>PARADO_MS?'parado':'ativo');
+  const st=(ENG.visib==='hidden'||document.visibilityState==='hidden')?'tirou':ENG.visib==='visible-blurred'?'menu':tocando()?'assistindo':(agoraMs-Math.max(ENG.ultMov,ENG.ultInt)>PARADO_MS?'parado':'ativo');
+  if(st==='assistindo')ENG.ultInt=agoraMs; /* ao terminar o vídeo, os 90 s de "parado" contam a partir do fim */
   if(st!==ENG.status){ENG.status=st;ENG.novoStatus=true;enviar(true);}}
+/* ---------- vídeo-aula e narração: assistir conta como participação ----------
+   Vale para <video>/<audio> e new Audio() com som, sem loop e com mais de 3 s (fica de fora trilha de fundo e vídeo de capa mudo). */
+const MID={el:null,max:0,fim:false};
+const midiaValida=m=>m&&!m.muted&&!m.loop&&m.volume>0&&isFinite(m.duration)&&m.duration>3;
+const tocando=()=>!!(MID.el&&!MID.el.paused&&!MID.el.ended);
+function vigiar(m){if(!m||m.__p360)return;m.__p360=1;
+  m.addEventListener('playing',()=>{if(!midiaValida(m))return;const src=m.currentSrc||m.src;if(MID.el!==m||MID.src!==src){MID.el=m;MID.src=src;MID.max=0;MID.fim=false;}interagiu(false);amostrar();enviar(true);});
+  m.addEventListener('timeupdate',()=>{if(MID.el===m&&m.duration)MID.max=Math.max(MID.max,m.currentTime/m.duration);});
+  m.addEventListener('ended',()=>{if(MID.el===m){MID.max=1;MID.fim=true;interagiu(false);amostrar();enviar(true);}});
+  m.addEventListener('pause',()=>{if(MID.el===m){interagiu(false);amostrar();enviar(true);}});}
+try{const _play=HTMLMediaElement.prototype.play;HTMLMediaElement.prototype.play=function(){try{vigiar(this);}catch(_){}return _play.apply(this,arguments);};}catch(_){}
+document.addEventListener('play',e=>{if(e.target instanceof HTMLMediaElement)vigiar(e.target);},true);
+function midia(){const m=MID.el;if(!m)return null;let nome='';try{nome=decodeURIComponent((m.currentSrc||m.src||'').split('?')[0].split('/').pop()).replace(/\.[a-z0-9]+$/i,'');}catch(_){}
+  return{tipo:m.tagName==='VIDEO'?'video':'audio',nome,tocando:tocando(),pos:Math.floor((m.currentTime||0)/5)*5,dur:Math.round(m.duration||0),visto:Math.round(MID.max*10)*10,fim:MID.fim};}
 ['pointerdown','keydown','wheel'].forEach(t=>addEventListener(t,()=>interagiu(t==='pointerdown'),{capture:true,passive:true}));
 addEventListener('pointermove',()=>{ENG.ultInt=Date.now();},{passive:true});
 document.addEventListener('visibilitychange',()=>amostrar());

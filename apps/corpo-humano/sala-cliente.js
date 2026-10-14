@@ -7,7 +7,7 @@
    Arquivo-mestre: assets/sala/sala-cliente.js (cópia idêntica em cada apps/<app>/). Regra 9: sem onclick inline. */
 (function(){'use strict';
 if(window.Portal360Sala)return;
-const VERSAO='1.4.0';
+const VERSAO='1.4.1';
 /* endereço do banco: preenchido quando o projeto Firebase da sala for criado (sem barra no fim) */
 const DB_PADRAO='https://portal360-sala-default-rtdb.firebaseio.com';
 const q=new URLSearchParams(location.search);
@@ -55,7 +55,7 @@ let bateria=null;try{if(navigator.getBattery)navigator.getBattery().then(b=>{con
 let ultimoEnvio='',hb=0,es=null,poll=0,ligado=false;
 function pacote(){let e={};try{if(A.ok())e=A.estado();}catch(_){e={};}
   const chave=APP+'/'+(e.secId||'')+'/'+(e.view||'');if(chave!==ENG.chave){ENG.chave=chave;ENG.interacoes=0;ENG.novaMissao=true;if(!tocando())MID.el=null;}
-  return Object.assign({rotulo:sala.rotulo,app:APP,appNome:APPS[APP],emVR:emVR(),bateria,saindo:false,versao:VERSAO,atividade:ENG.status,atencao:atencao(),interacoes:ENG.interacoes,midia:midia()},e);}
+  return Object.assign({rotulo:sala.rotulo,app:APP,appNome:APPS[APP],emVR:emVR(),bateria,saindo:false,versao:VERSAO,atividade:ENG.status,atencao:atencao(),interacoes:ENG.interacoes,midia:midia(),diagVR},e);}
 async function enviar(forcar){if(!sala)return;const p=pacote();const sig=JSON.stringify(p);if(!forcar&&sig===ultimoEnvio&&Date.now()-hb<5000)return;ultimoEnvio=sig;hb=Date.now();p.visto={'.sv':'timestamp'};
   /* marcos com a hora do servidor: desde quando está neste status e nesta missão */
   if(ENG.novoStatus){p.statusDesde={'.sv':'timestamp'};ENG.novoStatus=false;}if(ENG.novaMissao){p.missaoDesde={'.sv':'timestamp'};ENG.novaMissao=false;}
@@ -137,7 +137,7 @@ function executar(c){
   if(c.tipo==='encerrar'){fecharAviso();aviso('Aula encerrada','Obrigado! Pode tirar o óculos.',false,6000);sair(true);return;}
   if(c.tipo==='ir'){fecharAviso();
     if(c.app==='catalogo'){if(APP!=='catalogo')location.href=BASE;return;}
-    if(c.app&&c.app!==APP&&PASTA[c.app])SS.set('portal360_prof_abriu',APPS[c.app]||'1');
+    if(c.app&&c.app!==APP&&PASTA[c.app]){SS.set('portal360_prof_abriu',APPS[c.app]||'1');SS.set('portal360_estava_vr',emVR()?'1':'0');}
     if(c.app&&c.app!==APP&&PASTA[c.app]){SS.set('portal360_irpara',JSON.stringify({sec:c.sec||'',view:c.view||''}));location.href=BASE+'apps/'+PASTA[c.app]+'/?vr=1';return;}
     fecharBoasVindas();try{if(A.ok())A.ir(c.sec,c.view);}catch(e){console.warn('Sala: não consegui ir para a missão',e);}setTimeout(()=>enviar(true),600);}
 }
@@ -145,16 +145,18 @@ function executar(c){
    1) Se o aluno já estava em VR, o Quest Browser concede a sessão à página nova (evento "sessiongranted",
       navegação WebXR): entramos sozinhos, sem toque.
    2) Se não (vinha do catálogo em 2D), o navegador exige um toque: a tela de entrada inteira vira o botão. */
-let xrConcedido=false;
+let xrConcedido=false;const concedido=()=>xrConcedido||!!window.__xrConcedido;
 try{if(navigator.xr&&navigator.xr.addEventListener)navigator.xr.addEventListener('sessiongranted',()=>{xrConcedido=true;});}catch(_){}
-function chegadaPeloProfessor(){const nome=SS.get('portal360_prof_abriu');if(!nome||APP==='catalogo')return;SS.del('portal360_prof_abriu');
+let diagVR=null; /* para o painel: como foi a entrada no VR depois da troca de app */
+function chegadaPeloProfessor(){const nome=SS.get('portal360_prof_abriu');if(!nome||APP==='catalogo')return;SS.del('portal360_prof_abriu');const estava=SS.get('portal360_estava_vr')==='1';SS.del('portal360_estava_vr');
   let n=0;const t=setInterval(()=>{const g=document.getElementById('vrGate'),bt=g&&g.querySelector('[data-action="vr-entrar"]');
     if(!bt){if(++n>60)clearInterval(t);return;}clearInterval(t);
-    if(xrConcedido){bt.click();return;}
+    if(concedido()){diagVR='auto';bt.click();enviar(true);return;}
+    diagVR=estava?'toque-sem-concessao':'toque-vinha-2d';enviar(true);
     g.classList.add('p360s-gate');const sub=g.querySelector('.vrgate-s');if(sub)sub.textContent='O professor abriu esta atividade · toque em qualquer lugar para entrar';
     g.addEventListener('click',e=>{if(!e.target.closest('button'))bt.click();});
     /* o evento pode chegar depois da tela montada */
-    const t2=setInterval(()=>{if(!document.body.contains(g)){clearInterval(t2);return;}if(xrConcedido){clearInterval(t2);bt.click();}},200);setTimeout(()=>clearInterval(t2),8000);},250);}
+    const t2=setInterval(()=>{if(!document.body.contains(g)){clearInterval(t2);return;}if(concedido()){clearInterval(t2);diagVR='auto';bt.click();enviar(true);}},200);setTimeout(()=>clearInterval(t2),8000);},250);}
 /* a turma chega direto na missão: fecha a boas-vindas (marcando como vista) */
 function fecharBoasVindas(){try{const w=document.getElementById('welcomeDialog');if(w&&w.open){w.close();const L=window.CorpoLab||window.TerraLab||window.DNALab;if(L&&L.state){L.state.welcomed=true;}}}catch(_){}}
 function ouvirComandos(){

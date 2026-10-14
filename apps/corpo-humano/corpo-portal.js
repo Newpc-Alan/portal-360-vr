@@ -150,10 +150,11 @@ Proto.buildXRUI=function(){
     atv.forEach((a,i)=>this.xrButton((i+1)+'. '+a.label,'view:'+a.id,-1.18,.6-i*UI.passo,.5,false,a.id===S.view?VD:null));
     this.xrButton('◀ Voltar','xr:menu:raiz',-1.18,.6-(atv.length+.3)*UI.passo,.5);
   }else if(menu==='sistemas'){
-    const disp=D.sistemas.filter(x=>!x.breve);
-    disp.forEach((x,i)=>this.xrButton((x.id===S.sistema?'● ':'○ ')+x.nome,'sistema:'+x.id,-1.18,.6-i*UI.passo,.5,false,x.id===S.sistema?VD:null));
-    this.xrButton('… mais '+D.sistemas.filter(x=>x.breve).length+' sistemas em breve','xr:menu:raiz',-1.18,.6-disp.length*UI.passo,.5,true);
-    this.xrButton('◀ Voltar','xr:menu:raiz',-1.18,.6-(disp.length+1.3)*UI.passo,.5);
+    /* v4.8: com 10+ sistemas o passo encolhe para a lista caber na altura do painel */
+    const disp=D.sistemas.filter(x=>!x.breve),brv=D.sistemas.filter(x=>x.breve),linhas=disp.length+(brv.length?1:0)+1.3,pas=Math.min(UI.passo,1.62/linhas);
+    disp.forEach((x,i)=>this.xrButton((x.id===S.sistema?'● ':'○ ')+x.nome,'sistema:'+x.id,-1.18,.6-i*pas,.5,false,x.id===S.sistema?VD:null));
+    if(brv.length)this.xrButton(brv.every(x=>x.restrito)?'🔒 '+brv.map(x=>x.nome).join(', ')+': professor libera':'… mais '+brv.length+' sistemas em breve','xr:menu:raiz',-1.18,.6-disp.length*pas,.5,true);
+    this.xrButton('◀ Voltar','xr:menu:raiz',-1.18,.6-(disp.length+(brv.length?1:0)+.3)*pas,.5);
   }else{
     this.xrButton('◎ Centralizar','center',-1.18,.6,.5);this.xrButton(S.autoRotate?'Ⅱ Pausar giro':'▷ Girar modelo','rotate',-1.18,.6-UI.passo,.5);
     this.xrButton('■ Parar voz','voice:stop',-1.18,.6-2*UI.passo,.5);this.xrButton('↙ Catálogo','catalog',-1.18,.6-3*UI.passo,.5,false,AZ);
@@ -180,7 +181,7 @@ Proto.xrSelect=function(ctrl){
 /* v3.8 · "Entrar no corpo": o modelo cresce até virar uma sala em volta do aluno */
 const DENTRO_TXT={torax:'Você está dentro do tórax. Olhe em volta: as costelas protegem o coração e os pulmões, e a traqueia desce logo acima de você. Aponte para qualquer estrutura para ouvir sobre ela.',corpo:'Você está ao lado de um corpo gigante. Dê a volta, olhe de perto as articulações e aponte para o que quiser conhecer.',fora:'De volta ao tamanho natural.'};
 Proto.alternarDentro=function(){this.dentro=!this.dentro;this.anchor=null;this.xrZoom=1;if(this.copy)Lab.command('inspect:close');this.placeXR();this.buildXRUI();
-  const S=Lab.state,inteiro=((S.view==='contexto'&&!S.context)||['esqContexto','ossos','musculos','articulacoes','nervos'].includes(S.view)||(S.view==='nervContexto'&&S.nervContext<2)||(S.view==='digContexto'&&!S.digContext)||(S.view==='uriContexto'&&!S.uriContext)||(S.view==='endContexto'&&!S.endContext)||['urinario','endocrino','mensageiros'].includes(S.view)||(S.view==='desafio'&&['esq','nerv','uri','end'].includes(S.modulo)));
+  const S=Lab.state,inteiro=((S.view==='contexto'&&!S.context)||['esqContexto','ossos','musculos','articulacoes','nervos'].includes(S.view)||(S.view==='nervContexto'&&S.nervContext<2)||(S.view==='digContexto'&&!S.digContext)||(S.view==='uriContexto'&&!S.uriContext)||(S.view==='endContexto'&&!S.endContext)||['urinario','endocrino','mensageiros'].includes(S.view)||(S.view==='desafio'&&['esq','nerv','uri','end'].includes(S.modulo))||(window.CORPO_EXTRA&&window.CORPO_EXTRA.inteiro(S)));
   if(S.autoVoice)narrator.say(this.dentro?(inteiro?DENTRO_TXT.corpo:DENTRO_TXT.torax):DENTRO_TXT.fora,this.dentro?(inteiro?'vr-dentro-corpo':'vr-dentro-torax'):'vr-fora');};
 
 /* ---------- 4. Narração posicional ---------- */
@@ -300,13 +301,13 @@ function placeInterno(){
   if(!this.xr||!this.model||!this.anchor)return;
   const S=Lab.state,fita=['caminhoAr','caminhoSangue','alimento','coluna','braco'].includes(S.view);
   if(this.dentro&&!this.copy){
-    const a=this.anchor;const inteiro=((S.view==='contexto'&&!S.context)||['esqContexto','ossos','musculos','articulacoes','nervos'].includes(S.view)||(S.view==='nervContexto'&&S.nervContext<2)||(S.view==='digContexto'&&!S.digContext)||(S.view==='uriContexto'&&!S.uriContext)||(S.view==='endContexto'&&!S.endContext)||['urinario','endocrino','mensageiros'].includes(S.view)||(S.view==='desafio'&&['esq','nerv','uri','end'].includes(S.modulo)));
+    const a=this.anchor;const inteiro=((S.view==='contexto'&&!S.context)||['esqContexto','ossos','musculos','articulacoes','nervos'].includes(S.view)||(S.view==='nervContexto'&&S.nervContext<2)||(S.view==='digContexto'&&!S.digContext)||(S.view==='uriContexto'&&!S.uriContext)||(S.view==='endContexto'&&!S.endContext)||['urinario','endocrino','mensageiros'].includes(S.view)||(S.view==='desafio'&&['esq','nerv','uri','end'].includes(S.modulo))||(window.CORPO_EXTRA&&window.CORPO_EXTRA.inteiro(S)));
     const alvoObj=this.obj||this.model;const b=this.boxDe(alvoObj,inteiro);if(b.isEmpty())return;const sz=b.getSize(new T.Vector3()),maior=Math.max(sz.x,sz.y,sz.z);if(maior<1e-4)return;
     if(inteiro){/* corpo gigante de 3,4 m, pés no nível do aluno, a 1,2 m; o analógico esquerdo sobe para ver de perto */const k=3.4/sz.y;this.root.scale.multiplyScalar(k);this.root.updateMatrixWorld(true);const b2=this.boxDe(alvoObj,true),c=b2.getCenter(new T.Vector3());const alvo=a.p.clone().addScaledVector(a.f,1.2);this.root.position.x+=alvo.x-c.x;this.root.position.z+=alvo.z-c.z;this.root.position.y+=.02-b2.min.y;}
     else{/* tórax-sala: os órgãos (sem a silhueta) ocupam 3,4 m; o aluno fica no meio, coração à altura do peito */const k=3.4/maior;this.root.scale.multiplyScalar(k);this.root.updateMatrixWorld(true);const b2=this.boxDe(alvoObj),c=b2.getCenter(new T.Vector3());const alvo=a.p.clone().addScaledVector(a.f,.45);alvo.y=a.p.y-.3;this.root.position.add(alvo.sub(c));}
     this.root.updateMatrixWorld(true);return;
   }
-  if(((S.view==='contexto'&&!S.context)||(['esqContexto','ossos','musculos','articulacoes','nervos'].includes(S.view)||(S.view==='nervContexto'&&S.nervContext<2)||(S.view==='digContexto'&&!S.digContext)||(S.view==='uriContexto'&&!S.uriContext)||(S.view==='endContexto'&&!S.endContext)||['urinario','endocrino','mensageiros'].includes(S.view)||(S.view==='desafio'&&['esq','nerv','uri','end'].includes(S.modulo))))&&!this.copy){
+  if(((S.view==='contexto'&&!S.context)||(['esqContexto','ossos','musculos','articulacoes','nervos'].includes(S.view)||(S.view==='nervContexto'&&S.nervContext<2)||(S.view==='digContexto'&&!S.digContext)||(S.view==='uriContexto'&&!S.uriContext)||(S.view==='endContexto'&&!S.endContext)||['urinario','endocrino','mensageiros'].includes(S.view)||(S.view==='desafio'&&['esq','nerv','uri','end'].includes(S.modulo))||(window.CORPO_EXTRA&&window.CORPO_EXTRA.inteiro(S))))&&!this.copy){
     // corpo inteiro em tamanho natural, pés no piso, a 1,8 m do professor
     const tudo=this.boxDe(this.model,true);if(!tudo.isEmpty()){const alt=tudo.getSize(new T.Vector3()).y,esc=1.72/alt;this.root.scale.multiplyScalar(esc);this.root.updateMatrixWorld(true);const b=this.boxDe(this.model,true),c=b.getCenter(new T.Vector3());this.root.position.x+=this.anchor.p.x+this.anchor.f.x*1.8-c.x;this.root.position.z+=this.anchor.p.z+this.anchor.f.z*1.8-c.z;this.root.position.y+=.05-b.min.y;this.root.updateMatrixWorld(true);}
     return;

@@ -314,3 +314,16 @@ v4.7.8 (chão)
 v4.7.10 (celular)
 - Menu de sistemas no celular refeito: sistemas em fichas que quebram linha e as missões do sistema ativo numa linha rolável
   (antes cada sistema virava uma coluna alta e os últimos ficavam cortados fora da tela). Sem mudança no VR.
+
+==== v4.8.0 (out/2026) · Linfático e defesa, Tegumentar e Reprodutor ====
+Arquivos novos: ltr-data.js (conteúdo), ltr-models.js (cenas 3D), ltr-app.js (controlador), ROTEIRO-AUDIOS-LIN-TEG-REP.csv (77 áudios).
+Integração: ganchos genéricos no corpo-app.js (window.CORPO_EXTRA) e no corpo-portal.js (enquadramento no VR e menu de sistemas).
+- Linfático e defesa: Contexto (rede no corpo · órgãos de defesa · dentro do linfonodo), Explorar (8 fichas), Defenda o corpo (sequência de 6), Desafio (5).
+- Tegumentar: Contexto (corpo · pedaço de pele · corte), Explorar (9 fichas no bloco de pele em corte), Camadas da pele (8 decisões), Desafio (5).
+- Reprodutor: Contexto (pelve · feminino · masculino), Explorar (9 fichas em pranchas de atlas), Puberdade (sequência de 6), Desafio (5).
+  Só órgãos internos, vista esquemática, sem genitália externa. Oculto até liberar:
+  · Ajustes → "Liberar o sistema reprodutor nesta sessão" (vale até fechar o navegador; pede confirmação);
+  · link da turma: ?reprodutor=1 libera, ?reprodutor=0 bloqueia e esconde a opção em Ajustes.
+Modelos: todos procedurais por enquanto. Ponto de troca: baço, timo e tonsilas (CENTROS_LTR em ltr-models.js) passam a usar
+modelos/<chave>.glb do Z-Anatomy quando a chave for incluída em D.LTR_GLB. Pendentes do Z-Anatomy: sistema linfático, pele e vísceras pélvicas.
+Áudios: 77 narrações a gravar (fichas = chave; orientações lin-*, teg-*, rep-*). Até lá, voz do navegador.

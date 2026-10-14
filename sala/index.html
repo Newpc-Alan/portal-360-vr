@@ -71,7 +71,7 @@ footer{color:var(--suave);font-size:12px;text-align:center;padding:24px}
 <script>
 (function(){'use strict';
 /* endereço do banco (o mesmo do sala-cliente.js); ?saladb= sobrescreve para teste */
-const DB_PADRAO='';
+const DB_PADRAO='https://portal360-sala-default-rtdb.firebaseio.com';
 const q=new URLSearchParams(location.search);
 const LS={get:k=>{try{return localStorage.getItem(k);}catch(_){return null;}},set:(k,v)=>{try{localStorage.setItem(k,v);}catch(_){}},del:k=>{try{localStorage.removeItem(k);}catch(_){}}};
 if(q.get('saladb'))LS.set('portal360_sala_db',q.get('saladb').replace(/\/+$/,''));

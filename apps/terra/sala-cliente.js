@@ -7,9 +7,9 @@
    Arquivo-mestre: assets/sala/sala-cliente.js (cópia idêntica em cada apps/<app>/). Regra 9: sem onclick inline. */
 (function(){'use strict';
 if(window.Portal360Sala)return;
-const VERSAO='1.0.0';
+const VERSAO='1.0.1';
 /* endereço do banco: preenchido quando o projeto Firebase da sala for criado (sem barra no fim) */
-const DB_PADRAO='';
+const DB_PADRAO='https://portal360-sala-default-rtdb.firebaseio.com';
 const q=new URLSearchParams(location.search);
 const LS={get:k=>{try{return localStorage.getItem(k);}catch(_){return null;}},set:(k,v)=>{try{localStorage.setItem(k,v);}catch(_){}},del:k=>{try{localStorage.removeItem(k);}catch(_){}}};
 const SS={get:k=>{try{return sessionStorage.getItem(k);}catch(_){return null;}},set:(k,v)=>{try{sessionStorage.setItem(k,v);}catch(_){}},del:k=>{try{sessionStorage.removeItem(k);}catch(_){}}};

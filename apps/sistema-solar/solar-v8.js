@@ -458,9 +458,11 @@ function xrContexto(){
 function menuVRItens(){const v=estado.vista;const vistas=[['Sistema Solar','sistema'],['Examinar','planeta'],['Comparar','comparar'],['Dia e noite','diaNoite'],['Fases da Lua','fases'],['Estações','estacoes'],['Eclipses','eclipse'],['Desafio','desafio']].map(([t,k])=>[t,'view:'+k,k===v?'rgba(26,107,42,.96)':null]);
  return vistas.concat([[S.guide<0?'Aula guiada':'Encerrar aula guiada',S.guide<0?'guide':'guideStop','rgba(15,74,110,.96)'],[S.nomesVR?'Nomes: ao apontar':'Nomes: todos','nomes'],[estado.playing?'Pausar movimento':'Retomar movimento','pause'],['Centralizar','center'],['Ajuda dos controles','ajuda'],['Catálogo','catalogo'],['Sair do VR','sair','rgba(140,20,20,.95)']]);}
 function menuVRAbrir(){menuVRFechar();const a=xrAnchor();const itens=menuVRItens();const bot=[];
- const fundo=textoCanvasVR(1024,700,(g,c)=>{g.fillStyle='rgba(4,14,28,.88)';g.beginPath();g.roundRect(0,0,c.width,c.height,40);g.fill();g.strokeStyle='rgba(55,177,218,.8)';g.lineWidth=6;g.stroke();});fundo.renderOrder=998;fundo.scale.set(.86,.66,1);fundo.position.copy(a.p).addScaledVector(a.f,.84).add(new T.Vector3(0,-.055,0));scene.add(fundo);
- itens.forEach(([t,ac,cor],i)=>{const b=criarBotaoVR(t,ac,cor);const k=vrBotoes.indexOf(b);if(k>=0)vrBotoes.splice(k,1);b.scale.set(.245,.061,1);const col=i%3,lin=Math.floor(i/3);b.position.copy(a.p).addScaledVector(a.r,(col-1)*.262).addScaledVector(a.f,.8).add(new T.Vector3(0,.10-lin*.082,0));scene.add(b);bot.push(b);});
- const tit=xrText(['Menu','Aponte e aperte o gatilho · Y ou B fecha'],1024,200);tit.scale.set(.42,.082,1);tit.position.copy(a.p).addScaledVector(a.f,.82).add(new T.Vector3(0,.19,0));scene.add(tit);
+ /* v9.5: menu a 1,3 m (antes 0,8 m), escalado na mesma proporção: mesmo tamanho aparente, mais espaço para os braços */
+ const K=1.6,D=.8*K;
+ const fundo=textoCanvasVR(1024,700,(g,c)=>{g.fillStyle='rgba(4,14,28,.88)';g.beginPath();g.roundRect(0,0,c.width,c.height,40);g.fill();g.strokeStyle='rgba(55,177,218,.8)';g.lineWidth=6;g.stroke();});fundo.renderOrder=998;fundo.scale.set(.86*K,.66*K,1);fundo.position.copy(a.p).addScaledVector(a.f,D+.04*K).add(new T.Vector3(0,-.055*K,0));scene.add(fundo);
+ itens.forEach(([t,ac,cor],i)=>{const b=criarBotaoVR(t,ac,cor);const k=vrBotoes.indexOf(b);if(k>=0)vrBotoes.splice(k,1);b.scale.set(.245*K,.061*K,1);const col=i%3,lin=Math.floor(i/3);b.position.copy(a.p).addScaledVector(a.r,(col-1)*.262*K).addScaledVector(a.f,D).add(new T.Vector3(0,(.10-lin*.082)*K,0));scene.add(b);bot.push(b);});
+ const tit=xrText(['Menu','Aponte e aperte o gatilho · Y ou B fecha'],1024,200);tit.scale.set(.42*K,.082*K,1);tit.position.copy(a.p).addScaledVector(a.f,D+.02*K).add(new T.Vector3(0,.19*K,0));scene.add(tit);
  S.menuVR={botoes:bot,titulo:tit,fundo,aberto:true};}
 function menuVRFechar(){if(!S.menuVR)return;for(const b of S.menuVR.botoes)release(b);release(S.menuVR.titulo);release(S.menuVR.fundo);S.menuVR=null;}
 function menuVRAlternar(){if(S.menuVR)menuVRFechar();else menuVRAbrir();}
@@ -514,6 +516,6 @@ atualizarVR=function(){_atuV94();orientarPlacas();if(S.btnMenuCena)S.btnMenuCena
 const _sairV94=sairVRFinal;
 sairVRFinal=function(){if(S.btnMenuCena){const i=vrBotoes.indexOf(S.btnMenuCena);if(i>=0)vrBotoes.splice(i,1);release(S.btnMenuCena);S.btnMenuCena=null;}_sairV94();};
 
-window.PortalSolarV8={version:'8.11',state:S,seasons,daylight,setDay,beginMission,checkMission,finishMission,enterView:entrarVista,exportSummary,setupXRActivity,resetStudent};
+window.PortalSolarV8={version:'8.12',state:S,seasons,daylight,setDay,beginMission,checkMission,finishMission,enterView:entrarVista,exportSummary,setupXRActivity,resetStudent};
 entrarVista(S.views.includes(estado.vista)?estado.vista:'sistema');renderer.setAnimationLoop(animate);
 })();

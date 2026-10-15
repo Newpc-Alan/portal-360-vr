@@ -1,4 +1,5 @@
-/* Sala do professor · cliente dos óculos (Portal 360º VR · Portal do Educador) v1.2.0 (out/2026)
+/* Sala do professor · cliente dos óculos (Portal Maestro VR · Portal 360º VR · Portal do Educador) v1.7.0 (out/2026)
+   v1.7.0: pausa com mensagem motivacional, mão levantada (gesto real ou botão do analógico) e pesquisa rápida no VR.
    Roda no catálogo e em cada app. O óculos entra numa sala (código de 4 dígitos), informa a cada poucos segundos
    o que o aluno está fazendo (app, sistema/tema, missão, progresso, Desafio, se está no VR, bateria) e obedece aos
    comandos do professor: levar para uma missão, pausar/retomar, chamar (identificar o óculos) e encerrar.
@@ -7,7 +8,7 @@
    Arquivo-mestre: assets/sala/sala-cliente.js (cópia idêntica em cada apps/<app>/). Regra 9: sem onclick inline. */
 (function(){'use strict';
 if(window.Portal360Sala)return;
-const VERSAO='1.6.0';
+const VERSAO='1.7.0';
 /* endereço do banco: preenchido quando o projeto Firebase da sala for criado (sem barra no fim) */
 const DB_PADRAO='https://portal360-sala-default-rtdb.firebaseio.com';
 const q=new URLSearchParams(location.search);
@@ -135,10 +136,12 @@ function executar(c){
   if(c.tipo==='video-pausa'){if(telao)telao.v.pause();return;}
   if(c.tipo==='video-play'){if(telao)tocarVideo();return;}
   if(c.tipo==='video-fim'){fecharVideo();return;}
-  if(c.tipo==='pausa'){if(telao)telao.v.pause();aviso('⏸ Olhe para o professor','A atividade foi pausada.',true);return;}
+  if(c.tipo==='pausa'){if(telao)telao.v.pause();pausaMotivacional();return;}
+  if(c.tipo==='pesquisa'){abrirPesquisa(c.pid,c.pergunta);return;}
+  if(c.tipo==='pesquisa-fim'){fecharPesquisa();return;}
   if(c.tipo==='retomar'){fecharAviso();if(telao)tocarVideo();return;}
   if(c.tipo==='chamar'){aviso(sala.rotulo.toUpperCase(),'O professor está procurando este óculos.',false,5000);return;}
-  if(c.tipo==='encerrar'){fecharAviso();aviso('Aula encerrada','Obrigado! Pode tirar o óculos.',false,6000);sair(true);return;}
+  if(c.tipo==='encerrar'){fecharAviso();fecharPesquisa();MAO.ativa=false;aviso('Aula encerrada','Obrigado! Pode tirar o óculos.',false,6000);sair(true);return;}
   if(c.tipo==='ir'){fecharAviso();fecharVideo();
     if(c.app==='catalogo'){if(APP!=='catalogo')location.href=BASE;return;}
     if(c.app&&c.app!==APP&&PASTA[c.app]){SS.set('portal360_prof_abriu',APPS[c.app]||'1');SS.set('portal360_estava_vr',emVR()?'1':'0');}
@@ -177,9 +180,9 @@ function iniciar(){if(ligado||!sala||!DB())return;ligado=true;
   /* chegou por um comando "ir" vindo de outro app: completa a navegação quando o app estiver pronto */
   const ir=SS.get('portal360_irpara');if(ir){SS.del('portal360_irpara');let tent=0;const t=setInterval(()=>{if(A.ok()||++tent>40){clearInterval(t);try{const o=JSON.parse(ir);fecharBoasVindas();if(A.ok())A.ir(o.sec,o.view);setTimeout(fecharBoasVindas,400);}catch(_){}}},250);}
   let tent=0;const esperar=setInterval(()=>{if(A.ok()||++tent>40){clearInterval(esperar);enviarMapa();}},250);
-  enviar(true);setInterval(()=>enviar(false),1500);setInterval(amostrar,250);ouvirComandos();chip();}
+  enviar(true);setInterval(()=>enviar(false),1500);setInterval(()=>{amostrar();vigiarMao();},250);setInterval(conferirMao,3000);ouvirComandos();chip();}
 async function entrar(codigo,rotulo){sala={codigo,rotulo};LS.set('portal360_sala',JSON.stringify(sala));ligado=false;iniciar();chip();}
-async function sair(silencioso){if(sala){await rede('DELETE','salas/'+sala.codigo+'/oculos/'+ID);}pararComandos();sala=null;LS.del('portal360_sala');ligado=false;chip();if(!silencioso)fecharDialogo();}
+async function sair(silencioso){fecharPesquisa();MAO.ativa=false;if(sala){await rede('DELETE','salas/'+sala.codigo+'/oculos/'+ID);}pararComandos();sala=null;LS.del('portal360_sala');ligado=false;chip();if(!silencioso)fecharDialogo();}
 addEventListener('pagehide',()=>{if(sala&&DB()){try{fetch(url('salas/'+sala.codigo+'/oculos/'+ID),{method:'PATCH',body:JSON.stringify({saindo:true,visto:{'.sv':'timestamp'}}),keepalive:true});}catch(_){}}});
 
 /* ---------- avisos (no VR: véu à frente dos olhos; no 3D: tela cheia) ---------- */
@@ -198,6 +201,106 @@ function aviso(titulo,sub,fixo,ms){fecharAviso();
   /* <dialog> modal: fica acima até de outros diálogos modais do app (ex.: boas-vindas) */const modal=typeof HTMLDialogElement==='function';const d=document.createElement(modal?'dialog':'div');d.className='p360s-aviso';d.innerHTML='<div><b></b><span></span></div>';d.querySelector('b').textContent=titulo;d.querySelector('span').textContent=sub;document.body.appendChild(d);if(modal){try{d.showModal();}catch(_){d.setAttribute('open','');}d.addEventListener('cancel',e=>{if(fixo)e.preventDefault();});}fim.push(()=>{try{if(d.open&&d.close)d.close();}catch(_){}d.remove();});
   const t=ms?setTimeout(fecharAviso,ms):0;avisoAtual={fim,t};}
 function fecharAviso(){if(!avisoAtual)return;clearTimeout(avisoAtual.t);avisoAtual.fim.forEach(f=>{try{f();}catch(_){}});avisoAtual=null;}
+
+
+/* ---------- Portal Maestro VR: pausa motivacional ----------
+   As artes ficam em assets/sala/pausa/ (16:9, texto centralizado). Sorteia uma a cada pausa e troca a cada 40 s, sem repetir.
+   No VR: véu escuro e a arte à frente dos olhos (acompanha a cabeça, como o aviso de pausa). Fora do VR: tela cheia.
+   Sem internet ou enquanto carrega: mostra o texto "Olhe para o professor". */
+const PAUSA_IMGS=['assets/sala/pausa/msg1.jpg','assets/sala/pausa/msg2.jpg','assets/sala/pausa/msg3.jpg'];
+let pausaIdx=-1;
+function sortearPausa(){let i=0;if(PAUSA_IMGS.length>1){do{i=Math.floor(Math.random()*PAUSA_IMGS.length);}while(i===pausaIdx);}pausaIdx=i;return BASE+PAUSA_IMGS[i];}
+function placaTexto(T,titulo,sub,larg,alt){const c=document.createElement('canvas');c.width=1024;c.height=384;const x=c.getContext('2d');x.textAlign='center';x.fillStyle='#ffffff';x.font='800 88px system-ui,Segoe UI,Arial';x.fillText(titulo,512,170);x.fillStyle='#9fdcff';x.font='500 44px system-ui,Segoe UI,Arial';x.fillText(sub,512,270);
+  const tx=new T.CanvasTexture(c);tx.encoding=T.sRGBEncoding;const m=new T.Mesh(new T.PlaneGeometry(larg,alt),new T.MeshBasicMaterial({map:tx,transparent:true,depthTest:false,depthWrite:false}));m.userData.tx=tx;return m;}
+function pausaMotivacional(){fecharAviso();
+  const T=window.THREE,ctx=ctxApp(),xr=!!(T&&ctx&&ctx.renderer&&ctx.renderer.xr&&ctx.renderer.xr.isPresenting);const fim=[];
+  if(xr){const {renderer,scene,camera}=ctx;const g=new T.Group();let vivo=true;
+    const veu=new T.Mesh(new T.SphereGeometry(2.5,32,20),new T.MeshBasicMaterial({color:0x020812,side:T.BackSide,transparent:true,opacity:.95,depthTest:false,depthWrite:false}));veu.renderOrder=9995;g.add(veu);
+    const reserva=placaTexto(T,'⏸ Olhe para o professor','A atividade foi pausada.',1.6,.6);reserva.renderOrder=9996;reserva.position.set(0,0,-1.5);g.add(reserva);
+    const mat=new T.MeshBasicMaterial({transparent:true,opacity:0,depthTest:false,depthWrite:false});mat.toneMapped=false;
+    const arte=new T.Mesh(new T.PlaneGeometry(1.6,.9),mat);arte.renderOrder=9997;arte.position.set(0,-.02,-1.5);g.add(arte);
+    scene.add(g);let tex=null;const loader=new T.TextureLoader();
+    const carregar=()=>loader.load(sortearPausa(),t=>{if(!vivo){t.dispose();return;}t.encoding=T.sRGBEncoding;const ant=tex;tex=t;mat.map=t;mat.opacity=1;mat.needsUpdate=true;reserva.visible=false;if(ant)ant.dispose();},undefined,()=>{});
+    carregar();const troca=setInterval(carregar,40000);
+    const p=new T.Vector3(),qq=new T.Quaternion(),s=new T.Vector3();const sess=renderer.xr.getSession();
+    const quadro=()=>{if(!vivo)return;camera.matrixWorld.decompose(p,qq,s);g.position.copy(p);g.quaternion.copy(qq);sess.requestAnimationFrame(quadro);};sess.requestAnimationFrame(quadro);
+    fim.push(()=>{vivo=false;clearInterval(troca);scene.remove(g);[veu,reserva,arte].forEach(m=>{m.geometry.dispose();m.material.dispose();});if(reserva.userData.tx)reserva.userData.tx.dispose();if(tex)tex.dispose();});}
+  estilo();const modal=typeof HTMLDialogElement==='function';const d=document.createElement(modal?'dialog':'div');d.className='p360s-aviso p360s-pausa';d.innerHTML='<div><b>⏸ Olhe para o professor</b><span>A atividade foi pausada.</span></div>';document.body.appendChild(d);
+  const trocar2D=()=>{const u=sortearPausa();const im=new Image();im.onload=()=>{d.style.backgroundImage='url("'+u+'")';d.classList.add('com-arte');};im.src=u;};trocar2D();const troca2D=setInterval(trocar2D,40000);
+  if(modal){try{d.showModal();}catch(_){d.setAttribute('open','');}d.addEventListener('cancel',e=>e.preventDefault());}
+  fim.push(()=>{clearInterval(troca2D);try{if(d.open&&d.close)d.close();}catch(_){}d.remove();});
+  avisoAtual={fim,t:0};}
+
+/* ---------- Portal Maestro VR: recado curto no VR (não fecha a pausa nem a pesquisa) ---------- */
+let recadoAtual=null;
+function recado(texto,ms){fecharRecado();const T=window.THREE,ctx=ctxApp(),xr=!!(T&&ctx&&ctx.renderer&&ctx.renderer.xr&&ctx.renderer.xr.isPresenting);const fim=[];
+  if(xr){const {renderer,scene,camera}=ctx;const g=new T.Group();let vivo=true;
+    const c=document.createElement('canvas');c.width=1024;c.height=160;const x=c.getContext('2d');x.fillStyle='rgba(15,44,74,.92)';x.beginPath();if(x.roundRect)x.roundRect(8,8,1008,144,72);else x.rect(8,8,1008,144);x.fill();x.strokeStyle='#e0a321';x.lineWidth=8;x.stroke();
+    x.textAlign='center';x.fillStyle='#ffffff';x.font='700 58px system-ui,Segoe UI,Arial';x.fillText(String(texto).slice(0,40),512,100);
+    const tx=new T.CanvasTexture(c);tx.encoding=T.sRGBEncoding;const m=new T.Mesh(new T.PlaneGeometry(.8,.125),new T.MeshBasicMaterial({map:tx,transparent:true,depthTest:false,depthWrite:false}));m.renderOrder=9998;m.position.set(0,-.32,-1.2);g.add(m);scene.add(g);
+    const p=new T.Vector3(),qq=new T.Quaternion(),s=new T.Vector3();const sess=renderer.xr.getSession();
+    const quadro=()=>{if(!vivo)return;camera.matrixWorld.decompose(p,qq,s);g.position.copy(p);g.quaternion.copy(qq);sess.requestAnimationFrame(quadro);};sess.requestAnimationFrame(quadro);
+    fim.push(()=>{vivo=false;scene.remove(g);m.geometry.dispose();m.material.dispose();tx.dispose();});}
+  else{estilo();const d=document.createElement('div');d.className='p360s-recado';d.textContent=texto;document.body.appendChild(d);fim.push(()=>d.remove());}
+  recadoAtual={fim,t:setTimeout(fecharRecado,ms||3500)};}
+function fecharRecado(){if(!recadoAtual)return;clearTimeout(recadoAtual.t);recadoAtual.fim.forEach(f=>{try{f();}catch(_){}});recadoAtual=null;}
+
+/* ---------- Portal Maestro VR: mão levantada ----------
+   Levantar: erguer o controle (ou a mão) acima da cabeça por 1,5 s, ou segurar o botão do analógico por 0,6 s.
+   Abaixar: segurar o botão do analógico de novo, ou o professor toca em "Atender" no painel.
+   Grava salas/<código>/oculos/<id>/mao (hora do servidor); o professor apaga ao atender. */
+const MAO={ativa:false,cimaDesde:0,stickDesde:0,stickUsado:false,espera:0};
+async function alternarMao(levantar){if(!sala)return;const caminho='salas/'+sala.codigo+'/oculos/'+ID+'/mao';
+  if(levantar){const r=await rede('PUT',caminho,{'.sv':'timestamp'});if(r===null){recado('Sem conexão: tente de novo',3000);return;}MAO.ativa=true;recado('✋ Mão levantada · o professor está vendo',4000);}
+  else{await rede('DELETE',caminho);MAO.ativa=false;recado('Mão abaixada',2500);}
+  MAO.espera=Date.now()+1500;chip();interagiu(true);}
+function vigiarMao(){if(!sala)return;const T=window.THREE,ctx=ctxApp();if(!T||!ctx||!ctx.renderer||!ctx.renderer.xr||!ctx.renderer.xr.isPresenting)return;
+  const agoraMs=Date.now();if(agoraMs<MAO.espera)return;const r=ctx.renderer;let cabeca=null;
+  try{const pc=new T.Vector3();ctx.camera.matrixWorld.decompose(pc,new T.Quaternion(),new T.Vector3());cabeca=pc;}catch(_){return;}
+  /* gesto: algum controle bem acima da cabeça */
+  let alto=false;for(let i=0;i<2;i++){try{const c=r.xr.getController(i);if(!c)continue;const pp=new T.Vector3().setFromMatrixPosition(c.matrixWorld);if(pp.lengthSq()<1e-6)continue;if(pp.y>cabeca.y+.15)alto=true;}catch(_){}}
+  if(alto&&!MAO.ativa){if(!MAO.cimaDesde)MAO.cimaDesde=agoraMs;else if(agoraMs-MAO.cimaDesde>1500){MAO.cimaDesde=0;alternarMao(true);return;}}else MAO.cimaDesde=0;
+  /* botão do analógico (thumbstick) segurado */
+  let stick=false;try{const s=r.xr.getSession();for(const src of s.inputSources){const gp=src.gamepad;if(gp&&gp.buttons[3]&&gp.buttons[3].pressed)stick=true;}}catch(_){}
+  if(stick){if(!MAO.stickDesde){MAO.stickDesde=agoraMs;MAO.stickUsado=false;}else if(!MAO.stickUsado&&agoraMs-MAO.stickDesde>600){MAO.stickUsado=true;alternarMao(!MAO.ativa);}}else MAO.stickDesde=0;}
+async function conferirMao(){if(!sala||!MAO.ativa||Date.now()<MAO.espera)return;const v=await rede('GET','salas/'+sala.codigo+'/oculos/'+ID+'/mao');if(v===null&&MAO.ativa&&Date.now()>=MAO.espera){MAO.ativa=false;chip();recado('🙌 O professor viu sua mão',3500);}}
+
+/* ---------- Portal Maestro VR: pesquisa rápida ----------
+   O professor pergunta ("Entenderam?") e cada óculos responde Entendi / Mais ou menos / Não entendi.
+   No VR: painel fixo à frente, o aluno aponta o controle e aperta o gatilho. Fora do VR: três botões na tela.
+   Resposta em salas/<código>/respostas/pesquisa/<pid>/<id>; só o professor vê. */
+const OPC_PESQ=[['verde','Entendi','#a6c544','#05091a'],['amarelo','Mais ou menos','#e0a321','#05091a'],['vermelho','Não entendi','#e5675a','#ffffff']];
+let pesquisa=null;
+function quebrar(x,texto,larg){const pal=String(texto).split(/\s+/);const linhas=[];let l='';for(const w of pal){const t=l?l+' '+w:w;if(x.measureText(t).width>larg&&l){linhas.push(l);l=w;}else l=t;}if(l)linhas.push(l);return linhas.slice(0,3);}
+function abrirPesquisa(pid,pergunta){if(!pid||!sala)return;if(LS.get('portal360_pesq_resp')===pid)return;fecharPesquisa();
+  pergunta=String(pergunta||'Entenderam?').slice(0,140);const T=window.THREE,ctx=ctxApp(),xr=!!(T&&ctx&&ctx.renderer&&ctx.renderer.xr&&ctx.renderer.xr.isPresenting);const fim=[];pesquisa={pid,fim,feito:false};
+  if(xr){const {renderer,scene,camera}=ctx;const g=new T.Group();let vivo=true;
+    const p=new T.Vector3(),q=new T.Quaternion(),sc=new T.Vector3();camera.matrixWorld.decompose(p,q,sc);
+    const f=new T.Vector3(0,0,-1).applyQuaternion(q);f.y=0;if(f.lengthSq()<1e-4)f.set(0,0,-1);f.normalize();g.position.copy(p);g.position.y-=.12;g.rotation.y=Math.atan2(-f.x,-f.z);
+    const veu=new T.Mesh(new T.SphereGeometry(6,32,20),new T.MeshBasicMaterial({color:0x02060e,side:T.BackSide,transparent:true,opacity:.55,depthTest:false,depthWrite:false}));veu.renderOrder=9988;g.add(veu);
+    const c=document.createElement('canvas');c.width=1024;c.height=420;const x=c.getContext('2d');x.fillStyle='rgba(12,34,59,.96)';x.beginPath();if(x.roundRect)x.roundRect(6,6,1012,408,40);else x.rect(6,6,1012,408);x.fill();x.strokeStyle='#3ea8ce';x.lineWidth=6;x.stroke();
+    x.textAlign='center';x.fillStyle='#a6c544';x.font='800 34px system-ui,Segoe UI,Arial';x.fillText('📊 PESQUISA RÁPIDA',512,70);x.fillStyle='#ffffff';x.font='700 54px system-ui,Segoe UI,Arial';quebrar(x,pergunta,920).forEach((l,i)=>x.fillText(l,512,150+i*62));
+    x.fillStyle='#9fdcff';x.font='500 30px system-ui,Segoe UI,Arial';x.fillText('Aponte o controle e aperte o gatilho',512,388);
+    const tx=new T.CanvasTexture(c);tx.encoding=T.sRGBEncoding;const fundo=new T.Mesh(new T.PlaneGeometry(1.3,.533),new T.MeshBasicMaterial({map:tx,transparent:true,depthTest:false,depthWrite:false}));fundo.renderOrder=9989;fundo.position.set(0,.2,-1.35);g.add(fundo);
+    const botoes=OPC_PESQ.map(([valor,rot,cor,txt],i)=>{const cb=document.createElement('canvas');cb.width=512;cb.height=256;const y=cb.getContext('2d');y.fillStyle=cor;y.beginPath();if(y.roundRect)y.roundRect(8,8,496,240,48);else y.rect(8,8,496,240);y.fill();
+      y.textAlign='center';y.fillStyle=txt;y.font='800 64px system-ui,Segoe UI,Arial';y.fillText(['✔','≈','✖'][i],256,110);y.font='700 52px system-ui,Segoe UI,Arial';y.fillText(rot,256,200);
+      const tb=new T.CanvasTexture(cb);tb.encoding=T.sRGBEncoding;const m=new T.Mesh(new T.PlaneGeometry(.38,.19),new T.MeshBasicMaterial({map:tb,transparent:true,depthTest:false,depthWrite:false}));m.renderOrder=9990;m.position.set((i-1)*.43,-.2,-1.33);m.userData={valor,tb};g.add(m);return m;});
+    scene.add(g);const ray=new T.Raycaster();const o=new T.Vector3(),dq=new T.Quaternion(),dd=new T.Vector3();
+    const alvo=()=>{let achou=null;for(let i=0;i<2;i++){try{const ctl=renderer.xr.getController(i);if(!ctl)continue;o.setFromMatrixPosition(ctl.matrixWorld);if(o.lengthSq()<1e-6)continue;ctl.matrixWorld.decompose(o,dq,dd);ray.set(o,new T.Vector3(0,0,-1).applyQuaternion(dq));const h=ray.intersectObjects(botoes,false)[0];if(h){achou=h.object;break;}}catch(_){}}return achou;};
+    const sess=renderer.xr.getSession();
+    const quadro=()=>{if(!vivo)return;const a=pesquisa&&!pesquisa.feito?alvo():null;botoes.forEach(b=>{const s=b===a?1.12:1;b.scale.set(s,s,1);});sess.requestAnimationFrame(quadro);};sess.requestAnimationFrame(quadro);
+    const sel=()=>{if(!pesquisa||pesquisa.feito)return;const a=alvo();if(a)responderPesquisa(a.userData.valor);};sess.addEventListener('select',sel);
+    pesquisa.vrFeito=()=>{botoes.forEach(b=>b.visible=false);const ok=placaTexto(T,'✓ Resposta enviada','Obrigado!',1.0,.375);ok.renderOrder=9991;ok.position.set(0,-.2,-1.32);g.add(ok);fim.push(()=>{ok.geometry.dispose();ok.material.dispose();if(ok.userData.tx)ok.userData.tx.dispose();});};
+    fim.push(()=>{vivo=false;sess.removeEventListener('select',sel);scene.remove(g);[veu,fundo].concat(botoes).forEach(m=>{m.geometry.dispose();m.material.dispose();});tx.dispose();botoes.forEach(b=>b.userData.tb.dispose());});}
+  else{estilo();const d=document.createElement('div');d.className='p360s-dlg p360s-pesq';d.innerHTML='<div class="p360s-box"><h3>📊 Pesquisa rápida</h3><p class="pq"></p><div class="p360s-opc">'+OPC_PESQ.map(([v,r,cor,txt])=>'<button type="button" data-action="p360s-pesq" data-valor="'+v+'" style="background:'+cor+';color:'+txt+'">'+r+'</button>').join('')+'</div><div class="ok" hidden>✓ Resposta enviada</div></div>';
+    d.querySelector('.pq').textContent=pergunta;document.body.appendChild(d);pesquisa.dom=d;fim.push(()=>d.remove());}}
+async function responderPesquisa(valor){if(!pesquisa||pesquisa.feito||!sala)return;pesquisa.feito=true;const pid=pesquisa.pid;
+  const r=await rede('PUT','salas/'+sala.codigo+'/respostas/pesquisa/'+pid+'/'+ID,{valor,rotulo:sala.rotulo,ts:{'.sv':'timestamp'}});
+  if(r===null){pesquisa.feito=false;recado('Sem conexão: tente de novo',3000);return;}
+  LS.set('portal360_pesq_resp',pid);interagiu(true);
+  if(pesquisa.vrFeito)pesquisa.vrFeito();if(pesquisa.dom){pesquisa.dom.querySelector('.p360s-opc').hidden=true;pesquisa.dom.querySelector('.ok').hidden=false;}
+  setTimeout(()=>{if(pesquisa&&pesquisa.pid===pid)fecharPesquisa();},1400);}
+function fecharPesquisa(){if(!pesquisa)return;const p=pesquisa;pesquisa=null;p.fim.forEach(f=>{try{f();}catch(_){}});}
 
 /* ---------- vídeo-aula conduzida pelo professor ----------
    No VR: telão fixo no espaço, à frente de onde o aluno olhava (não acompanha a cabeça, para não enjoar), com a cena escurecida.
@@ -265,12 +368,19 @@ function estilo(){if(document.getElementById('p360s-css'))return;const s=documen
  '.p360s-gate{cursor:pointer}.p360s-gate .vrgate-s{color:#8ff0b8!important;font-size:18px!important;font-weight:700}.p360s-gate [data-action="vr-entrar"]{font-size:24px!important;padding:20px 44px!important;animation:p360pulse 1.6s ease-in-out infinite}@keyframes p360pulse{50%{box-shadow:0 0 0 14px rgba(61,220,132,.25)}}'+
  '.p360s-yt-top b{display:inline!important;font-size:18px!important;font-weight:700!important}.p360s-yt-box{width:min(96vw,calc((100vh - 80px)*1.7778));display:flex;flex-direction:column;gap:10px}.p360s-yt-top{display:flex;align-items:center;justify-content:space-between;color:#fff;font:700 18px system-ui}.p360s-yt-top button{background:rgba(255,255,255,.12);color:#fff;border:1px solid rgba(255,255,255,.3);border-radius:10px;padding:8px 14px;font:700 14px system-ui;cursor:pointer}.p360s-yt-frame{position:relative;width:100%;aspect-ratio:16/9;background:#000}.p360s-yt-frame iframe{position:absolute;inset:0;width:100%;height:100%;border:0}.p360s-voltar{cursor:pointer}'+
  '.p360s-video video{width:min(100vw,177vh);height:auto;max-height:100vh;background:#000}'+
+ '.p360s-pausa.com-arte{background-size:cover!important;background-position:center!important;background-color:#05091a!important}.p360s-pausa.com-arte>div{display:none}'+
+ '.p360s-recado{position:fixed;left:50%;bottom:70px;transform:translateX(-50%);z-index:2147483300;background:#0f2c4a;color:#fff;border:2px solid #e0a321;border-radius:999px;padding:12px 22px;font:700 18px system-ui,Segoe UI,Arial;box-shadow:0 8px 24px rgba(0,0,0,.4)}'+
+ '.p360s-mao{position:fixed;left:14px;bottom:62px;z-index:2147483000;border:0;border-radius:999px;padding:9px 15px;background:linear-gradient(135deg,#e0a321,#f3c34d);color:#3d2a00;font:800 14px system-ui,Segoe UI,Arial;cursor:pointer;box-shadow:0 6px 20px rgba(0,0,0,.35)}.p360s-mao.on{background:#fff3d6;box-shadow:0 0 0 3px #e0a321}'+
+ '.p360s-pesq .pq{color:#fff!important;font-size:20px!important;font-weight:700}.p360s-opc{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}.p360s-opc button{padding:16px 6px!important;font-size:15px!important;border-radius:12px}.p360s-pesq .ok{color:#a6c544;font-weight:800;text-align:center;font-size:18px;margin-top:8px}'+
  '.p360s-aviso{position:fixed;inset:0;width:100vw;height:100vh;max-width:none;max-height:none;margin:0;padding:0;border:0;z-index:2147483200;background:rgba(2,8,18,.94);display:flex;align-items:center;justify-content:center;text-align:center;font-family:system-ui,Segoe UI,Arial}.p360s-aviso::backdrop{background:transparent}.p360s-aviso b{display:block;color:#fff;font-size:clamp(34px,7vw,80px);font-weight:800}.p360s-aviso span{display:block;color:#9fdcff;font-size:clamp(16px,2.6vw,26px);margin-top:12px}';
  document.head.appendChild(s);}
 let chipEl=null;
 function chip(){if(!document.body)return;estilo();if(!DB()){if(chipEl){chipEl.remove();chipEl=null;}return;}
   if(!chipEl){chipEl=document.createElement('button');chipEl.type='button';chipEl.className='p360s-chip';chipEl.dataset.action='p360s-abrir';document.body.appendChild(chipEl);}
-  chipEl.className='p360s-chip'+(sala?'':' off');chipEl.innerHTML='<i></i>'+(sala?'Sala '+sala.codigo+' · '+escapar(sala.rotulo):'🎓 Entrar na sala');}
+  chipEl.className='p360s-chip'+(sala?'':' off');chipEl.innerHTML='<i></i>'+(sala?'Sala '+sala.codigo+' · '+escapar(sala.rotulo):'🎓 Entrar na sala');
+  if(sala){if(!maoEl){maoEl=document.createElement('button');maoEl.type='button';maoEl.dataset.action='p360s-mao';document.body.appendChild(maoEl);}maoEl.className='p360s-mao'+(MAO.ativa?' on':'');maoEl.textContent=MAO.ativa?'✋ Mão levantada · baixar':'✋ Levantar a mão';}
+  else if(maoEl){maoEl.remove();maoEl=null;}}
+let maoEl=null;
 const escapar=s=>String(s||'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 let dlg=null;
 function abrirDialogo(){fecharDialogo();estilo();dlg=document.createElement('div');dlg.className='p360s-dlg';dlg.dataset.action='p360s-fora';
@@ -282,6 +392,8 @@ function fecharDialogo(){if(dlg){dlg.remove();dlg=null;}}
 document.addEventListener('click',async e=>{const b=e.target.closest('[data-action^="p360s-"]');if(!b)return;const ac=b.dataset.action;
   if(ac==='p360s-abrir')abrirDialogo();else if(ac==='p360s-fechar'||(ac==='p360s-fora'&&e.target===b))fecharDialogo();else if(ac==='p360s-sair')sair();
   else if(ac==='p360s-yt-fechar'){fecharVideo();}
+  else if(ac==='p360s-mao'){alternarMao(!MAO.ativa);}
+  else if(ac==='p360s-pesq'){responderPesquisa(b.dataset.valor);}
   else if(ac==='p360s-entrar'){const cod=(dlg.querySelector('#p360s-cod').value||'').replace(/\D/g,''),num=dlg.querySelector('#p360s-num').value,er=dlg.querySelector('#p360s-erro');
     if(cod.length!==4){er.textContent='O código tem 4 números.';return;}
     er.textContent='Procurando a sala…';const s=await rede('GET','salas/'+cod+'/aberta');if(s!==true){er.textContent='Sala '+cod+' não encontrada. Confira o código na lousa.';return;}

@@ -2,7 +2,7 @@
    Rede primeiro para a casca (html, css, js): com internet sempre carrega a versão publicada mais nova, inclusive pacotes
    atualizados por fora; sem internet, ou se a rede não responder em 4 s, usa a cópia guardada. Áudios ficam numa cache
    persistente (cache primeiro), baixados em segundo plano depois da primeira abertura. Pedidos com Range recebem 206. */
-const VERSAO='8.14-3151d9';
+const VERSAO='8.14-d2b094';
 const PFX='solar-',CASCA=PFX+'casca-'+VERSAO,PESADA=PFX+'pesada-v1',META=PFX+'meta-v1';
 const ESCOPO=new URL(self.registration.scope).pathname;
 let baixando=false;

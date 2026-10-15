@@ -5,7 +5,7 @@
    É um app separado: usa CÓPIAS congeladas (pasta snap/) dos modelos da Célula, da Terra e do DNA, e não altera
    nenhum app do catálogo. Equipe: A ou X pula a cena; B ou Y volta à espera. */
 (function(){'use strict';
-const T=THREE,VERSAO='1.1.0',$=id=>document.getElementById(id);
+const T=THREE,VERSAO='1.2.0',$=id=>document.getElementById(id);
 const CM=window.CELULA_MODELS,TM=window.TERRA_MODELS,DM=window.DNA_MODELS;
 
 /* ---------- palco ---------- */
@@ -68,6 +68,46 @@ function somar(){const c=lerContagem();c[hoje()]=(c[hoje()]||0)+1;try{localStora
 function mostrarContagem(){const c=lerContagem(),h=c[hoje()]||0,tot=Object.values(c).reduce((a,b)=>a+b,0);$('contador').textContent='Demonstrações hoje: '+h+' · total neste aparelho: '+tot;}
 mostrarContagem();
 
+/* ---------- efeitos sonoros sintetizados (sem arquivos): subida, explosão, passagem, batimento ---------- */
+let actx=null,mestre=null;
+function sfx(){try{if(!actx){actx=new (window.AudioContext||window.webkitAudioContext)();mestre=actx.createGain();mestre.gain.value=.8;mestre.connect(actx.destination);}if(actx.state!=='running')actx.resume();}catch(_){}return actx;}
+function ruido(ctx,dur){const b=ctx.createBuffer(1,Math.ceil(ctx.sampleRate*dur),ctx.sampleRate),d=b.getChannelData(0);for(let i=0;i<d.length;i++)d[i]=Math.random()*2-1;const s=ctx.createBufferSource();s.buffer=b;return s;}
+function env(ctx,g,t0,pico,ataque,queda){g.gain.setValueAtTime(0.0001,t0);g.gain.exponentialRampToValueAtTime(pico,t0+ataque);g.gain.exponentialRampToValueAtTime(0.0001,t0+ataque+queda);}
+function somSubida(dur){const c=sfx();if(!c)return;const t=c.currentTime;const o=c.createOscillator(),g=c.createGain();o.type='sawtooth';o.frequency.setValueAtTime(40,t);o.frequency.exponentialRampToValueAtTime(160,t+dur);
+ const lp=c.createBiquadFilter();lp.type='lowpass';lp.frequency.setValueAtTime(200,t);lp.frequency.exponentialRampToValueAtTime(2400,t+dur);o.connect(lp);lp.connect(g);g.connect(mestre);g.gain.setValueAtTime(.0001,t);g.gain.exponentialRampToValueAtTime(.22,t+dur*.95);g.gain.exponentialRampToValueAtTime(.0001,t+dur+.05);o.start(t);o.stop(t+dur+.1);
+ const n=ruido(c,dur),bp=c.createBiquadFilter(),gn=c.createGain();bp.type='bandpass';bp.Q.value=1.2;bp.frequency.setValueAtTime(300,t);bp.frequency.exponentialRampToValueAtTime(4000,t+dur);n.connect(bp);bp.connect(gn);gn.connect(mestre);gn.gain.setValueAtTime(.0001,t);gn.gain.exponentialRampToValueAtTime(.12,t+dur*.95);gn.gain.exponentialRampToValueAtTime(.0001,t+dur+.05);n.start(t);}
+function somExplosao(forca){const c=sfx();if(!c)return;const t=c.currentTime,k=forca||1;const o=c.createOscillator(),g=c.createGain();o.type='sine';o.frequency.setValueAtTime(110,t);o.frequency.exponentialRampToValueAtTime(28,t+1.4);o.connect(g);g.connect(mestre);env(c,g,t,.95*k,.01,1.6);o.start(t);o.stop(t+1.8);
+ const n=ruido(c,2.2),lp=c.createBiquadFilter(),gn=c.createGain();lp.type='lowpass';lp.frequency.setValueAtTime(5000,t);lp.frequency.exponentialRampToValueAtTime(150,t+2);n.connect(lp);lp.connect(gn);gn.connect(mestre);env(c,gn,t,.7*k,.005,2.0);n.start(t);}
+function somPassagem(){const c=sfx();if(!c)return;const t=c.currentTime;const n=ruido(c,1.3),bp=c.createBiquadFilter(),g=c.createGain();bp.type='bandpass';bp.Q.value=2;bp.frequency.setValueAtTime(250,t);bp.frequency.exponentialRampToValueAtTime(3200,t+.55);bp.frequency.exponentialRampToValueAtTime(500,t+1.2);n.connect(bp);bp.connect(g);g.connect(mestre);env(c,g,t,.32,.45,.8);n.start(t);}
+function somBatida(forte){const c=sfx();if(!c)return;const t=c.currentTime;const o=c.createOscillator(),g=c.createGain();o.type='sine';o.frequency.setValueAtTime(forte?62:52,t);o.frequency.exponentialRampToValueAtTime(34,t+.16);o.connect(g);g.connect(mestre);env(c,g,t,forte?.9:.55,.008,.2);o.start(t);o.stop(t+.3);}
+const ease=x=>1-Math.pow(1-Math.min(1,Math.max(0,x)),3),easeIn=x=>Math.pow(Math.min(1,Math.max(0,x)),3);
+const elastico=x=>{x=Math.min(1,Math.max(0,x));return x===1?1:Math.pow(2,-10*x)*Math.sin((x*10-.75)*(2*Math.PI)/3)+1;};
+/* textura de brilho (radial) e o logo recortado em círculo, prontos desde o início */
+function texBrilho(r,g,b){const c=document.createElement('canvas');c.width=c.height=256;const x=c.getContext('2d');const gr=x.createRadialGradient(128,128,0,128,128,128);gr.addColorStop(0,`rgba(${r},${g},${b},1)`);gr.addColorStop(.25,`rgba(${r},${g},${b},.55)`);gr.addColorStop(1,`rgba(${r},${g},${b},0)`);x.fillStyle=gr;x.fillRect(0,0,256,256);return texCanvas(c);}
+const BRILHO_AZUL=texBrilho(140,220,255),BRILHO_BRANCO=texBrilho(255,255,255);
+const LOGO=(()=>{const c=document.createElement('canvas');c.width=c.height=512;const t=texCanvas(c);const im=new Image();im.onload=()=>{const x=c.getContext('2d');x.save();x.beginPath();x.arc(256,256,256,0,Math.PI*2);x.clip();x.drawImage(im,0,0,512,512);x.restore();t.needsUpdate=true;};im.src='assets/logo.png';return t;})();
+function spriteBrilho(tex,cor){return new T.Sprite(new T.SpriteMaterial({map:tex,color:cor||0xffffff,transparent:true,depthWrite:false,blending:T.AdditiveBlending}));}
+/* logo do Portal com halo, usado na abertura, na espera e no final */
+function logoComHalo(r){const g=new T.Group();const h=spriteBrilho(BRILHO_AZUL);h.scale.set(r*5,r*5,1);g.add(h);const m=new T.Mesh(new T.CircleGeometry(r,72),new T.MeshBasicMaterial({map:LOGO,transparent:true,depthWrite:false,toneMapped:false}));m.position.z=.01;g.add(m);g.userData.halo=h;return g;}
+/* nuvem de partículas: implode até o logo e explode para fora, passando pelo visitante */
+function nuvemExplosiva(n,raioIni,raioFim){const pos=new Float32Array(n*3),ini=new Float32Array(n*3),alvo=new Float32Array(n*3),vel=new Float32Array(n*3);
+ for(let i=0;i<n;i++){const u=Math.random()*2-1,a=Math.random()*Math.PI*2,s=Math.sqrt(1-u*u),r=raioIni[0]+Math.random()*(raioIni[1]-raioIni[0]);ini[i*3]=Math.cos(a)*s*r;ini[i*3+1]=u*r;ini[i*3+2]=Math.sin(a)*s*r;
+  const ra=Math.sqrt(Math.random())*raioFim,b=Math.random()*Math.PI*2;alvo[i*3]=Math.cos(b)*ra;alvo[i*3+1]=Math.sin(b)*ra;alvo[i*3+2]=(Math.random()-.5)*.1;}
+ pos.set(ini);const geo=new T.BufferGeometry();geo.setAttribute('position',new T.BufferAttribute(pos,3));
+ const p=new T.Points(geo,new T.PointsMaterial({color:0xa8ecff,size:.045,transparent:true,opacity:0,depthWrite:false,blending:T.AdditiveBlending,map:BRILHO_BRANCO}));
+ p.userData={ini,alvo,vel,explodiu:false};
+ p.userData.implodir=k=>{const e=easeIn(k);for(let i=0;i<pos.length;i++)pos[i]=ini[i]+(alvo[i]-ini[i])*e;geo.attributes.position.needsUpdate=true;p.material.opacity=Math.min(1,k*2);};
+ p.userData.explodir=()=>{for(let i=0;i<n;i++){const x=pos[i*3],y=pos[i*3+1],z=pos[i*3+2]+.02;const l=Math.hypot(x,y,z)||1,v=4+Math.random()*11;vel[i*3]=x/l*v+(Math.random()-.5)*3;vel[i*3+1]=y/l*v+(Math.random()-.5)*3;vel[i*3+2]=Math.abs(z/l)*v+2+Math.random()*9;}p.userData.explodiu=true;};
+ p.userData.voar=(dt,f)=>{for(let i=0;i<pos.length;i++){pos[i]+=vel[i]*dt;vel[i]*=1-dt*.7;}geo.attributes.position.needsUpdate=true;p.material.opacity=Math.max(0,f);};
+ return p;}
+
+/* passagem em velocidade da luz entre as cenas: riscos de luz que vêm na direção do visitante (presos à cabeça) */
+const warp=(()=>{const n=420,pos=new Float32Array(n*6),dados=[];for(let i=0;i<n;i++){const r=.7+Math.random()*4,a=Math.random()*Math.PI*2,z=-Math.random()*44,l=.8+Math.random()*2.4;dados.push([Math.cos(a)*r,Math.sin(a)*r,z,l]);}
+ const geo=new T.BufferGeometry();geo.setAttribute('position',new T.BufferAttribute(pos,3));const m=new T.LineSegments(geo,new T.LineBasicMaterial({color:0xcdeeff,transparent:true,opacity:0,depthTest:false,depthWrite:false,blending:T.AdditiveBlending}));m.renderOrder=3001;m.frustumCulled=false;camera.add(m);
+ m.userData.passo=(dt,k)=>{m.visible=k>.02;if(!m.visible)return;m.material.opacity=k;for(let i=0;i<n;i++){const d=dados[i];d[2]+=dt*70*k;if(d[2]>1)d[2]-=45;pos[i*6]=d[0];pos[i*6+1]=d[1];pos[i*6+2]=d[2];pos[i*6+3]=d[0];pos[i*6+4]=d[1];pos[i*6+5]=d[2]-d[3]*(.4+k);}geo.attributes.position.needsUpdate=true;};return m;})();
+/* aproxima um grupo do visitante: de d0 a d1 metros em "dur" segundos */
+function aproximar(g,a,d0,d1,dy,t,dur){const d=d0+(d1-d0)*ease(t/dur);g.position.copy(a.p).addScaledVector(a.f,d);g.position.y=a.p.y+(dy||0);}
+
 /* ---------- coração (anatomia real Z-Anatomy, CC BY-SA 4.0) ---------- */
 let coracaoGLB=null;
 try{new T.GLTFLoader().load('modelos/coracao.glb',g=>{coracaoGLB=g.scene;},undefined,()=>{coracaoGLB=null;});}catch(_){}
@@ -89,10 +129,26 @@ function dicaGiro(g,y,z){const d=placa('','✋ Segure o gatilho e mova a mão pa
 /* grupo "giro": é ele que o visitante gira com o gatilho; a animação própria do modelo fica dentro dele */
 function comGiro(g,obj){const giro=new T.Group();giro.add(obj);g.add(giro);g.userData.alvo=giro;return giro;}
 const CENAS=[
- {id:'abertura',dur:13,legenda:'Isto é imersão. Com o Portal 360º VR, o aluno não olha para o conteúdo: ele entra nele. O que você vai ver agora é só uma pequena amostra.',
-  montar(a){const g=new T.Group();const logo=placa('Portal 360º VR','Isto é imersão: o conhecimento por dentro',1.7,.6,{fundo:false,tamT:96,tamC:48,y0:120,corC:'#9fe8ff'});logo.position.y=.15;g.add(logo);
-   const im=new Image();im.onload=()=>{const c=document.createElement('canvas');c.width=c.height=256;const x=c.getContext('2d');x.drawImage(im,0,0,256,256);const m=new T.Mesh(new T.CircleGeometry(.22,48),new T.MeshBasicMaterial({map:texCanvas(c),transparent:true,depthWrite:false}));m.position.y=.62;g.add(m);};im.src='assets/logo.png';
-   aFrente(g,a,2.4,0);g.userData.tick=t=>{g.position.y=a.p.y+Math.sin(t*.8)*.03;};return g;}},
+ {id:'abertura',dur:13,falaEm:4.2,legenda:'Isto é imersão. Com o Portal 360º VR, o aluno não olha para o conteúdo: ele entra nele.',
+  montar(a){const g=new T.Group();aFrente(g,a,3.2,.15);
+   const nuvem=nuvemExplosiva(2600,[7,22],.55);g.add(nuvem);
+   const flash=spriteBrilho(BRILHO_BRANCO);flash.scale.set(.01,.01,1);g.add(flash);
+   const anel=new T.Mesh(new T.RingGeometry(.96,1,128),new T.MeshBasicMaterial({color:0x7CFFB8,transparent:true,opacity:0,side:T.DoubleSide,depthWrite:false,blending:T.AdditiveBlending}));g.add(anel);
+   const anel2=anel.clone();anel2.material=anel.material.clone();anel2.material.color.setHex(0x7fd6ff);g.add(anel2);
+   const logo=logoComHalo(.55);logo.scale.setScalar(.001);g.add(logo);
+   const tit=placa('Portal 360º VR','',2.4,.34,{fundo:false,tamT:120,y0:100});tit.position.y=-.92;tit.material.opacity=0;g.add(tit);
+   const sub=placa('','Isto é imersão.',1.8,.18,{fundo:false,tamC:76,y0:90,corC:'#7CFFB8'});sub.position.y=-1.22;sub.material.opacity=0;g.add(sub);
+   const T1=2.6;let somou=false;
+   g.userData.tick=(t,dt)=>{if(!somou){somou=true;somSubida(T1);}
+    if(t<T1){nuvem.userData.implodir(t/T1);logo.scale.setScalar(.001);return;}
+    if(!nuvem.userData.explodiu){nuvem.userData.explodir();somExplosao(1);}
+    const e=t-T1;nuvem.userData.voar(dt,1-e/3.5);
+    const fl=e<.18?e/.18:Math.max(0,1-(e-.18)/.9);flash.scale.setScalar(.1+fl*9);flash.material.opacity=fl;
+    anel.scale.setScalar(.2+e*7);anel.material.opacity=Math.max(0,1-e/1.5);anel2.scale.setScalar(.2+Math.max(0,e-.25)*5);anel2.material.opacity=Math.max(0,1-(e-.25)/1.8)*(e>.25?1:0);
+    logo.scale.setScalar(Math.max(.001,elastico(e/1.1)));logo.userData.halo.material.opacity=.75+.25*Math.sin(t*2.2);logo.rotation.y=Math.sin(t*.5)*.12;
+    tit.material.opacity=ease((e-1.0)/1.0);sub.material.opacity=ease((e-2.2)/1.0);
+    if(t>11){const k=(t-11)/2;logo.scale.setScalar(1+easeIn(k)*1.5);}};
+   return g;}},
  {id:'solar',dur:40,legenda:'Você está no meio do Sistema Solar. Segure o gatilho e gire os planetas com a mão. Na experiência completa, o aluno examina cada planeta, compara tamanhos, entende o dia e a noite, as fases da Lua e os eclipses.',
   montar(a){const g=new T.Group();const sist=new T.Group();sist.rotation.x=.12;
    const sun=new T.Mesh(new T.SphereGeometry(.7,64,40),new T.MeshBasicMaterial({map:txPlaneta('sol'),color:0xfff1d6}));sist.add(sun);
@@ -110,29 +166,40 @@ const CENAS=[
     const orb=new T.Mesh(new T.RingGeometry(d-.006,d+.006,160),new T.MeshBasicMaterial({color:0x5f86a8,side:T.DoubleSide,transparent:true,opacity:.3}));orb.rotation.x=-Math.PI/2;sist.add(orb);corpos.push([piv,m,vel]);});
    comGiro(g,sist);dicaGiro(g,1.6,0);
    /* o Sol fica 6 m à frente, abaixo da linha dos olhos: as órbitas externas passam em volta do visitante */
-   aFrente(g,a,6,-.7);g.userData.tick=(t,dt)=>{for(const [piv,m,vel] of corpos){piv.rotation.y+=dt*vel*.35;m.rotation.y+=dt*1.2;}sun.rotation.y+=dt*.08;if(lua)lua.userData.piv.rotation.y+=dt*2.2;};return g;}},
+   aFrente(g,a,16,-.7);g.userData.tick=(t,dt)=>{aproximar(g,a,16,6,-.7,t,5);for(const [piv,m,vel] of corpos){piv.rotation.y+=dt*vel*.35;m.rotation.y+=dt*1.2;}sun.rotation.y+=dt*.08;if(lua)lua.userData.piv.rotation.y+=dt*2.2;};return g;}},
  {id:'terra',dur:38,legenda:'A Terra aberta ao meio: crosta, manto e núcleo. Gire o planeta com o gatilho. Na experiência completa, o aluno viaja até o centro da Terra e estuda placas, vulcões e rochas.',
-  montar(a){const g=new T.Group();const te=TM.terra({corte:true,rotulos:true});te.scale.setScalar(.42);comGiro(g,te);dicaGiro(g,-1.6,.3);luzFrente(g,1.0);aFrente(g,a,3,0);
-   g.userData.tick=(t,dt)=>{if(te.userData.tick)te.userData.tick(t,dt);if(!g.userData.mexeu)te.rotation.y=Math.sin(t*.25)*.35;};g.userData.liberar=()=>TM.dispose(g);return g;}},
+  montar(a){const g=new T.Group();const pai=new T.Group();const inteira=TM.terra({});inteira.scale.setScalar(.42);pai.add(inteira);const te=TM.terra({corte:true,rotulos:true});te.scale.setScalar(.42);te.visible=false;pai.add(te);comGiro(g,pai);dicaGiro(g,-1.6,.3);luzFrente(g,1.0);
+   const fl=spriteBrilho(BRILHO_BRANCO,0xffd9a0);fl.scale.set(.01,.01,1);g.add(fl);aFrente(g,a,12,0);let abriu=false;
+   g.userData.tick=(t,dt)=>{aproximar(g,a,12,3,0,t,3.4);if(inteira.userData.tick)inteira.userData.tick(t,dt);if(te.userData.tick)te.userData.tick(t,dt);
+    if(!abriu&&t>4){abriu=true;inteira.visible=false;te.visible=true;somExplosao(.6);}const e=t-4;const k=e>0&&e<1.2?(e<.15?e/.15:1-(e-.15)/1.05):0;fl.scale.setScalar(.01+k*4.5);fl.material.opacity=k;
+    if(!g.userData.mexeu){inteira.rotation.y=t*.5;te.rotation.y=Math.sin(t*.25)*.35;}};g.userData.liberar=()=>TM.dispose(g);return g;}},
  {id:'celula',dur:40,legenda:'Agora você encolheu até o tamanho de uma célula. Gire e observe o núcleo e as mitocôndrias. Na experiência completa, o aluno entra na célula, monta a fábrica de proteínas e compara a célula animal com a vegetal.',
   montar(a){const g=new T.Group();const c=CM.celula('animal');c.scale.setScalar(.62);comGiro(g,c);dicaGiro(g,-1.55,.3);luzFrente(g,1.0);aFrente(g,a,2.7,0);
-   g.userData.tick=(t,dt)=>{if(c.userData.tick)c.userData.tick(t,dt);if(!g.userData.mexeu){c.rotation.y=Math.sin(t*.3)*.45;c.rotation.x=Math.sin(t*.2)*.08;}const k=.62+Math.min(t,10)*.012;c.scale.setScalar(k);};g.userData.liberar=()=>CM.dispose(g);return g;}},
+   g.userData.tick=(t,dt)=>{if(c.userData.tick)c.userData.tick(t,dt);if(!g.userData.mexeu){c.rotation.y=Math.sin(t*.3)*.45;c.rotation.x=Math.sin(t*.2)*.08;}const k=t<3.5?.02+.6*ease(t/3.5):.62+Math.min(t-3.5,10)*.012;c.scale.setScalar(k);};g.userData.liberar=()=>CM.dispose(g);return g;}},
  {id:'dna',dur:32,legenda:'Mais fundo ainda: a molécula de DNA, a receita da vida. Na experiência completa, o aluno monta a dupla hélice, pareia as bases e acompanha o DNA se copiando.',
   montar(a){const g=new T.Group();const h=DM.helix();h.scale.setScalar(.36);comGiro(g,h);dicaGiro(g,-1.5,.4);luzFrente(g,1.9);g.add(new T.AmbientLight(0xffffff,1.1));aFrente(g,a,2.3,0);
-   g.userData.tick=(t,dt)=>{if(!g.userData.mexeu)h.rotation.y+=dt*.35;h.position.y=Math.sin(t*.4)*.12;};g.userData.liberar=()=>DM.dispose(g);return g;}},
- {id:'coracao',dur:32,legenda:'Um coração humano batendo, com anatomia real. E ele é só um dos órgãos: o corpo humano completo tem onze sistemas para explorar.',
-  montar(a){const g=new T.Group();const h=coracaoModelo();comGiro(g,h);dicaGiro(g,-.75,.2);luzFrente(g,1.1);aFrente(g,a,1.9,.28);
-   g.userData.tick=(t,dt)=>{const ciclo=(t*1.15)%1,pulso=Math.exp(-Math.pow((ciclo-.08)/.05,2))+.6*Math.exp(-Math.pow((ciclo-.3)/.06,2));h.userData.piv.scale.setScalar(h.userData.k*(1+.07*pulso));if(!g.userData.mexeu)h.rotation.y=Math.sin(t*.3)*.6;};return g;}},
- {id:'amostra',dur:22,legenda:'O que você viu foi só uma amostra. São cinco experiências completas, com quase cem missões e mais de duzentas fichas narradas, em realidade virtual, em 3D na lousa e em realidade mista, com aula guiada e relatório para o professor.',
-  montar(a){const g=new T.Group();
-   const p=placa('Isto foi só uma amostra','',2.0,.2,{fundo:false,tamT:66,y0:72});p.position.y=.66;g.add(p);
-   const itens=[['5','experiências completas'],['~100','missões de aprendizagem'],['200+','fichas narradas'],['VR · 3D · mista','óculos, lousa e realidade mista'],['Aula guiada','com relatório do professor'],['Offline','funciona sem internet']];
-   itens.forEach(([n,t],i)=>{const c=placa(n,t,.6,.36,{tamT:n.length>6?84:140,tamC:70,y0:n.length>6?160:180,corT:'#7CFFB8'});c.position.set(((i%3)-1)*.66,.24-Math.floor(i/3)*.42,0);c.scale.setScalar(.001);c.userData.i=i;g.add(c);});
-   const rod=placa('','Alinhado à BNCC · Ciências do Ensino Fundamental ao Médio',1.6,.1,{fundo:false,tamC:40,y0:60,corC:'#9fe8ff'});rod.position.y=-.6;g.add(rod);
-   aFrente(g,a,2.4,0);g.userData.tick=t=>{g.children.forEach(c=>{if(c.userData.i!==undefined){const k=Math.min(1,Math.max(0,(t-1-c.userData.i*.9)*2.5));c.scale.setScalar(Math.max(.001,1-Math.pow(1-k,3)));}});};return g;}},
- {id:'final',dur:16,legenda:'Portal 360º VR, da NEWPC: o conhecimento por dentro. Converse com nosso consultor aqui no estande e leve esta experiência para a sua rede de ensino.',
-  montar(a){const g=new T.Group();const p=placa('Leve esta experiência para a sua rede','Portal 360º VR · NEWPC Educação\nFale com nosso consultor aqui no estande.',1.7,.78,{tamT:68,tamC:46,y0:100});
-   g.add(p);const cr=placa('','Modelo do coração: Z-Anatomy (CC BY-SA 4.0)',1.2,.08,{fundo:false,tamC:30,y0:50,corC:'#7f9aae'});cr.position.y=-.5;g.add(cr);aFrente(g,a,2.3,.05);g.userData.tick=t=>{p.position.y=Math.sin(t*.8)*.02;};return g;}}
+   g.userData.tick=(t,dt)=>{if(!g.userData.mexeu)h.rotation.y+=dt*(.35+2.4*(1-ease(t/3.5)));h.position.y=-3.2*(1-ease(t/3.2))+Math.sin(t*.4)*.12;};g.userData.liberar=()=>DM.dispose(g);return g;}},
+ {id:'coracao',dur:32,legenda:'Um coração humano batendo, com anatomia real. Sinta o ritmo. E ele é só um dos órgãos: o corpo humano inteiro espera para ser explorado.',
+  montar(a){const g=new T.Group();const h=coracaoModelo();comGiro(g,h);dicaGiro(g,-.75,.2);luzFrente(g,1.1);const brilho=new T.PointLight(0xff4050,0,4);brilho.position.set(0,.2,.9);g.add(brilho);aFrente(g,a,1.9,.28);let ultimo=-1;
+   g.userData.tick=(t,dt)=>{const ciclo=(t*1.15)%1,pulso=Math.exp(-Math.pow((ciclo-.08)/.05,2))+.6*Math.exp(-Math.pow((ciclo-.3)/.06,2));h.userData.piv.scale.setScalar(h.userData.k*(1+.07*pulso));brilho.intensity=pulso*1.4;const fase=ciclo<.08?0:ciclo<.3?1:2;if(fase!==ultimo){if(fase===1)somBatida(true);if(fase===2)somBatida(false);ultimo=fase;}if(!g.userData.mexeu)h.rotation.y=Math.sin(t*.3)*.6;};return g;}},
+ {id:'comeco',dur:24,legenda:'Isto é só o começo. Com o Portal 360º VR, qualquer conteúdo pode virar uma experiência: do átomo ao universo, da célula ao corpo humano. O limite é a imaginação.',
+  montar(a){const g=new T.Group();g.position.copy(a.p);g.rotation.y=a.yaw;
+   const tit=placa('Isto é só o começo','',2.2,.28,{fundo:false,tamT:96,y0:96});tit.position.set(0,.35,-2.6);tit.material.opacity=0;g.add(tit);
+   const sub=placa('','Qualquer conteúdo pode virar uma experiência imersiva.',2.6,.32,{fundo:false,tamC:46,y0:54,corC:'#7CFFB8'});sub.position.set(0,0,-2.6);sub.material.opacity=0;g.add(sub);
+   const FR=['Explorar o universo','Entrar no corpo humano','Mergulhar numa célula','Descer ao centro da Terra','Montar moléculas','Ver a física acontecer','Caminhar por ecossistemas','Visitar a história','Enxergar a matemática','Viajar pelo planeta','Dar vida à geografia','Aprender fazendo'];
+   const anel=new T.Group();g.add(anel);const itens=[];FR.forEach((f,i)=>{const ang=i/FR.length*Math.PI*2,r=3.3,y=(i%3-1)*.45+.25;const p=placa('',f,1.3,.16,{fundo:'rgba(6,30,44,.72)',borda:'rgba(124,255,184,.55)',tamC:56,y0:88});
+    p.position.set(Math.sin(ang)*r,y,-Math.cos(ang)*r);p.rotation.y=-ang;p.material.opacity=0;anel.add(p);itens.push(p);});
+   const brilho=spriteBrilho(BRILHO_AZUL);brilho.scale.set(5,5,1);brilho.position.set(0,.2,-3.4);brilho.material.opacity=.35;g.add(brilho);
+   let som=false;g.userData.tick=(t,dt)=>{if(!som){som=true;somPassagem();}tit.material.opacity=ease(t/1.2);sub.material.opacity=ease((t-1.2)/1.2);
+    itens.forEach((p,i)=>{p.material.opacity=ease((t-2.2-i*.55)/.8);});anel.rotation.y=t*.06;brilho.material.opacity=.3+.12*Math.sin(t*1.5);};return g;}},
+ {id:'final',dur:16,legenda:'Portal 360º VR, da NEWPC: o conhecimento por dentro. Converse com nosso consultor aqui no estande e leve esta experiência para a sua rede.',
+  montar(a){const g=new T.Group();aFrente(g,a,2.6,.25);const nuvem=nuvemExplosiva(1200,[.05,.2],.4);nuvem.userData.implodir(1);nuvem.material.opacity=0;g.add(nuvem);
+   const logo=logoComHalo(.42);logo.scale.setScalar(.001);g.add(logo);
+   const tit=placa('Portal 360º VR','O conhecimento por dentro',2.0,.42,{fundo:false,tamT:104,tamC:56,y0:100,corC:'#9fe8ff'});tit.position.y=-.78;tit.material.opacity=0;g.add(tit);
+   const cta=placa('','Fale com nosso consultor aqui no estande',1.6,.16,{fundo:'rgba(10,70,46,.9)',borda:'rgba(124,255,184,.8)',tamC:58,y0:88});cta.position.y=-1.18;cta.material.opacity=0;g.add(cta);
+   const cr=placa('','Modelo do coração: Z-Anatomy (CC BY-SA 4.0) · NEWPC Educação',1.4,.08,{fundo:false,tamC:30,y0:50,corC:'#7f9aae'});cr.position.y=-1.42;g.add(cr);
+   let bum=false;g.userData.tick=(t,dt)=>{if(!bum&&t>.3){bum=true;somExplosao(.55);nuvem.userData.explodir();}if(bum)nuvem.userData.voar(dt,1-(t-.3)/2.5);
+    logo.scale.setScalar(Math.max(.001,elastico((t-.3)/1.1)));logo.userData.halo.material.opacity=.7+.3*Math.sin(t*2);tit.material.opacity=ease((t-1)/1);cta.material.opacity=ease((t-2.2)/1);cta.scale.setScalar(1+.03*Math.sin(t*3));};return g;}}
 ];
 
 /* ---------- interação: segurar o gatilho e mover a mão gira o objeto da cena ---------- */
@@ -142,28 +209,32 @@ function pegar(ctrl){const alvo=atual&&atual.userData.alvo;if(!alvo)return;const
 function soltar(ctrl){pegas.delete(ctrl);}
 function girarComMao(){const alvo=atual&&atual.userData.alvo;if(!alvo)return;for(const [ctrl,p] of pegas){const d=direcao(ctrl);alvo.rotation.y=p.ry+(d.yaw-p.y0)*2.6;alvo.rotation.x=Math.max(-.9,Math.min(.9,p.rx-(d.pitch-p.p0)*2.2));}}
 /* ---------- máquina do tour ---------- */
-let estado='parado',ind=-1,atual=null,tCena=0,anc=null,fade=0,fadeAlvo=0,pendente=null,legenda3D=null,espera=null,sessao=null,aguardaPose=0;
+let falaPend=null,estado='parado',ind=-1,atual=null,tCena=0,anc=null,fade=0,fadeAlvo=0,pendente=null,legenda3D=null,espera=null,sessao=null,aguardaPose=0;
 function legendaTexto(txt){$('legenda').textContent=txt||'';if(legenda3D){liberar(legenda3D);legenda3D=null;}
  if(txt&&renderer.xr.isPresenting&&anc){legenda3D=placa('',txt,1.5,.32,{tamC:40,y0:62,fundo:'rgba(3,12,24,.78)',borda:'rgba(55,177,218,.5)'});aFrente(legenda3D,anc,2.1,-.62);scene.add(legenda3D);}}
 function limparCena(){pegas.clear();if(atual){if(atual.userData.liberar)atual.userData.liberar();else liberar(atual);atual=null;}}
 function trocar(fn){pendente=fn;fadeAlvo=1;}
-function montarEspera(){limparEspera();anc=ancora();const g=new T.Group();
- const c=lerContagem();const p=placa('Portal 360º VR','Aperte o gatilho para começar a viagem',1.5,.55,{tamT:84,tamC:44,y0:110,corC:'#7CFFB8'});g.add(p);
- const n=placa('','Demonstrações hoje: '+(c[hoje()]||0),.8,.12,{tamC:46,y0:72,fundo:false,corC:'#8fb0c2'});n.position.y=-.42;g.add(n);
- aFrente(g,anc,2.4,0);g.userData.tick=t=>{p.position.y=Math.sin(t*1.2)*.025;};scene.add(g);espera=g;}
+function montarEspera(){limparEspera();anc=ancora();const g=new T.Group();aFrente(g,anc,4.2,.1);
+ const n=2200,pos=new Float32Array(n*3),cor=new Float32Array(n*3);for(let i=0;i<n;i++){const braco=i%3,r=.3+Math.pow(Math.random(),.7)*2.6,ang=braco*2.094+r*1.9+(Math.random()-.5)*.5;pos[i*3]=Math.cos(ang)*r;pos[i*3+1]=(Math.random()-.5)*.18*(3-r);pos[i*3+2]=Math.sin(ang)*r;const k=1-r/3;cor[i*3]=.5+.5*k;cor[i*3+1]=.75+.25*k;cor[i*3+2]=1;}
+ const geo=new T.BufferGeometry();geo.setAttribute('position',new T.BufferAttribute(pos,3));geo.setAttribute('color',new T.BufferAttribute(cor,3));
+ const gal=new T.Points(geo,new T.PointsMaterial({size:.05,vertexColors:true,transparent:true,opacity:.9,depthWrite:false,blending:T.AdditiveBlending,map:BRILHO_BRANCO}));gal.rotation.x=1.15;g.add(gal);
+ const logo=logoComHalo(.38);logo.position.y=.15;g.add(logo);
+ const p=placa('','Portal 360º VR',1.6,.2,{fundo:false,tamC:90,y0:110});p.position.y=-.55;g.add(p);
+ const c=lerContagem();const cont=placa('','Aperte o gatilho  ·  demonstrações hoje: '+(c[hoje()]||0),1.3,.08,{fundo:false,tamC:40,y0:52,corC:'#8fb0c2'});cont.position.y=-.8;g.add(cont);
+ g.userData.tick=t=>{gal.rotation.z=t*.08;logo.userData.halo.material.opacity=.6+.4*Math.sin(t*1.6);logo.position.y=.15+Math.sin(t*.9)*.04;};scene.add(g);espera=g;}
 function limparEspera(){if(espera){liberar(espera);espera=null;}}
 function irEspera(){pararVoz();estado='espera';ind=-1;trocar(()=>{limparCena();legendaTexto('');montarEspera();});}
-function iniciar(){if(estado==='tour')return;try{musica.play().catch(()=>{});}catch(_){}estado='tour';ind=-1;proxima();}
+function iniciar(){if(estado==='tour')return;sfx();try{musica.play().catch(()=>{});}catch(_){}estado='tour';ind=-1;proxima();}
 function proxima(){ind++;if(ind>=CENAS.length){somar();irEspera();return;}
- const cena=CENAS[ind];trocar(()=>{limparEspera();limparCena();if(ind===0||!anc||cena.id==='abertura')anc=ancora();atual=cena.montar(anc);scene.add(atual);tCena=0;legendaTexto(cena.legenda);narrar(cena.id,cena.legenda);});}
+ const cena=CENAS[ind];if(ind>0)somPassagem();trocar(()=>{limparEspera();limparCena();if(ind===0||!anc||cena.id==='abertura')anc=ancora();atual=cena.montar(anc);scene.add(atual);tCena=0;falaPend=cena.falaEm?cena:null;legendaTexto(cena.falaEm?'':cena.legenda);if(!cena.falaEm)narrar(cena.id,cena.legenda);});}
 function encerrarTela(){pararVoz();musica.pause();estado='parado';limparCena();limparEspera();legendaTexto('');$('barra').hidden=true;$('painel').classList.remove('oculto');}
 
 /* ---------- entrada: VR, tela, controles ---------- */
 const ctrls=[0,1].map(i=>{const c=renderer.xr.getController(i);const l=new T.Line(new T.BufferGeometry().setFromPoints([new T.Vector3(),new T.Vector3(0,0,-1)]),new T.LineBasicMaterial({color:0x7fd6ff}));l.scale.z=1.2;c.add(l);
  c.addEventListener('selectstart',()=>{if(estado==='espera')iniciar();else if(estado==='tour')pegar(c);});c.addEventListener('selectend',()=>soltar(c));scene.add(c);return c;});
-async function entrarVR(){if(!navigator.xr||!window.isSecureContext){alert('Abra este endereço no navegador do óculos (HTTPS).');return;}
+async function entrarVR(){sfx();if(!navigator.xr||!window.isSecureContext){alert('Abra este endereço no navegador do óculos (HTTPS).');return;}
  try{const s=await navigator.xr.requestSession('immersive-vr',{optionalFeatures:['local-floor']});renderer.xr.setReferenceSpaceType('local-floor');await renderer.xr.setSession(s);sessao=s;
-  s.addEventListener('end',()=>{sessao=null;encerrarTela();});$('painel').classList.add('oculto');try{musica.play().catch(()=>{});}catch(_){}estado='espera';aguardaPose=20;fade=1;fadeAlvo=1;}
+  s.addEventListener('end',()=>{sessao=null;encerrarTela();});s.addEventListener('visibilitychange',()=>{if(s.visibilityState==='visible'&&estado==='espera'&&!pendente&&espera)setTimeout(()=>{if(estado==='espera')iniciar();},1200);});$('painel').classList.add('oculto');try{musica.play().catch(()=>{});}catch(_){}estado='espera';aguardaPose=20;fade=1;fadeAlvo=1;}
  catch(e){alert('Não foi possível abrir o VR: '+(e&&e.message||e));}}
 function verNaTela(){$('painel').classList.add('oculto');$('barra').hidden=false;camera.position.set(0,1.6,0);camera.rotation.set(0,0,0);anc=null;iniciar();}
 let arr=null;canvas.addEventListener('pointerdown',e=>{const al=atual&&atual.userData.alvo;if(!al)return;arr={x:e.clientX,y:e.clientY,ry:al.rotation.y,rx:al.rotation.x};atual.userData.mexeu=true;});
@@ -180,7 +251,8 @@ renderer.setAnimationLoop(()=>{const dt=Math.min(.05,relogio.getDelta());
  /* transição: escurece, troca, clareia */
  const vel=dt/.55;if(fade<fadeAlvo)fade=Math.min(fadeAlvo,fade+vel);else if(fade>fadeAlvo)fade=Math.max(fadeAlvo,fade-vel);
  if(pendente&&fade>=1){const f=pendente;pendente=null;f();fadeAlvo=0;}
- cortina.material.opacity=fade;cortina.visible=fade>.001;
+ cortina.material.opacity=fade*(estado==='tour'&&ind>0?.88:1);cortina.visible=fade>.001;warp.userData.passo(dt,estado==='tour'&&ind>0?fade:0);
+ if(falaPend&&tCena>=falaPend.falaEm){const c=falaPend;falaPend=null;legendaTexto(c.legenda);narrar(c.id,c.legenda);}
  if(atual&&atual.userData.tick){tCena+=dt;atual.userData.tick(tCena,dt);}
  if(atual){girarComMao();const dc=atual.userData.dica;if(dc){const vis=tCena<12&&!atual.userData.mexeu;dc.material.opacity+=((vis?1:0)-dc.material.opacity)*Math.min(1,dt*4);dc.visible=dc.material.opacity>.02;}}
  if(espera&&espera.userData.tick)espera.userData.tick(relogio.elapsedTime);

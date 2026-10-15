@@ -458,7 +458,7 @@ function xrContexto(){
 function menuVRItens(){const v=estado.vista;const vistas=[['Sistema Solar','sistema'],['Examinar','planeta'],['Comparar','comparar'],['Dia e noite','diaNoite'],['Fases da Lua','fases'],['Estações','estacoes'],['Eclipses','eclipse'],['Desafio','desafio']].map(([t,k])=>[t,'view:'+k,k===v?'rgba(26,107,42,.96)':null]);
  return vistas.concat([[S.guide<0?'Aula guiada':'Encerrar aula guiada',S.guide<0?'guide':'guideStop','rgba(15,74,110,.96)'],[S.nomesVR?'Nomes: ao apontar':'Nomes: todos','nomes'],[estado.playing?'Pausar movimento':'Retomar movimento','pause'],['Centralizar','center'],['Ajuda dos controles','ajuda'],['Catálogo','catalogo'],['Sair do VR','sair','rgba(140,20,20,.95)']]);}
 function menuVRAbrir(){menuVRFechar();const a=xrAnchor();const itens=menuVRItens();const bot=[];
- const fundo=textoCanvasVR(1024,700,(g,c)=>{g.fillStyle='rgba(4,14,28,.88)';g.beginPath();g.roundRect(0,0,c.width,c.height,40);g.fill();g.strokeStyle='rgba(55,177,218,.8)';g.lineWidth=6;g.stroke();});fundo.renderOrder=998;fundo.scale.set(.86,.58,1);fundo.position.copy(a.p).addScaledVector(a.f,.84).add(new T.Vector3(0,.01,0));scene.add(fundo);
+ const fundo=textoCanvasVR(1024,700,(g,c)=>{g.fillStyle='rgba(4,14,28,.88)';g.beginPath();g.roundRect(0,0,c.width,c.height,40);g.fill();g.strokeStyle='rgba(55,177,218,.8)';g.lineWidth=6;g.stroke();});fundo.renderOrder=998;fundo.scale.set(.86,.66,1);fundo.position.copy(a.p).addScaledVector(a.f,.84).add(new T.Vector3(0,-.055,0));scene.add(fundo);
  itens.forEach(([t,ac,cor],i)=>{const b=criarBotaoVR(t,ac,cor);const k=vrBotoes.indexOf(b);if(k>=0)vrBotoes.splice(k,1);b.scale.set(.245,.061,1);const col=i%3,lin=Math.floor(i/3);b.position.copy(a.p).addScaledVector(a.r,(col-1)*.262).addScaledVector(a.f,.8).add(new T.Vector3(0,.10-lin*.082,0));scene.add(b);bot.push(b);});
  const tit=xrText(['Menu','Aponte e aperte o gatilho · Y ou B fecha'],1024,200);tit.scale.set(.42,.082,1);tit.position.copy(a.p).addScaledVector(a.f,.82).add(new T.Vector3(0,.19,0));scene.add(tit);
  S.menuVR={botoes:bot,titulo:tit,fundo,aberto:true};}
@@ -485,6 +485,35 @@ atualizarVR=function(){_atuV8();if(S.xrWait||!S.xrAnchor)return;
 const _sairV8=sairVRFinal;
 sairVRFinal=function(){menuVRFechar();dicasFechar();if(S.pilulaVR){release(S.pilulaVR);S.pilulaVR=null;}for(const b of S.ctxBtns)release(b);S.ctxBtns=[];_sairV8();};
 
-window.PortalSolarV8={version:'8.10',state:S,seasons,daylight,setDay,beginMission,checkMission,finishMission,enterView:entrarVista,exportSummary,setupXRActivity,resetStudent};
+/* v9.4 · VR fixo. 1) Painéis e botões deixam de ser sprites (que giram junto com a cabeça) e viram placas paradas no
+   mundo: cada placa vira para o aluno uma única vez, quando aparece, e depois fica onde está. 2) Além do Y/B e da pílula
+   do controle, um botão "☰ Menu" fica fixo na cena, para apontar e apertar o gatilho. 3) Trilha de fundo: retomada a
+   cada gatilho (o Quest suspende o áudio ao entrar no VR) e item "Música" no menu. */
+S.placasVR=[];
+textoCanvasVR=function(w,h,desenhar){const c=document.createElement('canvas');c.width=w;c.height=h;const g=c.getContext('2d');if(!g.roundRect){g.roundRect=function(x,y,ww,hh){this.rect(x,y,ww,hh);};}desenhar(g,c);
+ const tx=new T.CanvasTexture(c);tx.minFilter=T.LinearMipmapLinearFilter;tx.magFilter=T.LinearFilter;tx.generateMipmaps=true;try{tx.anisotropy=renderer.capabilities.getMaxAnisotropy();}catch(e){tx.anisotropy=4;}
+ const m=new T.Mesh(new T.PlaneGeometry(1,1),new T.MeshBasicMaterial({map:tx,transparent:true,depthTest:false,depthWrite:false,side:T.DoubleSide,toneMapped:false}));m.renderOrder=999;m.userData.placaVR=true;S.placasVR.push(m);return m;};
+const _vQ=new T.Vector3();
+function noControle(o){let p=o.parent;while(p){if(vrControllers.includes(p))return true;p=p.parent;}return false;}
+function orientarPlacas(){if(!S.placasVR.length)return;let cam=camera;try{if(renderer.xr.isPresenting)cam=renderer.xr.getCamera(camera);}catch(e){}cam.getWorldPosition(_vQ);
+ const resto=[];for(const m of S.placasVR){if(!m.parent){if(!m.userData.solta)m.userData.solta=(m.userData.solta||0)+1;if(m.userData.solta<600)resto.push(m);continue;}
+  if(!noControle(m)){m.parent.updateMatrixWorld(true);m.lookAt(_vQ);}}S.placasVR=resto;}
+function botaoMenuCena(){if(S.btnMenuCena){const i=vrBotoes.indexOf(S.btnMenuCena);if(i>=0)vrBotoes.splice(i,1);release(S.btnMenuCena);S.btnMenuCena=null;}if(!S.xrAnchor)return;
+ const b=criarBotaoVR('☰  Menu','menu','rgba(15,74,110,.96)');b.scale.set(.30,.075,1);b.position.copy(atAnchor(-.80,-.52,1.45));scene.add(b);S.btnMenuCena=b;}
+function retomarAudio(){try{if(audioCtx&&audioCtx.state!=='running')audioCtx.resume();if(musicaOn&&!musicNodes)iniciarMusica();if(musicNodes&&!narrAtual&&audioCtx){const nv=musicNodes.nivel||.26;if(musicNodes.master.gain.value<nv*.5)duckMusica(false);}}catch(e){}}
+const _setupV94=setupXRActivity;
+setupXRActivity=function(){_setupV94();botaoMenuCena();};
+const _itensV94=menuVRItens;
+menuVRItens=function(){const l=_itensV94();const i=l.findIndex(x=>x[1]==='center');l.splice(i,0,[musicaOn?'Música: ligada':'Música: desligada','musica']);return l;};
+const _acaoV94=acaoBotaoVR;
+acaoBotaoVR=function(a){if(a==='musica'){menuVRFechar();toggleMusica();retomarAudio();return;}_acaoV94(a);};
+const _selV94=tratarSelecaoVR;
+tratarSelecaoVR=function(ctrl){retomarAudio();_selV94(ctrl);};
+const _atuV94=atualizarVR;let _audT=0;
+atualizarVR=function(){_atuV94();orientarPlacas();if(S.btnMenuCena)S.btnMenuCena.visible=!S.menuVR;const t=performance.now();if(t-_audT>2000){_audT=t;retomarAudio();}};
+const _sairV94=sairVRFinal;
+sairVRFinal=function(){if(S.btnMenuCena){const i=vrBotoes.indexOf(S.btnMenuCena);if(i>=0)vrBotoes.splice(i,1);release(S.btnMenuCena);S.btnMenuCena=null;}_sairV94();};
+
+window.PortalSolarV8={version:'8.11',state:S,seasons,daylight,setDay,beginMission,checkMission,finishMission,enterView:entrarVista,exportSummary,setupXRActivity,resetStudent};
 entrarVista(S.views.includes(estado.vista)?estado.vista:'sistema');renderer.setAnimationLoop(animate);
 })();

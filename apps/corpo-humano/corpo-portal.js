@@ -148,7 +148,7 @@ Proto.buildXRUI=function(){
   const colunas=[[GRUPO_NOME,grupos.map(x=>[(x.id===grupoAtual?'✓ ':'')+x.nome,GRUPO_CMD+x.id,x.id===grupoAtual?AT:AZ])],
    ['MISSÕES',atv.map((a,i)=>[(a.id===S.view?'▶ ':'')+(i+1)+'. '+a.label,'view:'+a.id,a.id===S.view?AT:null])],
    ['VER',[[this.dentro?TXT_FORA:TXT_DENTRO,'xr:dentro',this.dentro?{bg:'#4a2a0f',borda:'#ffc77a',texto:'#fff6e8'}:{bg:'#2a1050',borda:'#c9a6ff',texto:'#ffffff'}],
-     ['Recentralizar a cena','center',null],[S.autoRotate?'Parar o giro do modelo':'Girar o modelo','rotate',null]].concat(ar?[[this.xrModo==='ar'?'Voltar ao VR':'Ver na minha sala','xr:'+(this.xrModo==='ar'?'vr':'ar'),{bg:'#0f3a4a',borda:'#7fd6ff',texto:'#ffffff'}]]:[])],
+     ['Recentralizar a cena','center',null],[S.autoRotate?'Parar o giro do modelo':'Girar o modelo','rotate',null]].concat(Lab.temCoracao&&window.CORPO_GLTF?[[window.CORPO_GLTF.estiloCoracao==='real'?'Coração: cores didáticas':'Coração: realista','coracao:estilo',null]]:[]).concat(ar?[[this.xrModo==='ar'?'Voltar ao VR':'Ver na minha sala','xr:'+(this.xrModo==='ar'?'vr':'ar'),{bg:'#0f3a4a',borda:'#7fd6ff',texto:'#ffffff'}]]:[])],
    ['SOM E SAÍDA',[['Repetir a explicação','voice:repeat',null],['Parar a voz','voice:stop',null],[narrator.musicOn?'Música de fundo: ligada':'Música de fundo: desligada','xr:musica',null],
      ['Como usar os controles','xr:ajuda',null],['Voltar ao catálogo','catalog',AZ],[this.xrModo==='ar'?'Sair da realidade mista':'Sair do VR','vr',SAI]]]];
   const MAXL=7,cols=[];colunas.forEach(([cab,it])=>{const n=Math.ceil(it.length/MAXL),por=Math.ceil(it.length/n);for(let k=0;k<n;k++)cols.push([k?'':cab,it.slice(k*por,(k+1)*por)]);});

@@ -13,17 +13,28 @@ const PARTES_POS={rins:{rim_d:[-0.059,1.0938,-0.0099],rim_e:[0.0616,1.1122,-0.01
 const CORACAO_PARTES={atrioD:[-0.0145,1.2955,0.0291],atrioE:[0.021,1.3005,0.0113],ventD:[0.0197,1.2852,0.0477],ventE:[0.0424,1.2815,0.0281],aorta:[0.0112,1.3525,0.0006],pulmonar:[0.0259,1.3135,0.0117],cavas:[-0.0145,1.2042,0.0172],veiasPulm:[0.0053,1.3131,-0.0129]};
 const CORES={pulmoes:0xd98585,traqueia:0x9ed6ef,bronquios:0xbfe3f4,faringe:0xaad8ef,esofago:0xe9a070,estomago:0xe08a50,figado:0x9e4d40,intestino_delgado:0xf0c07a,intestino_grosso:0xc99a6b,diafragma:0xb48ae8,costelas:0xe9e4d6,silhueta:0x8fc3dd,cabeca:0x8fc3dd,aorta:0xe8484f,pancreas:0xf2d39b,duodeno:0xe8b065,apendice:0xc99a6b,ureteres:0xf0d08a,adrenais:0xf2c46a,hipofise:0xe0a0a8,pineal:0xd8b0d0};
 const CORES_PARTES={laringe:{tireoide:0xd8ecf3,cricoide:0xcfe3ee,aritenoide:0xc4dbe8,hioide:0xe9e4d6,epiglote:0xe7a0a0,laringofaringe:0xaad8ef},nariz:{cartilagens:0xd8ecf3,ossos:0xe9e4d6,conchas:0xe3b7b0,mucosa:0xe39a9a},faringe:{nasofaringe:0x9ed6ef,orofaringe:0xaad8ef,laringofaringe:0xbfe3f4},boca:{lingua:0xd96b73,palato:0xe8a39c,uvula:0xe08a90},vesicula:{vesicula:0x6f9f52,ducto_biliar:0x9ccf7a},salivares:{parotida:0xf0b8b0,submandibular:0xe9a8a0,sublingual:0xf4c8c0,ductos:0xf7e0d8},rins:{rim_d:0xa0433f,rim_e:0xa0433f,pelve_renal_d:0xf0d08a,pelve_renal_e:0xf0d08a},bexiga:{bexiga:0xe9c27a,uretra:0xe9c27a},tireoide:{tireoide:0xc96a6a,paratireoides:0xf0d0a0}};
+/* v4.10 · coração realista (padrão) ou com cores didáticas (vermelho = arterial, azul = venoso); escolha do professor, guardada no aparelho */
+const CORES_CORACAO_REAL={atrioD:0x7a2a31,atrioE:0x8a2f34,ventD:0x8e3230,ventE:0x993532,aorta:0xe3c2b6,pulmonar:0xd9b0a6,cavas:0x4f3a5c,veiasPulm:0x8c3a44,coronarias:0xa8222c};
+let estiloCoracao='real';try{estiloCoracao=localStorage.getItem('pde_corpo_coracao')==='didatico'?'didatico':'real';}catch(_){}
+let ENV=null;/* reflexo de ambiente (brilho de tecido úmido), gerado uma vez com o renderer do app */
+function envDe(renderer){if(ENV||!renderer||!T.PMREMGenerator)return ENV;try{const pm=new T.PMREMGenerator(renderer),c=document.createElement('canvas');c.width=512;c.height=256;const x=c.getContext('2d');
+ const gr=x.createLinearGradient(0,0,0,256);gr.addColorStop(0,'#dfe6f2');gr.addColorStop(.42,'#6b6f7c');gr.addColorStop(.6,'#2a2228');gr.addColorStop(1,'#0c0a0e');x.fillStyle=gr;x.fillRect(0,0,512,256);
+ x.fillStyle='#ffffff';x.fillRect(296,34,110,46);x.fillRect(70,60,64,34);x.fillStyle='rgba(255,214,190,.8)';x.fillRect(440,110,50,26);
+ const t=new T.CanvasTexture(c);t.mapping=T.EquirectangularReflectionMapping;t.encoding=T.sRGBEncoding;ENV=pm.fromEquirectangular(t).texture;t.dispose();pm.dispose();}catch(_){ENV=null;}return ENV;}
+function setEstiloCoracao(e){estiloCoracao=e==='didatico'?'didatico':'real';try{localStorage.setItem('pde_corpo_coracao',estiloCoracao);}catch(_){}window.dispatchEvent(new CustomEvent('corpo:estilo-coracao',{detail:{estilo:estiloCoracao}}));}
 const OPAC_PARTES={nariz:{mucosa:.8}};
 const CORES_CORACAO={atrioD:0xb8343f,atrioE:0xd9434f,ventD:0xc43b48,ventE:0xd9434f,aorta:0xe8484f,pulmonar:0x4f7fe0,cavas:0x4f7fe0,veiasPulm:0xe8484f,coronarias:0x8f2a33};
 const cache={},fila={};let loader=null;
 function toLocal(p){return new T.Vector3(p[0]*ESC,(p[1]-OY)*ESC,p[2]*ESC);}
 function material(key,parte){
-  const cor=key==='coracao'?(CORES_CORACAO[parte]??CORES_CORACAO.ventE):(CORES_PARTES[key]?(CORES_PARTES[key][parte]??0xd8ecf3):(CORES[key]??0xcccccc));
+  const real=key==='coracao'&&estiloCoracao==='real',tab=real?CORES_CORACAO_REAL:CORES_CORACAO;
+  const cor=key==='coracao'?(tab[parte]??tab.ventE):(CORES_PARTES[key]?(CORES_PARTES[key][parte]??0xd8ecf3):(CORES[key]??0xcccccc));
   const m=new T.MeshStandardMaterial({color:cor,roughness:key==='costelas'?.7:.5,metalness:.05});
   if(key==='silhueta'||key==='cabeca'){m.transparent=true;m.opacity=key==='cabeca'?.16:.12;m.depthWrite=false;m.side=T.DoubleSide;}
   if(key==='costelas'){m.transparent=true;m.opacity=.62;}
   const op=OPAC_PARTES[key]&&OPAC_PARTES[key][parte];if(op!==undefined){m.transparent=true;m.opacity=op;m.depthWrite=false;}
   if(window.CORPO_TECIDOS){const t=window.CORPO_TECIDOS.tecidoDe(key,parte);if(t)window.CORPO_TECIDOS.aplicar(m,t);}
+  if(real){m.color.convertSRGBToLinear();if(ENV){m.envMap=ENV;m.envMapIntensity=.9;}m.userData.coracaoReal=true;}
   return m;
 }
 function carregar(key,cb){
@@ -53,5 +64,5 @@ function ponto(x,y,z){return toLocal([x,y,z]);}
 /* centro local de uma parte do coração, relativo ao grupo do coração */
 function parteCoracao(parte){const p=CORACAO_PARTES[parte],c=CENTROS.coracao;return new T.Vector3((p[0]-c[0])*ESC,(p[1]-c[1])*ESC,(p[2]-c[2])*ESC);}
 function precarregar(keys){(keys||Object.keys(CENTROS)).forEach(k=>carregar(k,()=>{}));}
-window.CORPO_GLTF={ESC,OY,CENTROS,PARTES_POS,CORACAO_PARTES,CORES,material,orgao,ponto,parteCoracao,carregar,precarregar,ATRIBUICAO:'Modelos anatômicos: Z-Anatomy (CC BY-SA 4.0), adaptados pela NEWPC para o Portal 360º VR.'};
+window.CORPO_GLTF={get estiloCoracao(){return estiloCoracao;},setEstiloCoracao,envDe,ESC,OY,CENTROS,PARTES_POS,CORACAO_PARTES,CORES,material,orgao,ponto,parteCoracao,carregar,precarregar,ATRIBUICAO:'Modelos anatômicos: Z-Anatomy (CC BY-SA 4.0), adaptados pela NEWPC para o Portal 360º VR.'};
 })();

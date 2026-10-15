@@ -8,9 +8,9 @@
 <link rel="icon" href="assets/logo.png"><link rel="stylesheet" href="corpo-lab.css?v=4.8.0"><link rel="stylesheet" href="corpo-portal.css?v=4.8.0"><link rel="stylesheet" href="corpo-v4.css?v=4.8.0">
 <script defer src="vendor/three.r128.min.js"></script>
 <script defer src="vendor/GLTFLoader.r128.js"></script>
-<script defer src="corpo-data.js?v=4.9.0"></script><script defer src="nerv-data.js?v=4.8.0"></script><script defer src="dig-data.js?v=4.8.0"></script><script defer src="uri-end-data.js?v=4.8.0"></script>
+<script defer src="corpo-data.js?v=4.10.0"></script><script defer src="nerv-data.js?v=4.8.0"></script><script defer src="dig-data.js?v=4.8.0"></script><script defer src="uri-end-data.js?v=4.8.0"></script>
 <script defer src="ltr-data.js?v=4.8.0"></script><script defer src="corpo-tecidos.js?v=4.8.0"></script>
-<script defer src="corpo-gltf.js?v=4.8.0"></script>
+<script defer src="corpo-gltf.js?v=4.10.0"></script>
 <script defer src="corpo-models.js?v=4.8.0"></script>
 <script defer src="esq-gltf.js?v=4.8.0"></script>
 <script defer src="esq-models.js?v=4.8.0"></script>
@@ -18,10 +18,10 @@
 <script defer src="ltr-models.js?v=4.8.0"></script><script defer src="corpo-viagem.js?v=4.8.0"></script>
 <script defer src="corpo-audio.js?v=4.8.0"></script>
 <script defer src="corpo-v4.js?v=4.8.0"></script><script defer src="ltr-app.js?v=4.8.0"></script>
-<script defer src="corpo-app.js?v=4.9.0"></script><script defer src="corpo-relatorio.js?v=4.8.0"></script>
+<script defer src="corpo-app.js?v=4.10.0"></script><script defer src="corpo-relatorio.js?v=4.8.0"></script>
 <script defer src="portal-entrada.js?v=1.0.2"></script>
 <script defer src="sala-cliente.js?v=1.7.0"></script>
-<script defer src="corpo-portal.js?v=4.9.0"></script>
+<script defer src="corpo-portal.js?v=4.10.0"></script>
 </head>
 <body>
 <div id="lab">
@@ -38,7 +38,7 @@
   <canvas id="scene" aria-label="Modelo tridimensional interativo do corpo humano" tabindex="0"></canvas>
   <div class="stage-heading"><span class="eyebrow" id="sceneKicker">LOCALIZE</span><h2 id="sceneTitle">Onde fica cada órgão?</h2><p id="sceneSub">Do corpo inteiro ao interior do tórax.</p></div>
   <div id="sceneLegend" class="scene-legend" aria-label="Legenda do modelo"></div>
-  <div id="stageTools" class="stage-tools"><button id="closeInspect" data-action="closeInspect" hidden>← Voltar ao modelo</button><button id="centerBtn" data-action="center">◎ Centralizar</button><button id="rotateBtn" data-action="rotate" aria-pressed="false">▷ Girar</button><button id="zoomIn" data-action="zoomIn" aria-label="Aproximar o modelo">＋</button><button id="zoomOut" data-action="zoomOut" aria-label="Afastar o modelo">−</button></div>
+  <div id="stageTools" class="stage-tools"><button id="closeInspect" data-action="closeInspect" hidden>← Voltar ao modelo</button><button id="centerBtn" data-action="center">◎ Centralizar</button><button id="rotateBtn" data-action="rotate" aria-pressed="false">▷ Girar</button><button id="estiloCoracaoBtn" data-action="estiloCoracao" aria-pressed="false" hidden>❤ Cores didáticas</button><button id="zoomIn" data-action="zoomIn" aria-label="Aproximar o modelo">＋</button><button id="zoomOut" data-action="zoomOut" aria-label="Afastar o modelo">−</button></div>
   <div id="v4Hud" class="v4-hud" aria-hidden="true" hidden><span>MODELO ANATÔMICO</span><span id="v4Phase">EXPLORAÇÃO LIVRE</span></div>
   <div id="stageHint" class="stage-hint">Arraste o fundo para girar · use a roda do mouse para aproximar</div>
   <div id="webglError" class="stage-error" hidden><h2>Visualização 3D indisponível</h2><p>O navegador não conseguiu iniciar o WebGL. Ative a aceleração gráfica ou abra em outro navegador. As orientações e atividades por botões continuam disponíveis.</p></div>

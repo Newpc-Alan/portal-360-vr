@@ -285,13 +285,18 @@ body.intro-fullscreen #btnSkipIntro{cursor:pointer}
         </div>
       </article>
 
-      <article class="card experience-card" data-keywords="celula biologia organelas microscopio" data-tema="biologia" data-serie="efii em" data-status="embreve" style="--bgimg:linear-gradient(135deg,#122641,#11213b)">
+      <article class="card available experience-card" data-keywords="celula biologia organelas microscopio membrana nucleo mitocondria ribossomo reticulo golgi lisossomo citoplasma celula animal celula vegetal cloroplasto parede celular vacuolo fotossintese proteina vr 3d" data-tema="biologia" data-serie="efii em" data-status="disponivel" style="--bgimg:url('assets/capa-celula-card.webp?v=1')">
         <div class="media"></div><div class="glow"></div>
         <div class="card-content">
-          <span class="tag soon">Em breve</span>
+          <span class="tag">Disponível agora</span>
           <h3>Célula 3D VR</h3>
-          <p>Entre em uma célula e explore organelas, funções e estruturas microscópicas.</p>
-          <div class="meta"><span>Biologia</span><span>Fundamental II e Médio</span></div>
+          <p>A célula animal e a vegetal abertas ao meio, o caminho de uma proteína e uma viagem por dentro da célula, em 3D e realidade virtual.</p>
+          <div class="meta"><span>Biologia</span><span>Fundamental II e Médio</span><span>2 temas · 9 missões · 21 fichas</span><span>VR + 3D + realidade mista</span></div>
+          <div class="card-actions">
+            <button type="button" class="aula-btn breve" disabled title="Videoaula em produção"><span class="passo">1</span><svg class="play" viewBox="0 0 24 24" aria-hidden="true"><path d="M8 5v14l11-7z" fill="currentColor"/></svg>Aula em breve</button>
+            <a href="apps/celula/" class="primary-btn"><span class="passo">2</span>Explorar em 3D</a>
+            <a href="apps/celula/?vr=1" class="vr-btn" data-vr-app="celula"><span class="passo">3</span>🥽 Entrar em VR</a>
+          </div>
         </div>
       </article>
 
@@ -497,7 +502,7 @@ document.addEventListener('webkitfullscreenchange',function(){
    O app fica pré-carregado num iframe invisível (mesma origem). O clique aqui conta como gesto
    do usuário para o iframe, então a sessão WebXR abre na hora, sem segundo toque. */
 /* BUILD muda a cada publicação: força o navegador do óculos a buscar o index.html novo dos apps (o GitHub Pages ignora a query) */
-const BUILD='20261015a';
+const BUILD='20261015b';
 const appFrames={};
 /* os links dos cartões também levam a versão, para abrir direto sem cache antigo */
 document.querySelectorAll('.card-actions a[href^="apps/"]').forEach(a=>{const u=new URL(a.getAttribute('href'),location.href);u.searchParams.set('v',BUILD);a.setAttribute('href',u.pathname+u.search);});

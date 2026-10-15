@@ -1,11 +1,12 @@
-/* Portal 360º VR · Modo Estande (v1.0.0)
+/* Portal 360º VR · Modo Estande (v1.3.0)
    Tour automático de cerca de 3,5 minutos para feiras e eventos (SENACOP 2026): espaço, Terra por dentro, célula,
-   DNA e coração, com narração, legenda e música. Roda sozinho: o visitante aperta o gatilho, assiste, e no fim o
-   tour mostra a tela "Fale com a NEWPC", soma 1 no contador do dia e volta à espera para o próximo.
+   DNA e coração saindo do corpo humano, com narração, legenda e música. Roda sozinho: começa quando o visitante coloca o
+   óculos (ou aperta o gatilho); no fim há uma pesquisa rápida de uma pergunta (três carinhas), o convite para falar com o
+   consultor, soma 1 no contador do dia e volta à espera para o próximo.
    É um app separado: usa CÓPIAS congeladas (pasta snap/) dos modelos da Célula, da Terra e do DNA, e não altera
    nenhum app do catálogo. Equipe: A ou X pula a cena; B ou Y volta à espera. */
 (function(){'use strict';
-const T=THREE,VERSAO='1.2.0',$=id=>document.getElementById(id);
+const T=THREE,VERSAO='1.3.0',$=id=>document.getElementById(id);
 const CM=window.CELULA_MODELS,TM=window.TERRA_MODELS,DM=window.DNA_MODELS;
 
 /* ---------- palco ---------- */
@@ -30,13 +31,26 @@ cortina.renderOrder=3000;camera.add(cortina);
 /* ---------- utilidades ---------- */
 function texCanvas(c){const t=new T.CanvasTexture(c);t.encoding=T.sRGBEncoding;t.minFilter=T.LinearMipmapLinearFilter;t.generateMipmaps=true;t.anisotropy=8;return t;}
 function quebrar(g,txt,maxW){const out=[];let l='';for(const w of String(txt).split(/\s+/)){const n=l?l+' '+w:w;if(g.measureText(n).width>maxW&&l){out.push(l);l=w;}else l=n;}if(l)out.push(l);return out;}
-/* placa de texto: título opcional + corpo, fundo escuro translúcido */
-function placa(titulo,corpo,w,h,opt={}){const W=1024,H=Math.round(W*h/w),c=document.createElement('canvas');c.width=W;c.height=H;const g=c.getContext('2d');
- if(opt.fundo!==false){g.fillStyle=opt.fundo||'rgba(3,14,28,.86)';g.fillRect(0,0,W,H);g.strokeStyle=opt.borda||'rgba(124,255,184,.55)';g.lineWidth=6;g.strokeRect(3,3,W-6,H-6);}
- let y=opt.y0||70;g.textAlign='center';
- if(titulo){g.font='700 '+(opt.tamT||64)+'px Segoe UI,Arial';g.fillStyle=opt.corT||'#ffffff';for(const l of quebrar(g,titulo,W-80)){g.fillText(l,W/2,y);y+=(opt.tamT||64)*1.2;}y+=10;}
- if(corpo){const tc=opt.tamC||42;g.font='500 '+tc+'px Segoe UI,Arial';g.fillStyle=opt.corC||'#d8ecf8';for(const par of String(corpo).split('\n')){for(const l of quebrar(g,par,W-90)){g.fillText(l,W/2,y);y+=tc*1.3;}y+=tc*.25;}}
- const m=new T.Mesh(new T.PlaneGeometry(w,h),new T.MeshBasicMaterial({map:texCanvas(c),transparent:true,depthWrite:false,side:T.DoubleSide,toneMapped:false}));m.renderOrder=500;return m;}
+/* placa de texto: título opcional + corpo, fundo escuro translúcido.
+   O texto SEMPRE cabe na caixa: quebra as linhas, centraliza na vertical e, se não couber, diminui a letra até caber.
+   opt.autoAltura: em vez de diminuir a letra, a caixa cresce na altura (legendas). */
+const _med=document.createElement('canvas').getContext('2d');
+function montarLinhas(titulo,corpo,f,larg,opt){const L=[];let tot=0,estoura=false;const tT=(opt.tamT||64)*f,tC=(opt.tamC||42)*f;
+ const add=(txt,font,cor,adv)=>{_med.font=font;if(_med.measureText(txt).width>larg)estoura=true;L.push({txt,font,cor,adv});tot+=adv;};
+ if(titulo){const ft='700 '+tT+'px Segoe UI,Arial';_med.font=ft;for(const l of quebrar(_med,titulo,larg))add(l,ft,opt.corT||'#ffffff',tT*1.22);if(corpo){L.push({gap:tT*.18});tot+=tT*.18;}}
+ if(corpo){const fc='500 '+tC+'px Segoe UI,Arial';String(corpo).split('\n').forEach((par,i)=>{if(i){L.push({gap:tC*.25});tot+=tC*.25;}_med.font=fc;for(const l of quebrar(_med,par,larg))add(l,fc,opt.corC||'#d8ecf8',tC*1.3);});}
+ return{L,tot,estoura};}
+function placa(titulo,corpo,w,h,opt={}){const W=1024,comFundo=opt.fundo!==false,mx=comFundo?52:20,padV=comFundo?22:4,larg=W-2*mx;
+ let f=1,lay=montarLinhas(titulo,corpo,f,larg,opt),H=Math.round(W*h/w);
+ if(opt.autoAltura){H=Math.max(H,Math.ceil(lay.tot+2*padV+8));h=w*H/W;}
+ while((lay.tot>H-2*padV||lay.estoura)&&f>.35){f*=.94;lay=montarLinhas(titulo,corpo,f,larg,opt);}
+ const c=document.createElement('canvas');c.width=W;c.height=H;const g=c.getContext('2d');
+ if(comFundo){g.fillStyle=opt.fundo||'rgba(3,14,28,.86)';g.fillRect(0,0,W,H);g.strokeStyle=opt.borda||'rgba(124,255,184,.55)';g.lineWidth=6;g.strokeRect(3,3,W-6,H-6);}
+ g.textAlign='center';g.textBaseline='middle';let y=(H-lay.tot)/2;
+ for(const l of lay.L){if(l.gap){y+=l.gap;continue;}g.font=l.font;g.fillStyle=l.cor;g.fillText(l.txt,W/2,y+l.adv/2);y+=l.adv;}
+ const m=new T.Mesh(new T.PlaneGeometry(w,h),new T.MeshBasicMaterial({map:texCanvas(c),transparent:true,depthWrite:false,side:T.DoubleSide,toneMapped:false}));m.renderOrder=500;
+ m.userData.texto={escala:f,cabe:lay.tot<=H-2*padV&&!lay.estoura,altura:h,titulo,corpo};PLACAS.push(m.userData.texto);if(PLACAS.length>200)PLACAS.shift();return m;}
+const PLACAS=[];
 function rotulo(txt,cor,w){const c=document.createElement('canvas');c.width=512;c.height=96;const g=c.getContext('2d');let s=54;g.font='700 '+s+'px Segoe UI,Arial';while(g.measureText(txt).width>490&&s>20){s-=2;g.font='700 '+s+'px Segoe UI,Arial';}
  g.textAlign='center';g.textBaseline='middle';g.shadowColor='#000';g.shadowBlur=8;g.fillStyle=cor||'#e7f6ff';g.fillText(txt,256,48);
  const sp=new T.Sprite(new T.SpriteMaterial({map:texCanvas(c),transparent:true,depthWrite:false}));sp.scale.set(w,w*96/512,1);return sp;}
@@ -65,7 +79,12 @@ const CHAVE='pde_estande_contagem';
 function hoje(){const d=new Date();return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0');}
 function lerContagem(){try{return JSON.parse(localStorage.getItem(CHAVE)||'{}');}catch(_){return{};}}
 function somar(){const c=lerContagem();c[hoje()]=(c[hoje()]||0)+1;try{localStorage.setItem(CHAVE,JSON.stringify(c));}catch(_){}mostrarContagem();}
-function mostrarContagem(){const c=lerContagem(),h=c[hoje()]||0,tot=Object.values(c).reduce((a,b)=>a+b,0);$('contador').textContent='Demonstrações hoje: '+h+' · total neste aparelho: '+tot;}
+function mostrarContagem(){const c=lerContagem(),h=c[hoje()]||0,tot=Object.values(c).reduce((a,b)=>a+b,0);const p=lerPesquisa()[hoje()]||{};
+ $('contador').textContent='Demonstrações hoje: '+h+' · total neste aparelho: '+tot+' · pesquisa hoje: muita '+(p.muita||0)+', alguma '+(p.alguma||0)+', pouca '+(p.pouca||0);}
+/* respostas da pesquisa rápida, por dia, neste aparelho */
+const CHAVE_P='pde_estande_pesquisa';
+function lerPesquisa(){try{return JSON.parse(localStorage.getItem(CHAVE_P)||'{}');}catch(_){return{};}}
+function registrarPesquisa(v){const c=lerPesquisa(),d=c[hoje()]=c[hoje()]||{};d[v]=(d[v]||0)+1;try{localStorage.setItem(CHAVE_P,JSON.stringify(c));}catch(_){}mostrarContagem();}
 mostrarContagem();
 
 /* ---------- efeitos sonoros sintetizados (sem arquivos): subida, explosão, passagem, batimento ---------- */
@@ -80,6 +99,7 @@ function somExplosao(forca){const c=sfx();if(!c)return;const t=c.currentTime,k=f
  const n=ruido(c,2.2),lp=c.createBiquadFilter(),gn=c.createGain();lp.type='lowpass';lp.frequency.setValueAtTime(5000,t);lp.frequency.exponentialRampToValueAtTime(150,t+2);n.connect(lp);lp.connect(gn);gn.connect(mestre);env(c,gn,t,.7*k,.005,2.0);n.start(t);}
 function somPassagem(){const c=sfx();if(!c)return;const t=c.currentTime;const n=ruido(c,1.3),bp=c.createBiquadFilter(),g=c.createGain();bp.type='bandpass';bp.Q.value=2;bp.frequency.setValueAtTime(250,t);bp.frequency.exponentialRampToValueAtTime(3200,t+.55);bp.frequency.exponentialRampToValueAtTime(500,t+1.2);n.connect(bp);bp.connect(g);g.connect(mestre);env(c,g,t,.32,.45,.8);n.start(t);}
 function somBatida(forte){const c=sfx();if(!c)return;const t=c.currentTime;const o=c.createOscillator(),g=c.createGain();o.type='sine';o.frequency.setValueAtTime(forte?62:52,t);o.frequency.exponentialRampToValueAtTime(34,t+.16);o.connect(g);g.connect(mestre);env(c,g,t,forte?.9:.55,.008,.2);o.start(t);o.stop(t+.3);}
+function somAcerto(){const c=sfx();if(!c)return;const t=c.currentTime;[[660,0],[880,.11],[1320,.22]].forEach(([f,d])=>{const o=c.createOscillator(),g=c.createGain();o.type='sine';o.frequency.value=f;o.connect(g);g.connect(mestre);env(c,g,t+d,.35,.01,.5);o.start(t+d);o.stop(t+d+.6);});}
 const ease=x=>1-Math.pow(1-Math.min(1,Math.max(0,x)),3),easeIn=x=>Math.pow(Math.min(1,Math.max(0,x)),3);
 const elastico=x=>{x=Math.min(1,Math.max(0,x));return x===1?1:Math.pow(2,-10*x)*Math.sin((x*10-.75)*(2*Math.PI)/3)+1;};
 /* textura de brilho (radial) e o logo recortado em círculo, prontos desde o início */
@@ -116,8 +136,22 @@ function coracaoModelo(){const g=new T.Group();
   m.traverse(o=>{if(o.isMesh){let n=o.name,p=o;while(p&&!CORES[n]){p=p.parent;n=p&&p.name;}o.material=new T.MeshStandardMaterial({color:new T.Color(CORES[n]||0xc43b48).convertSRGBToLinear(),roughness:.45,metalness:.02});}});
   /* o tamanho vem só do coração (sem as veias cavas, que são longas), para ele aparecer grande */
   const box=new T.Box3();m.updateMatrixWorld(true);m.traverse(o=>{if(o.isMesh){let q=o,cava=false;while(q){if(q.name==='cavas')cava=true;q=q.parent;}if(!cava)box.expandByObject(o);}});if(box.isEmpty())box.setFromObject(m);
-  const tam=box.getSize(new T.Vector3()),c=box.getCenter(new T.Vector3());m.position.sub(c);const k=1.1/Math.max(tam.x,tam.y,tam.z);const piv=new T.Group();piv.add(m);piv.scale.setScalar(k);g.add(piv);g.userData.piv=piv;g.userData.k=k;}
- else{const piv=new T.Group();const v=new T.Mesh(new T.SphereGeometry(.42,40,28),new T.MeshStandardMaterial({color:0xb52a35,roughness:.4}));v.scale.set(1,1.2,.9);piv.add(v);const ao=new T.Mesh(new T.TorusGeometry(.22,.07,12,32,Math.PI),new T.MeshStandardMaterial({color:0xc8323c}));ao.position.set(0,.5,0);piv.add(ao);g.add(piv);g.userData.piv=piv;g.userData.k=1;}
+  const tam=box.getSize(new T.Vector3()),c=box.getCenter(new T.Vector3());m.position.sub(c);const k=1.1/Math.max(tam.x,tam.y,tam.z);const piv=new T.Group();piv.add(m);piv.scale.setScalar(k);g.add(piv);g.userData.piv=piv;g.userData.k=k;g.userData.c=c.clone();}
+ else{const piv=new T.Group();const v=new T.Mesh(new T.SphereGeometry(.42,40,28),new T.MeshStandardMaterial({color:0xb52a35,roughness:.4}));v.scale.set(1,1.2,.9);piv.add(v);const ao=new T.Mesh(new T.TorusGeometry(.22,.07,12,32,Math.PI),new T.MeshStandardMaterial({color:0xc8323c}));ao.position.set(0,.5,0);piv.add(ao);g.add(piv);g.userData.piv=piv;g.userData.k=1;g.userData.c=new T.Vector3(.022,1.284,.019);}
+ return g;}
+
+/* ---------- corpo humano de fundo (Z-Anatomy, CC BY-SA 4.0): pele translúcida, costelas e órgãos, SEM o coração ----------
+   Todos os arquivos estão no mesmo referencial (metros, origem nos pés, corpo de frente para +z), então basta somar. */
+const ORGAOS={silhueta:0x8fc3dd,costelas:0xe9e4d6,pulmoes:0xd98585,traqueia:0x9ed6ef,esofago:0xe9a070,figado:0x9e4d40,estomago:0xe08a50,intestino_delgado:0xf0c07a,intestino_grosso:0xc99a6b,aorta:0xe8484f,rins:0xa0433f,bexiga:0xe9c27a,pancreas:0xf2d39b,vesicula:0x6f9f52};
+const CORPO_GLB={};
+try{const ld=new T.GLTFLoader();Object.keys(ORGAOS).forEach(k=>ld.load('modelos/corpo-'+k+'.glb',g=>{CORPO_GLB[k]=g.scene;},undefined,()=>{}));}catch(_){}
+function corpoFundo(){const g=new T.Group();
+ for(const k of Object.keys(ORGAOS)){const src=CORPO_GLB[k];if(!src)continue;const o=src.clone(true);
+  o.traverse(x=>{if(!x.isMesh)return;const m=new T.MeshStandardMaterial({color:new T.Color(ORGAOS[k]).convertSRGBToLinear(),roughness:.5,metalness:.03});
+   if(k==='silhueta'){m.transparent=true;m.opacity=.16;m.depthWrite=false;m.side=T.DoubleSide;m.emissive=new T.Color(0x0d3550);}
+   else if(k==='costelas'){m.transparent=true;m.opacity=.6;}
+   x.material=m;});
+  g.add(o);}
  return g;}
 
 /* ---------- as cenas do tour ---------- */
@@ -128,6 +162,16 @@ function txPlaneta(n){if(TXP[n])return TXP[n];const t=TEXL.load('assets/planeta-
 function dicaGiro(g,y,z){const d=placa('','✋ Segure o gatilho e mova a mão para girar',1.25,.12,{fundo:'rgba(10,60,40,.85)',borda:'rgba(124,255,184,.7)',tamC:40,y0:72,corC:'#eafff3'});d.position.set(0,y,z||0);g.add(d);g.userData.dica=d;}
 /* grupo "giro": é ele que o visitante gira com o gatilho; a animação própria do modelo fica dentro dele */
 function comGiro(g,obj){const giro=new T.Group();giro.add(obj);g.add(giro);g.userData.alvo=giro;return giro;}
+/* carinhas da pesquisa, desenhadas (não dependem de emoji do navegador do óculos) */
+const PESQ=[{valor:'pouca',rotulo:'Pouca',cor:'#e2574c',boca:-1},{valor:'alguma',rotulo:'Alguma',cor:'#f2c14e',boca:0},{valor:'muita',rotulo:'Muita',cor:'#3fcf7f',boca:1}];
+function carinha(o){const W=320,H=400,c=document.createElement('canvas');c.width=W;c.height=H;const x=c.getContext('2d');
+ x.fillStyle='rgba(4,18,32,.88)';x.strokeStyle=o.cor;x.lineWidth=8;x.beginPath();x.roundRect?x.roundRect(6,6,W-12,H-12,36):x.rect(6,6,W-12,H-12);x.fill();x.stroke();
+ const cx=W/2,cy=150,r=105;x.fillStyle=o.cor;x.beginPath();x.arc(cx,cy,r,0,Math.PI*2);x.fill();
+ x.fillStyle='#14202b';[-38,38].forEach(dx=>{x.beginPath();x.ellipse(cx+dx,cy-25,12,17,0,0,Math.PI*2);x.fill();});
+ x.strokeStyle='#14202b';x.lineWidth=13;x.lineCap='round';x.beginPath();
+ if(o.boca>0)x.arc(cx,cy+8,52,.18*Math.PI,.82*Math.PI);else if(o.boca<0)x.arc(cx,cy+78,50,1.2*Math.PI,1.8*Math.PI);else{x.moveTo(cx-45,cy+42);x.lineTo(cx+45,cy+42);}x.stroke();
+ x.fillStyle='#ffffff';x.font='700 58px Segoe UI,Arial';x.textAlign='center';x.textBaseline='middle';x.fillText(o.rotulo,cx,322);
+ const m=new T.Mesh(new T.PlaneGeometry(.48,.6),new T.MeshBasicMaterial({map:texCanvas(c),transparent:true,depthWrite:false,side:T.DoubleSide,toneMapped:false}));m.renderOrder=510;m.userData.valor=o.valor;return m;}
 const CENAS=[
  {id:'abertura',dur:13,falaEm:4.2,legenda:'Isto é imersão. Com o Portal 360º VR, o aluno não olha para o conteúdo: ele entra nele.',
   montar(a){const g=new T.Group();aFrente(g,a,3.2,.15);
@@ -179,9 +223,22 @@ const CENAS=[
  {id:'dna',dur:32,legenda:'Mais fundo ainda: a molécula de DNA, a receita da vida. Na experiência completa, o aluno monta a dupla hélice, pareia as bases e acompanha o DNA se copiando.',
   montar(a){const g=new T.Group();const h=DM.helix();h.scale.setScalar(.36);comGiro(g,h);dicaGiro(g,-1.5,.4);luzFrente(g,1.9);g.add(new T.AmbientLight(0xffffff,1.1));aFrente(g,a,2.3,0);
    g.userData.tick=(t,dt)=>{if(!g.userData.mexeu)h.rotation.y+=dt*(.35+2.4*(1-ease(t/3.5)));h.position.y=-3.2*(1-ease(t/3.2))+Math.sin(t*.4)*.12;};g.userData.liberar=()=>DM.dispose(g);return g;}},
- {id:'coracao',dur:32,legenda:'Um coração humano batendo, com anatomia real. Sinta o ritmo. E ele é só um dos órgãos: o corpo humano inteiro espera para ser explorado.',
-  montar(a){const g=new T.Group();const h=coracaoModelo();comGiro(g,h);dicaGiro(g,-.75,.2);luzFrente(g,1.1);const brilho=new T.PointLight(0xff4050,0,4);brilho.position.set(0,.2,.9);g.add(brilho);aFrente(g,a,1.9,.28);let ultimo=-1;
-   g.userData.tick=(t,dt)=>{const ciclo=(t*1.15)%1,pulso=Math.exp(-Math.pow((ciclo-.08)/.05,2))+.6*Math.exp(-Math.pow((ciclo-.3)/.06,2));h.userData.piv.scale.setScalar(h.userData.k*(1+.07*pulso));brilho.intensity=pulso*1.4;const fase=ciclo<.08?0:ciclo<.3?1:2;if(fase!==ultimo){if(fase===1)somBatida(true);if(fase===2)somBatida(false);ultimo=fase;}if(!g.userData.mexeu)h.rotation.y=Math.sin(t*.3)*.6;};return g;}},
+ {id:'coracao',dur:38,falaEm:5.4,legenda:'Este coração acabou de sair de um corpo humano. Sinta o ritmo. Atrás dele está o corpo inteiro: costelas, pulmões, fígado, intestinos. Tudo pode ser explorado por dentro.',
+  montar(a){const g=new T.Group();aFrente(g,a,0,0);
+   /* o corpo fica de frente para o visitante; o coração começa no lugar dele, batendo, e sai do peito até a mão do visitante */
+   const S=1.6,HC=new T.Vector3(.022,1.284,.019);const corpo=corpoFundo();corpo.scale.setScalar(S);g.add(corpo);
+   const P0=new T.Vector3(0,.12,-3.0),P1=new T.Vector3(.62,.3,-4.3),FRENTE=new T.Vector3(-.62,.26,-1.95);
+   const vazio=spriteBrilho(BRILHO_BRANCO,0xff3040);vazio.material.opacity=0;vazio.material.depthTest=false;vazio.renderOrder=400;g.add(vazio);
+   const h=coracaoModelo();const giro=comGiro(g,h);const piv=h.userData.piv,kf=h.userData.k,dc=h.userData.c.clone().sub(HC).multiplyScalar(S);
+   dicaGiro(g,-.42,-1.8);g.userData.dica.position.x=-.62;luzFrente(g,1.1);const brilho=new T.PointLight(0xff4050,0,4);brilho.position.set(-.5,.45,-1.15);g.add(brilho);
+   const T0=2.4,T1=5.2,spot=new T.Vector3(),ini=new T.Vector3();let ultimo=-1,saiu=false;
+   g.userData.tick=(t,dt)=>{const ciclo=(t*1.15)%1,pulso=Math.exp(-Math.pow((ciclo-.08)/.05,2))+.6*Math.exp(-Math.pow((ciclo-.3)/.06,2));
+    const r=ease((t-T0)/(T1-T0+1.8));spot.lerpVectors(P0,P1,r);corpo.position.copy(spot).addScaledVector(HC,-S);
+    const u=ease((t-T0)/(T1-T0));if(!saiu&&t>T0){saiu=true;somPassagem();}
+    ini.copy(spot).add(dc);giro.position.lerpVectors(ini,FRENTE,u);const base=S+(kf*.82-S)*u;piv.scale.setScalar(base*(1+.07*pulso));
+    vazio.position.copy(spot).z+=.12;vazio.scale.setScalar(.3+.35*pulso+.2*u);vazio.material.opacity=.3+.6*pulso;
+    brilho.intensity=pulso*1.4*u;const fase=ciclo<.08?0:ciclo<.3?1:2;if(fase!==ultimo){if(fase===1)somBatida(true);if(fase===2)somBatida(false);ultimo=fase;}
+    if(!g.userData.mexeu&&u>=1)h.rotation.y=Math.sin((t-T1)*.3)*.6;};return g;}},
  {id:'comeco',dur:24,legenda:'Isto é só o começo. Com o Portal 360º VR, qualquer conteúdo pode virar uma experiência: do átomo ao universo, da célula ao corpo humano. O limite é a imaginação.',
   montar(a){const g=new T.Group();g.position.copy(a.p);g.rotation.y=a.yaw;
    const tit=placa('Isto é só o começo','',2.2,.28,{fundo:false,tamT:96,y0:96});tit.position.set(0,.35,-2.6);tit.material.opacity=0;g.add(tit);
@@ -192,26 +249,42 @@ const CENAS=[
    const brilho=spriteBrilho(BRILHO_AZUL);brilho.scale.set(5,5,1);brilho.position.set(0,.2,-3.4);brilho.material.opacity=.35;g.add(brilho);
    let som=false;g.userData.tick=(t,dt)=>{if(!som){som=true;somPassagem();}tit.material.opacity=ease(t/1.2);sub.material.opacity=ease((t-1.2)/1.2);
     itens.forEach((p,i)=>{p.material.opacity=ease((t-2.2-i*.55)/.8);});anel.rotation.y=t*.06;brilho.material.opacity=.3+.12*Math.sin(t*1.5);};return g;}},
- {id:'final',dur:16,legenda:'Portal 360º VR, da NEWPC: o conhecimento por dentro. Converse com nosso consultor aqui no estande e leve esta experiência para a sua rede.',
+ {id:'final',dur:9,legenda:'Portal 360º VR, da NEWPC: o conhecimento por dentro.',
   montar(a){const g=new T.Group();aFrente(g,a,2.6,.25);const nuvem=nuvemExplosiva(1200,[.05,.2],.4);nuvem.userData.implodir(1);nuvem.material.opacity=0;g.add(nuvem);
    const logo=logoComHalo(.42);logo.scale.setScalar(.001);g.add(logo);
-   const tit=placa('Portal 360º VR','O conhecimento por dentro',2.0,.42,{fundo:false,tamT:104,tamC:56,y0:100,corC:'#9fe8ff'});tit.position.y=-.78;tit.material.opacity=0;g.add(tit);
-   const cta=placa('','Fale com nosso consultor aqui no estande',1.6,.16,{fundo:'rgba(10,70,46,.9)',borda:'rgba(124,255,184,.8)',tamC:58,y0:88});cta.position.y=-1.18;cta.material.opacity=0;g.add(cta);
-   const cr=placa('','Modelo do coração: Z-Anatomy (CC BY-SA 4.0) · NEWPC Educação',1.4,.08,{fundo:false,tamC:30,y0:50,corC:'#7f9aae'});cr.position.y=-1.42;g.add(cr);
+   const tit=placa('Portal 360º VR','O conhecimento por dentro',2.0,.42,{fundo:false,tamT:104,tamC:56,corC:'#9fe8ff'});tit.position.y=-.78;tit.material.opacity=0;g.add(tit);
+   const cr=placa('','Modelos anatômicos: Z-Anatomy (CC BY-SA 4.0) · NEWPC Educação',1.4,.08,{fundo:false,tamC:30,corC:'#7f9aae'});cr.position.y=-1.1;g.add(cr);
    let bum=false;g.userData.tick=(t,dt)=>{if(!bum&&t>.3){bum=true;somExplosao(.55);nuvem.userData.explodir();}if(bum)nuvem.userData.voar(dt,1-(t-.3)/2.5);
-    logo.scale.setScalar(Math.max(.001,elastico((t-.3)/1.1)));logo.userData.halo.material.opacity=.7+.3*Math.sin(t*2);tit.material.opacity=ease((t-1)/1);cta.material.opacity=ease((t-2.2)/1);cta.scale.setScalar(1+.03*Math.sin(t*3));};return g;}}
+    logo.scale.setScalar(Math.max(.001,elastico((t-.3)/1.1)));logo.userData.halo.material.opacity=.7+.3*Math.sin(t*2);tit.material.opacity=ease((t-1)/1);};return g;}},
+ /* pesquisa rápida: uma pergunta, três carinhas; o visitante aponta e aperte o gatilho. Depois, o convite para o consultor. */
+ {id:'pesquisa',dur:24,legenda:'Uma pergunta rápida antes de tirar o óculos: quanto isso faria diferença nas escolas da sua rede? Aponte para uma carinha e aperte o gatilho.',
+  montar(a){const g=new T.Group();aFrente(g,a,2.2,.05);
+   const q=placa('Quanto isso faria diferença nas escolas da sua rede?','',1.9,.34,{fundo:false,tamT:70});q.position.y=.56;q.material.opacity=0;g.add(q);
+   const bts=PESQ.map((o,i)=>{const b=carinha(o);b.position.set((i-1)*.6,0,0);b.material.opacity=0;g.add(b);return b;});
+   const inst=placa('','Aponte e aperte o gatilho',1.2,.09,{fundo:false,tamC:44,corC:'#8fb0c2'});inst.position.y=-.42;inst.material.opacity=0;g.add(inst);
+   const obg=placa('Obrigado!','Agora tire o óculos e fale com nosso consultor aqui no estande.',1.7,.42,{fundo:'rgba(10,70,46,.94)',borda:'rgba(124,255,184,.85)',tamT:88,tamC:50});obg.position.set(0,.05,.08);obg.visible=false;obg.material.opacity=0;g.add(obg);
+   let resp=null,tR=0,tA=0;g.userData.botoes=bts;
+   g.userData.escolher=b=>{if(resp)return;resp=b;tR=tA;registrarPesquisa(b.userData.valor);pararVoz();somAcerto();legendaTexto('Obrigado! Agora tire o óculos e fale com nosso consultor aqui no estande.');};
+   g.userData.tick=(t,dt)=>{tA=t;q.material.opacity=ease(t/.8);inst.material.opacity=resp?Math.max(0,1-(t-tR)*3):ease((t-1.4)/.8);
+    bts.forEach((b,i)=>{const alvo=resp?(b===resp?1.35:.7):(b.userData.hover?1.18:1);const s=b.scale.x+(alvo-b.scale.x)*Math.min(1,dt*10);b.scale.setScalar(s);
+     b.material.opacity=resp?(b===resp?Math.max(0,1-(t-tR-.5)*2):Math.max(0,.9-(t-tR)*3)):ease((t-.5-i*.25)/.6);});
+    if(resp){const e=t-tR-.5;if(e>0){obg.visible=true;obg.material.opacity=ease(e/.6);obg.scale.setScalar(.8+.2*elastico(e/.9));}if(t-tR>6.5)g.userData.acabou=true;}};
+   return g;}}
 ];
 
 /* ---------- interação: segurar o gatilho e mover a mão gira o objeto da cena ---------- */
 const pegas=new Map(),_d=new T.Vector3(),_q=new T.Quaternion();
 function direcao(ctrl){ctrl.getWorldQuaternion(_q);_d.set(0,0,-1).applyQuaternion(_q);return{yaw:Math.atan2(_d.x,-_d.z),pitch:Math.asin(Math.max(-1,Math.min(1,_d.y)))};}
+const ray=new T.Raycaster(),_m4=new T.Matrix4();
+function botaoNoRaio(){const bs=atual&&atual.userData.botoes;if(!bs)return null;const h=ray.intersectObjects(bs,false).find(x=>x.object.material.opacity>.3);return h||null;}
+function raioDoControle(ctrl){_m4.identity().extractRotation(ctrl.matrixWorld);ray.ray.origin.setFromMatrixPosition(ctrl.matrixWorld);ray.ray.direction.set(0,0,-1).applyMatrix4(_m4);return botaoNoRaio();}
 function pegar(ctrl){const alvo=atual&&atual.userData.alvo;if(!alvo)return;const d=direcao(ctrl);pegas.set(ctrl,{y0:d.yaw,p0:d.pitch,ry:alvo.rotation.y,rx:alvo.rotation.x});atual.userData.mexeu=true;}
 function soltar(ctrl){pegas.delete(ctrl);}
 function girarComMao(){const alvo=atual&&atual.userData.alvo;if(!alvo)return;for(const [ctrl,p] of pegas){const d=direcao(ctrl);alvo.rotation.y=p.ry+(d.yaw-p.y0)*2.6;alvo.rotation.x=Math.max(-.9,Math.min(.9,p.rx-(d.pitch-p.p0)*2.2));}}
 /* ---------- máquina do tour ---------- */
 let falaPend=null,estado='parado',ind=-1,atual=null,tCena=0,anc=null,fade=0,fadeAlvo=0,pendente=null,legenda3D=null,espera=null,sessao=null,aguardaPose=0;
 function legendaTexto(txt){$('legenda').textContent=txt||'';if(legenda3D){liberar(legenda3D);legenda3D=null;}
- if(txt&&renderer.xr.isPresenting&&anc){legenda3D=placa('',txt,1.5,.32,{tamC:40,y0:62,fundo:'rgba(3,12,24,.78)',borda:'rgba(55,177,218,.5)'});aFrente(legenda3D,anc,2.1,-.62);scene.add(legenda3D);}}
+ if(txt&&renderer.xr.isPresenting&&anc){legenda3D=placa('',txt,1.7,.2,{tamC:40,autoAltura:true,fundo:'rgba(3,12,24,.78)',borda:'rgba(55,177,218,.5)'});aFrente(legenda3D,anc,2.1,-.5-legenda3D.userData.texto.altura/2);scene.add(legenda3D);}}
 function limparCena(){pegas.clear();if(atual){if(atual.userData.liberar)atual.userData.liberar();else liberar(atual);atual=null;}}
 function trocar(fn){pendente=fn;fadeAlvo=1;}
 function montarEspera(){limparEspera();anc=ancora();const g=new T.Group();aFrente(g,anc,4.2,.1);
@@ -231,14 +304,14 @@ function encerrarTela(){pararVoz();musica.pause();estado='parado';limparCena();l
 
 /* ---------- entrada: VR, tela, controles ---------- */
 const ctrls=[0,1].map(i=>{const c=renderer.xr.getController(i);const l=new T.Line(new T.BufferGeometry().setFromPoints([new T.Vector3(),new T.Vector3(0,0,-1)]),new T.LineBasicMaterial({color:0x7fd6ff}));l.scale.z=1.2;c.add(l);
- c.addEventListener('selectstart',()=>{if(estado==='espera')iniciar();else if(estado==='tour')pegar(c);});c.addEventListener('selectend',()=>soltar(c));scene.add(c);return c;});
+ c.userData.linha=l;c.addEventListener('selectstart',()=>{if(estado==='espera')iniciar();else if(estado==='tour'){const h=raioDoControle(c);if(h&&atual.userData.escolher)atual.userData.escolher(h.object);else pegar(c);}});c.addEventListener('selectend',()=>soltar(c));scene.add(c);return c;});
 async function entrarVR(){sfx();if(!navigator.xr||!window.isSecureContext){alert('Abra este endereço no navegador do óculos (HTTPS).');return;}
  try{const s=await navigator.xr.requestSession('immersive-vr',{optionalFeatures:['local-floor']});renderer.xr.setReferenceSpaceType('local-floor');await renderer.xr.setSession(s);sessao=s;
   s.addEventListener('end',()=>{sessao=null;encerrarTela();});s.addEventListener('visibilitychange',()=>{if(s.visibilityState==='visible'&&estado==='espera'&&!pendente&&espera)setTimeout(()=>{if(estado==='espera')iniciar();},1200);});$('painel').classList.add('oculto');try{musica.play().catch(()=>{});}catch(_){}estado='espera';aguardaPose=20;fade=1;fadeAlvo=1;}
  catch(e){alert('Não foi possível abrir o VR: '+(e&&e.message||e));}}
 function verNaTela(){$('painel').classList.add('oculto');$('barra').hidden=false;camera.position.set(0,1.6,0);camera.rotation.set(0,0,0);anc=null;iniciar();}
-let arr=null;canvas.addEventListener('pointerdown',e=>{const al=atual&&atual.userData.alvo;if(!al)return;arr={x:e.clientX,y:e.clientY,ry:al.rotation.y,rx:al.rotation.x};atual.userData.mexeu=true;});
-addEventListener('pointermove',e=>{const al=atual&&atual.userData.alvo;if(!arr||!al)return;al.rotation.y=arr.ry+(e.clientX-arr.x)*.008;al.rotation.x=Math.max(-.9,Math.min(.9,arr.rx+(e.clientY-arr.y)*.006));});addEventListener('pointerup',()=>{arr=null;});
+let arr=null;canvas.addEventListener('pointerdown',e=>{if(atual&&atual.userData.botoes){ray.setFromCamera({x:e.clientX/innerWidth*2-1,y:-(e.clientY/innerHeight)*2+1},camera);const h=botaoNoRaio();if(h){atual.userData.escolher(h.object);return;}}const al=atual&&atual.userData.alvo;if(!al)return;arr={x:e.clientX,y:e.clientY,ry:al.rotation.y,rx:al.rotation.x};atual.userData.mexeu=true;});
+addEventListener('pointermove',e=>{if(atual&&atual.userData.botoes&&!arr){ray.setFromCamera({x:e.clientX/innerWidth*2-1,y:-(e.clientY/innerHeight)*2+1},camera);const h=botaoNoRaio();atual.userData.botoes.forEach(b=>b.userData.hover=!!h&&h.object===b);}const al=atual&&atual.userData.alvo;if(!arr||!al)return;al.rotation.y=arr.ry+(e.clientX-arr.x)*.008;al.rotation.x=Math.max(-.9,Math.min(.9,arr.rx+(e.clientY-arr.y)*.006));});addEventListener('pointerup',()=>{arr=null;});
 document.addEventListener('click',e=>{const b=e.target.closest('[data-action]');if(!b)return;const a=b.dataset.action;
  if(a==='vr')entrarVR();else if(a==='tela')verNaTela();else if(a==='pular'){if(estado==='tour')proxima();}else if(a==='parar')encerrarTela();});
 addEventListener('keydown',e=>{if(estado==='parado')return;if(e.key==='ArrowRight'||e.key===' '){if(estado==='tour')proxima();else iniciar();}if(e.key==='Escape')encerrarTela();});
@@ -246,7 +319,8 @@ if(!navigator.xr)$('btnVR').textContent='🥽 VR (abra no navegador do óculos)'
 
 /* ---------- laço ---------- */
 const relogio=new T.Clock();const prevBtn={};
-renderer.setAnimationLoop(()=>{const dt=Math.min(.05,relogio.getDelta());
+const ACEL=Math.max(1,+(new URLSearchParams(location.search).get('acel'))||1);/* só para testes automáticos */
+renderer.setAnimationLoop(()=>{const dt=Math.min(.05,relogio.getDelta())*ACEL;
  if(aguardaPose){aguardaPose--;if(!aguardaPose&&estado==='espera'){montarEspera();fadeAlvo=0;}}
  /* transição: escurece, troca, clareia */
  const vel=dt/.55;if(fade<fadeAlvo)fade=Math.min(fadeAlvo,fade+vel);else if(fade>fadeAlvo)fade=Math.max(fadeAlvo,fade-vel);
@@ -254,9 +328,10 @@ renderer.setAnimationLoop(()=>{const dt=Math.min(.05,relogio.getDelta());
  cortina.material.opacity=fade*(estado==='tour'&&ind>0?.88:1);cortina.visible=fade>.001;warp.userData.passo(dt,estado==='tour'&&ind>0?fade:0);
  if(falaPend&&tCena>=falaPend.falaEm){const c=falaPend;falaPend=null;legendaTexto(c.legenda);narrar(c.id,c.legenda);}
  if(atual&&atual.userData.tick){tCena+=dt;atual.userData.tick(tCena,dt);}
+ if(atual&&atual.userData.botoes&&sessao){const bs=atual.userData.botoes;bs.forEach(b=>b.userData.hover=false);for(const c of ctrls){const h=raioDoControle(c);if(h)h.object.userData.hover=true;c.userData.linha.scale.z=h?h.distance:2.4;}}
  if(atual){girarComMao();const dc=atual.userData.dica;if(dc){const vis=tCena<12&&!atual.userData.mexeu;dc.material.opacity+=((vis?1:0)-dc.material.opacity)*Math.min(1,dt*4);dc.visible=dc.material.opacity>.02;}}
  if(espera&&espera.userData.tick)espera.userData.tick(relogio.elapsedTime);
- if(estado==='tour'&&ind>=0&&ind<CENAS.length&&!pendente&&tCena>CENAS[ind].dur)proxima();
+ if(estado==='tour'&&ind>=0&&ind<CENAS.length&&!pendente&&(tCena>CENAS[ind].dur||(atual&&atual.userData.acabou)))proxima();
  /* botões da equipe: A/X pula a cena, B/Y volta à espera */
  if(sessao)for(const src of sessao.inputSources){const gp=src.gamepad;if(!gp)continue;const k=src.handedness;const ax=gp.axes[2]||0;if(Math.abs(ax)>.2&&atual&&atual.userData.alvo){atual.userData.alvo.rotation.y+=ax*dt*1.6;atual.userData.mexeu=true;}const a=!!(gp.buttons[4]&&gp.buttons[4].pressed),b=!!(gp.buttons[5]&&gp.buttons[5].pressed);
   if(a&&!prevBtn[k+'a']&&estado==='tour')proxima();if(b&&!prevBtn[k+'b']&&estado==='tour')irEspera();prevBtn[k+'a']=a;prevBtn[k+'b']=b;}
@@ -264,5 +339,5 @@ renderer.setAnimationLoop(()=>{const dt=Math.min(.05,relogio.getDelta());
 
 /* uso sem internet no estande: guarda tudo no aparelho na primeira visita */
 if('serviceWorker' in navigator&&(location.protocol==='https:'||location.hostname==='localhost'))navigator.serviceWorker.register('sw.js').catch(()=>{});
-window.PortalEstande={versao:VERSAO,CENAS,iniciar,proxima,irEspera,get estado(){return estado;},get ind(){return ind;}};
+window.PortalEstande={versao:VERSAO,PLACAS,get atual(){return atual;},CENAS,iniciar,proxima,irEspera,get estado(){return estado;},get ind(){return ind;},get t(){return tCena;}};
 })();

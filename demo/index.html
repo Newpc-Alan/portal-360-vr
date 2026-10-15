@@ -30,7 +30,7 @@ html,body{margin:0;height:100%;background:#020812;color:#eaf6ff;font-family:"Seg
 <body>
 <canvas id="palco"></canvas>
 <div id="legenda"></div>
-<div id="barra" hidden><button type="button" data-action="pular">Pular cena ▶</button><button type="button" data-action="parar">Encerrar</button></div>
+<div id="barra" hidden><button type="button" data-action="voltar">◀ Voltar</button><button type="button" data-action="pular">Avançar ▶</button><button type="button" data-action="parar">Encerrar</button></div>
 <div id="painel">
   <div class="caixa">
     <img src="assets/logo.png" alt="">
@@ -41,7 +41,7 @@ html,body{margin:0;height:100%;background:#020812;color:#eaf6ff;font-family:"Seg
       <button type="button" class="sec" data-action="tela">Ver o tour nesta tela</button>
     </div>
     <div class="contador" id="contador"></div>
-    <div class="dica"><b>Para a equipe do estande:</b> entre no VR uma vez e entregue o óculos. Cada visitante aperta o gatilho para começar; no fim, o visitante responde a pesquisa rápida (aponta para uma carinha e aperta o gatilho) e o tour volta sozinho à tela de espera. O resultado da pesquisa aparece aqui embaixo, no contador. Botão A (ou X): pula a cena. Botão B (ou Y): volta à espera. Para quem está na fila ver junto, transmita o óculos para a TV do estande (menu do Quest › Transmitir).</div>
+    <div class="dica"><b>Para a equipe do estande:</b> entre no VR uma vez e entregue o óculos. Cada visitante aperta o gatilho para começar e pode usar as setas "Voltar" e "Avançar" da cena (aponta e aperta o gatilho) para ir no próprio ritmo; no fim, o visitante responde a pesquisa rápida (aponta para uma carinha e aperta o gatilho) e o tour volta sozinho à tela de espera. O resultado da pesquisa aparece aqui embaixo, no contador. Botão A (ou X): pula a cena. Botão B (ou Y): volta à espera. Para quem está na fila ver junto, transmita o óculos para a TV do estande (menu do Quest › Transmitir).</div>
     <div class="dica">Modelos anatômicos (coração e corpo humano): Z-Anatomy, CC BY-SA 4.0.</div>
   </div>
 </div>
@@ -53,6 +53,6 @@ html,body{margin:0;height:100%;background:#020812;color:#eaf6ff;font-family:"Seg
 <script src="snap/terra-models.js"></script>
 <script src="snap/dna-data.js"></script>
 <script src="snap/dna-models.js"></script>
-<script src="estande.js?v=1.3.2"></script>
+<script src="estande.js?v=1.4.0"></script>
 </body>
 </html>

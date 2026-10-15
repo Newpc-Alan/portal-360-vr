@@ -457,12 +457,16 @@ function xrContexto(){
 }
 function menuVRItens(){const v=estado.vista;const vistas=[['Sistema Solar','sistema'],['Examinar','planeta'],['Comparar','comparar'],['Dia e noite','diaNoite'],['Fases da Lua','fases'],['Estações','estacoes'],['Eclipses','eclipse'],['Desafio','desafio']].map(([t,k])=>[t,'view:'+k,k===v?'rgba(26,107,42,.96)':null]);
  return vistas.concat([[S.guide<0?'Aula guiada':'Encerrar aula guiada',S.guide<0?'guide':'guideStop','rgba(15,74,110,.96)'],[S.nomesVR?'Nomes: ao apontar':'Nomes: todos','nomes'],[estado.playing?'Pausar movimento':'Retomar movimento','pause'],['Centralizar','center'],['Ajuda dos controles','ajuda'],['Catálogo','catalogo'],['Sair do VR','sair','rgba(140,20,20,.95)']]);}
-function menuVRAbrir(){menuVRFechar();const a=xrAnchor();const itens=menuVRItens();const bot=[];
- /* v9.5: menu a 1,3 m (antes 0,8 m), escalado na mesma proporção: mesmo tamanho aparente, mais espaço para os braços */
- const K=1.6,D=.8*K;
- const fundo=textoCanvasVR(1024,700,(g,c)=>{g.fillStyle='rgba(4,14,28,.88)';g.beginPath();g.roundRect(0,0,c.width,c.height,40);g.fill();g.strokeStyle='rgba(55,177,218,.8)';g.lineWidth=6;g.stroke();});fundo.renderOrder=998;fundo.scale.set(.86*K,.66*K,1);fundo.position.copy(a.p).addScaledVector(a.f,D+.04*K).add(new T.Vector3(0,-.055*K,0));scene.add(fundo);
- itens.forEach(([t,ac,cor],i)=>{const b=criarBotaoVR(t,ac,cor);const k=vrBotoes.indexOf(b);if(k>=0)vrBotoes.splice(k,1);b.scale.set(.245*K,.061*K,1);const col=i%3,lin=Math.floor(i/3);b.position.copy(a.p).addScaledVector(a.r,(col-1)*.262*K).addScaledVector(a.f,D).add(new T.Vector3(0,(.10-lin*.082)*K,0));scene.add(b);bot.push(b);});
- const tit=xrText(['Menu','Aponte e aperte o gatilho · Y ou B fecha'],1024,200);tit.scale.set(.42*K,.082*K,1);tit.position.copy(a.p).addScaledVector(a.f,D+.02*K).add(new T.Vector3(0,.19*K,0));scene.add(tit);
+function menuVRAbrir(){menuVRFechar();const itens=menuVRItens();const bot=[];
+ /* v9.6: o menu nasce logo ACIMA do botão ☰ Menu da cena (alinhado pela esquerda), a 1,5 m, em 4 colunas, mais baixo
+    e mais largo; se o aluno estiver olhando para outro lado (Y/B), usa a direção atual da cabeça com o mesmo desenho. */
+ const h=xrAnchor();let a=S.xrAnchor||h;if(a.f.dot(h.f)<.64)a={p:a.p.clone(),f:h.f,r:h.r};
+ const P=(x,y,z)=>a.p.clone().addScaledVector(a.r,x).addScaledVector(a.f,z).add(new T.Vector3(0,y,0));
+ const Z=1.5,COLS=4,DX=.36,DY=.11,cx=-.95+(COLS*DX+.08)/2,linhas=Math.ceil(itens.length/COLS),base=-.38;
+ const topo=base+(linhas-1)*DY,alt=(topo+.19)-(base-.07);
+ const fundo=textoCanvasVR(1024,700,(g,c)=>{g.fillStyle='rgba(4,14,28,.88)';g.beginPath();g.roundRect(0,0,c.width,c.height,40);g.fill();g.strokeStyle='rgba(55,177,218,.8)';g.lineWidth=6;g.stroke();});fundo.renderOrder=998;fundo.scale.set(COLS*DX+.08,alt,1);fundo.position.copy(P(cx,(topo+.19+base-.07)/2,Z+.03));scene.add(fundo);
+ itens.forEach(([t,ac,cor],i)=>{const b=criarBotaoVR(t,ac,cor);const k=vrBotoes.indexOf(b);if(k>=0)vrBotoes.splice(k,1);b.scale.set(.33,.082,1);const col=i%COLS,lin=Math.floor(i/COLS);b.position.copy(P(cx+(col-(COLS-1)/2)*DX,topo-lin*DY,Z));scene.add(b);bot.push(b);});
+ const tit=xrText(['Menu','Aponte e aperte o gatilho · Y ou B fecha'],1024,200);tit.scale.set(.62,.12,1);tit.position.copy(P(cx,topo+.115,Z+.01));scene.add(tit);
  S.menuVR={botoes:bot,titulo:tit,fundo,aberto:true};}
 function menuVRFechar(){if(!S.menuVR)return;for(const b of S.menuVR.botoes)release(b);release(S.menuVR.titulo);release(S.menuVR.fundo);S.menuVR=null;}
 function menuVRAlternar(){if(S.menuVR)menuVRFechar();else menuVRAbrir();}
@@ -516,6 +520,6 @@ atualizarVR=function(){_atuV94();orientarPlacas();if(S.btnMenuCena)S.btnMenuCena
 const _sairV94=sairVRFinal;
 sairVRFinal=function(){if(S.btnMenuCena){const i=vrBotoes.indexOf(S.btnMenuCena);if(i>=0)vrBotoes.splice(i,1);release(S.btnMenuCena);S.btnMenuCena=null;}_sairV94();};
 
-window.PortalSolarV8={version:'8.12',state:S,seasons,daylight,setDay,beginMission,checkMission,finishMission,enterView:entrarVista,exportSummary,setupXRActivity,resetStudent};
+window.PortalSolarV8={version:'8.13',state:S,seasons,daylight,setDay,beginMission,checkMission,finishMission,enterView:entrarVista,exportSummary,setupXRActivity,resetStudent};
 entrarVista(S.views.includes(estado.vista)?estado.vista:'sistema');renderer.setAnimationLoop(animate);
 })();

@@ -288,3 +288,10 @@ window.PortalEntrada={
   depois(fn,atraso){if(typeof fn!=='function')return;if(ativo)fila.push(fn);else setTimeout(fn,atraso||0);}
 };
 })();
+
+/* v1.0.2 · tela de entrada "?vr=1": um gatilho em QUALQUER lugar da tela entra no VR (antes era preciso acertar o botão) */
+(function(){try{const ligar=ov=>{if(ov.__toqueVR)return;ov.__toqueVR=true;ov.style.cursor='pointer';
+  ov.addEventListener('click',e=>{if(e.target.closest('button,[data-action],a'))return;const b=ov.querySelector('[data-action="vr-entrar"]');if(b){e.stopPropagation();b.click();}},true);
+  const s=ov.querySelector('.vrgate-s');if(s)s.textContent='Aperte o gatilho em qualquer lugar para entrar no VR';};
+ const ver=()=>{const ov=document.getElementById('vrGate');if(ov)ligar(ov);};
+ new MutationObserver(ver).observe(document.documentElement,{childList:true,subtree:true});ver();}catch(_){}})();

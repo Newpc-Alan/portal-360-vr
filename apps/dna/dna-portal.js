@@ -102,10 +102,12 @@ Proto.buildXRUI=function(){
   const des=estadoDesafio();
   if(des){title=des.acertou?'✅ ACERTOU!':'❌ ERROU';tom=des.acertou?'ok':'erro';body=D.questions[S.quiz.index].why;}
   if(this.xrReport){const r=Lab.report();title='Resumo da experiência';body=S.completed.length+' atividades concluídas. '+r.independent+' respostas independentes. '+r.errors+' tentativas incorretas. '+r.hints+' pistas consultadas. '+r.skips+' posições puladas. Exporte os registros no modo 3D.';tom='neutro';}
-  const panel=this.textPlane(title,body,1.06,.86,tom);panel.position.set(1.16,.30,-1.64);panel.rotation.y=-.6;this.ui.add(panel);
-  const lista=this.xrReport?[{label:'Voltar à atividade',cmd:'xr:reportclose'}]:this._acoes();
+  if(this.xrAjuda&&!this.xrReport){title='Como usar os controles';body=AJUDA_CONTROLES;tom='neutro';}
+  const menuAberto=!!this.menuAberto;
+  const panel=this.textPlane(title,body,1.06,.86,tom);panel.position.set(1.16,.30,-1.64);panel.rotation.y=-.6;if(menuAberto)panel.visible=false;this.ui.add(panel);
+  const lista=menuAberto?[]:this.xrReport?[{label:'Voltar à atividade',cmd:'xr:reportclose'}]:this.xrAjuda?[{label:'Voltar à atividade',cmd:'xr:ajudaclose'}]:this._acoes();
   const max=8,pages=Math.max(1,Math.ceil(lista.length/max));this.uiPage=Math.min(this.uiPage||0,pages-1);
-  const quizFase=(S.view==='desafio'&&S.quiz.phase===1&&!this.xrReport);
+  const quizFase=(S.view==='desafio'&&S.quiz.phase===1&&!this.xrReport&&!this.xrAjuda&&!menuAberto);
   if(quizFase){
     panel.position.set(1.16,.52,-1.64);
     let yy=-.06;lista.forEach(a=>{let cor=null;const m=/^quiz:answer:(\d+)$/.exec(a.cmd);
@@ -118,13 +120,40 @@ Proto.buildXRUI=function(){
     if(des&&m){const k=Number(m[1]);cor=k===des.correto?VERDE:k===des.escolha?VERMELHO:APAGADO;}
     this.xrButton(a.label,a.cmd,1.16+(i%2?.25:-.25),-.22-Math.floor(i/2)*UI.passo,UI.btnW,a.disabled,cor);
   });
-  if(pages>1&&!quizFase){this.xrButton('◀ Opções','xr:prev',.91,-.86,UI.btnW,this.uiPage===0);this.xrButton('Mais opções ▶','xr:next',1.41,-.86,UI.btnW,this.uiPage===pages-1);}
-  D.activities.forEach((a,i)=>this.xrButton((i+1)+'. '+a.label,'view:'+a.id,-1.18,.52-i*UI.passo,.5));
-  this.xrButton('🥽 Sair do VR','vr',-1.18,-.62,.5,false,{bg:'#5a2a16',borda:'#ff9f6b',texto:'#fff2ea'});
-  this.xrButton('↙ Catálogo','catalog',-1.18,-.77,.5,false,{bg:'#0f2c4a',borda:'#37B1DA',texto:'#ffffff'});
-  this.xrButton('◎ Centralizar','center',-.52,-.86,UI.btnW);this.xrButton(S.autoRotate?'Ⅱ Pausar':'▷ Girar','rotate',-.02,-.86,UI.btnW);
-  this.xrButton('🔊 Ouvir','voice:repeat',-.52,-1.01,UI.btnW);this.xrButton('■ Parar voz','voice:stop',-.02,-1.01,UI.btnW);
+  if(pages>1&&!quizFase&&!menuAberto){this.xrButton('◀ Opções','xr:prev',.91,-.86,UI.btnW,this.uiPage===0);this.xrButton('Mais opções ▶','xr:next',1.41,-.86,UI.btnW,this.uiPage===pages-1);}
+  /* v2.3 · VR enxuto (padrão Sistema Solar 8.13 / Célula 1.2.2): botão "☰ Menu" fixo na cena; menu em colunas acima dele */
+  const AZ={bg:'#0f2c4a',borda:'#37B1DA',texto:'#ffffff'},AT={bg:'#0f6b3a',borda:'#7CFFB8',texto:'#ffffff'},SAI={bg:'#5a2a16',borda:'#ff9f6b',texto:'#fff2ea'};
+  this.xrButton(menuAberto?'✕ Fechar menu':'☰  Menu','xr:abrirmenu',-.80,-.52,.36,false,menuAberto?{bg:'#3a2a10',borda:'#ffc77a',texto:'#fff6e8'}:{bg:'#0f4a6e',borda:'#7fd6ff',texto:'#ffffff'});
+  if(!menuAberto)return;
+  const atv=D.activities,idx=Math.max(0,atv.findIndex(a=>a.id===S.view));
+  const cols=[['MISSÕES',atv.map((a,i)=>[(a.id===S.view?'▶ ':'')+(i+1)+'. '+a.label,'view:'+a.id,a.id===S.view?AT:null])],
+   ['VER',[['Recentralizar a cena','center',null],[S.autoRotate?'Parar o giro do modelo':'Girar o modelo','rotate',null]]],
+   ['SOM E SAÍDA',[['Repetir a explicação','voice:repeat',null],['Parar a voz','voice:stop',null],[narrator.musicOn?'Música de fundo: ligada':'Música de fundo: desligada','xr:musica',null],['Como usar os controles','xr:ajuda',null],['Voltar ao catálogo','catalog',AZ],['Sair do VR','vr',SAI]]]];
+  const COLS=cols.length,DX=.5,W=.47,DY=.13,linhas=Math.max(...cols.map(c=>c[1].length)),base=-.52+.06+.075,topo=base+(linhas-1)*DY,cx=-.98+(COLS*DX)/2;
+  const fundoC=document.createElement('canvas');fundoC.width=fundoC.height=256;const fg=fundoC.getContext('2d');fg.fillStyle='rgba(4,14,28,.92)';fg.fillRect(0,0,256,256);fg.strokeStyle='rgba(55,177,218,.85)';fg.lineWidth=3;fg.strokeRect(1.5,1.5,253,253);
+  const alt=(topo+.36)-(base-.08),fundo=new T.Mesh(new T.PlaneGeometry(COLS*DX+.06,alt),new T.MeshBasicMaterial({map:texturaCanvas(fundoC),transparent:true,side:T.DoubleSide,depthWrite:false}));
+  fundo.position.set(cx,(topo+.36+base-.08)/2,UI.z-.03);fundo.rotation.y=-Math.atan2(cx,-UI.z);fundo.userData.ordem=990;this.ui.add(fundo);
+  const rot=-Math.atan2(cx,-UI.z);
+  [[('Menu  ·  DNA Imersivo  ·  atividade '+(idx+1)+' de '+atv.length),'#ffffff',topo+.30,64],['Aponte o raio para uma opção e aperte o gatilho · B ou Y fecha','#bfe6f2',topo+.215,44]].forEach(([t,c,y,sz])=>{const r=rotuloPlano(t,c,COLS*DX-.12,sz);r.position.set(cx,y,UI.z-.01);r.rotation.y=rot;r.userData.ordem=995;this.ui.add(r);});
+  cols.forEach(([cab,itens],c)=>{const x=cx+(c-(COLS-1)/2)*DX;const h=rotuloPlano(cab,'#9fe8ff',W,64);h.position.set(x,topo+.105,UI.z-.005);h.rotation.y=-Math.atan2(x,-UI.z);h.userData.ordem=996;this.ui.add(h);
+    itens.forEach(([t,cmd,cor],l)=>this.xrButton(t,cmd,x,topo-l*DY,W,false,cor));});
 };
+function rotuloPlano(text,cor,largura,size){const c=document.createElement('canvas');c.width=512;c.height=128;const g=c.getContext('2d');g.font='600 '+size+'px Segoe UI,Arial';while(g.measureText(text).width>490&&size>17){size-=2;g.font='600 '+size+'px Segoe UI,Arial';}
+  g.textAlign='center';g.textBaseline='middle';g.fillStyle=cor;g.fillText(text,256,64);return new T.Mesh(new T.PlaneGeometry(largura,largura/4),new T.MeshBasicMaterial({map:texturaCanvas(c),transparent:true,side:T.DoubleSide,depthWrite:false}));}
+const AJUDA_CONTROLES='Gatilho: escolhe e abre a ficha. Grip (lateral): segura a peça na mão; gire o pulso para olhar em volta. Analógicos para os lados: giram a hélice. B ou Y: abre e fecha o menu. Gatilho fora do menu: fecha o menu ou para a narração.';
+Proto.alternarMenuVR=function(forca){this.menuAberto=forca===undefined?!this.menuAberto:!!forca;this.uiPage=0;if(this.menuAberto)this.xrAjuda=false;this.buildXRUI();};
+/* botão apontado cresce e acende, ponto no toque do raio, B/Y abre o menu; UI por cima do modelo, fundo do menu atrás dos botões */
+const updateOriginalV=Proto.updateXR;
+Proto.updateXR=function(dt){updateOriginalV.call(this,dt);if(!this.xr)return;
+  this.ui.traverse(o=>{if(o.isMesh&&o.material&&!o.userData._ord){o.userData._ord=true;o.material.depthTest=false;o.material.transparent=true;o.renderOrder=o.userData.ordem||1000;}});
+  const alvos=new Set();this._pontos=this._pontos||new Map();
+  for(const ctrl of this.controllers){const ui=this.controllerRay(ctrl).intersectObjects(this.uiHits,false)[0];let pt=this._pontos.get(ctrl);
+    if(!pt){pt=new T.Mesh(new T.SphereGeometry(.012,12,8),new T.MeshBasicMaterial({color:0xffffff,depthTest:false,transparent:true}));pt.renderOrder=1100;this.scene.add(pt);this._pontos.set(ctrl,pt);}
+    if(ui){alvos.add(ui.object);pt.visible=true;pt.position.copy(ui.point);}else pt.visible=false;}
+  for(const b of this.uiHits){const on=alvos.has(b);if(b.userData.s0===undefined)b.userData.s0=b.scale.x;const k=on?1.1:1;b.scale.set(b.userData.s0*k,b.userData.s0*k,1);if(b.material&&b.material.color)b.material.color.setScalar(on?1:.86);}
+  if(this.xrSession)for(const src of this.xrSession.inputSources){const gp=src.gamepad;if(!gp)continue;const st=src.__menuSt||(src.__menuSt={});const bY=!!(gp.buttons[5]&&gp.buttons[5].pressed);if(bY&&!st.y)this.alternarMenuVR();st.y=bY;}
+};
+
 /* lista de ações da lateral (o dna-app monta os botões com data-act; lemos de lá para não depender de variáveis internas) */
 Proto._acoes=function(){const out=[];document.querySelectorAll('#lessonPanel [data-act]').forEach(b=>{if(/^pair:target:/.test(b.dataset.act))return;if(b.closest('details')&&!b.closest('details').open)return;const label=(b.title&&b.textContent.trim().length<=1?b.textContent.trim()+' · '+b.title:b.textContent.trim());out.push({label,cmd:b.dataset.act,disabled:b.disabled});});return out;};
 
@@ -134,6 +163,13 @@ Proto.xrSelect=function(ctrl){
   if(this.held.has(ctrl))return xrSelectOriginal.call(this,ctrl);
   const ray=this.controllerRay(ctrl);
   const ui=ray.intersectObjects(this.uiHits,false)[0];
+  const cmdUI=ui&&ui.object.userData.command;
+  if(cmdUI==='xr:abrirmenu'){this.alternarMenuVR();return;}
+  if(cmdUI==='xr:musica'){this.menuAberto=false;narrator.setMusic(!narrator.musicOn,Math.max(.12,narrator.musicVolume||.2));const cb=document.getElementById('musicEnabled');if(cb)cb.checked=narrator.musicOn;setTimeout(()=>{if(this.xr)this.buildXRUI();},120);return;}
+  if(cmdUI==='xr:ajuda'){this.menuAberto=false;this.xrAjuda=true;this.buildXRUI();return;}
+  if(cmdUI==='xr:ajudaclose'){this.xrAjuda=false;this.buildXRUI();return;}
+  if(this.menuAberto&&!ui){this.alternarMenuVR(false);return;}
+  if(this.menuAberto&&cmdUI)this.menuAberto=false;
   this.root.updateMatrixWorld(true);
   const hit=ui?null:this.hits(ray)[0];
   if(!ui&&!hit){narrator.stop();return;}
@@ -158,7 +194,7 @@ document.addEventListener('visibilitychange',()=>{if(!document.hidden&&ligado){t
 const toggleOriginal=Proto.toggleVR;
 Proto.toggleVR=async function(){const r=await toggleOriginal.call(this);ligarPosicional();if(posicional)posicional.setRefDistance(this.xr?1.2:14);if(this.xr&&typeof entrarAmbiente==='function')entrarAmbiente();return r;};
 const exitOriginal=Proto.exitXR;
-Proto.exitXR=function(){exitOriginal.call(this);if(posicional)posicional.setRefDistance(14);};
+Proto.exitXR=function(){exitOriginal.call(this);if(posicional)posicional.setRefDistance(14);if(this._pontos){for(const pt of this._pontos.values()){this.scene.remove(pt);pt.geometry.dispose();pt.material.dispose();}this._pontos=null;}this.menuAberto=false;this.xrAjuda=false;};
 
 /* ---------- 5. Ambiente VR com profundidade + trilha de fundo ---------- */
 let ambiente=null,musicaAntes=null;

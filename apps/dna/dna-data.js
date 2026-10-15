@@ -51,5 +51,5 @@ const sources=[
  ['Estrutura experimental 1BNA — RCSB PDB','https://www.rcsb.org/structure/1BNA'],
  ['Three.js / WebXR','https://threejs.org/docs/pages/WebXRManager.html']
 ];
-window.DNA_DATA={bases,info,activities,guide,context,questions,sources,sequence:'ATGCCGTAACGTTAGCGATCGTAC',version:'2.1.1',complement:s=>s.split('').map(c=>bases[c].pair).join('')};
+window.DNA_DATA={bases,info,activities,guide,context,questions,sources,sequence:'ATGCCGTAACGTTAGCGATCGTAC',version:'2.3.0',complement:s=>s.split('').map(c=>bases[c].pair).join('')};
 })();

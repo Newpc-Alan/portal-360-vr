@@ -1,4 +1,4 @@
-/* Portal 360º VR · Modo Estande (v1.3.1)
+/* Portal 360º VR · Modo Estande (v1.3.2)
    Tour automático de cerca de 3,5 minutos para feiras e eventos (SENACOP 2026): espaço, Terra por dentro, célula,
    DNA e coração saindo do corpo humano, com narração, legenda e música. Roda sozinho: começa quando o visitante coloca o
    óculos (ou aperta o gatilho); no fim há uma pesquisa rápida de uma pergunta (três carinhas), o convite para falar com o
@@ -6,7 +6,7 @@
    É um app separado: usa CÓPIAS congeladas (pasta snap/) dos modelos da Célula, da Terra e do DNA, e não altera
    nenhum app do catálogo. Equipe: A ou X pula a cena; B ou Y volta à espera. */
 (function(){'use strict';
-const T=THREE,VERSAO='1.3.1',$=id=>document.getElementById(id);
+const T=THREE,VERSAO='1.3.2',$=id=>document.getElementById(id);
 const CM=window.CELULA_MODELS,TM=window.TERRA_MODELS,DM=window.DNA_MODELS;
 
 /* ---------- palco ---------- */
@@ -131,12 +131,51 @@ function aproximar(g,a,d0,d1,dy,t,dur){const d=d0+(d1-d0)*ease(t/dur);g.position
 /* ---------- coração (anatomia real Z-Anatomy, CC BY-SA 4.0) ---------- */
 let coracaoGLB=null;
 try{new T.GLTFLoader().load('modelos/coracao.glb',g=>{coracaoGLB=g.scene;},undefined,()=>{coracaoGLB=null;});}catch(_){}
+/* realismo do coração: tecido úmido (verniz + reflexo de ambiente), fibras musculares em relevo, cores reais
+   (músculo vermelho-escuro, aorta e tronco pulmonar claros, veias cavas roxo-azuladas), sombreamento suave,
+   veia cava cortada rente ao coração e batimento por câmara (átrios primeiro, depois os ventrículos). */
+const ENV_TECIDO=(()=>{try{const pm=new T.PMREMGenerator(renderer);const c=document.createElement('canvas');c.width=512;c.height=256;const x=c.getContext('2d');
+ const gr=x.createLinearGradient(0,0,0,256);gr.addColorStop(0,'#dfe6f2');gr.addColorStop(.42,'#6b6f7c');gr.addColorStop(.6,'#2a2228');gr.addColorStop(1,'#0c0a0e');x.fillStyle=gr;x.fillRect(0,0,512,256);
+ x.fillStyle='rgba(255,255,255,1)';x.fillRect(296,34,110,46);x.fillRect(70,60,64,34);x.fillStyle='rgba(255,214,190,.8)';x.fillRect(440,110,50,26);
+ const t=new T.CanvasTexture(c);t.mapping=T.EquirectangularReflectionMapping;t.encoding=T.sRGBEncoding;const rt=pm.fromEquirectangular(t);t.dispose();pm.dispose();return rt.texture;}catch(_){return null;}})();
+function texTecido(tipo){const N=512,c=document.createElement('canvas');c.width=c.height=N;const x=c.getContext('2d');let sd=tipo==='fibra'?7:13;const rnd=()=>{sd=(sd*16807)%2147483647;return sd/2147483647;};
+ if(tipo==='fibra'){x.fillStyle='#808080';x.fillRect(0,0,N,N);
+  for(let i=0;i<2600;i++){const y0=rnd()*N,x0=rnd()*N,l=40+rnd()*160,w=1+rnd()*2.5,cl=rnd()<.5?120+rnd()*40:60+rnd()*40;x.strokeStyle=`rgba(${cl},${cl},${cl},.55)`;x.lineWidth=w;x.beginPath();x.moveTo(x0,y0);x.bezierCurveTo(x0+l*.33,y0+(rnd()-.5)*14,x0+l*.66,y0+(rnd()-.5)*14,x0+l,y0+(rnd()-.5)*10);x.stroke();}
+  for(let i=0;i<900;i++){const v=rnd()<.5?40:200;x.fillStyle=`rgba(${v},${v},${v},.10)`;x.beginPath();x.arc(rnd()*N,rnd()*N,2+rnd()*14,0,Math.PI*2);x.fill();}}
+ else{x.fillStyle='#b9b9b9';x.fillRect(0,0,N,N);
+  for(let i=0;i<1600;i++){const v=150+rnd()*90;x.fillStyle=`rgba(${v},${v*.92},${v*.86},.22)`;x.beginPath();x.arc(rnd()*N,rnd()*N,3+rnd()*22,0,Math.PI*2);x.fill();}
+  for(let i=0;i<260;i++){const x0=rnd()*N,y0=rnd()*N;x.strokeStyle=`rgba(${90+rnd()*40},40,50,.35)`;x.lineWidth=.8+rnd()*1.4;x.beginPath();x.moveTo(x0,y0);let px=x0,py=y0;for(let k=0;k<6;k++){px+=(rnd()-.5)*40;py+=(rnd()-.5)*40;x.lineTo(px,py);}x.stroke();}}
+ const t=new T.CanvasTexture(c);t.wrapS=t.wrapT=T.RepeatWrapping;t.anisotropy=8;if(tipo==='cor')t.encoding=T.sRGBEncoding;return t;}
+const TEX_FIBRA=texTecido('fibra'),TEX_COR=texTecido('cor');
+/* sombreamento suave: junta os vértices na mesma posição e tira a média das normais */
+function suavizar(geo){const p=geo.attributes.position,n=geo.attributes.normal;if(!n)return;const m=new Map(),k=i=>Math.round(p.getX(i)*1e5)+'_'+Math.round(p.getY(i)*1e5)+'_'+Math.round(p.getZ(i)*1e5);
+ for(let i=0;i<p.count;i++){const key=k(i);const a=m.get(key)||[0,0,0];a[0]+=n.getX(i);a[1]+=n.getY(i);a[2]+=n.getZ(i);m.set(key,a);}
+ for(let i=0;i<p.count;i++){const a=m.get(k(i)),l=Math.hypot(a[0],a[1],a[2])||1;n.setXYZ(i,a[0]/l,a[1]/l,a[2]/l);}n.needsUpdate=true;}
+/* coordenadas de textura por projeção em caixa (o modelo não tem UV); ESC define o tamanho das fibras */
+function uvCaixa(geo,esc){const p=geo.attributes.position,n=geo.attributes.normal,uv=new Float32Array(p.count*2);
+ for(let i=0;i<p.count;i++){const ax=Math.abs(n.getX(i)),ay=Math.abs(n.getY(i)),az=Math.abs(n.getZ(i));let u,v;if(ax>=ay&&ax>=az){u=p.getZ(i);v=p.getY(i);}else if(ay>=az){u=p.getX(i);v=p.getZ(i);}else{u=p.getX(i);v=p.getY(i);}uv[i*2]=u*esc;uv[i*2+1]=v*esc;}
+ geo.setAttribute('uv',new T.BufferAttribute(uv,2));}
+const TECIDO={atrioD:{cor:0x7a2a31,fibra:.45},atrioE:{cor:0x8a2f34,fibra:.45},ventD:{cor:0x8e3230,fibra:.55},ventE:{cor:0x993532,fibra:.55},
+ aorta:{cor:0xe3c2b6,fibra:.25},pulmonar:{cor:0xd9b0a6,fibra:.25},cavas:{cor:0x4f3a5c,fibra:.2},veiasPulm:{cor:0x8c3a44,fibra:.2},coronarias:{cor:0xa8222c,fibra:.1}};
+function materialTecido(nome){const t=TECIDO[nome]||TECIDO.ventE;
+ const m=new T.MeshPhysicalMaterial({color:new T.Color(t.cor).convertSRGBToLinear(),map:TEX_COR,bumpMap:TEX_FIBRA,bumpScale:.012*t.fibra,roughness:.5,roughnessMap:TEX_FIBRA,metalness:0,clearcoat:.75,clearcoatRoughness:.2,envMap:ENV_TECIDO,envMapIntensity:.9});
+ if(nome==='cavas'){m.clippingPlanes=[CORTE_CAVA];m.side=T.DoubleSide;}if(nome==='pulmonar'){m.clippingPlanes=CORTE_PULM;m.side=T.DoubleSide;}return m;}
+const CORTE_CAVA=new T.Plane(new T.Vector3(0,1,0),0),CORTE_PULM=[new T.Plane(),new T.Plane()];
 function coracaoModelo(){const g=new T.Group();
- if(coracaoGLB){const m=coracaoGLB.clone(true);const CORES={atrioD:0xb8343f,atrioE:0xd9434f,ventD:0xc43b48,ventE:0xd9434f,aorta:0xe8484f,pulmonar:0x4f7fe0,cavas:0x4f7fe0,veiasPulm:0xe8484f,coronarias:0x8f2a33};
-  m.traverse(o=>{if(o.isMesh){let n=o.name,p=o;while(p&&!CORES[n]){p=p.parent;n=p&&p.name;}o.material=new T.MeshStandardMaterial({color:new T.Color(CORES[n]||0xc43b48).convertSRGBToLinear(),roughness:.45,metalness:.02});}});
+ if(coracaoGLB){const m=coracaoGLB.clone(true);const partes={};
+  m.traverse(o=>{if(o.isMesh){let n=o.name,p=o;while(p&&!TECIDO[n]){p=p.parent;n=p&&p.name;}o.geometry=o.geometry.clone();suavizar(o.geometry);uvCaixa(o.geometry,n&&n.indexOf('vent')===0?9:12);o.material=materialTecido(n);
+   o.geometry.computeBoundingBox();const no=p||o;partes[n]={no,centro:o.geometry.boundingBox.getCenter(new T.Vector3()),pos:no.position.clone()};}});
   /* o tamanho vem só do coração (sem as veias cavas, que são longas), para ele aparecer grande */
   const box=new T.Box3();m.updateMatrixWorld(true);m.traverse(o=>{if(o.isMesh){let q=o,cava=false;while(q){if(q.name==='cavas')cava=true;q=q.parent;}if(!cava)box.expandByObject(o);}});if(box.isEmpty())box.setFromObject(m);
-  const tam=box.getSize(new T.Vector3()),c=box.getCenter(new T.Vector3());m.position.sub(c);const k=1.1/Math.max(tam.x,tam.y,tam.z);const piv=new T.Group();piv.add(m);piv.scale.setScalar(k);g.add(piv);g.userData.piv=piv;g.userData.k=k;g.userData.c=c.clone();}
+  const tam=box.getSize(new T.Vector3()),c=box.getCenter(new T.Vector3());m.position.sub(c);const k=1.1/Math.max(tam.x,tam.y,tam.z);const piv=new T.Group();piv.add(m);piv.scale.setScalar(k);g.add(piv);g.userData.piv=piv;g.userData.k=k;g.userData.c=c.clone();
+  /* corte da veia cava: plano logo abaixo da base do coração, acompanhando o giro */
+  const pontoCorte=new T.Vector3(c.x,box.min.y-.004,c.z).sub(c),pE=new T.Vector3(-.03,c.y,c.z).sub(c),pD=new T.Vector3(.066,c.y,c.z).sub(c),/* largura das câmaras (m, Z-Anatomy) */_p=new T.Vector3(),_n=new T.Vector3();
+  g.userData.corte=()=>{piv.updateMatrixWorld(true);_p.copy(pontoCorte).applyMatrix4(piv.matrixWorld);_n.set(0,1,0).transformDirection(piv.matrixWorld);CORTE_CAVA.setFromNormalAndCoplanarPoint(_n,_p);/* ramos das artérias pulmonares cortados na largura do coração */_p.copy(pE).applyMatrix4(piv.matrixWorld);_n.set(1,0,0).transformDirection(piv.matrixWorld);CORTE_PULM[0].setFromNormalAndCoplanarPoint(_n,_p);_p.copy(pD).applyMatrix4(piv.matrixWorld);_n.set(-1,0,0).transformDirection(piv.matrixWorld);CORTE_PULM[1].setFromNormalAndCoplanarPoint(_n,_p);};
+  /* batimento: átrios contraem primeiro, depois os ventrículos (sístole), cada um em volta do próprio centro */
+  const env=(x,a,b)=>x<a||x>b?0:Math.sin((x-a)/(b-a)*Math.PI);
+  const escalar=(nome,sx,sy)=>{const P=partes[nome];if(!P)return;P.no.scale.set(sx,sy,sx);P.no.position.set(P.pos.x+P.centro.x*(1-sx),P.pos.y+P.centro.y*(1-sy),P.pos.z+P.centro.z*(1-sx));};
+  g.userData.bater=ciclo=>{const a=env(ciclo,0,.12),v=env(ciclo,.08,.36);escalar('atrioD',1-.09*a,1-.06*a);escalar('atrioE',1-.09*a,1-.06*a);escalar('ventD',1-.06*v,1-.035*v);escalar('ventE',1-.07*v,1-.04*v);
+   m.rotation.y=-.04*v;g.userData.corte();};}
  else{const piv=new T.Group();const v=new T.Mesh(new T.SphereGeometry(.42,40,28),new T.MeshStandardMaterial({color:0xb52a35,roughness:.4}));v.scale.set(1,1.2,.9);piv.add(v);const ao=new T.Mesh(new T.TorusGeometry(.22,.07,12,32,Math.PI),new T.MeshStandardMaterial({color:0xc8323c}));ao.position.set(0,.5,0);piv.add(ao);g.add(piv);g.userData.piv=piv;g.userData.k=1;g.userData.c=new T.Vector3(.022,1.284,.019);}
  return g;}
 
@@ -230,12 +269,12 @@ const CENAS=[
    const P0=new T.Vector3(0,.12,-3.0),P1=new T.Vector3(.62,.3,-4.3),FRENTE=new T.Vector3(-.62,.26,-1.95);
    const vazio=spriteBrilho(BRILHO_BRANCO,0xff3040);vazio.material.opacity=0;vazio.material.depthTest=false;vazio.renderOrder=400;g.add(vazio);
    const h=coracaoModelo();const giro=comGiro(g,h);const piv=h.userData.piv,kf=h.userData.k,dc=h.userData.c.clone().sub(HC).multiplyScalar(S);
-   dicaGiro(g,-.42,-1.8);g.userData.dica.position.x=-.62;luzFrente(g,1.1);const brilho=new T.PointLight(0xff4050,0,4);brilho.position.set(-.5,.45,-1.15);g.add(brilho);
+   dicaGiro(g,-.42,-1.8);g.userData.dica.position.x=-.62;luzFrente(g,1.1);const brilho=new T.PointLight(0xff4050,0,4);brilho.position.set(-.5,.45,-1.15);g.add(brilho);const contra=new T.SpotLight(0xffd8c8,1.6,6,.6,.6);contra.position.set(-.2,1.6,-3.4);contra.target=giro;g.add(contra);
    const T0=2.4,T1=5.2,spot=new T.Vector3(),ini=new T.Vector3();let ultimo=-1,saiu=false;
    g.userData.tick=(t,dt)=>{const ciclo=(t*1.15)%1,pulso=Math.exp(-Math.pow((ciclo-.08)/.05,2))+.6*Math.exp(-Math.pow((ciclo-.3)/.06,2));
     const r=ease((t-T0)/(T1-T0+1.8));spot.lerpVectors(P0,P1,r);corpo.position.copy(spot).addScaledVector(HC,-S);
     const u=ease((t-T0)/(T1-T0));if(!saiu&&t>T0){saiu=true;somPassagem();}
-    ini.copy(spot).add(dc);giro.position.lerpVectors(ini,FRENTE,u);const base=S+(kf*.82-S)*u;piv.scale.setScalar(base*(1+.07*pulso));
+    ini.copy(spot).add(dc);giro.position.lerpVectors(ini,FRENTE,u);const base=S+(kf*.82-S)*u;piv.scale.setScalar(base*(1+.015*pulso));if(h.userData.bater)h.userData.bater(ciclo);
     vazio.position.copy(spot).z+=.12;vazio.scale.setScalar(.3+.35*pulso+.2*u);vazio.material.opacity=.3+.6*pulso;
     brilho.intensity=pulso*1.4*u;const fase=ciclo<.08?0:ciclo<.3?1:2;if(fase!==ultimo){if(fase===1)somBatida(true);if(fase===2)somBatida(false);ultimo=fase;}
     if(!g.userData.mexeu&&u>=1)h.rotation.y=Math.sin((t-T1)*.3)*.6;};return g;}},
@@ -297,7 +336,8 @@ function montarEspera(){limparEspera();anc=ancora();const g=new T.Group();aFrent
  g.userData.tick=t=>{gal.rotation.z=t*.08;logo.userData.halo.material.opacity=.6+.4*Math.sin(t*1.6);logo.position.y=.15+Math.sin(t*.9)*.04;};scene.add(g);espera=g;}
 function limparEspera(){if(espera){liberar(espera);espera=null;}}
 function irEspera(){pararVoz();estado='espera';ind=-1;trocar(()=>{limparCena();legendaTexto('');montarEspera();});}
-function iniciar(){if(estado==='tour')return;sfx();try{musica.play().catch(()=>{});}catch(_){}estado='tour';ind=-1;proxima();}
+const CENA_INI=Math.max(0,CENAS.findIndex(c=>c.id===new URLSearchParams(location.search).get('cena')));/* ?cena=coracao abre direto numa cena (ensaio da equipe) */
+function iniciar(){if(estado==='tour')return;sfx();try{musica.play().catch(()=>{});}catch(_){}estado='tour';ind=CENA_INI-1;proxima();}
 function proxima(){ind++;if(ind>=CENAS.length){somar();irEspera();return;}
  const cena=CENAS[ind];if(ind>0)somPassagem();trocar(()=>{limparEspera();limparCena();if(ind===0||!anc||cena.id==='abertura')anc=ancora();atual=cena.montar(anc);scene.add(atual);tCena=0;falaPend=cena.falaEm?cena:null;legendaTexto(cena.falaEm?'':cena.legenda);if(!cena.falaEm)narrar(cena.id,cena.legenda);});}
 function encerrarTela(){pararVoz();musica.pause();estado='parado';limparCena();limparEspera();legendaTexto('');$('barra').hidden=true;$('painel').classList.remove('oculto');}

@@ -3,7 +3,7 @@
           Célula vegetal (Contexto, Explorar, Animal × Vegetal, Desafio).
    Textos no tom falado das narrações (chaves = nomes dos MP3 em audio/; o tema vegetal usa o prefixo veg-). */
 (function(){'use strict';
-const D={version:'1.2.0'};
+const D={version:'1.2.1'};
 D.temas=[
  {id:'animal',nome:'Célula animal',estuda:'A menor unidade da vida, por dentro.',exemplos:'Membrana, núcleo, mitocôndria, retículo, Golgi e lisossomo',modulo:'ani',atividades:['contexto','explorar','fabrica','viagem'],questoes:['unidade','mitocondria','nucleo','ribossomo','membrana','lisossomo']},
  {id:'vegetal',nome:'Célula vegetal',estuda:'O que a planta tem de diferente.',exemplos:'Parede celular, cloroplasto, vacúolo e a comparação com a célula animal',modulo:'veg',atividades:['vegContexto','vegetalExp','comparar'],questoes:['parede','cloroplasto','plantaMito','vacuolo','soVegetal','tamanho']}

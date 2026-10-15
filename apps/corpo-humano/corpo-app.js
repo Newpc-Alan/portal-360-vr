@@ -314,7 +314,7 @@ class LabView {
    else if(S.view==='viagem'){if(Math.abs(y)>.6&&!st.snapY){st.snapY=true;const v=S.viagem;v.u=Math.max(0,Math.min(1,v.u-Math.sign(y)*.08));v.andando=false;renderSidebar();}else if(Math.abs(y)<.3)st.snapY=false;}
    else if(alvo&&Math.abs(y)>zona){alvo.rotation.x=Math.max(-1.25,Math.min(1.25,alvo.rotation.x+y*dt*1.4));}
    const bA=gp.buttons[4]&&gp.buttons[4].pressed;if(bA&&!st.bA){st.bA=true;this.center();}else if(!bA)st.bA=false;
-   const bB=gp.buttons[5]&&gp.buttons[5].pressed;if(bB&&!st.bB){st.bB=true;this.xrMenu=this.xrMenu==='raiz'?'missoes':'raiz';this.buildXRUI();}else if(!bB)st.bB=false;}}
+   const bB=gp.buttons[5]&&gp.buttons[5].pressed;if(bB&&!st.bB){st.bB=true;if(this.alternarMenuVR)this.alternarMenuVR();else{this.xrMenu=this.xrMenu==='raiz'?'missoes':'raiz';this.buildXRUI();}}else if(!bB)st.bB=false;}}
  /* v4.6: modo 'vr' (imersivo) ou 'ar' (realidade mista / passthrough do Quest 3S). Trocar de modo encerra a sessão atual e abre a outra. */
  async toggleVR(modo,silencioso){modo=modo||'vr';if(this.xrSession){if(modo!==this.xrModo){this.xrPendente=modo;}await this.xrSession.end();return;}if(!window.isSecureContext||!navigator.xr){fb('O modo VR precisa de HTTPS e de um navegador compatível no óculos. Aqui você pode usar o modo 3D.','warning');return;}
   /* v4.7.9: um pedido por vez; sessão que falhou no meio é sempre encerrada; mensagem diz a etapa */

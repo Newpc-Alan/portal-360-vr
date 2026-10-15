@@ -1,4 +1,4 @@
-/* Portal 360º VR · Modo Estande (v1.3.0)
+/* Portal 360º VR · Modo Estande (v1.3.1)
    Tour automático de cerca de 3,5 minutos para feiras e eventos (SENACOP 2026): espaço, Terra por dentro, célula,
    DNA e coração saindo do corpo humano, com narração, legenda e música. Roda sozinho: começa quando o visitante coloca o
    óculos (ou aperta o gatilho); no fim há uma pesquisa rápida de uma pergunta (três carinhas), o convite para falar com o
@@ -6,7 +6,7 @@
    É um app separado: usa CÓPIAS congeladas (pasta snap/) dos modelos da Célula, da Terra e do DNA, e não altera
    nenhum app do catálogo. Equipe: A ou X pula a cena; B ou Y volta à espera. */
 (function(){'use strict';
-const T=THREE,VERSAO='1.3.0',$=id=>document.getElementById(id);
+const T=THREE,VERSAO='1.3.1',$=id=>document.getElementById(id);
 const CM=window.CELULA_MODELS,TM=window.TERRA_MODELS,DM=window.DNA_MODELS;
 
 /* ---------- palco ---------- */
@@ -173,7 +173,7 @@ function carinha(o){const W=320,H=400,c=document.createElement('canvas');c.width
  x.fillStyle='#ffffff';x.font='700 58px Segoe UI,Arial';x.textAlign='center';x.textBaseline='middle';x.fillText(o.rotulo,cx,322);
  const m=new T.Mesh(new T.PlaneGeometry(.48,.6),new T.MeshBasicMaterial({map:texCanvas(c),transparent:true,depthWrite:false,side:T.DoubleSide,toneMapped:false}));m.renderOrder=510;m.userData.valor=o.valor;return m;}
 const CENAS=[
- {id:'abertura',dur:13,falaEm:4.2,legenda:'Isto é imersão. Com o Portal 360º VR, o aluno não olha para o conteúdo: ele entra nele.',
+ {id:'abertura',dur:15.5,falaEm:4.2,legenda:'Isto é imersão. Com o Portal 360º VR, o aluno não olha para o conteúdo: ele entra nele.',
   montar(a){const g=new T.Group();aFrente(g,a,3.2,.15);
    const nuvem=nuvemExplosiva(2600,[7,22],.55);g.add(nuvem);
    const flash=spriteBrilho(BRILHO_BRANCO);flash.scale.set(.01,.01,1);g.add(flash);
@@ -191,7 +191,7 @@ const CENAS=[
     anel.scale.setScalar(.2+e*7);anel.material.opacity=Math.max(0,1-e/1.5);anel2.scale.setScalar(.2+Math.max(0,e-.25)*5);anel2.material.opacity=Math.max(0,1-(e-.25)/1.8)*(e>.25?1:0);
     logo.scale.setScalar(Math.max(.001,elastico(e/1.1)));logo.userData.halo.material.opacity=.75+.25*Math.sin(t*2.2);logo.rotation.y=Math.sin(t*.5)*.12;
     tit.material.opacity=ease((e-1.0)/1.0);sub.material.opacity=ease((e-2.2)/1.0);
-    if(t>11){const k=(t-11)/2;logo.scale.setScalar(1+easeIn(k)*1.5);}};
+    if(t>13.5){const k=(t-13.5)/2;logo.scale.setScalar(1+easeIn(k)*1.5);}};
    return g;}},
  {id:'solar',dur:40,legenda:'Você está no meio do Sistema Solar. Segure o gatilho e gire os planetas com a mão. Na experiência completa, o aluno examina cada planeta, compara tamanhos, entende o dia e a noite, as fases da Lua e os eclipses.',
   montar(a){const g=new T.Group();const sist=new T.Group();sist.rotation.x=.12;

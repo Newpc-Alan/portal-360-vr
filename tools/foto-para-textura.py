@@ -33,7 +33,11 @@ def main():
     ap.add_argument('--relevo', type=float, default=3.0, help='força do normal map')
     ap.add_argument('--inverter', action='store_true', help='claro = fundo (para rochas com poros claros)')
     ap.add_argument('--direto', action='store_true', help='não mistura para tirar a emenda (imagens com estruturas grandes, como a obsidiana; nas pedras cada face usa a imagem inteira)')
+    ap.add_argument('--pasta', default=None, help='pasta de saída (padrão: apps/terra/assets)')
+    ap.add_argument('--prefixo', default='rocha-', help='prefixo do arquivo (padrão: rocha-)')
     a = ap.parse_args()
+    global SAIDA
+    if a.pasta: SAIDA = a.pasta
 
     im = Image.open(a.imagem).convert('RGB')
     w, h = im.size; s = min(w, h)
@@ -75,8 +79,8 @@ def main():
     nrm = np.stack([-gx, gy, np.ones_like(alt)], -1)
     nrm /= np.linalg.norm(nrm, axis=-1, keepdims=True)
 
-    Image.fromarray((np.clip(out, 0, 1) * 255 + .5).astype(np.uint8)).save(os.path.join(SAIDA, f'rocha-{a.chave}.webp'), quality=86, method=6)
-    Image.fromarray(((nrm * .5 + .5) * 255 + .5).astype(np.uint8)).save(os.path.join(SAIDA, f'rocha-{a.chave}-normal.webp'), quality=88, method=6)
+    Image.fromarray((np.clip(out, 0, 1) * 255 + .5).astype(np.uint8)).save(os.path.join(SAIDA, f'{a.prefixo}{a.chave}.webp'), quality=86, method=6)
+    Image.fromarray(((nrm * .5 + .5) * 255 + .5).astype(np.uint8)).save(os.path.join(SAIDA, f'{a.prefixo}{a.chave}-normal.webp'), quality=88, method=6)
     print(a.chave, 'ok')
 
 if __name__ == '__main__':

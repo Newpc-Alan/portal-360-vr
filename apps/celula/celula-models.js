@@ -140,7 +140,7 @@ function celulaVegetal(opt={}){const g=new T.Group();const W=4.2,H=3.0,P=1.5;
 function celula(tipo,opt={}){const c=tipo==='vegetal'?celulaVegetal(opt):celulaAnimal(opt);if(opt.destaque){const alvo=opt.destaque;c.traverse(o=>{if(!o.isMesh||!o.material)return;const k=o.userData.hit&&o.userData.hit.key;o.material=Array.isArray(o.material)?o.material.map(m=>m.clone()):o.material.clone();const mm2=Array.isArray(o.material)?o.material:[o.material];mm2.forEach(m=>{if(k===alvo){if(m.emissive){m.emissive.setHex(0x6a4a10);m.userData.pulsa=true;}}else if(m.color){m.color.multiplyScalar(.38);}});});const t0=c.userData.tick;c.userData.tick=t=>{if(t0)t0(t);const k=.55+.45*Math.sin(t*4);c.traverse(o=>{if(o.isMesh&&o.material&&o.material.userData&&o.material.userData.pulsa)o.material.emissiveIntensity=k;});};}return c;}
 /* ---------- foto real no microscópio (painel com moldura e legenda) ---------- */
 /* fotos da Wikimedia Commons: crédito obrigatório (CC BY / BY-SA) aparece embaixo da legenda */
-const FOTOS={bochecha:{asp:1239/1198,cred:'Foto: Fritzmann2002 · CC BY-SA 4.0 · Wikimedia Commons'},cebola:{asp:1,cred:'Foto: Katekor1 · CC BY 4.0 · Wikimedia Commons'},elodea:{asp:1,cred:'Foto: Kelvinsong · CC BY-SA 3.0 · Wikimedia Commons'}};
+const FOTOS={bochecha:{asp:1239/1198,cred:'Foto: Fritzmann2002 · CC BY-SA 4.0 · Wikimedia Commons'},cebola:{asp:1,cred:'Foto: Katekor1 · CC BY 4.0 · Wikimedia Commons'},elodea:{asp:1091/2000,cred:'Foto: Kelvinsong · CC BY-SA 3.0 · Wikimedia Commons'}};
 /* sem crédito confirmado, o painel não aparece */
 function fotoReal(arq,legenda,largura=2.4){const g=new T.Group();const info=FOTOS[arq];if(!info||!info.cred)return g;const t=new T.Texture();t.encoding=T.sRGBEncoding;t.minFilter=T.LinearFilter;LOADER.load('assets/foto-'+arq+'.webp',img=>{t.image=img;t.needsUpdate=true;});
  const h=largura*info.asp;const quadro=new T.Mesh(new T.PlaneGeometry(largura,h),new T.MeshBasicMaterial({map:t,toneMapped:false,color:0xffffff}));g.add(quadro);
@@ -170,7 +170,7 @@ function muroVegetal(){const g=new T.Group();const geo=new T.BoxGeometry(1.0,.7,
   for(let k=0;k<6;k++){const cp=new T.Mesh(new T.SphereGeometry(.06,10,8),matTex('cloroplasto',0xffffff));cp.scale.set(1.5,.8,.6);const a=rnd()*Math.PI*2;cp.position.set(x+Math.cos(a)*.36,y+Math.sin(a)*.22,.28);cp.rotation.z=a;g.add(cp);}}return g;}
 function vegContexto(level){const g=new T.Group();
  if(level===0){const f=folha();g.add(f);g.userData.tick=f.userData.tick;textAt(g,'Uma folha',2.2,1.6,0,2.2,'#cfe8f6');}
- else if(level===1){const m=muroVegetal();m.scale.setScalar(.72);m.position.x=-1.3;g.add(m);textAt(g,'Células da folha no microscópio',-1.3,1.75,0,3,'#cfe8f6');const f=fotoReal('elodea','Foto real: cloroplastos em folha de elódea',2.4);f.position.set(3.3,.1,.2);f.rotation.y=-.22;g.add(f);}
+ else if(level===1){const m=muroVegetal();m.scale.setScalar(.72);m.position.x=-1.3;g.add(m);textAt(g,'Células da folha no microscópio',-1.3,1.75,0,3,'#cfe8f6');const f=fotoReal('elodea','Foto real: cloroplastos em folha de elódea (400×)',2.9);f.position.set(3.5,.1,.2);f.rotation.y=-.22;g.add(f);}
  else{const c=cloroplasto({aberto:true});c.scale.setScalar(5.5);tag(c,{type:'inspect',key:'cloroplasto'});g.add(c);textAt(g,'Cloroplasto aberto · 5 a 10 µm',0,-1.75,0,3,'#cfe8f6');}
  return g;}
 function explorar(){const c=celula('animal');return c;}

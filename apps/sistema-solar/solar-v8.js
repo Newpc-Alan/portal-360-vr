@@ -228,16 +228,7 @@ function xrAnchor(){const p=new T.Vector3(),q=new T.Quaternion();let cam=camera;
 function atAnchor(x,y,z){if(!S.xrAnchor)S.xrAnchor=xrAnchor();/* v9.2: nunca chamar sem âncora (erro 228:44 no Quest) */return S.xrAnchor.p.clone().addScaledVector(S.xrAnchor.r,x).addScaledVector(S.xrAnchor.f,z).add(new T.Vector3(0,y,0));}
 function xrButton(text,action,x,y,z=1.45){const b=criarBotaoVR(text,action);b.position.copy(atAnchor(x,y,z));scene.add(b);return b;}
 function setupXRActivity(){clearXRUI();if(!S.xrAnchor)S.xrAnchor=xrAnchor();const v=estado.vista;const scales={sistema:.017,desafio:.017,planeta: .3/(CORPOS[estado.sel].raio||1),comparar:.062,diaNoite:.068,fases:.049,estacoes:.023,eclipse:.028};root.scale.setScalar(scales[v]);root.rotation.set(v==='sistema'||v==='estacoes'?.25:0,S.xrAnchor.yaw,0);root.position.copy(atAnchor(0,-.45,1.85));if(v==='planeta'){root.position.copy(atAnchor(0,.02,1.0));root.scale.multiplyScalar(1.22);}root.traverse(o=>{if(o.isPoints){if(o.userData.baseSize===undefined)o.userData.baseSize=o.material.size;o.material.size=o.userData.baseSize*root.scale.x;}if(o.isPointLight)o.decay=0;});
- const titles=['Sistema Solar','Examinar','Comparar','Dia e noite','Fases da Lua','Estações','Eclipses','Desafio'];S.views.forEach((x,i)=>xrButton(titles[i],'view:'+x,-1.08,.5-i*.135));xrButton('Centralizar','center',-.26,-.88);xrButton('Pausar / retomar','pause',.26,-.88);xrButton('Catálogo','catalogo',-.26,-1.02);xrButton('Sair do VR','sair',.26,-1.02);
- if(v==='sistema'||v==='planeta'){xrButton('Ouvir planeta','speak',.78,-.56);xrButton('Anterior','prevPlanet',.58,-.70);xrButton('Próximo','nextPlanet',.98,-.70);if(v==='sistema')xrButton('Fechar zoom','closeFocus',.78,-.84);}
- if(v==='comparar'){xrButton('Terra × Lua','cmp:lua',.9,-.30);xrButton('Terra × Júpiter','cmp:jupiter',.9,-.45);xrButton('Terra × Saturno','cmp:saturno',.9,-.60);}
- if(v==='diaNoite'){xrButton('Girar − 15°','day:-1',.72,-.3);xrButton('Girar + 15°','day:1',1.19,-.3);xrButton('Iniciar missão','mission',.95,-.45);xrButton('Conferir','check',.95,-.6);}
- if(v==='estacoes')[[0,'Outono'],[90,'Inverno'],[180,'Primavera'],[270,'Verão']].forEach(([a,n],i)=>xrButton(n,'season:'+a,.95,-.15-i*.14));
- if(v==='fases')[[0,'Nova'],[90,'Crescente'],[180,'Cheia'],[270,'Minguante']].forEach(([a,n],i)=>xrButton(n,'phase:'+a,.95,-.15-i*.14));
- if(v==='eclipse'){xrButton('Solar','eclipse:solar',.95,-.25);xrButton('Lunar','eclipse:lunar',.95,-.4);}
- if(v==='desafio'){Array.from($v('qOps').children).forEach((b,i)=>xrButton(String.fromCharCode(65+i)+' — '+b.textContent,'answer:'+i,.95,-.1-i*.16));xrButton('Próxima questão','question',.95,-.81);}
- xrButton(S.guide<0?'Aula guiada':'Próxima etapa','guide',-.80,-.75);
- if(S.mission===2&&v==='diaNoite'){xrButton('Rotação','result:rotacao',.72,-.75);xrButton('Translação','result:translacao',1.19,-.75);}
+ xrContexto();
  // Etiquetas existentes reaproveitam as posições dos modelos, sem alterar escala.
  for(const l of labelsMap){const sp=criarLabelVR(l.el.textContent);sp.scale.set(.20,.05,1);scene.add(sp);S.xrLabels.push({sp,mesh:l.mesh});}
  S.lastPanel='';updateXRPanel();}
@@ -265,10 +256,13 @@ function updateXRPanel(){
  else if(v==='fases')lines.push($v('faseNome').textContent,$v('fasePasso').textContent);
  else if(v==='eclipse')lines.push($v('eclipseInfo').textContent);
  else if(v==='desafio')lines.push($v('qPergunta').textContent,quiz.respondida?('Resposta: '+quiz.certa):'Selecione uma alternativa no console.');
+ else if(v==='sistema'){lines=['Sistema Solar','Aponte um planeta e aperte o gatilho. Botão Y: menu.'];}
  else lines.push(CORPOS[estado.sel].nome,CORPOS[estado.sel].fato,'Aponte e aperte o gatilho para aproximar um planeta.');
  const txt=(lateral?'L|':'C|')+lines.join('|');if(txt===S.lastPanel)return;S.lastPanel=txt;if(S.xrPanel)release(S.xrPanel);
- const sp=xrText(lines,lateral?900:1024,lateral?760:512);
- if(lateral){sp.scale.set(.50,.42,1);sp.position.copy(atAnchor(.74,.12,.92));sp.rotation.y=(S.xrAnchor?S.xrAnchor.yaw:0)-.18;}
+ const compacto=v==='sistema'&&!lateral;
+ const sp=xrText(lines,lateral?900:1024,lateral?760:compacto?220:512);
+ if(compacto){sp.scale.set(.6,.13,1);sp.position.copy(atAnchor(.56,.40,1.35));}
+ else if(lateral){sp.scale.set(.50,.42,1);sp.position.copy(atAnchor(.74,.12,.92));sp.rotation.y=(S.xrAnchor?S.xrAnchor.yaw:0)-.18;}
  else{sp.scale.set(.68,.34,1);sp.position.copy(atAnchor(.82,.42,1.55));}
  scene.add(sp);S.xrPanel=sp;
 }
@@ -277,11 +271,11 @@ tratarSelecaoVR=function(ctrl){const b=raycastBotoesVR(ctrl);if(b){acaoBotaoVR(b
 function grab(ctrl){if(rayCastHeld(ctrl))return;const hit=raycastController(ctrl);if(!hit)return;const k=hit.object.userData.corpoKey;if(!k)return;const m=esfera(.22,CORPOS[k].cor,k==='sol',k);if(CORPOS[k].anel)m.add(criarAnelSaturno(.22));scene.add(m);ctrl.add(m);m.position.set(0,-.025,-.4);m.rotation.set(0,0,0);m.userData.inspection=true;S.inspections.push(m);S.held.set(ctrl,m);if(S.inspections.length>3){const old=S.inspections.shift();for(const [c,o] of S.held)if(o===old)S.held.delete(c);release(old);}caption('Cópia de inspeção: segure o botão lateral para mover; solte para deixar no espaço.',8);}
 function rayCastHeld(ctrl){const rc=new T.Raycaster();rc.ray.origin.setFromMatrixPosition(ctrl.matrixWorld);rc.ray.direction.set(0,0,-1).transformDirection(ctrl.matrixWorld);const h=rc.intersectObjects(S.inspections,false)[0];if(!h)return false;const m=h.object;if([...S.held.values()].includes(m))return true;ctrl.attach(m);S.held.set(ctrl,m);return true;}
 function drop(ctrl){const m=S.held.get(ctrl);if(m){scene.attach(m);S.held.delete(ctrl);}}
-criarControleVR=function(i){const ctrl=renderer.xr.getController(i);vrRig.add(ctrl);const g=new T.BufferGeometry().setFromPoints([new T.Vector3(),new T.Vector3(0,0,-1)]);const ray=new T.Line(g,new T.LineBasicMaterial({color:0x37b1da}));ray.name='vrRay';ray.scale.z=4;ctrl.add(ray);ctrl.addEventListener('selectstart',()=>tratarSelecaoVR(ctrl));ctrl.addEventListener('squeezestart',()=>grab(ctrl));ctrl.addEventListener('squeezeend',()=>drop(ctrl));ctrl.addEventListener('disconnected',()=>drop(ctrl));vrControllers.push(ctrl);return ctrl;};
+criarControleVR=function(i){const ctrl=renderer.xr.getController(i);vrRig.add(ctrl);const g=new T.BufferGeometry().setFromPoints([new T.Vector3(),new T.Vector3(0,0,-1)]);const ray=new T.Line(g,new T.LineBasicMaterial({color:0x37b1da}));ray.name='vrRay';ray.scale.z=4;ctrl.add(ray);ctrl.addEventListener('selectstart',()=>tratarSelecaoVR(ctrl));ctrl.addEventListener('squeezestart',()=>grab(ctrl));ctrl.addEventListener('squeezeend',()=>drop(ctrl));ctrl.addEventListener('disconnected',()=>drop(ctrl));ctrl.addEventListener('connected',e=>{ctrl.userData.mao=e.data&&e.data.handedness;});vrControllers.push(ctrl);return ctrl;};
 entrarVR=async function(){if(!window.isSecureContext||!navigator.xr){vrMensagem('Abra em HTTPS em um navegador compatível com WebXR. O modo 3D continua disponível.',6000);return;}try{if(!await navigator.xr.isSessionSupported('immersive-vr')){vrMensagem('Este dispositivo não informou suporte a VR imersivo.',5000);return;}renderer.xr.setReferenceSpaceType('local-floor');const session=await navigator.xr.requestSession('immersive-vr',{optionalFeatures:['local-floor']});try{await renderer.xr.setSession(session);}catch(e){await session.end();throw e;}vrSession=session;estado.vr=true;document.body.classList.add('vr-active');$v('btnVR').textContent='🥽 Sair do VR';camera.position.set(0,0,0);camera.rotation.set(0,0,0);vrRig.position.set(0,0,0);if(!vrControllers.length){criarControleVR(0);criarControleVR(1);}S.xrAnchor=null;session.addEventListener('end',sairVRFinal);S.xrWait=3;narrInit();}catch(e){vrMensagem('Não foi possível iniciar VR: '+e.message,7000);}};
 sairVRFinal=function(){clearInspections();clearXRUI();estado.vr=false;vrSession=null;S.xrAnchor=null;document.body.classList.remove('vr-active');$v('btnVR').textContent='🥽 Entrar em VR';narrParar();root.position.set(0,0,0);root.rotation.set(0,0,0);root.scale.setScalar(1);vrRig.position.set(0,0,0);entrarVista(estado.vista);dimensions.w=0;resize();};
-atualizarVR=function(){if(S.xrWait){S.xrWait--;if(!S.xrWait){S.xrAnchor=xrAnchor();setupXRActivity();}return;}for(const ctrl of vrControllers){const h=raycastBotoesVR(ctrl)||raycastController(ctrl),ray=ctrl.getObjectByName('vrRay');if(ray)ray.material.color.setHex(h?0x8fe4ba:0x37b1da);}const session=renderer.xr.getSession();if(session){let i=0;for(const source of session.inputSources){const gp=source.gamepad;if(!gp){i++;continue;}const prev=vrPrevBtn[i]||(vrPrevBtn[i]={});const ax=gp.axes[2]||0,ay=gp.axes[3]||0;if(Math.abs(ax)>.25){if(estado.vista==='diaNoite')setDay(S.dayAngle-ax*S.dt);else if(estado.vista==='planeta'&&focoMesh){focoMesh.mesh.rotation.y-=ax*S.dt;pause(true);}else root.rotation.y-=ax*S.dt*.6;}if(Math.abs(ay)>.25)root.position.addScaledVector(S.xrAnchor.f,ay*S.dt*.15);const pressed=gp.buttons[4]&&gp.buttons[4].pressed;if(pressed&&!prev.a)pause(estado.playing);prev.a=pressed;i++;}}
- root.updateMatrixWorld(true);for(const l of S.xrLabels){const p=new T.Vector3();l.mesh.getWorldPosition(p);const r=l.mesh.geometry&&l.mesh.geometry.parameters.radius||1;l.sp.position.copy(p);l.sp.position.y+=r*root.scale.x+.04;l.sp.visible=estado.nomes;}
+atualizarVR=function(){if(S.xrWait){S.xrWait--;if(!S.xrWait){S.xrAnchor=xrAnchor();setupXRActivity();}return;}S.xrApontados=new Set();for(const ctrl of vrControllers){const hp=raycastController(ctrl);if(hp){S.xrApontados.add(hp.object);if(hp.object.parent)S.xrApontados.add(hp.object.parent);}const h=raycastBotoesVR(ctrl)||hp,ray=ctrl.getObjectByName('vrRay');if(ray)ray.material.color.setHex(h?0x8fe4ba:0x37b1da);}const session=renderer.xr.getSession();if(session){let i=0;for(const source of session.inputSources){const gp=source.gamepad;if(!gp){i++;continue;}const prev=vrPrevBtn[i]||(vrPrevBtn[i]={});const ax=gp.axes[2]||0,ay=gp.axes[3]||0;if(Math.abs(ax)>.25){if(estado.vista==='diaNoite')setDay(S.dayAngle-ax*S.dt);else if(estado.vista==='planeta'&&focoMesh){focoMesh.mesh.rotation.y-=ax*S.dt;pause(true);}else root.rotation.y-=ax*S.dt*.6;}if(Math.abs(ay)>.25)root.position.addScaledVector(S.xrAnchor.f,ay*S.dt*.15);const pressed=gp.buttons[4]&&gp.buttons[4].pressed;if(pressed&&!prev.a)pause(estado.playing);prev.a=pressed;i++;}}
+ root.updateMatrixWorld(true);for(const l of S.xrLabels){const p=new T.Vector3();l.mesh.getWorldPosition(p);const r=l.mesh.geometry&&l.mesh.geometry.parameters.radius||1;l.sp.position.copy(p);l.sp.position.y+=r*root.scale.x+.04;l.sp.visible=nomeVisivelVR(l.mesh);}
  animarFocoPlanetaVR();updateXRPanel();const suppressCaption=(estado.vista==='planeta'||(estado.vista==='sistema'&&!!S.xrFocusKey));const text=!suppressCaption&&S.captions&&performance.now()<S.captionUntil?S.caption:'';const capKey=(suppressCaption?'sem-caixa:':'geral:')+text;if(capKey!==S.lastCaption){S.lastCaption=capKey;if(S.xrCaption){release(S.xrCaption);S.xrCaption=null;}if(text){if(estado.vista==='planeta'){const sp=xrPlanetCaption(text);sp.scale.set(1.25,.32,1);sp.position.copy(atAnchor(0,-.62,1.02));scene.add(sp);S.xrCaption=sp;}else{const sp=xrText([text],1024,320);sp.scale.set(.92,.29,1);sp.position.copy(atAnchor(0,-.46,1.12));scene.add(sp);S.xrCaption=sp;}}}
 };
 
@@ -441,6 +435,56 @@ setupXRActivity=function(){setupN();if(NARR_VISTAS[chaveVistaAtual()])xrButton('
 const acaoN=acaoBotaoVR;
 acaoBotaoVR=function(a){if(a==='narrarVista'){if(narrAtual===NARR_VISTAS[chaveVistaAtual()].key)narrParar();else narrarVista();return;}if(a.startsWith('eclipse:')){acaoN(a);return;}acaoN(a);};
 
-window.PortalSolarV8={version:'8.9.1',state:S,seasons,daylight,setDay,beginMission,checkMission,finishMission,enterView:entrarVista,exportSummary,setupXRActivity,resetStudent};
+/* v9.3 · VR enxuto. O mundo fica limpo: o console fixo (vistas, centralizar, pausar, catálogo, sair) virou um menu
+   chamado pelo botão Y/B ou pela pílula "☰ Menu" do controle esquerdo; botões de atividade aparecem só na vista
+   em que fazem sentido; no Sistema Solar o nome do astro aparece ao apontar. Nada foi removido, só escondido. */
+S.ctxBtns=[];S.nomesVR=false;S.xrApontados=new Set();S.prevY={};
+function nomeVisivelVR(mesh){const v=estado.vista;if(v!=='sistema'&&v!=='desafio')return estado.nomes;if(S.nomesVR)return true;const k=mesh.userData&&mesh.userData.corpoKey;return S.xrApontados.has(mesh)||(!!k&&(k===S.xrFocusKey||k==='sol'));}
+function xrContexto(){
+ for(const b of S.ctxBtns){const i=vrBotoes.indexOf(b);if(i>=0)vrBotoes.splice(i,1);release(b);}S.ctxBtns=[];
+ if(!S.xrAnchor)return;
+ const add=(t,a,x,y,cor)=>{const b=criarBotaoVR(t,a,cor);b.position.copy(atAnchor(x,y,1.45));scene.add(b);S.ctxBtns.push(b);return b;};
+ const v=estado.vista;
+ if((v==='sistema'&&S.xrFocusKey)||v==='planeta'){add('Ouvir de novo','speak',.78,-.56);add('◀ Anterior','prevPlanet',.58,-.70);add('Próximo ▶','nextPlanet',.98,-.70);if(v==='sistema')add('Fechar','closeFocus',.78,-.84);}
+ if(v==='comparar'){add('Terra × Lua','cmp:lua',.9,-.30);add('Terra × Júpiter','cmp:jupiter',.9,-.45);add('Terra × Saturno','cmp:saturno',.9,-.60);}
+ if(v==='diaNoite'){add('Girar − 15°','day:-1',.72,-.3);add('Girar + 15°','day:1',1.19,-.3);add('Iniciar missão','mission',.95,-.45);add('Conferir','check',.95,-.6);}
+ if(v==='estacoes')[[0,'Outono'],[90,'Inverno'],[180,'Primavera'],[270,'Verão']].forEach(([a,n],i)=>add(n,'season:'+a,.95,-.15-i*.14));
+ if(v==='fases')[[0,'Nova'],[90,'Crescente'],[180,'Cheia'],[270,'Minguante']].forEach(([a,n],i)=>add(n,'phase:'+a,.95,-.15-i*.14));
+ if(v==='eclipse'){add('Solar','eclipse:solar',.95,-.25);add('Lunar','eclipse:lunar',.95,-.4);}
+ if(v==='desafio'){Array.from($v('qOps').children).forEach((b,i)=>add(String.fromCharCode(65+i)+' — '+b.textContent,'answer:'+i,.95,-.1-i*.16));add('Próxima questão','question',.95,-.81);}
+ if(S.mission===2&&v==='diaNoite'){add('Rotação','result:rotacao',.72,-.75);add('Translação','result:translacao',1.19,-.75);}
+ if(S.guide>=0)add('Próxima etapa ▶','guide',-.80,-.75,'rgba(26,107,42,.96)');
+}
+function menuVRItens(){const v=estado.vista;const vistas=[['Sistema Solar','sistema'],['Examinar','planeta'],['Comparar','comparar'],['Dia e noite','diaNoite'],['Fases da Lua','fases'],['Estações','estacoes'],['Eclipses','eclipse'],['Desafio','desafio']].map(([t,k])=>[t,'view:'+k,k===v?'rgba(26,107,42,.96)':null]);
+ return vistas.concat([[S.guide<0?'Aula guiada':'Encerrar aula guiada',S.guide<0?'guide':'guideStop','rgba(15,74,110,.96)'],[S.nomesVR?'Nomes: ao apontar':'Nomes: todos','nomes'],[estado.playing?'Pausar movimento':'Retomar movimento','pause'],['Centralizar','center'],['Ajuda dos controles','ajuda'],['Catálogo','catalogo'],['Sair do VR','sair','rgba(140,20,20,.95)']]);}
+function menuVRAbrir(){menuVRFechar();const a=xrAnchor();const itens=menuVRItens();const bot=[];
+ const fundo=textoCanvasVR(1024,700,(g,c)=>{g.fillStyle='rgba(4,14,28,.88)';g.beginPath();g.roundRect(0,0,c.width,c.height,40);g.fill();g.strokeStyle='rgba(55,177,218,.8)';g.lineWidth=6;g.stroke();});fundo.renderOrder=998;fundo.scale.set(.86,.58,1);fundo.position.copy(a.p).addScaledVector(a.f,.84).add(new T.Vector3(0,.01,0));scene.add(fundo);
+ itens.forEach(([t,ac,cor],i)=>{const b=criarBotaoVR(t,ac,cor);const k=vrBotoes.indexOf(b);if(k>=0)vrBotoes.splice(k,1);b.scale.set(.245,.061,1);const col=i%3,lin=Math.floor(i/3);b.position.copy(a.p).addScaledVector(a.r,(col-1)*.262).addScaledVector(a.f,.8).add(new T.Vector3(0,.10-lin*.082,0));scene.add(b);bot.push(b);});
+ const tit=xrText(['Menu','Aponte e aperte o gatilho · Y ou B fecha'],1024,200);tit.scale.set(.42,.082,1);tit.position.copy(a.p).addScaledVector(a.f,.82).add(new T.Vector3(0,.19,0));scene.add(tit);
+ S.menuVR={botoes:bot,titulo:tit,fundo,aberto:true};}
+function menuVRFechar(){if(!S.menuVR)return;for(const b of S.menuVR.botoes)release(b);release(S.menuVR.titulo);release(S.menuVR.fundo);S.menuVR=null;}
+function menuVRAlternar(){if(S.menuVR)menuVRFechar();else menuVRAbrir();}
+function maoVR(m){return vrControllers.find(c=>c.userData.mao===m)||null;}
+function dicasFechar(){for(const d of S.dicasVR||[])release(d);S.dicasVR=[];}
+function dicasVR(){dicasFechar();const esq=maoVR('left'),dir=maoVR('right');const mk=(ctrl,l)=>{if(!ctrl)return;const sp=xrText(l,1024,230);sp.scale.set(.26,.058,1);sp.position.set(0,.11,-.03);ctrl.add(sp);S.dicasVR.push(sp);};
+ mk(dir,['Mão direita','Gatilho: escolher · Grip: segurar · B: menu']);mk(esq,['Mão esquerda','Y: menu · X: pausar · Manete: girar']);S.dicasAte=performance.now()+12000;}
+const _rcBotoesV8=raycastBotoesVR;
+raycastBotoesVR=function(ctrl){let lista=vrBotoes.filter(b=>b.visible);if(S.menuVR)lista=lista.concat(S.menuVR.botoes);if(S.pilulaVR&&S.pilulaVR.parent!==ctrl)lista.push(S.pilulaVR);if(!lista.length)return null;vrRaycaster.camera=camera;vrTempMat.identity().extractRotation(ctrl.matrixWorld);vrRaycaster.ray.origin.setFromMatrixPosition(ctrl.matrixWorld);vrRaycaster.ray.direction.set(0,0,-1).applyMatrix4(vrTempMat);const h=vrRaycaster.intersectObjects(lista,false);return h.length?h[0].object:null;};
+const _acaoV8=acaoBotaoVR;
+acaoBotaoVR=function(a){if(a==='menu'){menuVRAlternar();return;}menuVRFechar();
+ if(a==='nomes'){S.nomesVR=!S.nomesVR;return;}if(a==='ajuda'){dicasVR();return;}if(a==='guideStop'){S.guide=-1;renderGuide();xrContexto();return;}
+ _acaoV8(a);if(estado.vr&&!a.startsWith('view:')&&a!=='center'&&a!=='sair'&&a!=='catalogo')xrContexto();};
+const _selV8=tratarSelecaoVR;
+tratarSelecaoVR=function(ctrl){if(S.menuVR&&!raycastBotoesVR(ctrl)){menuVRFechar();return;}const antes=S.xrFocusKey;_selV8(ctrl);if(estado.vr&&S.xrFocusKey!==antes)xrContexto();};
+const _atuV8=atualizarVR;
+atualizarVR=function(){_atuV8();if(S.xrWait||!S.xrAnchor)return;
+ if(!S.pilulaVR){const esq=maoVR('left')||vrControllers[0];if(esq&&esq.userData.mao){const p=criarBotaoVR('☰ Menu (Y)','menu');const k=vrBotoes.indexOf(p);if(k>=0)vrBotoes.splice(k,1);p.scale.set(.11,.0275,1);p.position.set(0,.045,-.04);esq.add(p);S.pilulaVR=p;dicasVR();}}
+ if(S.dicasVR&&S.dicasVR.length&&performance.now()>S.dicasAte)dicasFechar();
+ if(S.xrPanel)S.xrPanel.visible=!S.menuVR;if(S.xrCaption)S.xrCaption.visible=!S.menuVR;for(const c of S.ctxBtns)c.visible=!S.menuVR;
+ const session=renderer.xr.getSession();if(session){let i=0;for(const src of session.inputSources){const gp=src.gamepad;if(gp){const y=!!(gp.buttons[5]&&gp.buttons[5].pressed);if(y&&!S.prevY[i])menuVRAlternar();S.prevY[i]=y;}i++;}}};
+const _sairV8=sairVRFinal;
+sairVRFinal=function(){menuVRFechar();dicasFechar();if(S.pilulaVR){release(S.pilulaVR);S.pilulaVR=null;}for(const b of S.ctxBtns)release(b);S.ctxBtns=[];_sairV8();};
+
+window.PortalSolarV8={version:'8.10',state:S,seasons,daylight,setDay,beginMission,checkMission,finishMission,enterView:entrarVista,exportSummary,setupXRActivity,resetStudent};
 entrarVista(S.views.includes(estado.vista)?estado.vista:'sistema');renderer.setAnimationLoop(animate);
 })();

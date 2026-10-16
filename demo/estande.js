@@ -1,4 +1,4 @@
-/* Portal 360º VR · Modo Estande (v1.4.0)
+/* Portal 360º VR · Modo Estande (v1.5.0)
    Tour automático de cerca de 3,5 minutos para feiras e eventos (SENACOP 2026): espaço, Terra por dentro, célula,
    DNA e coração saindo do corpo humano, com narração, legenda e música. Roda sozinho: começa quando o visitante coloca o
    óculos (ou aperta o gatilho); no fim há uma pesquisa rápida de uma pergunta (três carinhas), o convite para falar com o
@@ -6,7 +6,7 @@
    É um app separado: usa CÓPIAS congeladas (pasta snap/) dos modelos da Célula, da Terra e do DNA, e não altera
    nenhum app do catálogo. Equipe: A ou X pula a cena; B ou Y volta à espera. */
 (function(){'use strict';
-const T=THREE,VERSAO='1.4.0',$=id=>document.getElementById(id);
+const T=THREE,VERSAO='1.5.0',$=id=>document.getElementById(id);
 const CM=window.CELULA_MODELS,TM=window.TERRA_MODELS,DM=window.DNA_MODELS;
 
 /* ---------- palco ---------- */
@@ -69,10 +69,12 @@ const musica=new Audio('audio/fundo.mp3');musica.loop=true;musica.volume=.18;
 const voz=new Audio();voz.preload='auto';let falando=false,falaSeq=0;
 function musicaVol(v){musica.volume=v;}
 function narrar(chave,texto){falaSeq++;const seq=falaSeq;pararVoz(true);falando=true;musicaVol(.06);
- const fim=()=>{if(seq!==falaSeq)return;falando=false;musicaVol(.18);};
- const sintetica=()=>{if(seq!==falaSeq)return;try{const u=new SpeechSynthesisUtterance(texto);u.lang='pt-BR';u.rate=1.0;u.onend=u.onerror=fim;speechSynthesis.speak(u);}catch(_){fim();}};
+ const fim=()=>{if(seq!==falaSeq)return;falando=false;musicaVol(.18);if(fala)fala.fimEm=performance.now();};
+ fala={chave,texto,itens:(window.LEGENDAS||{})[chave]||null,fimEm:0};legendaTexto('');
+ const sintetica=()=>{if(seq!==falaSeq)return;if(fala){fala.itens=null;legendaTexto(texto);}try{const u=new SpeechSynthesisUtterance(texto);u.lang='pt-BR';u.rate=1.0;u.onend=u.onerror=fim;speechSynthesis.speak(u);}catch(_){fim();}};
  voz.onended=fim;voz.onerror=()=>sintetica();voz.src='audio/estande-'+chave+'.mp3';const p=voz.play();if(p&&p.catch)p.catch(()=>sintetica());}
-function pararVoz(silencio){try{voz.pause();}catch(_){}try{speechSynthesis.cancel();}catch(_){}if(!silencio){falando=false;musicaVol(.18);}}
+let fala=null;/* narração em curso, para a legenda frase por frase */
+function pararVoz(silencio){fala=null;try{voz.pause();}catch(_){}try{speechSynthesis.cancel();}catch(_){}if(!silencio){falando=false;musicaVol(.18);}}
 
 /* ---------- contador de demonstrações (fica neste aparelho) ---------- */
 const CHAVE='pde_estande_contagem';
@@ -332,9 +334,30 @@ function pegar(ctrl){const alvo=atual&&atual.userData.alvo;if(!alvo)return;const
 function soltar(ctrl){pegas.delete(ctrl);}
 function girarComMao(){const alvo=atual&&atual.userData.alvo;if(!alvo)return;for(const [ctrl,p] of pegas){const d=direcao(ctrl);alvo.rotation.y=p.ry+(d.yaw-p.y0)*2.6;alvo.rotation.x=Math.max(-.9,Math.min(.9,p.rx-(d.pitch-p.p0)*2.2));}}
 /* ---------- máquina do tour ---------- */
-let falaPend=null,estado='parado',ind=-1,atual=null,tCena=0,anc=null,fade=0,fadeAlvo=0,pendente=null,legenda3D=null,espera=null,sessao=null,aguardaPose=0;
-function legendaTexto(txt){$('legenda').textContent=txt||'';if(legenda3D){liberar(legenda3D);legenda3D=null;}
- if(txt&&renderer.xr.isPresenting&&anc){legenda3D=placa('',txt,1.7,.2,{tamC:40,autoAltura:true,fundo:'rgba(3,12,24,.78)',borda:'rgba(55,177,218,.5)'});aFrente(legenda3D,anc,2.1,-.5-legenda3D.userData.texto.altura/2);scene.add(legenda3D);}}
+let falaPend=null,estado='parado',ind=-1,atual=null,tCena=0,anc=null,fade=0,fadeAlvo=0,pendente=null,espera=null,sessao=null,aguardaPose=0;
+/* ---------- legenda de cinema: uma frase por vez, sincronizada com a voz, palavra falada em destaque ---------- */
+const LEG=(()=>{const c=document.createElement('canvas');c.width=1024;c.height=216;const t=texCanvas(c);
+ const m=new T.Mesh(new T.PlaneGeometry(1.5,1.5*216/1024),new T.MeshBasicMaterial({map:t,transparent:true,depthWrite:false,depthTest:false,toneMapped:false,side:T.DoubleSide}));m.renderOrder=2400;m.visible=false;scene.add(m);
+ return{c,g:c.getContext('2d'),t,m,chave:''};})();
+function linhasLegenda(g,palavras,tam,larg){const L=[];let l=[];for(let i=0;i<palavras.length;i++){const teste=l.concat(i).map(k=>palavras[k]).join(' ');if(l.length&&g.measureText(teste).width>larg){L.push(l);l=[i];}else l.push(i);}if(l.length)L.push(l);return L;}
+function desenharLegenda(txt,iPal){const {c,g}=LEG,W=c.width,H=c.height;g.clearRect(0,0,W,H);if(!txt)return;
+ const palavras=txt.split(/\s+/);let tam=50,L;for(;tam>26;tam-=2){g.font='600 '+tam+'px Segoe UI,Arial';L=linhasLegenda(g,palavras,tam,W-80);if(L.length*tam*1.3<=H-36)break;}
+ const alt=L.length*tam*1.3+30,y0=(H-alt)/2;g.fillStyle='rgba(3,12,24,.82)';const r=26;g.beginPath();if(g.roundRect)g.roundRect(4,y0,W-8,alt,r);else g.rect(4,y0,W-8,alt);g.fill();
+ g.textBaseline='middle';g.font='600 '+tam+'px Segoe UI,Arial';const esp=g.measureText(' ').width;
+ L.forEach((ln,k)=>{const larg=ln.reduce((a,i)=>a+g.measureText(palavras[i]).width,0)+esp*(ln.length-1);let x=(W-larg)/2;const y=y0+15+tam*1.3*(k+.5);
+  for(const i of ln){g.fillStyle=iPal<0||i<iPal?'#ffffff':i===iPal?'#7CFFB8':'#8ea8ba';g.fillText(palavras[i],x,y);x+=g.measureText(palavras[i]).width+esp;}});}
+function mostrarFrase(txt,iPal){const chave=(txt||'')+'|'+iPal;if(chave===LEG.chave)return;LEG.chave=chave;
+ /* tela: mesma frase, com a palavra atual em destaque */
+ const el=$('legenda');el.textContent='';if(txt){txt.split(/\s+/).forEach((w,i)=>{const sp=document.createElement('span');sp.textContent=w+' ';if(iPal>=0)sp.style.color=i<iPal?'#ffffff':i===iPal?'#7CFFB8':'#8ea8ba';el.appendChild(sp);});}
+ desenharLegenda(txt,iPal);LEG.t.needsUpdate=true;LEG.m.visible=!!txt&&renderer.xr.isPresenting;
+ if(LEG.m.visible&&anc)aFrente(LEG.m,anc,2.1,-.62);}
+function legendaTexto(txt){mostrarFrase(txt||'',-1);}
+/* a cada quadro: qual frase e qual palavra o narrador está falando agora */
+function atualizarLegenda(){if(!fala||!fala.itens)return;const it=fala.itens;
+ if(fala.fimEm){if(performance.now()-fala.fimEm>2200){fala=null;mostrarFrase('',-1);}return;}
+ const t=voz.currentTime||0;let k=-1;for(let i=0;i<it.length;i++)if(it[i].t<=t+.05)k=i;if(k<0){mostrarFrase('',-1);return;}
+ const f=it[k],palavras=f.txt.split(/\s+/),tot=f.txt.length,frac=Math.min(1,Math.max(0,(t-f.t)/Math.max(.3,f.f-f.t)));let acc=0,w=palavras.length;
+ for(let i=0;i<palavras.length;i++){acc+=palavras[i].length+1;if(acc/tot>frac){w=i;break;}}mostrarFrase(f.txt,t>f.f?palavras.length:w);}
 function limparCena(){pegas.clear();if(atual){if(atual.userData.liberar)atual.userData.liberar();else liberar(atual);atual=null;}}
 function trocar(fn){pendente=fn;fadeAlvo=1;}
 function montarEspera(){limparEspera();anc=ancora();const g=new T.Group();aFrente(g,anc,4.2,.1);
@@ -351,7 +374,7 @@ const CENA_INI=Math.max(0,CENAS.findIndex(c=>c.id===new URLSearchParams(location
 function iniciar(){if(estado==='tour')return;sfx();try{musica.play().catch(()=>{});}catch(_){}estado='tour';ind=CENA_INI-1;proxima();}
 function anterior(){if(estado!=='tour'||ind<=0)return;ind-=2;proxima();}
 function proxima(){pararVoz();falaPend=null;ind++;if(ind>=CENAS.length){somar();irEspera();return;}
- const cena=CENAS[ind];if(ind>0)somPassagem();trocar(()=>{limparEspera();limparCena();if(ind===0||!anc||cena.id==='abertura')anc=ancora();atual=cena.montar(anc);scene.add(atual);posicionarNav(anc);tCena=0;falaPend=cena.falaEm?cena:null;legendaTexto(cena.falaEm?'':cena.legenda);if(!cena.falaEm)narrar(cena.id,cena.legenda);});}
+ const cena=CENAS[ind];if(ind>0)somPassagem();trocar(()=>{limparEspera();limparCena();if(ind===0||!anc||cena.id==='abertura')anc=ancora();atual=cena.montar(anc);scene.add(atual);posicionarNav(anc);tCena=0;falaPend=cena.falaEm?cena:null;legendaTexto('');if(!cena.falaEm)narrar(cena.id,cena.legenda);});}
 function encerrarTela(){pararVoz();musica.pause();estado='parado';limparCena();limparEspera();legendaTexto('');$('barra').hidden=true;$('painel').classList.remove('oculto');}
 
 /* ---------- entrada: VR, tela, controles ---------- */
@@ -378,7 +401,8 @@ renderer.setAnimationLoop(()=>{const dt=Math.min(.05,relogio.getDelta())*ACEL;
  const vel=dt/.55;if(fade<fadeAlvo)fade=Math.min(fadeAlvo,fade+vel);else if(fade>fadeAlvo)fade=Math.max(fadeAlvo,fade-vel);
  if(pendente&&fade>=1){const f=pendente;pendente=null;f();fadeAlvo=0;}
  cortina.material.opacity=fade*(estado==='tour'&&ind>0?.88:1);cortina.visible=fade>.001;warp.userData.passo(dt,estado==='tour'&&ind>0?fade:0);
- if(falaPend&&tCena>=falaPend.falaEm){const c=falaPend;falaPend=null;legendaTexto(c.legenda);narrar(c.id,c.legenda);}
+ if(falaPend&&tCena>=falaPend.falaEm){const c=falaPend;falaPend=null;narrar(c.id,c.legenda);}
+ atualizarLegenda();
  if(atual&&atual.userData.tick){tCena+=dt;atual.userData.tick(tCena,dt);}
  {const cena=estado==='tour'&&ind>=0?CENAS[ind]:null,vis=!!(cena&&atual&&cena.id!=='pesquisa'&&!pendente&&tCena>1.2);NAV.visible=vis||NAV_B[0].material.opacity>.02;
   NAV_B.forEach(b=>{b.material.opacity+=((vis?(b.userData.nav<0&&ind<=0?.25:1):0)-b.material.opacity)*Math.min(1,dt*5);const k=b.userData.hover&&vis?1.18:1;b.scale.setScalar(b.scale.x+(k-b.scale.x)*Math.min(1,dt*10));});}
@@ -393,5 +417,5 @@ renderer.setAnimationLoop(()=>{const dt=Math.min(.05,relogio.getDelta())*ACEL;
 
 /* uso sem internet no estande: guarda tudo no aparelho na primeira visita */
 if('serviceWorker' in navigator&&(location.protocol==='https:'||location.hostname==='localhost'))navigator.serviceWorker.register('sw.js').catch(()=>{});
-window.PortalEstande={versao:VERSAO,PLACAS,get atual(){return atual;},CENAS,iniciar,proxima,irEspera,get estado(){return estado;},get ind(){return ind;},get t(){return tCena;}};
+window.PortalEstande={versao:VERSAO,PLACAS,legCanvas:LEG.c,get atual(){return atual;},CENAS,iniciar,proxima,irEspera,get estado(){return estado;},get ind(){return ind;},get t(){return tCena;}};
 })();

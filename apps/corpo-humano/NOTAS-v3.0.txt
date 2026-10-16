@@ -345,3 +345,9 @@ v4.11.0 (Módulo 12: Órgãos dos Sentidos)
 - Integração: sent-app.js envolve o window.CORPO_EXTRA do ltr-app.js (mesmos ganchos genéricos). No corpo-app.js só entraram o prefixo
   de áudio 'sent-', o desafio 'sentDesafio', a aula guiada D.sentGuide, o "Explorar" dos sentidos e ícone/cor do menu.
 - Áudios: 42 falas em ROTEIRO-AUDIOS-SENTIDOS.csv (fichas, contexto, aula guiada, conclusões, lentes e desafio).
+v4.11.1 (realismo dos sentidos)
+- Pavilhão real: 14 regiões de superfície da orelha do "Regions of human body100.fbx" (Z-Anatomy) unidas na parte 'pavilhao' do orelha.glb.
+- Olho: íris com fibras radiais e colarete, esclera com vasinhos, retina com disco óptico, vasos e fóvea (texturas desenhadas em canvas,
+  coordenadas de textura geradas na hora), córnea e cristalino com verniz e reflexo de ambiente (CORPO_GLTF.envDe), normais suavizadas.
+  Glândula lacrimal só aparece na própria ficha. Rótulos do contexto presos a pontos reais das peças.
+- Orelha: ossículos e labirinto com textura de osso (CORPO_TECIDOS), nervo com textura de nervo, tímpano perolado.

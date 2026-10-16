@@ -225,6 +225,7 @@ const CLIMA={
  urinario:{domo:['#03121a','#0a2f3d','#0e3b4c','#0a2f3d','#03121a'],p1:[0x9ff3ff,.5],p2:[0xd0fbff,.65]},
  endocrino:{domo:['#0b1206','#1f2e0c','#2a3c14','#1f2e0c','#0b1206'],p1:[0xffd27f,.5],p2:[0xfff2c8,.65],faisca:true},
  nervoso:{domo:['#07041a','#160c38','#1d1148','#160c38','#07041a'],p1:[0xc9a6ff,.5],p2:[0xfff2a8,.7],faisca:true},
+ sentidos:{domo:['#020a1a','#08203a','#0c2c4a','#08203a','#020a1a'],p1:[0x9fc5f0,.5],p2:[0xf0a6c8,.6]},
  padrao:{domo:['#04101c','#0a2238','#0e2a44','#0a2238','#04101c'],p1:[0x7fd6ff,.55],p2:[0xa6f0d6,.7]}
 };
 function climaDe(){const S=Lab.state;return CLIMA[S.sistema]||CLIMA.padrao;}

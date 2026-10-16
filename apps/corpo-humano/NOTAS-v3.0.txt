@@ -331,3 +331,17 @@ modelos/<chave>.glb do Z-Anatomy quando a chave for incluída em D.LTR_GLB. Pend
 ==== v4.8.1 (out/2026) · narração humana dos módulos 9, 10 e 11 ====
 76 de 77 áudios gravados por Alan, normalizados (mono, 64 kbps, -17 LUFS, silêncio aparado). Falta: rep-contexto-2.mp3 (Reprodutor · Contexto etapa 3, sistema masculino); até chegar, voz do navegador.
 v4.8.2: rep-contexto-2.mp3 recebido; narração humana completa dos módulos 9, 10 e 11 (77/77).
+
+v4.11.0 (Módulo 12: Órgãos dos Sentidos)
+- Novo sistema "Órgãos dos sentidos" (logo depois do Nervoso), modulo 'sent': Contexto (3 níveis), Explorar (olho, orelha e outros
+  sentidos: 20 fichas novas + nervo óptico reaproveitado), Como enxergamos (sequência de 7), Lentes que corrigem (miopia e
+  hipermetropia, BNCC EF06CI08), Como ouvimos (sequência de 7), Desafio (6 situações) e aula guiada.
+- Modelos Z-Anatomy (CC BY-SA 4.0): olho.glb (esclera, córnea, íris, cristalino, retina, vitreo, nervo_optico, glandula_lacrimal) de
+  NervousSystem100.fbx; orelha.glb (timpano, coclea, vestibulo, nervo_auditivo do NervousSystem100 + martelo, bigorna, estribo do
+  SkeletalSystem100). Conversão: FBX2glTF → extração por nome com @gltf-transform → simplificação meshoptimizer (50%).
+  Geometria em metros (mesmo referencial dos outros órgãos), centros em SENT_MODELS.CENTROS_SENT.
+- O olho é mostrado com janela de corte (esclera, retina e vítreo sem o quarto de trás nasal) e nervo óptico encurtado; o Z-Anatomy
+  não tem pavilhão nem canal auditivo: entram como peças esquemáticas (sent-models.js).
+- Integração: sent-app.js envolve o window.CORPO_EXTRA do ltr-app.js (mesmos ganchos genéricos). No corpo-app.js só entraram o prefixo
+  de áudio 'sent-', o desafio 'sentDesafio', a aula guiada D.sentGuide, o "Explorar" dos sentidos e ícone/cor do menu.
+- Áudios: 42 falas em ROTEIRO-AUDIOS-SENTIDOS.csv (fichas, contexto, aula guiada, conclusões, lentes e desafio).

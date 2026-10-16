@@ -6,7 +6,7 @@
 const D=window.CORPO_DATA;
 const KEY='pde_corpo_turma';
 const SKILLS={respiracao:'Respiração',circulacao:'Circulação',digestao:'Digestão',integracao:'Integração dos sistemas','troca-gasosa':'Troca gasosa',movimento:'Movimento',articulacoes:'Articulações',coluna:'Coluna vertebral',explorar:'Ossos e proteção',musculos:'Músculos',reflexo:'Arco reflexo',encefalo:'Encéfalo',nervos:'Medula e nervos',jornada:'Jornada do pão',excrecao:'Excreção',regulacao:'Regulação hormonal',filtragem:'Filtragem no néfron',mensageiros:'Mensageiros químicos',urinario:'Sistema urinário',endocrino:'Sistema endócrino',viagem:'Viagem do ar'};
-Object.assign(SKILLS,{defesa:'Defesa do corpo',protecao:'Pele e proteção',reproducao:'Puberdade e reprodução',linfatico:'Sistema linfático',tegumentar:'Sistema tegumentar',reprodutor:'Sistema reprodutor',camadas:'Camadas da pele',puberdade:'Hormônios da puberdade'});
+Object.assign(SKILLS,{defesa:'Defesa do corpo',protecao:'Pele e proteção',sentidos:'Órgãos dos sentidos',reproducao:'Puberdade e reprodução',linfatico:'Sistema linfático',tegumentar:'Sistema tegumentar',reprodutor:'Sistema reprodutor',camadas:'Camadas da pele',puberdade:'Hormônios da puberdade'});
 const esc=s=>String(s??'').replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
 function turma(){try{return JSON.parse(localStorage.getItem(KEY)||'{}');}catch(_){return{};}}
 function salvarTurma(t){try{localStorage.setItem(KEY,JSON.stringify(t));}catch(_){}}

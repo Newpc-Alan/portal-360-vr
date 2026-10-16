@@ -1,4 +1,4 @@
-/* Portal 360º VR · Modo Estande (v1.5.0)
+/* Portal 360º VR · Modo Estande (v1.5.1)
    Tour automático de cerca de 3,5 minutos para feiras e eventos (SENACOP 2026): espaço, Terra por dentro, célula,
    DNA e coração saindo do corpo humano, com narração, legenda e música. Roda sozinho: começa quando o visitante coloca o
    óculos (ou aperta o gatilho); no fim há uma pesquisa rápida de uma pergunta (três carinhas), o convite para falar com o
@@ -6,7 +6,7 @@
    É um app separado: usa CÓPIAS congeladas (pasta snap/) dos modelos da Célula, da Terra e do DNA, e não altera
    nenhum app do catálogo. Equipe: A ou X pula a cena; B ou Y volta à espera. */
 (function(){'use strict';
-const T=THREE,VERSAO='1.5.0',$=id=>document.getElementById(id);
+const T=THREE,VERSAO='1.5.1',$=id=>document.getElementById(id);
 const CM=window.CELULA_MODELS,TM=window.TERRA_MODELS,DM=window.DNA_MODELS;
 
 /* ---------- palco ---------- */
@@ -320,15 +320,17 @@ const ray=new T.Raycaster(),_m4=new T.Matrix4();
 /* setas de navegação do visitante: "Voltar" e "Avançar", fixas nos cantos de baixo da cena; apontar e apertar o gatilho.
    Quem não quer esperar a narração terminar pula; quem perdeu algo volta. Sem toque, o tour segue sozinho como antes. */
 function botaoSeta(dir){const c=document.createElement('canvas');c.width=256;c.height=300;const x=c.getContext('2d');
- x.fillStyle='rgba(6,30,44,.88)';x.strokeStyle='rgba(124,255,184,.9)';x.lineWidth=8;x.beginPath();x.arc(128,116,104,0,Math.PI*2);x.fill();x.stroke();
- x.fillStyle='#ffffff';x.beginPath();if(dir>0){x.moveTo(100,66);x.lineTo(170,116);x.lineTo(100,166);}else{x.moveTo(156,66);x.lineTo(86,116);x.lineTo(156,166);}x.closePath();x.fill();
- x.font='700 46px Segoe UI,Arial';x.textAlign='center';x.fillStyle='#d8f5e6';x.fillText(dir>0?'Avançar':'Voltar',128,282);
- const m=new T.Mesh(new T.PlaneGeometry(.22,.258),new T.MeshBasicMaterial({map:texCanvas(c),transparent:true,opacity:0,depthWrite:false,depthTest:false,toneMapped:false}));m.renderOrder=2500;m.userData.nav=dir;return m;}
+ /* discreta: anel fino, fundo quase transparente, seta em traço; acende ao apontar */
+ x.fillStyle='rgba(4,16,28,.35)';x.strokeStyle='rgba(220,240,255,.85)';x.lineWidth=5;x.beginPath();x.arc(128,116,92,0,Math.PI*2);x.fill();x.stroke();
+ x.strokeStyle='#ffffff';x.lineWidth=14;x.lineCap='round';x.lineJoin='round';x.beginPath();if(dir>0){x.moveTo(108,72);x.lineTo(152,116);x.lineTo(108,160);}else{x.moveTo(148,72);x.lineTo(104,116);x.lineTo(148,160);}x.stroke();
+ x.font='500 38px Segoe UI,Arial';x.textAlign='center';x.fillStyle='rgba(220,240,255,.9)';x.fillText(dir>0?'avançar':'voltar',128,270);
+ const m=new T.Mesh(new T.PlaneGeometry(.13,.152),new T.MeshBasicMaterial({map:texCanvas(c),transparent:true,opacity:0,depthWrite:false,depthTest:false,toneMapped:false}));m.renderOrder=2500;m.userData.nav=dir;return m;}
 const NAV=new T.Group(),NAV_B=[botaoSeta(-1),botaoSeta(1)];NAV.add(NAV_B[0],NAV_B[1]);NAV.visible=false;scene.add(NAV);
-function posicionarNav(a){NAV.position.copy(a.p);NAV.rotation.y=a.yaw;NAV_B[0].position.set(-.72,-.2,-1.45);NAV_B[0].rotation.y=.45;NAV_B[1].position.set(.72,-.2,-1.45);NAV_B[1].rotation.y=-.45;}
+/* nas laterais da legenda, na mesma altura (abaixo da linha dos olhos), fora do centro da cena */
+function posicionarNav(a){NAV.position.copy(a.p);NAV.rotation.y=a.yaw;NAV_B[0].position.set(-.86,-.5,-1.6);NAV_B[0].rotation.y=.5;NAV_B[1].position.set(.86,-.5,-1.6);NAV_B[1].rotation.y=-.5;}
 function alvosRaio(){const bs=atual&&atual.userData.botoes?atual.userData.botoes.slice():[];if(NAV.visible)bs.push(NAV_B[0],NAV_B[1]);return bs;}
 function acionar(obj){if(obj.userData.nav){if(!pendente){if(obj.userData.nav>0)proxima();else anterior();}return true;}if(atual&&atual.userData.escolher){atual.userData.escolher(obj);return true;}return false;}
-function botaoNoRaio(){const bs=alvosRaio();if(!bs.length)return null;const h=ray.intersectObjects(bs,false).find(x=>x.object.material.opacity>.3);return h||null;}
+function botaoNoRaio(){const bs=alvosRaio();if(!bs.length)return null;const h=ray.intersectObjects(bs,false).find(x=>x.object.material.opacity>.3||(x.object.userData.nav&&NAV.visible&&x.object.material.opacity>.2));return h||null;}
 function raioDoControle(ctrl){_m4.identity().extractRotation(ctrl.matrixWorld);ray.ray.origin.setFromMatrixPosition(ctrl.matrixWorld);ray.ray.direction.set(0,0,-1).applyMatrix4(_m4);return botaoNoRaio();}
 function pegar(ctrl){const alvo=atual&&atual.userData.alvo;if(!alvo)return;const d=direcao(ctrl);pegas.set(ctrl,{y0:d.yaw,p0:d.pitch,ry:alvo.rotation.y,rx:alvo.rotation.x});atual.userData.mexeu=true;}
 function soltar(ctrl){pegas.delete(ctrl);}
@@ -405,7 +407,7 @@ renderer.setAnimationLoop(()=>{const dt=Math.min(.05,relogio.getDelta())*ACEL;
  atualizarLegenda();
  if(atual&&atual.userData.tick){tCena+=dt;atual.userData.tick(tCena,dt);}
  {const cena=estado==='tour'&&ind>=0?CENAS[ind]:null,vis=!!(cena&&atual&&cena.id!=='pesquisa'&&!pendente&&tCena>1.2);NAV.visible=vis||NAV_B[0].material.opacity>.02;
-  NAV_B.forEach(b=>{b.material.opacity+=((vis?(b.userData.nav<0&&ind<=0?.25:1):0)-b.material.opacity)*Math.min(1,dt*5);const k=b.userData.hover&&vis?1.18:1;b.scale.setScalar(b.scale.x+(k-b.scale.x)*Math.min(1,dt*10));});}
+  NAV_B.forEach(b=>{const alvo=!vis?0:b.userData.nav<0&&ind<=0?.15:b.userData.hover?1:.45;b.material.opacity+=(alvo-b.material.opacity)*Math.min(1,dt*6);const k=b.userData.hover&&vis?1.25:1;b.scale.setScalar(b.scale.x+(k-b.scale.x)*Math.min(1,dt*10));});}
  if(atual&&sessao){const bs=alvosRaio();bs.forEach(b=>b.userData.hover=false);for(const c of ctrls){const h=raioDoControle(c);if(h)h.object.userData.hover=true;c.userData.linha.scale.z=h?h.distance:2.4;}}
  if(atual){girarComMao();const dc=atual.userData.dica;if(dc){const vis=tCena<12&&!atual.userData.mexeu;dc.material.opacity+=((vis?1:0)-dc.material.opacity)*Math.min(1,dt*4);dc.visible=dc.material.opacity>.02;}}
  if(espera&&espera.userData.tick)espera.userData.tick(relogio.elapsedTime);

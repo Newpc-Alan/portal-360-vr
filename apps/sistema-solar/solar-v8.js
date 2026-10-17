@@ -562,6 +562,6 @@ criarBotaoVR=function(texto,acao,cor){const p=paleta(cor);if(p.primario&&!/[â–ºâ
   sp.scale.set(0.44,0.11,1);sp.userData.vrBotao=acao;vrBotoes.push(sp);return sp;};
 })();
 
-window.PortalSolarV8={version:'8.14',state:S,seasons,daylight,setDay,beginMission,checkMission,finishMission,enterView:entrarVista,exportSummary,setupXRActivity,resetStudent,menuVRAlternar};
+window.PortalSolarV8={version:'9.8',state:S,seasons,daylight,setDay,beginMission,checkMission,finishMission,enterView:entrarVista,exportSummary,setupXRActivity,resetStudent,menuVRAlternar};
 entrarVista(S.views.includes(estado.vista)?estado.vista:'sistema');renderer.setAnimationLoop(animate);
 })();

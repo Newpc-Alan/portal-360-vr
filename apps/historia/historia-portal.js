@@ -281,6 +281,7 @@ const placeOriginal=Proto.placeXR;
 const quizFaseXR=v=>{const S=Lab.state;return S.view==='desafio'&&Lab.quizAtual().phase===1&&!v.xrReport;};
 Proto.placeXR=function(){
   if(Lab.state.view==='piramide'){if(!this.anchor){try{this.anchor=this.head();}catch(_){}}if(this.anchor){this.uiPose=this.uiPose||{};}return;}/* v4.6: a Viagem posiciona o mundo a cada quadro (viagemTick) */
+  if(Lab.state.view==='museu'&&this.xr&&this.model){/* v1.1: no óculos o museu fica em tamanho real, com as peças em volta do aluno */if(!this.anchor){try{this.anchor=this.head();}catch(_){}}const a=this.anchor;if(a){this.root.scale.setScalar(this.xrZoom||1);this.root.rotation.set(0,a.yaw,0);this.root.position.set(a.p.x,0,a.p.z);this.root.updateMatrixWorld(true);return;}}
   placeInterno.call(this);
   /* v4.1: no Desafio o painel fica à frente; o modelo gira 50° para a direita em volta do aluno, sem mudar de tamanho */
   if(this.xr&&this.model&&this.anchor&&quizFaseXR(this)){const a=this.anchor,up=new T.Vector3(0,1,0);this.root.position.sub(a.p).applyAxisAngle(up,-.87).add(a.p);this.root.rotation.y-=.87;this.root.updateMatrixWorld(true);}

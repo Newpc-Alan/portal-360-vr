@@ -168,9 +168,9 @@ function contexto(level){const g=new T.Group();const CTX={type:'context'};
 /* explorar: tarde às margens do Nilo, com Gizé ao fundo */
 const EX={piramides:[[-4.2,-3.6,2.6,1.75],[-1.4,-3.95,2.4,1.62],[.8,-4.1,1.3,.86]],esfinge:[-2.6,-1.6],templo:[3.6,-1.2],obelisco:[2.3,-.6],farao:[4.9,-.3],escriba:[1.4,-1.1],estela:[.3,-.9],roseta:[.95,-.75],casas:[[-5.6,.6],[-4.4,.75]],palmeiras:[-6.3,-5,-3.1,-.8,2.2,4.6,6],papiros:[[-2.2,1],[3.2,1.1],[5.5,1]],shaduf:[-3.2,.95],nilometro:[1.1,1.2],campones:[[-4.8,1.25],[-2.8,1.45]],barco:[.2]};
 function explorar(opt={}){const g=new T.Group();const t=terreno();g.add(t);const ins=k=>({type:'inspect',key:k});tag(t.userData.agua,ins('nilo'));
- EX.piramides.forEach(([x,z,l,a],i)=>{const p=piramide(l,a,{topo:i===1});p.position.set(x,0,z);tag(p,ins('piramide'));g.add(p);});
- const ef=esfinge();ef.scale.setScalar(.55);ef.position.set(EX.esfinge[0],0,EX.esfinge[1]);ef.rotation.y=-.2;tag(ef,ins('esfinge'));g.add(ef);
- const tp=templo();tp.scale.setScalar(.6);tp.position.set(EX.templo[0],0,EX.templo[1]);tp.rotation.y=-.35;tag(tp,ins('templo'));g.add(tp);
+ {const gz=new T.Group();EX.piramides.forEach(([x,z,l,a],i)=>{const p=piramide(l,a,{topo:i===1});p.position.set(x,0,z);gz.add(p);});tag(gz,ins('piramide'));g.add(real('piramide-giza',gz));}
+ const ef0=esfinge();ef0.scale.setScalar(.55);tag(ef0,ins('esfinge'));const ef=real('esfinge-giza',ef0,{altura:.5});ef.position.set(EX.esfinge[0],0,EX.esfinge[1]);ef.rotation.y=-.2;g.add(ef);
+ const tp0=templo();tp0.scale.setScalar(.6);tag(tp0,ins('templo'));const tp=real('templo-cgbang',tp0,{altura:.72});tp.position.set(EX.templo[0],0,EX.templo[1]-.9);tp.rotation.y=-.12;/* templo real: entrada voltada para o rio */g.add(tp);
  const ob=obelisco(2.2);ob.position.set(EX.obelisco[0],0,EX.obelisco[1]);tag(ob,ins('obelisco'));g.add(ob);
  const fa=estatuaFarao();fa.scale.setScalar(.6);fa.position.set(EX.farao[0],0,EX.farao[1]);fa.rotation.y=-.5;tag(fa,ins('farao'));g.add(fa);
  const es=escribaSentado();es.scale.setScalar(.8);es.position.set(EX.escriba[0],0,EX.escriba[1]);es.rotation.y=.3;tag(es,ins('escriba'));g.add(es);
@@ -187,11 +187,12 @@ function explorar(opt={}){const g=new T.Group();const t=terreno();g.add(t);const
  return g;}
 /* ---------- fichas ampliadas ---------- */
 function inspection(key){const g=new T.Group();let o;
- if(key==='piramide'){o=piramide(2.4,1.55,{topo:true});}
- else if(key==='esfinge'){o=esfinge();}
- else if(key==='templo'){o=templo();}
+ if(PECA_MUSEU[key]){const pm=PECA_MUSEU[key],h=key==='caixoes'?.9:key==='reserva'||key==='nefertiti'?1.1:1.9,w=key==='caixoes'?2.6:.9;o=real(pm.arq,caixaEspera(w,h,w*.7),{yaw:pm.yaw,ajuste:'altura'});}
+ else if(key==='piramide'){o=real('piramide-giza',piramide(2.4,1.55,{topo:true}),{escala:1.6});}
+ else if(key==='esfinge'){o=real('esfinge-giza',esfinge());}
+ else if(key==='templo'){o=real('templo-cgbang',templo());}
  else if(key==='obelisco'){o=obelisco(3);}
- else if(key==='farao'){o=estatuaFarao();}
+ else if(key==='farao'){o=real('triade-menkaure',estatuaFarao(),{ajuste:'altura'});}
  else if(key==='escriba'){o=escribaSentado();o.scale.setScalar(2);}
  else if(key==='campones'){o=new T.Group();const f=pessoa({bracoAberto:true});f.scale.setScalar(1.4);o.add(f);const ce=new T.Mesh(new T.CylinderGeometry(.18,.14,.28,12),mat(0xc89048));ce.position.set(.5,.14,.2);o.add(ce);}
  else if(key==='hieroglifos'){o=estela();o.scale.setScalar(1.6);}
@@ -201,9 +202,9 @@ function inspection(key){const g=new T.Group();let o;
  else if(key==='casa'){o=casa();o.scale.setScalar(1.4);}
  else if(key==='papiro'){o=new T.Group();const p=papiro(14,5);p.scale.setScalar(1.6);o.add(p);const folha=new T.Mesh(new T.PlaneGeometry(.7,.5),mat(0xffffff,{map:texParedeGlifos('papiroGlifos','#2a2018',[232,220,176],61),side:T.DoubleSide}));folha.position.set(.95,.6,0);folha.rotation.y=-.3;o.add(folha);}
  else if(key==='nilo'||key==='cheias'){o=terreno({w:5,h:3.4});if(key==='cheias'){const nm=nilometro();nm.position.set(.4,-.05,rioZ(.4)-1.2);o.add(nm);}}
- else if(key==='sarcofago'){o=sarcofago();o.scale.setScalar(.9);}
+ else if(key==='sarcofago'){const s0=sarcofago();s0.scale.setScalar(.9);o=real('sarcofago-khufudjedef',s0);}
  else if(key==='mumia'){o=mumia();o.scale.setScalar(1.5);}
- else if(key==='canopicos'){o=canopicos();o.scale.setScalar(1.8);}
+ else if(key==='canopicos'){const c0=canopicos();c0.scale.setScalar(1.8);o=real('vaso-canopico',c0,{ajuste:'altura'});}
  else{o=piramide(2,1.3);}
  tag(o,{type:'inspect',key});g.add(o);g.userData.tick=o.userData.tick;g.userData.pegavel=true;return g;}
 /* ---------- mumificação: tabuleiro de etapas + a mesa do embalsamador ---------- */
@@ -287,13 +288,38 @@ function hieroglifosCena(state){const g=new T.Group();const R=window.HISTORIA_DA
  textFixo(g,state.done?'VOCÊ LEU COMO UM ESCRIBA':'O QUE ESTE SINAL QUER DIZER?',0,4.05,-.35,4.4,'#ffe3a8',false);
  const piso=new T.Mesh(new T.BoxGeometry(10,.1,3),matTex('calcario',0xd8c8a0));piso.position.set(0,-.65,.6);g.add(piso);g.userData.semGiro=true;return g;}
 function desafio(){const g=explorar();g.scale.setScalar(.85);return g;}
-function dispose(g){if(!g)return;const geos=new Set(),mats=new Set(),tex=new Set();const comp=new Set(Object.values(TEXP));g.traverse(o=>{if(o.geometry&&!o.isSprite)geos.add(o.geometry);for(const m of [].concat(o.material||[])){if(!m)continue;mats.add(m);for(const t of [m.map,m.emissiveMap,m.normalMap,m.bumpMap]){if(t&&!comp.has(t))tex.add(t);}}});geos.forEach(x=>x.dispose());mats.forEach(x=>x.dispose());tex.forEach(x=>x.dispose());if(g.parent)g.parent.remove(g);}
-/* ---------- encaixe dos cenários do Blender ----------
-   Se existir modelos/<nome>.glb (exportado do Blender, Y para cima, metros), ele substitui o cenário procedural daquela cena
-   sem mexer nas missões. Nomes previstos: egito-nilo.glb (Explorar), egito-piramide-interior.glb (Viagem). Precisa do
-   GLTFLoader em vendor/ (entra junto com o primeiro .glb). */
-const CENARIOS={};
-function cenarioExterno(nome,aoCarregar){if(!T.GLTFLoader)return null;if(CENARIOS[nome]===false)return null;if(CENARIOS[nome]){aoCarregar(CENARIOS[nome].clone());return true;}
- new T.GLTFLoader().load('modelos/'+nome+'.glb',gl=>{CENARIOS[nome]=gl.scene;aoCarregar(gl.scene.clone());},undefined,()=>{CENARIOS[nome]=false;});return true;}
-window.HISTORIA_MODELS={V,mat,ball,label,rotuloFixo,textFixo,textAt,tag,contexto,explorar,inspection,sequencia,viagemCena,hieroglifosCena,desafio,dispose,glifo,ESCALA_VR,cenarioExterno};
+function dispose(g){if(!g)return;const geos=new Set(),mats=new Set(),tex=new Set();const comp=new Set(Object.values(TEXP));g.traverse(o=>{if(o.userData.compartilhado)return;if(o.geometry&&!o.isSprite)geos.add(o.geometry);for(const m of [].concat(o.material||[])){if(!m)continue;mats.add(m);for(const t of [m.map,m.emissiveMap,m.normalMap,m.bumpMap]){if(t&&!comp.has(t))tex.add(t);}}});geos.forEach(x=>x.dispose());mats.forEach(x=>x.dispose());tex.forEach(x=>x.dispose());if(g.parent)g.parent.remove(g);}
+/* ---------- modelos reais (Sketchfab, CC BY 4.0; otimizados pela NEWPC para o Quest) ----------
+   Cada peça nasce procedural (aparece na hora, sem esperar a rede) e é trocada pelo modelo real assim que ele carrega,
+   no mesmo tamanho e no mesmo lugar, mantendo o ponto clicável. Sem GLTFLoader ou sem o arquivo, fica o procedural.
+   Geometria e texturas do modelo ficam em cache e são compartilhadas entre as cópias (dispose não as apaga). */
+const GLB={},GLB_ESPERA={};
+function glb(arq,cb){const c=GLB[arq];if(c===false)return;if(c){cb(c);return;}(GLB_ESPERA[arq]=GLB_ESPERA[arq]||[]).push(cb);if(GLB_ESPERA[arq].length>1)return;
+ if(!T.GLTFLoader){GLB[arq]=false;return;}
+ new T.GLTFLoader().load('modelos/'+arq+'.glb',gl=>{const sc=gl.scene;sc.updateMatrixWorld(true);const b=new T.Box3().setFromObject(sc),ce=b.getCenter(new T.Vector3());sc.position.sub(new T.Vector3(ce.x,b.min.y,ce.z));
+   const u=new T.Group();u.add(sc);u.traverse(o=>{o.userData.compartilhado=true;if(o.isMesh){o.frustumCulled=true;}});GLB[arq]=u;const fs=GLB_ESPERA[arq]||[];delete GLB_ESPERA[arq];fs.forEach(f=>{try{f(u);}catch(e){console.warn('modelo',arq,e);}});},
+  undefined,()=>{GLB[arq]=false;delete GLB_ESPERA[arq];});}
+/* troca o procedural pelo real. o.ajuste: 'max' (cabe na caixa do procedural, padrão) ou 'altura'; o.yaw gira o modelo (frente para +z) */
+function real(arq,proc,o={}){const g=new T.Group();g.add(proc);proc.updateMatrixWorld(true);const pb=new T.Box3().setFromObject(proc),ps=pb.getSize(new T.Vector3()),pc=pb.getCenter(new T.Vector3());
+ g.userData.real=arq;
+ glb(arq,u=>{const rr=new T.Group(),c=u.clone(true);c.rotation.y=o.yaw||0;rr.add(c);rr.updateMatrixWorld(true);const s2=new T.Box3().setFromObject(rr).getSize(new T.Vector3());
+  const k=(o.altura?o.altura/s2.y:o.ajuste==='altura'?ps.y/s2.y:Math.min(ps.x/s2.x,ps.y/s2.y,ps.z/s2.z))*(o.escala||1);rr.scale.setScalar(k);rr.position.set(pc.x,pb.min.y,pc.z);
+  let hit=null;proc.traverse(x=>{if(!hit&&x.userData.hit)hit=x.userData.hit;});if(hit)tag(rr,hit);g.remove(proc);dispose(proc);g.add(rr);g.userData.trocado=true;});
+ return g;}
+/* peças de museu: escaneamentos reais (ficha, arquivo, giro, altura em metros na vitrine) */
+const MUSEU=[['menkaure','estatua-menkaure-rainha',0,1.45],['triade','triade-menkaure',0,1.1],['reserva','cabeca-reserva',0,.5],['senenmut','estatua-senenmut',-Math.PI/2,1.0],
+ ['nefertiti','nefertiti',Math.PI/2,.55],['ramses','estatua-ramses',0,1.1],['tanwetamani','estatua-tanwetamani',-Math.PI/2,1.2],['caixoes','caixoes-padimut',0,.7]];
+const PECA_MUSEU=Object.fromEntries(MUSEU.map(([k,a,y,h])=>[k,{arq:a,yaw:y,h}]));
+function caixaEspera(w,h,d){const m=new T.Mesh(new T.BoxGeometry(w,h,d),new T.MeshBasicMaterial({color:0xe8d8b0,transparent:true,opacity:.18,depthWrite:false}));m.position.y=h/2;const g=new T.Group();g.add(m);return g;}
+function pedestal(w=.62,hh=.8){const g=new T.Group();const b=new T.Mesh(new T.BoxGeometry(w,hh,.62),mat(0x2a2620,{roughness:.6}));b.position.y=hh/2;g.add(b);const t=new T.Mesh(new T.BoxGeometry(w+.08,.04,.7),mat(0xc8a860,{metalness:.4,roughness:.4}));t.position.y=hh+.02;g.add(t);return g;}
+function museu(){const g=new T.Group();const D=window.HISTORIA_DATA;
+ const piso=new T.Mesh(new T.CircleGeometry(4.5,64),mat(0xffffff,{map:(()=>{const t=TX.calcario().clone();t.needsUpdate=true;t.repeat.set(6,6);return t;})(),roughness:.9}));piso.rotation.x=-Math.PI/2;piso.userData.semEnquadre=true;g.add(piso);
+ const n=MUSEU.length,R=3.6;
+ MUSEU.forEach(([k,arq,yaw,h],i)=>{const a=-1.25+2.5*i/(n-1);const x=Math.sin(a)*R,z=-Math.cos(a)*R;const base=new T.Group();base.position.set(x,0,z);base.rotation.y=-a;g.add(base);
+  const cx=k==='caixoes',ph=cx?.45:.8;const p=pedestal(cx?1.5:.62,ph);base.add(p);const larg=cx?1.45:.6;const esp=caixaEspera(larg,h,cx?.6:larg*.7);tag(esp,{type:'inspect',key:k});
+  const r=real(arq,esp,{yaw,ajuste:cx?'max':'altura'});r.position.y=ph+.04;base.add(r);
+  const nome=(D.info[k]||{}).name||k;const pl=rotuloFixo(nome,'#ffe9b8',cx?1.3:.6,cx?60:72);pl.position.set(0,ph*.62,.315);base.add(pl);tag(p,{type:'inspect',key:k});});
+ textFixo(g,'PEÇAS REAIS · ESCANEADAS EM MUSEUS',0,2.5,-3.4,3.6,'#e8c050',false);
+ g.userData.semGiro=true;return g;}
+window.HISTORIA_MODELS={V,mat,ball,label,rotuloFixo,textFixo,textAt,tag,contexto,explorar,inspection,sequencia,viagemCena,hieroglifosCena,desafio,dispose,glifo,ESCALA_VR,museu,real,glb};
 })();

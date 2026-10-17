@@ -161,7 +161,7 @@ Proto.buildXRUI=function(){
   const colunas=[[GRUPO_NOME,grupos.map(x=>[(x.id===grupoAtual?'✓ ':'')+x.nome,GRUPO_CMD+x.id,x.id===grupoAtual?AT:AZ])],
    ['MISSÕES',atv.map((a,i)=>[(a.id===S.view?'▶ ':'')+(i+1)+'. '+a.label,'view:'+a.id,a.id===S.view?AT:null])],
    ['VER',[[this.dentro?TXT_FORA:TXT_DENTRO,'xr:dentro',this.dentro?{bg:'#4a2a0f',borda:'#ffc77a',texto:'#fff6e8'}:{bg:'#2a1050',borda:'#c9a6ff',texto:'#ffffff'}],
-     ['Recentralizar a cena','center',null],[S.autoRotate?'Parar o giro do modelo':'Girar o modelo','rotate',null]].concat(Lab.temCoracao&&window.CORPO_GLTF?[[window.CORPO_GLTF.estiloCoracao==='real'?'Coração: cores didáticas':'Coração: realista','coracao:estilo',null]]:[]).concat(ar?[[this.xrModo==='ar'?'Voltar ao VR':'Ver na minha sala','xr:'+(this.xrModo==='ar'?'vr':'ar'),{bg:'#0f3a4a',borda:'#7fd6ff',texto:'#ffffff'}]]:[])],
+     ['Recentralizar a cena','center',null],['Aproximar tudo  (X)','xr:perto',(this.xrDistI??2)===0?APAGADO:null],['Afastar tudo  (Y)','xr:longe',(this.xrDistI??2)===4?APAGADO:null],[S.autoRotate?'Parar o giro do modelo':'Girar o modelo','rotate',null]].concat(Lab.temCoracao&&window.CORPO_GLTF?[[window.CORPO_GLTF.estiloCoracao==='real'?'Coração: cores didáticas':'Coração: realista','coracao:estilo',null]]:[]).concat(ar?[[this.xrModo==='ar'?'Voltar ao VR':'Ver na minha sala','xr:'+(this.xrModo==='ar'?'vr':'ar'),{bg:'#0f3a4a',borda:'#7fd6ff',texto:'#ffffff'}]]:[])],
    ['SOM E SAÍDA',[['Repetir a explicação','voice:repeat',null],['Parar a voz','voice:stop',null],[narrator.musicOn?'Música de fundo: ligada':'Música de fundo: desligada','xr:musica',null],
      ['Como usar os controles','xr:ajuda',null],['Voltar ao catálogo','catalog',AZ],[this.xrModo==='ar'?'Sair da realidade mista':'Sair do VR','vr',SAI]]]];
   /* v4.12.3: SISTEMAS sempre numa coluna só (pedido do professor); as outras ainda quebram acima de 7 itens */const MAXL=7,cols=[];colunas.forEach(([cab,it],ci)=>{const n=ci===0?1:Math.ceil(it.length/MAXL),por=Math.ceil(it.length/n);for(let k=0;k<n;k++)cols.push([k?'':cab,it.slice(k*por,(k+1)*por)]);});
@@ -170,7 +170,7 @@ Proto.buildXRUI=function(){
   const alt=(topo+.47)-(base-.08),fundo=new T.Mesh(new T.PlaneGeometry(COLS*DX+.06,alt),new T.MeshBasicMaterial({map:texturaCanvas(fundoC),transparent:true,side:T.DoubleSide,depthWrite:false}));
   fundo.position.set(cx,(topo+.47+base-.08)/2,UI.z-.03);fundo.rotation.y=-Math.atan2(cx,-UI.z);fundo.userData.ordem=990;this.ui.add(fundo);
   const idx=Math.max(0,atv.findIndex(a=>a.id===S.view)),rot=-Math.atan2(cx,-UI.z);
-  /* v4.12.3: título e dica em linhas separadas, sem sobrepor os cabeçalhos das colunas */[[('MENU  ·  '+grupoNome.toUpperCase()+'  ·  MISSÃO '+(idx+1)+' DE '+atv.length),'#ffffff',topo+.37,1.5,56],['Aponte o raio para uma opção e aperte o gatilho · B ou Y fecha','#bfe6f2',topo+.255,1.5,38]].forEach(([t,c,y,wd,sz])=>{const r=M.rotuloFixo(t,c,Math.min(wd,COLS*DX-.12),sz,false);r.position.set(cx,y,UI.z-.01);r.rotation.y=rot;r.traverse(o=>{o.userData.ordem=995;});this.ui.add(r);});
+  /* v4.12.3: título e dica em linhas separadas, sem sobrepor os cabeçalhos das colunas */[[('MENU  ·  '+grupoNome.toUpperCase()+'  ·  MISSÃO '+(idx+1)+' DE '+atv.length),'#ffffff',topo+.37,1.5,56],['Aponte o raio e aperte o gatilho · B fecha · X aproxima, Y afasta','#bfe6f2',topo+.255,1.5,38]].forEach(([t,c,y,wd,sz])=>{const r=M.rotuloFixo(t,c,Math.min(wd,COLS*DX-.12),sz,false);r.position.set(cx,y,UI.z-.01);r.rotation.y=rot;r.traverse(o=>{o.userData.ordem=995;});this.ui.add(r);});
   cols.forEach(([cab,itens],c)=>{const x=cx+(c-(COLS-1)/2)*DX;
     if(cab){const h=M.rotuloFixo(cab,'#9fe8ff',W,64,false);h.position.set(x,topo+.12,UI.z-.005);h.rotation.y=-Math.atan2(x,-UI.z);h.traverse(o=>{o.userData.ordem=996;});this.ui.add(h);}
     itens.forEach(([t,cmd,cor],l)=>this.xrButton(t,cmd,x,topo-l*DY,W,false,cor));});
@@ -178,12 +178,17 @@ Proto.buildXRUI=function(){
 /* v4.13.1 · conforto: tudo do VR um pouco mais longe (1,62 m → 1,95 m) e o menu centrado na altura dos olhos,
    para o aluno não ter de abaixar e levantar a cabeça. */
 const UI_LONGE=1.2,MENU_CENTRO=-.1;
+/* v4.13.2 · distância ajustável pelo aluno: 5 níveis (perto ... longe), guardados no aparelho */
+const DIST=[.75,.87,1,1.15,1.3];
+try{const v=parseInt(localStorage.getItem('pde_corpo_vr_dist'),10);view.xrDistI=isNaN(v)?2:Math.max(0,Math.min(4,v));}catch(_){view.xrDistI=2;}view.xrDist=DIST[view.xrDistI];
+Proto.mudarDistancia=function(passo){const i=Math.max(0,Math.min(DIST.length-1,(this.xrDistI??2)+passo));const avisar=(t,k)=>{try{Lab.getAPI().fb(t,k);}catch(_){}};if(i===this.xrDistI){avisar(passo<0?'Já está no mais perto.':'Já está no mais longe.','warning');return;}this.xrDistI=i;this.xrDist=DIST[i];try{localStorage.setItem('pde_corpo_vr_dist',String(i));}catch(_){}
+  this.placeXR();avisar('Distância '+(i+1)+' de '+DIST.length+(i===0?' (mais perto)':i===DIST.length-1?' (mais longe)':''));this.buildXRUI();};
 const buildXRUIBase=Proto.buildXRUI;
 Proto.buildXRUI=function(){this._menuDesde=null;buildXRUIBase.call(this);if(!this.xr||!this.ui)return;const ch=this.ui.children;
   if(this._menuDesde!=null&&this._menuDesde<ch.length){let lo=1e9,hi=-1e9;for(let i=this._menuDesde;i<ch.length;i++){const o=ch[i];if(!o.geometry)continue;if(!o.geometry.boundingBox)o.geometry.computeBoundingBox();const bb=o.geometry.boundingBox;lo=Math.min(lo,o.position.y+bb.min.y*o.scale.y);hi=Math.max(hi,o.position.y+bb.max.y*o.scale.y);}
     if(lo<hi){const dy=MENU_CENTRO-(lo+hi)/2;for(let i=this._menuDesde;i<ch.length;i++)ch[i].position.y+=dy;/* o botão Fechar menu vai para baixo do menu, sem se sobrepor */const fb=ch.find(o=>o.userData.command==='xr:abrirmenu');if(fb)fb.position.y=lo+dy-.1;}}
-  /* só a profundidade aumenta: o conjunto ocupa um ângulo menor e cabe no olhar sem mover a cabeça */ch.forEach(o=>{if(o.userData._longe)return;o.position.z*=UI_LONGE;if(o.rotation.y)o.rotation.y=-Math.atan2(o.position.x,-o.position.z)+(o.userData._rotExtra||0);o.userData._longe=true;});};
-const AJUDA_CONTROLES="Gatilho: escolhe e abre a ficha. Grip (lateral): segura o órgão na mão; gire o pulso para olhar em volta. Duas mãos: afaste para aumentar; na missão Coração, afastar as mãos abre o coração. Analógicos para os lados: giram o corpo ou o órgão. Analógico direito para cima ou para baixo: inclina. Analógico esquerdo para cima ou para baixo: sobe e desce. A: centraliza. B ou Y: abre e fecha o menu.";
+  /* só a profundidade aumenta: o conjunto ocupa um ângulo menor e cabe no olhar sem mover a cabeça */ch.forEach(o=>{if(o.userData._longe)return;o.position.z*=UI_LONGE*(this.xrDist||1);if(o.rotation.y)o.rotation.y=-Math.atan2(o.position.x,-o.position.z)+(o.userData._rotExtra||0);o.userData._longe=true;});};
+const AJUDA_CONTROLES="Gatilho: escolhe e abre a ficha. Grip (lateral): segura o órgão na mão; gire o pulso para olhar em volta. Duas mãos: afaste para aumentar; na missão Coração, afastar as mãos abre o coração. Analógicos para os lados: giram o corpo ou o órgão. Analógico direito para cima ou para baixo: inclina. Analógico esquerdo para cima ou para baixo: sobe e desce. A: centraliza. B: abre e fecha o menu. X: aproxima tudo. Y: afasta tudo (5 distâncias, o óculos lembra a escolhida).";
 Proto.alternarMenuVR=function(forca){this.menuAberto=forca===undefined?!this.menuAberto:!!forca;this.uiPage=0;if(this.menuAberto)this.xrAjuda=false;this.buildXRUI();};
 /* lista de ações da lateral (o dna-app monta os botões com data-act; lemos de lá para não depender de variáveis internas) */
 Proto._acoes=function(){const out=[];const lab=!!(window.CORPO_V4&&window.CORPO_V4.accepts(Lab.state.view));document.querySelectorAll('#lessonPanel [data-act]').forEach(b=>{if(/^seq:target:/.test(b.dataset.act))return;if(b.closest('details')&&(!b.closest('details').open||lab))return;if(lab&&(b.closest('.v4-small')||/^v4:(turn|align|cutStep|axis)/.test(b.dataset.act)))return;const label=(b.title&&b.textContent.trim().length<=1?b.textContent.trim()+' · '+b.title:b.textContent.trim());out.push({label,cmd:b.dataset.act,disabled:b.disabled,primario:b.classList.contains('primary')&&!/^(quiz:answer|sent:lente|seq:pick)/.test(b.dataset.act)});});return out;};
@@ -197,6 +202,7 @@ Proto.xrSelect=function(ctrl){
   if(ui&&ui.object.userData.command){this._apertado={cmd:ui.object.userData.command,t:performance.now()};}
   const cmdUI=ui&&ui.object.userData.command;
   if(cmdUI==='xr:abrirmenu'){this.alternarMenuVR();return;}
+  if(cmdUI==='xr:perto'||cmdUI==='xr:longe'){this.mudarDistancia(cmdUI==='xr:perto'?-1:1);return;}
   if(cmdUI==='xr:musica'){this.menuAberto=false;narrator.setMusic(!narrator.musicOn,Math.max(.12,narrator.musicVolume||.2));const cb=document.getElementById('musicEnabled');if(cb)cb.checked=narrator.musicOn;setTimeout(()=>{if(this.xr)this.buildXRUI();},120);return;}
   if(cmdUI==='xr:ajuda'){this.menuAberto=false;this.xrAjuda=true;this.buildXRUI();return;}
   if(cmdUI==='xr:ajudaclose'){this.xrAjuda=false;this.buildXRUI();return;}
@@ -315,6 +321,8 @@ Proto.placeXR=function(){
   if(this.xr&&this.model&&this.anchor&&!this.dentro&&!this.copy&&Lab.state.view==='coracaoLab'){/* v4.7.2: coração de estudo com 0,6 m a 0,9 m do aluno, altura do peito */const a=this.anchor,b=this.boxDe(this.obj||this.model);if(!b.isEmpty()){const sz=b.getSize(new T.Vector3()),k=(0.6*(this.xrZoom||1))/Math.max(sz.y,1e-3);this.root.scale.multiplyScalar(k);this.root.updateMatrixWorld(true);const b2=this.boxDe(this.obj||this.model),c=b2.getCenter(new T.Vector3());const alvo=a.p.clone().addScaledVector(a.f,.9);alvo.y=a.p.y-.15;this.root.position.add(alvo.sub(c));this.root.updateMatrixWorld(true);}}
   /* v4.1: no Desafio o painel fica à frente; o modelo gira 50° para a direita em volta do aluno, sem mudar de tamanho */
   if(this.xr&&this.model&&this.anchor&&quizFaseXR(this)){const a=this.anchor,up=new T.Vector3(0,1,0);this.root.position.sub(a.p).applyAxisAngle(up,-.87).add(a.p);this.root.rotation.y-=.87;this.root.updateMatrixWorld(true);}
+  /* v4.13.2: distância escolhida pelo aluno (X/Y): afasta ou aproxima a cena a partir dos olhos, sem mudar o tamanho real */
+  const f=this.xrDist||1;if(this.xr&&this.model&&this.anchor&&!this.dentro&&Math.abs(f-1)>.01){const a=this.anchor;this.root.updateMatrixWorld(true);const b=this.boxDe(this.model,true);if(!b.isEmpty()){const c=b.getCenter(new T.Vector3());this.root.position.x+=(c.x-a.p.x)*(f-1);this.root.position.z+=(c.z-a.p.z)*(f-1);this.root.updateMatrixWorld(true);}}
 };
 const updateOriginal=Proto.updateXR;
 const dAng=(a,b)=>{let d=a-b;while(d>Math.PI)d-=2*Math.PI;while(d<-Math.PI)d+=2*Math.PI;return d;};

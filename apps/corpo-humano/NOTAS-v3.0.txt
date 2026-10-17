@@ -369,3 +369,5 @@ v4.11.1 (realismo dos sentidos)
 4.13.0 · Visual dos botões: no VR, botões em pílula com degradê, brilho e sombra; ação principal (Próximo/Avançar/Ver...) em verde vivo com ►; painel e menu com cantos arredondados. No painel 3D, mesmo padrão via CSS (#lessonPanel button / .primary).
 
 4.13.1 · Conforto no VR: painéis e menu 20% mais longe (1,62 → 1,95 m, só profundidade), menu centrado na altura dos olhos com "Fechar menu" embaixo; modelos e tabuleiros a 2,2 m (antes 1,95).
+
+4.13.2 · Distância ajustável no VR: X (controle esquerdo) aproxima e Y afasta tudo (cena, painéis e menu), 5 níveis (0,75 a 1,3 x), guardado no aparelho; também no menu VER. B abre o menu (Y deixou de abrir). Ajuda dos controles atualizada.

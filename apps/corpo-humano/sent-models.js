@@ -137,12 +137,13 @@ function par(opt={}){const w=new T.Group(),Mo=M();
 /* ---------- contexto ----------
    v4.11.2: no olho (1) e na orelha (2) tocar numa parte abre a ficha dela; avançar fica só no botão do painel. */
 function sentContexto(level){const Mo=M(),g=G(),w=new T.Group();
-  if(level===0){registrar();const sil=g.orgao('silhueta',null,()=>CTX,{opacidade:.14});w.add(sil);
+  if(level===0){registrar();/* v4.12.4: o corpo não avança mais ao toque (o raio batia na pele antes do ponto do tato ou da boca e abria o olho) */const sil=g.orgao('silhueta',null,()=>null,{opacidade:.14});w.add(sil);
     const pts=[['Visão',[-0.031,1.592,0.08],0x9fc5f0,-1.6,.5],['Visão',[0.031,1.592,0.08],0x9fc5f0,null],['Audição',[-0.076,1.58,0.0],0xf0a6c8,-1.9,-.2],['Audição',[0.076,1.58,0.0],0xf0a6c8,null],
      ['Olfato',[0,1.585,0.1],0x9ed6ef,1.7,.35],['Paladar',[0,1.528,0.075],0xd96b73,1.7,-.35],['Tato',[0.28,0.79,0.06],0xf2c9a6,1.4,0]];
     /* v4.12.2: cada ponto leva ao seu sentido (visão → olho, audição → orelha, os outros abrem a ficha) */
     const DEST={'Visão':{type:'v4',command:'sent:ctx:olho'},'Audição':{type:'v4',command:'sent:ctx:orelha'},'Olfato':insp('olfato'),'Paladar':insp('paladar'),'Tato':insp('tato')};
     pts.forEach(([t,p,cor,dx,dy])=>{const b=new T.Mesh(new T.SphereGeometry(.09,20,14),new T.MeshBasicMaterial({color:cor}));b.position.copy(g.ponto(...p));b.userData.hit=DEST[t]||CTX;b.userData.pulso=true;w.add(b);
+      /* área de toque maior, um pouco à frente da pele, para o raio do óculos acertar o ponto */const alvo=new T.Mesh(new T.SphereGeometry(t==='Tato'?.24:.12,12,8),new T.MeshBasicMaterial({transparent:true,opacity:0,depthWrite:false}));alvo.position.copy(b.position).add(V(0,0,.12));alvo.userData.hit=b.userData.hit;w.add(alvo);
       if(dx!==null){const lp=b.position.clone().add(V(dx*1.25,dy,.5)),sp=label(w,t,lp,'#ffffff',2.4);sp.userData.hit=b.userData.hit;const fim=lp.clone().add(V(dx>0?-.75:.75,0,0));w.add(new T.Line(new T.BufferGeometry().setFromPoints([b.position.clone(),fim]),new T.LineBasicMaterial({color:cor,transparent:true,opacity:.7})));}});
     w.userData.tick=t=>{w.children.forEach(o=>{if(o.userData.pulso)o.scale.setScalar(1+.25*Math.sin(t*3+o.position.x*4));});};
     Mo.textAt(w,'OS CINCO SENTIDOS',0,-7.9,0,4.2,'#9fc5f0');return w;}

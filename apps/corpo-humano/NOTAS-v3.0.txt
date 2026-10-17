@@ -361,3 +361,5 @@ v4.11.1 (realismo dos sentidos)
 4.12.2 · Contexto sempre recomeça do corpo inteiro ao entrar (todos os sistemas). Sentidos: cada ponto do corpo leva ao seu sentido (visão → olho, audição → orelha, olfato/paladar/tato → ficha), com rótulo maior e linha até o ponto; botão "Voltar ao corpo inteiro" no olho e na orelha. Áudio sent-contexto-0 aparado (sai "Toque no corpo para a gente avançar").
 
 4.12.3 · Menu do VR: SISTEMAS numa coluna só; título "MENU · SISTEMA · MISSÃO N DE M" e dica em linhas separadas, sem sobrepor os cabeçalhos das colunas.
+
+4.12.4 · Sentidos/contexto: o corpo deixou de ser alvo de toque (o raio batia na pele antes dos pontos do tato e da boca e avançava para o olho). Cada ponto ganhou área de toque invisível à frente da pele.

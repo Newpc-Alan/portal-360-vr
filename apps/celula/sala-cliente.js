@@ -9,7 +9,7 @@
    Arquivo-mestre: assets/sala/sala-cliente.js (cópia idêntica em cada apps/<app>/). Regra 9: sem onclick inline. */
 (function(){'use strict';
 if(window.Portal360Sala)return;
-const VERSAO='1.8.0';
+const VERSAO='1.9.0';
 /* endereço do banco: preenchido quando o projeto Firebase da sala for criado (sem barra no fim) */
 const DB_PADRAO='https://portal360-sala-default-rtdb.firebaseio.com';
 const q=new URLSearchParams(location.search);
@@ -23,8 +23,8 @@ let sala=null;try{sala=JSON.parse(LS.get('portal360_sala')||'null');}catch(_){sa
 if(q.get('sala')&&/^\d{4}$/.test(q.get('sala'))){sala={codigo:q.get('sala'),rotulo:q.get('oculos')?('Óculos '+q.get('oculos').replace(/\D/g,'')):(sala&&sala.rotulo)||'Óculos'};LS.set('portal360_sala',JSON.stringify(sala));}
 
 /* ---------- adaptadores: o que cada app expõe ---------- */
-const APPS={corpo:'Corpo Humano Imersivo',terra:'Terra por Dentro',celula:'Célula 3D VR',dna:'DNA Imersivo',solar:'Sistema Solar VR',catalogo:'Catálogo Portal 360º'};
-const PASTA={corpo:'corpo-humano',terra:'terra',celula:'celula',dna:'dna',solar:'sistema-solar'};
+const APPS={corpo:'Corpo Humano Imersivo',terra:'Terra por Dentro',celula:'Célula 3D VR',historia:'História VR',dna:'DNA Imersivo',solar:'Sistema Solar VR',catalogo:'Catálogo Portal 360º'};
+const PASTA={corpo:'corpo-humano',terra:'terra',celula:'celula',historia:'historia',dna:'dna',solar:'sistema-solar'};
 const SOLAR_VISTAS={sistema:'Sistema Solar',planeta:'Planeta',comparar:'Comparar diâmetros',diaNoite:'Dia e noite',fases:'Fases da Lua',estacoes:'Estações do ano',eclipse:'Eclipses',desafio:'Desafio'};
 function emVR(){try{const c=window.PortalEntrada&&window.PortalEntrada.contexto&&window.PortalEntrada.contexto();return !!(c&&c.renderer&&c.renderer.xr&&c.renderer.xr.isPresenting);}catch(_){return false;}}
 function labGenerico(Lab,D,secKey,secLista){
@@ -41,6 +41,8 @@ const ADAPT={
     ir:(sec,view)=>{const L=window.TerraLab;if(sec&&L.state.tema!==sec)L.command('tema:'+sec);if(view)L.command('view:'+view);if(L.fecharMenu)L.fecharMenu();}},
   celula:{ok:()=>!!(window.CelulaLab&&window.CELULA_DATA),estado:()=>labGenerico(window.CelulaLab,window.CELULA_DATA,'tema',window.CELULA_DATA.temas),mapa:()=>mapaGenerico(window.CELULA_DATA,window.CELULA_DATA.temas),
     ir:(sec,view)=>{const L=window.CelulaLab;if(sec&&L.state.tema!==sec)L.command('tema:'+sec);if(view)L.command('view:'+view);if(L.fecharMenu)L.fecharMenu();}},
+  historia:{ok:()=>!!(window.HistoriaLab&&window.HISTORIA_DATA),estado:()=>labGenerico(window.HistoriaLab,window.HISTORIA_DATA,'tema',window.HISTORIA_DATA.temas),mapa:()=>mapaGenerico(window.HISTORIA_DATA,window.HISTORIA_DATA.temas),
+    ir:(sec,view)=>{const L=window.HistoriaLab;if(sec&&L.state.tema!==sec)L.command('tema:'+sec);if(view)L.command('view:'+view);if(L.fecharMenu)L.fecharMenu();}},
   dna:{ok:()=>!!(window.DNALab&&window.DNA_DATA),estado:()=>{const S=window.DNALab.state,D=window.DNA_DATA,a=D.activities.find(x=>x.id===S.view)||{};const ids=D.activities.map(x=>x.id);const q_=S.quiz||{};let ac=0,re=0;try{(q_.answers||[]).forEach((x,i)=>{if(x===undefined||x===null)return;re++;const Q=(D.questions||[])[i];if(Q&&x===Q.correct)ac++;});}catch(_){}
       return{secao:'DNA',secId:'dna',view:S.view,viewNome:(a.label||S.view)+(a.title?' · '+a.title:''),feitas:ids.filter(i=>(S.completed||[]).includes(i)).length,total:ids.length,desafio:{acertos:ac,respondidas:re,total:(D.questions||[]).length}};},
     mapa:()=>[{id:'dna',nome:'DNA',missoes:window.DNA_DATA.activities.map(a=>({id:a.id,nome:a.label}))}],ir:(sec,view)=>{if(view)window.DNALab.command('view:'+view);}},
@@ -49,7 +51,7 @@ const ADAPT={
     mapa:()=>[{id:'solar',nome:'Sistema Solar',missoes:Object.keys(SOLAR_VISTAS).map(k=>({id:k,nome:SOLAR_VISTAS[k]}))}],ir:(sec,view)=>{if(view&&window.PortalSolarV8.enterView)window.PortalSolarV8.enterView(view);}},
   catalogo:{ok:()=>true,estado:()=>({secao:'',secId:'',view:'catalogo',viewNome:'No catálogo',feitas:0,total:0,desafio:{acertos:0,respondidas:0,total:0}}),mapa:()=>null,ir:()=>{}}
 };
-const APP=(()=>{const m=location.pathname.match(/\/apps\/([^/]+)\//);const p=m?m[1]:'';return p==='corpo-humano'?'corpo':p==='terra'?'terra':p==='celula'?'celula':p==='dna'?'dna':p==='sistema-solar'?'solar':'catalogo';})();
+const APP=(()=>{const m=location.pathname.match(/\/apps\/([^/]+)\//);const p=m?m[1]:'';return p==='corpo-humano'?'corpo':p==='terra'?'terra':p==='celula'?'celula':p==='historia'?'historia':p==='dna'?'dna':p==='sistema-solar'?'solar':'catalogo';})();
 const A=ADAPT[APP];
 
 /* ---------- rede ---------- */
@@ -79,6 +81,7 @@ function resultado(){try{
   if(APP==='corpo'&&window.CorpoLab)return Object.assign({secoes:secoesLab(window.CorpoLab,window.CORPO_DATA,window.CORPO_DATA.sistemas)},totaisLab(window.CorpoLab));
   if(APP==='terra'&&window.TerraLab)return Object.assign({secoes:secoesLab(window.TerraLab,window.TERRA_DATA,window.TERRA_DATA.temas)},totaisLab(window.TerraLab));
   if(APP==='celula'&&window.CelulaLab)return Object.assign({secoes:secoesLab(window.CelulaLab,window.CELULA_DATA,window.CELULA_DATA.temas)},totaisLab(window.CelulaLab));
+  if(APP==='historia'&&window.HistoriaLab)return Object.assign({secoes:secoesLab(window.HistoriaLab,window.HISTORIA_DATA,window.HISTORIA_DATA.temas)},totaisLab(window.HistoriaLab));
   if(APP==='dna'&&window.DNALab){const D=window.DNA_DATA,S=window.DNALab.state;let ac=0,re=0;const q_=S.quiz||{};(q_.answers||[]).forEach((x,i)=>{if(x===undefined||x===null)return;re++;const Q=(D.questions||[])[i];if(Q&&x===Q.correct)ac++;});
     return Object.assign({secoes:[{id:'dna',nome:'DNA',missoes:D.activities.filter(a=>a.id!=='desafio').map(a=>({id:a.id,nome:a.label,feita:(S.completed||[]).includes(a.id)})),desafio:{acertos:ac,respondidas:re,total:(D.questions||[]).length,concluido:!!q_.done}}]},totaisLab(window.DNALab));}
   if(APP==='solar'&&window.PortalSolarV8&&window.PortalSolarV8.resumo){const r=window.PortalSolarV8.resumo();

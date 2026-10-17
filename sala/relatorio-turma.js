@@ -28,6 +28,10 @@ const H={
  EF08CI08:'Explicar as transformações da puberdade pela atuação dos hormônios e do sistema nervoso.',
  EF08CI12:'Justificar as fases da Lua e os eclipses por meio de modelos.',
  EF08CI13:'Representar rotação e translação e o papel da inclinação do eixo nas estações do ano.',
+ EF06HI01:'Identificar diferentes formas de compreensão da noção de tempo e de periodização.',
+ EF06HI02:'Identificar a gênese da produção do saber histórico e analisar o significado das fontes.',
+ EF06HI05:'Descrever modificações da natureza e da paisagem realizadas por diferentes sociedades.',
+ EF06HI07:'Identificar aspectos e formas de registro das sociedades antigas na África, no Oriente Médio e nas Américas.',
  EF09CI08:'Associar os gametas à transmissão das características hereditárias.',
  EF09CI09:'Discutir as ideias de Mendel sobre hereditariedade.',
  EF09CI14:'Descrever a composição e a estrutura do Sistema Solar.'};
@@ -35,9 +39,10 @@ const BNCC={
  corpo:{respiratorio:['EF05CI06','EF06CI06'],circulatorio:['EF05CI07','EF06CI06'],digestorio:['EF05CI06','EF05CI08'],esqueletico:['EF06CI09'],muscular:['EF06CI09'],nervoso:['EF06CI07'],sentidos:['EF06CI08'],urinario:['EF05CI07'],endocrino:['EF08CI08'],linfatico:['EF06CI06'],tegumentar:['EF06CI06'],reprodutor:['EF08CI08']},
  terra:{terra:['EF06CI11'],camadas:['EF06CI11'],placas:['EF07CI15','EF07CI16'],vulcao:['EF07CI15'],rochas:['EF06CI12']},
  celula:{animal:['EF06CI05','EF06CI06'],vegetal:['EF06CI05']},
+ historia:{egito:['EF06HI01','EF06HI02','EF06HI05','EF06HI07']},
  dna:{dna:['EF09CI08','EF09CI09']},
  solar:{solar:['EF05CI11','EF05CI12','EF08CI12','EF08CI13','EF09CI14']}};
-const NOME_APP={corpo:'Corpo Humano',terra:'Terra por Dentro',celula:'Célula 3D',dna:'DNA Imersivo',solar:'Sistema Solar'};
+const NOME_APP={corpo:'Corpo Humano',terra:'Terra por Dentro',celula:'Célula 3D',historia:'História VR',dna:'DNA Imersivo',solar:'Sistema Solar'};
 
 /* ---------- histórico local ---------- */
 function historico(){try{return JSON.parse(LS.get(HIST)||'[]');}catch(_){return [];}}

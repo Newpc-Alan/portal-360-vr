@@ -109,7 +109,7 @@ footer{color:var(--suave);font-size:12px;text-align:center;padding:24px}
 <main id="app"></main>
 <div class="toast" id="toast"></div>
 <footer>Portal Maestro VR · Portal 360º · Portal do Educador · NEWPC Tecnologia. Os óculos só enviam o número do óculos e o andamento da atividade; nenhum dado pessoal do aluno é registrado.</footer>
-<script src="relatorio-turma.js?v=1.0.0"></script>
+<script src="relatorio-turma.js?v=1.1.0"></script>
 <script>
 (function(){'use strict';
 /* endereço do banco (o mesmo do sala-cliente.js); ?saladb= sobrescreve para teste */
@@ -120,11 +120,11 @@ if(q.get('saladb'))LS.set('portal360_sala_db',q.get('saladb').replace(/\/+$/,'')
 const DB=(LS.get('portal360_sala_db')||DB_PADRAO||'').replace(/\/+$/,'');
 const $=id=>document.getElementById(id);
 const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
-const APPS={corpo:'Corpo Humano Imersivo',terra:'Terra por Dentro',dna:'DNA Imersivo',solar:'Sistema Solar VR'};
+const APPS={corpo:'Corpo Humano Imersivo',terra:'Terra por Dentro',celula:'Célula 3D VR',dna:'DNA Imersivo',historia:'História VR',solar:'Sistema Solar VR'};
 /* vídeo-aulas. YouTube (yt = código de 11 caracteres do link youtu.be/XXXXXXXXXXX): o óculos sai do VR, assiste em tela cheia e volta com 1 toque.
    MP4 hospedado no Portal (src): toca num telão dentro do VR, sem sair. Para incluir uma aula, acrescente uma linha aqui. */
 const AULAS_VIDEO=[{titulo:'Sistema Solar · aula',yt:'ZtPpHocvT7A'},{titulo:'Abertura do Portal 360º (MP4, telão no VR)',src:'assets/abertura.mp4'}];
-const APPS_BOTOES=[['solar','🪐','Sistema Solar'],['corpo','🫀','Corpo Humano'],['terra','🌍','Terra por Dentro'],['dna','🧬','DNA'],['catalogo','🏠','Catálogo']];
+const APPS_BOTOES=[['solar','🪐','Sistema Solar'],['corpo','🫀','Corpo Humano'],['terra','🌍','Terra por Dentro'],['dna','🧬','DNA'],['celula','🔬','Célula'],['historia','🏺','História'],['catalogo','🏠','Catálogo']];
 /* mapas das missões: os desta sala + os guardados de aulas anteriores (o painel lembra, assim as missões aparecem antes de algum óculos abrir o app) */
 function mapas(){let c={};try{c=JSON.parse(localStorage.getItem('portal360_mapas')||'{}')||{};}catch(_){c={};}const m=Object.assign(c,(sala&&sala.mapas)||{});
   try{if(sala&&sala.mapas&&Object.keys(sala.mapas).length)localStorage.setItem('portal360_mapas',JSON.stringify(m));}catch(_){}return m;}

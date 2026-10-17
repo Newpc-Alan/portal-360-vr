@@ -359,3 +359,5 @@ v4.11.1 (realismo dos sentidos)
 4.12.1 · Tabuleiros maiores no óculos: quadro de ordenar ocupa 1,9 m (antes 1,45 m), sem as margens invisíveis; câmera mira o centro do quadro; olho/orelha das missões luz e som foram para baixo da coluna de peças; PEÇAS em letra grande; esqueleto (coluna, braço) com o mesmo padrão de peças e rótulos.
 
 4.12.2 · Contexto sempre recomeça do corpo inteiro ao entrar (todos os sistemas). Sentidos: cada ponto do corpo leva ao seu sentido (visão → olho, audição → orelha, olfato/paladar/tato → ficha), com rótulo maior e linha até o ponto; botão "Voltar ao corpo inteiro" no olho e na orelha. Áudio sent-contexto-0 aparado (sai "Toque no corpo para a gente avançar").
+
+4.12.3 · Menu do VR: SISTEMAS numa coluna só; título "MENU · SISTEMA · MISSÃO N DE M" e dica em linhas separadas, sem sobrepor os cabeçalhos das colunas.

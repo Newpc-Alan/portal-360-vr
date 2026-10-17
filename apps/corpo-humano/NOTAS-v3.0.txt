@@ -363,3 +363,5 @@ v4.11.1 (realismo dos sentidos)
 4.12.3 · Menu do VR: SISTEMAS numa coluna só; título "MENU · SISTEMA · MISSÃO N DE M" e dica em linhas separadas, sem sobrepor os cabeçalhos das colunas.
 
 4.12.4 · Sentidos/contexto: o corpo deixou de ser alvo de toque (o raio batia na pele antes dos pontos do tato e da boca e avançava para o olho). Cada ponto ganhou área de toque invisível à frente da pele.
+
+4.12.5 · Sentidos/contexto: o nome de cada sentido virou botão grande (no óculos os pontos da cabeça ficam a ~3 cm um do outro e o raio pulava do paladar para o olho); áreas de toque dos pontos da cabeça reduzidas para não se sobreporem.

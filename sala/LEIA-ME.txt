@@ -1,4 +1,4 @@
-PORTAL MAESTRO VR · Sala do professor do Portal 360º VR (painel 2.0 · cliente 1.7.0, out/2026)
+PORTAL MAESTRO VR · Sala do professor do Portal 360º VR (painel 2.1 · cliente 1.8.0, out/2026)
 
 O que é: painel (sala/index.html) em que o professor acompanha cada óculos e conduz a turma.
 - Cada óculos entra na sala pelo botão "🎓 Entrar na sala" (catálogo ou app, fora do VR) ou pelo link
@@ -36,3 +36,14 @@ Novidades (Portal Maestro VR, out/2026):
 - As regras do Firebase não mudaram (tudo fica dentro de salas/<código>).
 - Ao mudar o sala-cliente.js: copiar o mestre para apps/<app>/ (a Célula tem APPS/PASTA/ADAPT próprios), subir o ?v= nos
   index.html e rodar tools/gerar-precache.py de cada app (o modo offline guarda o cliente em cache).
+
+Relatório da turma (painel 2.1 · cliente 1.8.0, out/2026):
+- Cada óculos envia, a cada mudança (no máximo a cada 15 s), o resultado detalhado por app: missões feitas por
+  sistema/tema, Desafio (acertos/respondidas/total), erros, pistas. Grava salas/<código>/resultados/<óculos>/<app>.
+- Botão "📄 Relatório da turma" (grupo Ouvir a turma) abre uma página pronta para imprimir/PDF: indicadores, leitura por
+  conteúdo com as habilidades da BNCC (mesmo mapeamento dos guias do professor), habilidades trabalhadas, pontos de
+  atenção e quadro por óculos. Escola, turma e professor são editáveis na página e ficam lembrados.
+- O painel guarda cada aula neste computador (últimas 12): na tela inicial aparecem os "Relatórios de aulas anteriores",
+  mesmo depois de encerrar a sala.
+- Peça: sala/relatorio-turma.js. Regras do Firebase inalteradas (tudo dentro de salas/<código>).
+- Limite: só conta o que aconteceu com o óculos dentro da sala; uso fora da sala não entra no relatório.

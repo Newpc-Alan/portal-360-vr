@@ -28,6 +28,7 @@ main{padding:22px;max-width:1500px;margin:0 auto}
 .painel{background:var(--card);border:1px solid var(--borda);border-radius:14px}
 /* abertura */
 .abrir{max-width:760px;margin:6vh auto;text-align:center}
+.hist-rel{margin-top:22px;padding:14px 16px;border:1px solid var(--borda);border-radius:12px;background:#fff}.hist-rel>div{display:flex;flex-wrap:wrap;gap:8px;margin-top:10px}
 .abrir h1{font-size:clamp(28px,4vw,40px);margin:0 0 6px;font-weight:800}.abrir .slogan{margin:0 0 12px;font-weight:700;color:var(--azul3)}.abrir p{color:var(--suave);font-size:17px;line-height:1.55}
 .abrir .acoes{display:flex;gap:12px;justify-content:center;margin-top:24px;flex-wrap:wrap}
 .passos{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-top:30px;text-align:left}
@@ -108,6 +109,7 @@ footer{color:var(--suave);font-size:12px;text-align:center;padding:24px}
 <main id="app"></main>
 <div class="toast" id="toast"></div>
 <footer>Portal Maestro VR · Portal 360º · Portal do Educador · NEWPC Tecnologia. Os óculos só enviam o número do óculos e o andamento da atividade; nenhum dado pessoal do aluno é registrado.</footer>
+<script src="relatorio-turma.js?v=1.0.0"></script>
 <script>
 (function(){'use strict';
 /* endereço do banco (o mesmo do sala-cliente.js); ?saladb= sobrescreve para teste */
@@ -137,7 +139,7 @@ const agora=()=>Date.now()+offset;
 /* ---------- telas ---------- */
 function telaConfig(){$('app').innerHTML='<div class="aviso-cfg"><h2>Sala ainda não configurada</h2><p>O endereço do banco de dados da Sala do professor ainda não foi definido. Depois de criar o projeto Firebase (Realtime Database), ele entra nas constantes <code>DB_PADRAO</code> deste painel e do <code>sala-cliente.js</code>.</p><p>Para teste, abra este painel com <code>?saladb=https://SEU-PROJETO.firebaseio.com</code>.</p></div>';}
 function telaAbrir(){let ant=LS.get('portal360_sala_prof');if(!codValido(ant)){LS.del('portal360_sala_prof');ant=null;}
-  $('app').innerHTML='<section class="abrir"><h1>Conduza a turma no VR</h1><p class="slogan">O professor conduz, a turma acompanha.</p><p>Abra a sala, mostre o código na lousa e cada óculos entra digitando os 4 números. Você acompanha o que cada aluno está fazendo e leva todos para a mesma missão com um toque.</p><div class="acoes"><button class="btn pri grande" data-action="abrir">▶ Abrir nova sala</button>'+(ant?'<button class="btn azul grande" data-action="reabrir">↻ Reabrir sala '+esc(ant)+'</button>':'')+'</div><div class="passos"><div><b>1 · ABRA A SALA</b><span>Mostre o código na lousa ou na TV.</span></div><div><b>2 · NOS ÓCULOS</b><span>No catálogo, toque em "🎓 Entrar na sala", digite o código e o número do óculos.</span></div><div><b>3 · CONDUZA</b><span>Acompanhe os cards, leve todos para uma missão, pause e chame a atenção.</span></div></div></section>';}
+  $('app').innerHTML='<section class="abrir"><h1>Conduza a turma no VR</h1><p class="slogan">O professor conduz, a turma acompanha.</p><p>Abra a sala, mostre o código na lousa e cada óculos entra digitando os 4 números. Você acompanha o que cada aluno está fazendo e leva todos para a mesma missão com um toque.</p><div class="acoes"><button class="btn pri grande" data-action="abrir">▶ Abrir nova sala</button>'+(ant?'<button class="btn azul grande" data-action="reabrir">↻ Reabrir sala '+esc(ant)+'</button>':'')+'</div><div class="passos"><div><b>1 · ABRA A SALA</b><span>Mostre o código na lousa ou na TV.</span></div><div><b>2 · NOS ÓCULOS</b><span>No catálogo, toque em "🎓 Entrar na sala", digite o código e o número do óculos.</span></div><div><b>3 · CONDUZA</b><span>Acompanhe os cards, leve todos para uma missão, pause e chame a atenção.</span></div></div>'+relatoriosAnteriores()+'</section>';}
 function telaSala(){
   $('app').innerHTML='<section class="barra"><div class="codigo"><small>Código da sala</small><b id="cod">'+codigo+'</b><span>No óculos: 🎓 Entrar na sala</span></div>'+
    '<div class="painel resumo"><div class="resumo-cab"><h2>Painel da aula</h2><span class="dur"><span id="tempo">00:00</span> de aula</span><button class="btn perigo" data-action="encerrar">■ Encerrar aula</button></div><div class="tiles">'+
@@ -155,6 +157,7 @@ function telaSala(){
     '</div>'+
     '<div class="grupo"><span class="grupo-rot">Ouvir a turma</span><div class="col">'+
      '<button class="btn pri" data-action="pesquisa-abrir" title="Cada aluno responde no VR: Entendi, Mais ou menos ou Não entendi">📊 Pesquisa rápida</button>'+
+     '<button class="btn azul" data-action="relatorio" title="Missões, Desafio e habilidades da BNCC de toda a turma, pronto para imprimir">📄 Relatório da turma</button>'+
      '<span style="font-size:12px;color:var(--suave)">✋ Para levantar a mão, o aluno ergue o controle acima da cabeça.</span>'+
     '</div></div>'+
     '<div class="grupo"><span class="grupo-rot">Óculos dos alunos</span><div class="col">'+
@@ -179,7 +182,7 @@ async function abrir(cod){
   const ok=await rede('PATCH','salas/'+cod,{aberta:true,criada:SV});if(ok===null||ok.aberta!==true){toast('Não abriu a sala: '+(ultimoErro||'resposta inesperada do banco'));return;}
   codigo=cod;LS.set('portal360_sala_prof',cod);inicio=Date.now();await medirRelogio();telaSala();ouvir();
   clearInterval(timer);timer=setInterval(()=>{const s=Math.floor((Date.now()-inicio)/1000);const t=$('tempo');if(t)t.textContent=String(Math.floor(s/60)).padStart(2,'0')+':'+String(s%60).padStart(2,'0');desenhar();},1000);}
-function ouvir(){parar();const busca=()=>{clearTimeout(refetch);refetch=setTimeout(async()=>{const d=await rede('GET','salas/'+codigo);if(d){sala=d;preencherSelects();desenhar();}},150);};
+function ouvir(){parar();const busca=()=>{clearTimeout(refetch);refetch=setTimeout(async()=>{const d=await rede('GET','salas/'+codigo);if(d){sala=d;if(window.RelatorioTurma)RelatorioTurma.guardar(codigo,d);preencherSelects();desenhar();}},150);};
   try{es=new EventSource(DB+'/salas/'+codigo+'.json');es.addEventListener('put',busca);es.addEventListener('patch',busca);es.onopen=()=>conexao(true);es.onerror=()=>{conexao(false);if(es&&es.readyState===2){es=null;if(!poll)poll=setInterval(busca,2500);}};}
   catch(_){poll=setInterval(busca,2500);}busca();}
 function parar(){if(es){es.close();es=null;}if(poll){clearInterval(poll);poll=0;}}
@@ -259,7 +262,14 @@ function nomeDestino(d){const m=mapas()[d.app];const s=m&&m.secoes.find(x=>x.id=
 /* ---------- eventos (Regra 9: delegação) ---------- */
 document.addEventListener('keydown',e=>{if(e.key==='Enter'&&$('modalPesq')&&!$('modalPesq').hidden){const b=document.querySelector('[data-action="pesquisa-enviar"]');if(b)b.click();}if(e.key==='Escape'&&$('modalPesq'))$('modalPesq').hidden=true;});
 document.addEventListener('change',e=>{if(e.target.id==='selApp')secoes();else if(e.target.id==='selSec')missoes();});
+/* v2.1 · Relatório da turma: da sala aberta ou de aulas anteriores guardadas neste computador */
+function relatoriosAnteriores(){const h=window.RelatorioTurma?RelatorioTurma.historico():[];if(!h.length)return '';
+  return '<div class="hist-rel"><b>📄 Relatórios de aulas anteriores</b><div>'+h.map((x,i)=>'<button class="btn" data-action="relatorio-hist" data-i="'+i+'">Sala '+esc(x.codigo)+' · '+esc(new Date(x.quando).toLocaleString('pt-BR',{day:'2-digit',month:'2-digit',hour:'2-digit',minute:'2-digit'}))+'</button>').join('')+'</div></div>';}
+function abrirRelatorio(res,rot,cod,quando){if(!window.RelatorioTurma){toast('Relatório indisponível.');return;}if(!res||!Object.keys(res).length){toast('Ainda não chegou resultado dos óculos. Os óculos enviam a cada 15 segundos, enquanto estão na sala.');return;}
+  if(!RelatorioTurma.abrir(res,rot,{codigo:cod,quando,logo:'../assets/sala/pde-256.png'}))toast('O navegador bloqueou a nova janela. Permita pop-ups para este site.');}
 document.addEventListener('click',async e=>{const b=e.target.closest('[data-action]');if(!b)return;const ac=b.dataset.action,id=b.dataset.id;
+  if(ac==='relatorio'){const rot={};Object.entries((sala&&sala.oculos)||{}).forEach(([k,o])=>{rot[k]=o&&o.rotulo;});abrirRelatorio(sala&&sala.resultados,rot,codigo,Date.now());return;}
+  if(ac==='relatorio-hist'){const x=(window.RelatorioTurma?RelatorioTurma.historico():[])[+b.dataset.i];if(x)abrirRelatorio(x.resultados,x.rotulos,x.codigo,x.quando);return;}
   if(ac==='tela-cheia'){try{document.fullscreenElement?document.exitFullscreen():document.documentElement.requestFullscreen();}catch(_){}return;}
   if(ac==='abrir'){b.disabled=true;await abrir(null);b.disabled=false;return;}
   if(ac==='reabrir'){await abrir(LS.get('portal360_sala_prof'));return;}
@@ -283,7 +293,7 @@ document.addEventListener('click',async e=>{const b=e.target.closest('[data-acti
   else if(ac==='chamar'){await comando({tipo:'chamar',alvo:id});toast('Chamando '+(sala.oculos[id]||{}).rotulo+'.');}
   else if(ac==='chamar-todos'){await comando({tipo:'chamar'});toast('Cada óculos mostra o próprio número por 5 segundos.');}
   else if(ac==='remover'){await rede('DELETE','salas/'+codigo+'/oculos/'+id);toast('Óculos removido da lista.');}
-  else if(ac==='encerrar'){if(!confirm('Encerrar a aula? Os óculos saem da sala e mostram "Aula encerrada".'))return;await comando({tipo:'encerrar'});setTimeout(async()=>{await rede('DELETE','salas/'+codigo);parar();clearInterval(timer);codigo=null;sala={};LS.del('portal360_sala_prof');telaAbrir();toast('Aula encerrada.');},2500);}
+  else if(ac==='encerrar'){if(!confirm('Encerrar a aula? Os óculos saem da sala e mostram "Aula encerrada". O relatório da turma continua disponível neste computador.'))return;await comando({tipo:'encerrar'});setTimeout(async()=>{await rede('DELETE','salas/'+codigo);parar();clearInterval(timer);codigo=null;sala={};LS.del('portal360_sala_prof');telaAbrir();toast('Aula encerrada.');},2500);}
 });
 if(!DB)telaConfig();else telaAbrir();
 })();

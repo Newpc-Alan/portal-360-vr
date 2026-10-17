@@ -367,3 +367,5 @@ v4.11.1 (realismo dos sentidos)
 4.12.5 · Sentidos/contexto: o nome de cada sentido virou botão grande (no óculos os pontos da cabeça ficam a ~3 cm um do outro e o raio pulava do paladar para o olho); áreas de toque dos pontos da cabeça reduzidas para não se sobreporem.
 
 4.13.0 · Visual dos botões: no VR, botões em pílula com degradê, brilho e sombra; ação principal (Próximo/Avançar/Ver...) em verde vivo com ►; painel e menu com cantos arredondados. No painel 3D, mesmo padrão via CSS (#lessonPanel button / .primary).
+
+4.13.1 · Conforto no VR: painéis e menu 20% mais longe (1,62 → 1,95 m, só profundidade), menu centrado na altura dos olhos com "Fechar menu" embaixo; modelos e tabuleiros a 2,2 m (antes 1,95).

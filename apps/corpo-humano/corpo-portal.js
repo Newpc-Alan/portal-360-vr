@@ -155,7 +155,7 @@ Proto.buildXRUI=function(){
   const AZ={bg:'#0f2c4a',borda:'#37B1DA',texto:'#ffffff'},AT={bg:'#0f6b3a',borda:'#7CFFB8',texto:'#ffffff'},SAI={bg:'#5a2a16',borda:'#ff9f6b',texto:'#fff2ea'};
   const menuAb=!!this.menuAberto;
   this.xrButton(menuAb?'✕ Fechar menu':'☰  Menu','xr:abrirmenu',-.80,-.52,.36,false,menuAb?{bg:'#3a2a10',borda:'#ffc77a',texto:'#fff6e8'}:{bg:'#0f4a6e',borda:'#7fd6ff',texto:'#ffffff'});
-  if(!menuAb)return;
+  if(!menuAb)return;this._menuDesde=this.ui.children.length;
   const ar=window.__arOK||this.xrModo==='ar';
   const grupos=D.sistemas.filter(x=>!x.breve),grupoAtual=S.sistema,grupoNome=(Lab.sistemaAtual()||{}).nome||'',GRUPO_NOME='SISTEMAS',GRUPO_CMD='sistema:',atv=Lab.atividadesDe(S.sistema),TXT_DENTRO='Entrar no corpo',TXT_FORA='Sair de dentro do corpo';
   const colunas=[[GRUPO_NOME,grupos.map(x=>[(x.id===grupoAtual?'✓ ':'')+x.nome,GRUPO_CMD+x.id,x.id===grupoAtual?AT:AZ])],
@@ -175,6 +175,14 @@ Proto.buildXRUI=function(){
     if(cab){const h=M.rotuloFixo(cab,'#9fe8ff',W,64,false);h.position.set(x,topo+.12,UI.z-.005);h.rotation.y=-Math.atan2(x,-UI.z);h.traverse(o=>{o.userData.ordem=996;});this.ui.add(h);}
     itens.forEach(([t,cmd,cor],l)=>this.xrButton(t,cmd,x,topo-l*DY,W,false,cor));});
 };
+/* v4.13.1 · conforto: tudo do VR um pouco mais longe (1,62 m → 1,95 m) e o menu centrado na altura dos olhos,
+   para o aluno não ter de abaixar e levantar a cabeça. */
+const UI_LONGE=1.2,MENU_CENTRO=-.1;
+const buildXRUIBase=Proto.buildXRUI;
+Proto.buildXRUI=function(){this._menuDesde=null;buildXRUIBase.call(this);if(!this.xr||!this.ui)return;const ch=this.ui.children;
+  if(this._menuDesde!=null&&this._menuDesde<ch.length){let lo=1e9,hi=-1e9;for(let i=this._menuDesde;i<ch.length;i++){const o=ch[i];if(!o.geometry)continue;if(!o.geometry.boundingBox)o.geometry.computeBoundingBox();const bb=o.geometry.boundingBox;lo=Math.min(lo,o.position.y+bb.min.y*o.scale.y);hi=Math.max(hi,o.position.y+bb.max.y*o.scale.y);}
+    if(lo<hi){const dy=MENU_CENTRO-(lo+hi)/2;for(let i=this._menuDesde;i<ch.length;i++)ch[i].position.y+=dy;/* o botão Fechar menu vai para baixo do menu, sem se sobrepor */const fb=ch.find(o=>o.userData.command==='xr:abrirmenu');if(fb)fb.position.y=lo+dy-.1;}}
+  /* só a profundidade aumenta: o conjunto ocupa um ângulo menor e cabe no olhar sem mover a cabeça */ch.forEach(o=>{if(o.userData._longe)return;o.position.z*=UI_LONGE;if(o.rotation.y)o.rotation.y=-Math.atan2(o.position.x,-o.position.z)+(o.userData._rotExtra||0);o.userData._longe=true;});};
 const AJUDA_CONTROLES="Gatilho: escolhe e abre a ficha. Grip (lateral): segura o órgão na mão; gire o pulso para olhar em volta. Duas mãos: afaste para aumentar; na missão Coração, afastar as mãos abre o coração. Analógicos para os lados: giram o corpo ou o órgão. Analógico direito para cima ou para baixo: inclina. Analógico esquerdo para cima ou para baixo: sobe e desce. A: centraliza. B ou Y: abre e fecha o menu.";
 Proto.alternarMenuVR=function(forca){this.menuAberto=forca===undefined?!this.menuAberto:!!forca;this.uiPage=0;if(this.menuAberto)this.xrAjuda=false;this.buildXRUI();};
 /* lista de ações da lateral (o dna-app monta os botões com data-act; lemos de lá para não depender de variáveis internas) */

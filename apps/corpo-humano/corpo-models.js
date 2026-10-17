@@ -275,7 +275,7 @@ function sequencia(state,cfg){
     const t=rotuloFixo(cfg.rotulos[k],'#ffffff',1.86,64);t.position.set(x,y,.22);g.add(t);
     if(state.selected===k){const anel=new T.Mesh(new T.BoxGeometry(2.04,.78,.08),new T.MeshBasicMaterial({color:0xffffff,wireframe:true}));anel.position.set(x,y,.1);g.add(anel);}
   });
-  if(!state.done)textFixo(g,'PEÇAS',x0+1.01,top+.5,0,1.4,'#9cbed0');
+  if(!state.done)textFixo(g,'PEÇAS',x0+1.01,top+.5,0,2.3,'#cfe3ee',false);
   const gl=G();
   if(state.done&&cfg.titulo==='CAMINHO DO SANGUE'){
     let pts;const base=V(-2.9,-.2,0),esc=1.15;
@@ -305,8 +305,6 @@ function sequencia(state,cfg){
     g.userData.tick=(t)=>{parts.forEach(d=>{const u=(t*.12+d.userData.f)%1;d.position.copy(d.userData.c.getPointAt(u));});};
   }
   g.userData.slots={top,dy};
-  /* v4.12: a câmera mira x=0; marcadores invisíveis simétricos garantem que as peças maiores caibam no quadro */
-  {const bx=new T.Box3().setFromObject(g),mx=Math.max(Math.abs(bx.min.x),Math.abs(bx.max.x));[-mx,mx].forEach(x=>{const m=new T.Mesh(new T.BoxGeometry(.01,.01,.01),new T.MeshBasicMaterial({visible:false}));m.position.x=x;g.add(m);});}
   return g;
 }
 /* alvéolo com capilar e gases */

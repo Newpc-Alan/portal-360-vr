@@ -355,3 +355,5 @@ v4.11.1 (realismo dos sentidos)
 4.11.2 · Sentidos: no contexto do olho e da orelha, tocar numa parte abre a ficha (antes avançava para a orelha). Avançar fica no botão do painel. Áudio sent-contexto-1 aparado: saiu a frase "Toque de novo para ver a orelha".
 
 4.12.0 · Como fazer em todos os exercícios: cartão no painel (ícone + gesto), linha no painel do VR com o gesto do controle (gatilho/botão lateral) e rodapé da cena. Sequências: peças maiores (1,9 x 0,64), texto quebra em até duas linhas em vez de encolher (label/quebraLinhas), dica "PEÇA → ESPAÇO AMARELO" no tabuleiro, enquadramento simétrico; botões do painel em 2 colunas e 15 px.
+
+4.12.1 · Tabuleiros maiores no óculos: quadro de ordenar ocupa 1,9 m (antes 1,45 m), sem as margens invisíveis; câmera mira o centro do quadro; olho/orelha das missões luz e som foram para baixo da coluna de peças; PEÇAS em letra grande; esqueleto (coluna, braço) com o mesmo padrão de peças e rótulos.

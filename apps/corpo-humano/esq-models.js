@@ -7,11 +7,12 @@ const COR={osso:0xe9e4d6,musculo:0xb8343f,pele:0x8fc3dd,marcador:0xffd166,ok:0x3
 const mat=(color,extra={})=>new T.MeshStandardMaterial(Object.assign({color,roughness:.5,metalness:.05},extra));
 function tag(o,data){o.traverse(x=>{if(x.isMesh)x.userData.hit=data;});o.userData.hit=data;return o;}
 function ball(r,color,pos,extra,seg=24){const m=new T.Mesh(new T.SphereGeometry(r,seg,Math.max(10,seg*.7|0)),mat(color,extra));if(pos)m.position.copy(pos);return m;}
-function label(text,color='#e7f6ff',width=1.5,size=56){const c=document.createElement('canvas');c.width=512;c.height=128;const ctx=c.getContext('2d');ctx.font='600 '+size+'px Segoe UI,Arial';while(ctx.measureText(text).width>490&&size>17){size-=2;ctx.font='600 '+size+'px Segoe UI,Arial';}ctx.textAlign='center';ctx.textBaseline='middle';ctx.shadowColor='#031220';ctx.shadowBlur=7;ctx.fillStyle=color;ctx.fillText(text,256,64);const tx=new T.CanvasTexture(c);tx.encoding=T.sRGBEncoding;tx.minFilter=T.LinearMipmapLinearFilter;tx.generateMipmaps=true;tx.anisotropy=8;const sp=new T.Sprite(new T.SpriteMaterial({map:tx,transparent:true,depthWrite:false,depthTest:true}));sp.scale.set(width,width/4,1);return sp;}
+/* v4.12: rótulos delegam ao corpo-models (quebra em duas linhas em vez de encolher) */
+function label(text,color='#e7f6ff',width=1.5,size=56,quebra=true){return window.CORPO_MODELS.label(text,color,width,size,quebra);}
 function textAt(g,text,x,y,z=0,width=1.5,color){const sp=label(text,color,width);sp.position.set(x,y,z);g.add(sp);return sp;}
 /* v4.7.1 · rótulo fixo no mundo (plano, não sprite): no VR as letras dos tabuleiros não giram com a cabeça */
-function rotuloFixo(text,color='#e7f6ff',width=1.5,size=56){const sp=label(text,color,width,size);const m=new T.Mesh(new T.PlaneGeometry(width,width/4),new T.MeshBasicMaterial({map:sp.material.map,transparent:true,depthWrite:false,side:T.DoubleSide}));sp.material.dispose();return m;}
-function textFixo(g,text,x,y,z=0,width=1.5,color){const m=rotuloFixo(text,color,width);m.position.set(x,y,z);g.add(m);return m;}
+function rotuloFixo(text,color='#e7f6ff',width=1.5,size=56,quebra=true){return window.CORPO_MODELS.rotuloFixo(text,color,width,size,quebra);}
+function textFixo(g,text,x,y,z=0,width=1.5,color,quebra=true){return window.CORPO_MODELS.textFixo(g,text,x,y,z,width,color,quebra);}
 function stageBase(g,width=5,y=-3.15,z=0){const m=new T.Mesh(new T.CircleGeometry(width,72),mat(0x0b2637,{roughness:.7,metalness:.12}));m.rotation.x=-Math.PI/2;m.position.set(0,y,z);g.add(m);const rim=new T.Mesh(new T.RingGeometry(width-.016,width+.016,72),new T.MeshBasicMaterial({color:0x305d72,side:T.DoubleSide}));rim.rotation.x=-Math.PI/2;rim.position.set(0,y+.01,z);g.add(rim);}
 const inspectHit=p=>({type:'inspect',key:G().chave(p)});
 const D_=k=>k+'_d';
@@ -88,7 +89,7 @@ function articulacoes(state){
 function sequencia(state,cfg){
   if(state.done)return sequenciaConcluida(cfg);
   const g=new T.Group();const n=cfg.ordem.length,dy=.62,top=(n-1)*dy/2+.3;
-  textFixo(g,cfg.titulo,.9,top+.75,0,3.4,cfg.cor);
+  textFixo(g,cfg.titulo,.9,top+1.32,0,3.6,cfg.cor);textFixo(g,'PEÇA → ESPAÇO AMARELO',.9,top+.5,0,3.0,'#ffe3a8',false);
   for(let i=0;i<n;i++){const y=top-i*dy;const key=state.colocados[i];
     const num=rotuloFixo(String(i+1),i===state.target?'#ffdb9f':'#8fb0c2',.5,96);num.position.set(-.55,y,.05);g.add(num);
     const placa=new T.Mesh(new T.BoxGeometry(2.6,.46,.16),mat(key?0x1d4f63:0x15303f,{transparent:!key,opacity:key?1:.65}));placa.position.set(.9,y,0);tag(placa,{type:'seqSlot',index:i});g.add(placa);
@@ -97,10 +98,12 @@ function sequencia(state,cfg){
     if(i<n-1){const seta=new T.ArrowHelper(V(0,-1,0),V(.9,y-.25,0),.12,0x6ca7be,.08,.06);g.add(seta);}
   }
   const restantes=state.bandeja.filter(k=>!state.colocados.includes(k));
-  restantes.forEach((k,i)=>{const cols=2,c=i%cols,r=Math.floor(i/cols);const x=2.75+c*1.6,y=top-.1-r*.72;
-    const peca=new T.Mesh(new T.BoxGeometry(1.48,.56,.2),mat(0x2b6f88,{roughness:.4}));peca.position.set(x,y,.1);peca.userData.draggable=true;tag(peca,{type:'seqPiece',key:k});g.add(peca);
-    const t=rotuloFixo(cfg.rotulos[k],'#ffffff',1.46,66);t.position.set(x,y,.22);g.add(t);});
-  if(restantes.length)textFixo(g,'PEÇAS',3.55,top+.55,0,1.2,'#8fb0c2');
+  /* v4.12: peças maiores e texto em até duas linhas (mesmo padrão do corpo-models) */
+  restantes.forEach((k,i)=>{const cols=2,c=i%cols,r=Math.floor(i/cols);const x=3.4+c*2.02,y=top-.1-r*.78;
+    const peca=new T.Mesh(new T.BoxGeometry(1.9,.64,.2),mat(0x2b6f88,{roughness:.4}));peca.position.set(x,y,.1);peca.userData.draggable=true;tag(peca,{type:'seqPiece',key:k});g.add(peca);
+    const t=rotuloFixo(cfg.rotulos[k],'#ffffff',1.86,64);t.position.set(x,y,.22);g.add(t);
+    if(state.selected===k){const anel=new T.Mesh(new T.BoxGeometry(2.04,.78,.08),new T.MeshBasicMaterial({color:0xffffff,wireframe:true}));anel.position.set(x,y,.1);g.add(anel);}});
+  if(restantes.length)textFixo(g,'PEÇAS',4.41,top+.5,0,2.3,'#cfe3ee',false);
   g.userData.slots={top,dy};
   /* referência: o recorte real ao lado, com as partes já colocadas em destaque */
   const ref=cfg.titulo==='COLUNA VERTEBRAL'?recorte('esqueleto',['cervical','toracica','lombar','sacro','coccix','cranio'],{cor:p=>state.colocados.includes(p)?0xffd166:p==='cranio'?0xcfc9bb:COR.osso,opacidade:.95,hit:p=>({type:'inspect',key:G().chave(p)})}):recorte('esqueleto',['clavicula_d','escapula_d','umero_d','radio_d','ulna_d','mao_d'],{cor:p=>{const k=G().chave(p);const key=(k==='radio'||k==='ulna')?'antebraco':k;return state.colocados.includes(key)?0xffd166:COR.osso;},hit:p=>({type:'inspect',key:G().chave(p)})});

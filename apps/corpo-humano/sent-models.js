@@ -173,7 +173,7 @@ function setaObjeto(alt,cor){const g=new T.Group();const h=new T.Mesh(new T.Cyli
 
 /* missão Como enxergamos: tabuleiro + olho em corte; cada etapa encaixada acende o trecho do caminho */
 function luz(state,cfg){const Mo=M(),g=Mo.sequencia(state,cfg),n=state.colocados.filter(Boolean).length;
-  alargar(g,5.6);const cena=new T.Group();cena.position.set(3.9,.15,0);cena.scale.setScalar(.5);g.add(cena);
+  /* v4.12: olho em corte embaixo da coluna de peças (quadro mais estreito = tudo maior no óculos) */const cena=new T.Group();cena.position.set(-3.05,-1.75,0);cena.scale.setScalar(.5);g.add(cena);
   const olho=olhoCorte();cena.add(olho);const u=olho.userData;
   const obj=setaObjeto(1.0,0xffd27f);obj.position.set(-3.0,0,0);cena.add(obj);label(cena,'Objeto',V(-3.0,-.95,.3),'#ffe9b0',1.1);
   const topo=V(-3.0,.62,0),base=V(-3.0,-.5,0);const img=[V(u.xRetina-.06,-.22,0),V(u.xRetina-.06,.18,0)];
@@ -213,7 +213,7 @@ function lentes(state){const Mo=M(),w=new T.Group();const caso=state.caso||'miop
 
 /* missão Como ouvimos: tabuleiro + orelha real; cada etapa encaixada acende o trecho do caminho do som */
 function som(state,cfg){const Mo=M(),g=Mo.sequencia(state,cfg),n=state.colocados.filter(Boolean).length;
-  alargar(g,5.6);const cena=new T.Group();cena.position.set(3.75,.1,0);cena.scale.setScalar(.45);g.add(cena);
+  const cena=new T.Group();cena.position.set(-3.7,-1.95,0);cena.scale.setScalar(.45);g.add(cena);
   const b=orelhaAmpliada({hit:null});cena.add(b);const o=b.userData.orelha;
   const ondas=[];if(n>=1){for(let i=0;i<4;i++){const r=new T.Mesh(new T.TorusGeometry(.5,.025,8,48),new T.MeshBasicMaterial({color:0xf0a6c8,transparent:true,opacity:.7}));r.rotation.y=Math.PI/2;r.userData.f=i/4;cena.add(r);ondas.push(r);}}
   const pulsos=[];if(n>=3){for(let i=0;i<3;i++){const p=new T.Mesh(new T.SphereGeometry(.07/K_ORELHA,12,8),new T.MeshBasicMaterial({color:0xfff0f6}));p.userData.f=i/3;o.add(p);pulsos.push(p);}}

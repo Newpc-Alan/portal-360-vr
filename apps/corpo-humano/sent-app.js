@@ -17,7 +17,7 @@ function garantir(S,freshSeq){if(typeof S.sentContext!=='number')S.sentContext=0
 /* ---------- painel lateral ---------- */
 function painel(S,H){const {btn,pill,esc,listaHTML,tourHTML,seqUI}=H,v=S.view;let h='';
   if(v==='sentContexto'){const lv=S.sentContext,e=D.sentContext[lv];
-    h+='<h2>'+esc(e.name)+'</h2><div class="step-list">'+D.sentContext.map((x,i)=>'<span class="'+(i<=lv?'done':'')+'"></span>').join('')+'</div><p>'+esc(e.text)+'</p><div class="button-row">'+btn('Etapa anterior','sent:ctx:back','',lv===0)+btn(BOTOES[lv],lv<2?'sent:ctx:next':'view:sentidos','primary')+'</div><div class="info-card"><p>'+esc(NOTAS[lv])+'</p></div>';
+    h+='<h2>'+esc(e.name)+'</h2><div class="step-list">'+D.sentContext.map((x,i)=>'<span class="'+(i<=lv?'done':'')+'"></span>').join('')+'</div><p>'+esc(e.text)+'</p><div class="button-row">'+btn('Etapa anterior','sent:ctx:back','',lv===0)+btn(BOTOES[lv],lv<2?'sent:ctx:next':'view:sentidos','primary')+'</div>'+(lv>0?btn('↺ Voltar ao corpo inteiro','sent:ctx:corpo','wide'):'')+'<div class="info-card"><p>'+esc(NOTAS[lv])+'</p></div>';
     return{html:h,text:e.text,key:e.audio};}
   if(v==='sentidos'){h+='<h2>Explore os órgãos dos sentidos</h2><p>Aponte em uma estrutura do olho ou da orelha na cena, ou escolha abaixo. Em "Outros sentidos" estão o olfato, o paladar e o tato.</p>'+listaHTML('sentidos')+tourHTML('sentidos')+'<p class="fine">Pergunta central: <b>Como percebemos o mundo?</b></p><p class="fine">BNCC EF06CI08: funcionamento do olho humano e lentes corretivas.</p>';
     return{html:h,text:'Aponte em uma estrutura para ver a ficha e ouvir a explicação. Investigue pelo menos três.',key:'sent-aula-explorar'};}
@@ -34,6 +34,7 @@ function painel(S,H){const {btn,pill,esc,listaHTML,tourHTML,seqUI}=H,v=S.view;le
 
 /* ---------- comandos ---------- */
 function command(kind,op,a,api){if(kind!=='sent')return false;const S=api.S;garantir(S);
+  if(op==='ctx'&&(a==='olho'||a==='orelha'||a==='corpo')){S.sentContext=a==='olho'?1:a==='orelha'?2:0;api.log('contexto','sentidos',{level:S.sentContext});if(S.sentContext===2)api.mark('sentContexto');api.render();if(S.autoVoice)api.narrator.say(api.instruction,api.instructionKey);return true;}
   if(op==='ctx'){if(a==='next'&&S.sentContext<2){S.sentContext++;api.log('contexto','sentidos',{level:S.sentContext});if(S.sentContext===2)api.mark('sentContexto');}
     else if(a==='next'){api.switchView('sentidos');return true;}
     if(a==='back')S.sentContext=Math.max(0,S.sentContext-1);api.render();if(S.autoVoice)api.narrator.say(api.instruction,api.instructionKey);return true;}

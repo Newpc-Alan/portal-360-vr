@@ -140,8 +140,10 @@ function sentContexto(level){const Mo=M(),g=G(),w=new T.Group();
   if(level===0){registrar();const sil=g.orgao('silhueta',null,()=>CTX,{opacidade:.14});w.add(sil);
     const pts=[['Visão',[-0.031,1.592,0.08],0x9fc5f0,-1.6,.5],['Visão',[0.031,1.592,0.08],0x9fc5f0,null],['Audição',[-0.076,1.58,0.0],0xf0a6c8,-1.9,-.2],['Audição',[0.076,1.58,0.0],0xf0a6c8,null],
      ['Olfato',[0,1.585,0.1],0x9ed6ef,1.7,.35],['Paladar',[0,1.528,0.075],0xd96b73,1.7,-.35],['Tato',[0.28,0.79,0.06],0xf2c9a6,1.4,0]];
-    pts.forEach(([t,p,cor,dx,dy])=>{const b=new T.Mesh(new T.SphereGeometry(.07,20,14),new T.MeshBasicMaterial({color:cor}));b.position.copy(g.ponto(...p));b.userData.hit=CTX;b.userData.pulso=true;w.add(b);
-      if(dx!==null)label(w,t,b.position.clone().add(V(dx,dy,.5)),'#ffffff',1.2);});
+    /* v4.12.2: cada ponto leva ao seu sentido (visão → olho, audição → orelha, os outros abrem a ficha) */
+    const DEST={'Visão':{type:'v4',command:'sent:ctx:olho'},'Audição':{type:'v4',command:'sent:ctx:orelha'},'Olfato':insp('olfato'),'Paladar':insp('paladar'),'Tato':insp('tato')};
+    pts.forEach(([t,p,cor,dx,dy])=>{const b=new T.Mesh(new T.SphereGeometry(.09,20,14),new T.MeshBasicMaterial({color:cor}));b.position.copy(g.ponto(...p));b.userData.hit=DEST[t]||CTX;b.userData.pulso=true;w.add(b);
+      if(dx!==null){const lp=b.position.clone().add(V(dx*1.25,dy,.5)),sp=label(w,t,lp,'#ffffff',2.4);sp.userData.hit=b.userData.hit;const fim=lp.clone().add(V(dx>0?-.75:.75,0,0));w.add(new T.Line(new T.BufferGeometry().setFromPoints([b.position.clone(),fim]),new T.LineBasicMaterial({color:cor,transparent:true,opacity:.7})));}});
     w.userData.tick=t=>{w.children.forEach(o=>{if(o.userData.pulso)o.scale.setScalar(1+.25*Math.sin(t*3+o.position.x*4));});};
     Mo.textAt(w,'OS CINCO SENTIDOS',0,-7.9,0,4.2,'#9fc5f0');return w;}
   if(level===1){const a=olhoAmpliado({});a.scale.setScalar(1.15);w.add(a);Mo.textFixo(w,'O OLHO POR DENTRO',0,2.5,0,3.2,'#9fc5f0');

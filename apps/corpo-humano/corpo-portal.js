@@ -154,7 +154,7 @@ Proto.buildXRUI=function(){
      viram duas, para o menu não subir demais. */
   const AZ={bg:'#0f2c4a',borda:'#37B1DA',texto:'#ffffff'},AT={bg:'#0f6b3a',borda:'#7CFFB8',texto:'#ffffff'},SAI={bg:'#5a2a16',borda:'#ff9f6b',texto:'#fff2ea'};
   const menuAb=!!this.menuAberto;
-  this.xrButton(menuAb?'✕ Fechar menu':'☰  Menu','xr:abrirmenu',-.80,-.52,.36,false,menuAb?{bg:'#3a2a10',borda:'#ffc77a',texto:'#fff6e8'}:{bg:'#0f4a6e',borda:'#7fd6ff',texto:'#ffffff'});
+  this.xrButton(menuAb?'✕ Fechar menu':'☰  Menu','xr:abrirmenu',-.80,-.74,.36,false,menuAb?{bg:'#3a2a10',borda:'#ffc77a',texto:'#fff6e8'}:{bg:'#0f4a6e',borda:'#7fd6ff',texto:'#ffffff'});
   if(!menuAb)return;this._menuDesde=this.ui.children.length;
   const ar=window.__arOK||this.xrModo==='ar';
   const grupos=D.sistemas.filter(x=>!x.breve),grupoAtual=S.sistema,grupoNome=(Lab.sistemaAtual()||{}).nome||'',GRUPO_NOME='SISTEMAS',GRUPO_CMD='sistema:',atv=Lab.atividadesDe(S.sistema),TXT_DENTRO='Entrar no corpo',TXT_FORA='Sair de dentro do corpo';
@@ -321,6 +321,8 @@ Proto.placeXR=function(){
   if(this.xr&&this.model&&this.anchor&&!this.dentro&&!this.copy&&Lab.state.view==='coracaoLab'){/* v4.7.2: coração de estudo com 0,6 m a 0,9 m do aluno, altura do peito */const a=this.anchor,b=this.boxDe(this.obj||this.model);if(!b.isEmpty()){const sz=b.getSize(new T.Vector3()),k=(0.6*(this.xrZoom||1))/Math.max(sz.y,1e-3);this.root.scale.multiplyScalar(k);this.root.updateMatrixWorld(true);const b2=this.boxDe(this.obj||this.model),c=b2.getCenter(new T.Vector3());const alvo=a.p.clone().addScaledVector(a.f,.9);alvo.y=a.p.y-.15;this.root.position.add(alvo.sub(c));this.root.updateMatrixWorld(true);}}
   /* v4.1: no Desafio o painel fica à frente; o modelo gira 50° para a direita em volta do aluno, sem mudar de tamanho */
   if(this.xr&&this.model&&this.anchor&&quizFaseXR(this)){const a=this.anchor,up=new T.Vector3(0,1,0);this.root.position.sub(a.p).applyAxisAngle(up,-.87).add(a.p);this.root.rotation.y-=.87;this.root.updateMatrixWorld(true);}
+  /* v4.13.4: tabuleiros de ordenar (1,9 m de largura) ficavam embaixo do painel da direita; vão 0,4 m para a esquerda */
+  if(this.xr&&this.model&&this.anchor&&!this.dentro&&!this.copy&&Lab.state&&['caminhoAr','caminhoSangue','alimento','coluna','braco','reflexo','defesa','puberdade','luz','som'].includes(Lab.state.view)){const a=this.anchor;this.root.position.x-=-a.f.z*.4;this.root.position.z-=a.f.x*.4;this.root.updateMatrixWorld(true);}
   /* v4.13.2: distância escolhida pelo aluno (X/Y): afasta ou aproxima a cena a partir dos olhos, sem mudar o tamanho real */
   const f=this.xrDist||1;if(this.xr&&this.model&&this.anchor&&!this.dentro&&Math.abs(f-1)>.01){const a=this.anchor;this.root.updateMatrixWorld(true);const b=this.boxDe(this.model,true);if(!b.isEmpty()){const c=b.getCenter(new T.Vector3());this.root.position.x+=(c.x-a.p.x)*(f-1);this.root.position.z+=(c.z-a.p.z)*(f-1);this.root.updateMatrixWorld(true);}}
 };

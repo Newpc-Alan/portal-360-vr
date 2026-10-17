@@ -373,3 +373,5 @@ v4.11.1 (realismo dos sentidos)
 4.13.2 · Distância ajustável no VR: X (controle esquerdo) aproxima e Y afasta tudo (cena, painéis e menu), 5 níveis (0,75 a 1,3 x), guardado no aparelho; também no menu VER. B abre o menu (Y deixou de abrir). Ajuda dos controles atualizada.
 
 4.13.3 · Distância no VR com 10 níveis (0,6 a 1,65 x; padrão no 5º).
+
+4.13.4 · Validação geral (55 telas no navegador e simulação do VR, sem erros nem arquivos faltando). No VR, tabuleiros de ordenar 0,4 m à esquerda para não ficarem sob o painel; botão Menu mais baixo.

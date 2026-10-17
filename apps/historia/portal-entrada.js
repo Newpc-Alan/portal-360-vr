@@ -1,21 +1,26 @@
 /* Portal de entrada · Portal 360º VR · Portal do Educador (v1.0.0, out/2026)
    Abertura cinematográfica ao entrar no óculos (e no 3D da lousa/desktop), igual para todos os apps do catálogo.
-   Sequência (~9 s): escuridão com estrelas → partículas chegam em redemoinho → formam o logo do Portal do Educador →
+   Sequência (~9 s, ~10,6 s com segundo logo): escuridão com estrelas → partículas chegam em redemoinho → formam o logo
+   (assinatura Portal 360º VR) → [v1.1: se houver "logo2", as partículas viajam e formam o logo do Portal do Educador] →
    o logo vira um anel de luz → o anel avança e atravessa o aluno → o mundo do app se revela numa onda de luz → título.
    - VR/realidade mista: desenhado dentro da cena do próprio app (mesmo renderer), por cima de tudo, sem pós-processamento.
    - 3D: camada própria por cima da página (canvas transparente), que se abre revelando o app.
    - Gatilho do controle, clique, toque, Esc ou Espaço pulam. Na 2ª entrada no VR da mesma página, versão curta.
    - Som sintetizado no navegador (sem arquivos). Requer THREE r128 global.
    Uso (no app, depois que a cena existe):
-     PortalEntrada.configurar({titulo, subtitulo, cor, logo, obter:()=>({renderer,scene,camera}), auto3D:true});
+     PortalEntrada.configurar({titulo, subtitulo, cor, logo, logo2, obter:()=>({renderer,scene,camera}), auto3D:true});
      PortalEntrada.depois(fn, atraso)  → roda fn quando a abertura revela o app (ou após "atraso" ms se não houver abertura)
      PortalEntrada.tocar3D()           → abertura em 3D sob demanda
    Arquivo-mestre: assets/portal-entrada/portal-entrada.js (cópia idêntica em cada apps/<app>/portal-entrada.js). */
 (function(){
 'use strict';
 if(window.PortalEntrada)return;
-const VERSAO='1.0.1';
-const DUR=9.4,REVELA_FIM=7.6,INICIO_CURTO=5.2;
+const VERSAO='1.1.0';
+/* ATR: tempo extra da 2ª formação (logo2). Tudo do anel em diante é empurrado por ATR. */
+const ATR2=1.6;let ATR=0;
+const DUR0=9.4,REVELA0=7.6,CURTO0=5.2;
+let DUR=DUR0,REVELA_FIM=REVELA0,INICIO_CURTO=CURTO0;
+function definirAtraso(tem2){ATR=tem2?ATR2:0;DUR=DUR0+ATR;REVELA_FIM=REVELA0+ATR;INICIO_CURTO=CURTO0+ATR;}
 let cfg=null,ativo=null,entradasXR=0,fila=[];
 const agoraS=()=>(typeof window.__peRelogio==='function'?window.__peRelogio():performance.now()/1000); /* relógio substituível só em teste */
 const reduzido=()=>{try{return matchMedia('(prefers-reduced-motion: reduce)').matches;}catch(_){return false;}};
@@ -35,21 +40,23 @@ function trilha(ctx,curto){
   const nos=[];
   // drone grave que cresce até a travessia
   if(!curto){
-    const filtro=ctx.createBiquadFilter();filtro.type='lowpass';filtro.frequency.setValueAtTime(120,t0);filtro.frequency.exponentialRampToValueAtTime(900,em(5.6));filtro.frequency.exponentialRampToValueAtTime(200,em(8.5));filtro.connect(mestre);
-    const g=ctx.createGain();g.gain.setValueAtTime(0,t0);g.gain.linearRampToValueAtTime(0.32,em(2));g.gain.linearRampToValueAtTime(0.5,em(5.6));g.gain.exponentialRampToValueAtTime(0.001,em(8.8));g.connect(filtro);
-    [55,55.4,82.5].forEach((f,i)=>{const o=ctx.createOscillator();o.type=i===2?'triangle':'sawtooth';o.frequency.value=f;o.connect(g);o.start(t0);o.stop(em(9));nos.push(o);});
+    const filtro=ctx.createBiquadFilter();filtro.type='lowpass';filtro.frequency.setValueAtTime(120,t0);filtro.frequency.exponentialRampToValueAtTime(900,em(5.6+ATR));filtro.frequency.exponentialRampToValueAtTime(200,em(8.5+ATR));filtro.connect(mestre);
+    const g=ctx.createGain();g.gain.setValueAtTime(0,t0);g.gain.linearRampToValueAtTime(0.32,em(2));g.gain.linearRampToValueAtTime(0.5,em(5.6+ATR));g.gain.exponentialRampToValueAtTime(0.001,em(8.8+ATR));g.connect(filtro);
+    [55,55.4,82.5].forEach((f,i)=>{const o=ctx.createOscillator();o.type=i===2?'triangle':'sawtooth';o.frequency.value=f;o.connect(g);o.start(t0);o.stop(em(9+ATR));nos.push(o);});
     // brilho quando o logo se forma
     [880,1318.5,1760,2637].forEach((f,i)=>{const o=ctx.createOscillator(),gg=ctx.createGain();o.type='sine';o.frequency.value=f;const ti=em(3.35+i*0.09);gg.gain.setValueAtTime(0,ti);gg.gain.linearRampToValueAtTime(0.09/(i+1)+0.03,ti+0.02);gg.gain.exponentialRampToValueAtTime(0.0008,ti+2.2);o.connect(gg);gg.connect(mestre);o.start(ti);o.stop(ti+2.4);nos.push(o);});
+    // segundo brilho quando o logo do Portal do Educador se forma (um tom acima)
+    if(ATR)[987.8,1480,1975.5,2960].forEach((f,i)=>{const o=ctx.createOscillator(),gg=ctx.createGain();o.type='sine';o.frequency.value=f;const ti=em(5.0+i*0.09);gg.gain.setValueAtTime(0,ti);gg.gain.linearRampToValueAtTime(0.08/(i+1)+0.025,ti+0.02);gg.gain.exponentialRampToValueAtTime(0.0008,ti+2.0);o.connect(gg);gg.connect(mestre);o.start(ti);o.stop(ti+2.2);nos.push(o);});
   }
   // whoosh na travessia do portal
   const dur=1.8,buf=ctx.createBuffer(1,Math.floor(ctx.sampleRate*dur),ctx.sampleRate),d=buf.getChannelData(0);
   for(let i=0;i<d.length;i++)d[i]=(Math.random()*2-1);
   const ru=ctx.createBufferSource();ru.buffer=buf;const bp=ctx.createBiquadFilter();bp.type='bandpass';bp.Q.value=1.2;
-  const tw=em(5.3);bp.frequency.setValueAtTime(220,tw);bp.frequency.exponentialRampToValueAtTime(2600,tw+0.9);bp.frequency.exponentialRampToValueAtTime(400,tw+dur);
+  const tw=em(5.3+ATR);bp.frequency.setValueAtTime(220,tw);bp.frequency.exponentialRampToValueAtTime(2600,tw+0.9);bp.frequency.exponentialRampToValueAtTime(400,tw+dur);
   const gw=ctx.createGain();gw.gain.setValueAtTime(0,tw);gw.gain.linearRampToValueAtTime(0.5,tw+0.85);gw.gain.exponentialRampToValueAtTime(0.001,tw+dur);
   ru.connect(bp);bp.connect(gw);gw.connect(mestre);ru.start(tw);ru.stop(tw+dur);nos.push(ru);
   // acorde de chegada no app
-  [261.6,392,523.3,659.3].forEach((f,i)=>{const o=ctx.createOscillator(),gg=ctx.createGain();o.type='sine';o.frequency.value=f;const ti=em(6.5)+i*0.04;gg.gain.setValueAtTime(0,ti);gg.gain.linearRampToValueAtTime(0.07,ti+0.25);gg.gain.exponentialRampToValueAtTime(0.0008,ti+2.6);o.connect(gg);gg.connect(mestre);o.start(ti);o.stop(ti+2.8);nos.push(o);});
+  [261.6,392,523.3,659.3].forEach((f,i)=>{const o=ctx.createOscillator(),gg=ctx.createGain();o.type='sine';o.frequency.value=f;const ti=em(6.5+ATR)+i*0.04;gg.gain.setValueAtTime(0,ti);gg.gain.linearRampToValueAtTime(0.07,ti+0.25);gg.gain.exponentialRampToValueAtTime(0.0008,ti+2.6);o.connect(gg);gg.connect(mestre);o.start(ti);o.stop(ti+2.8);nos.push(o);});
   return{parar(rapido){try{const t=ctx.currentTime;mestre.gain.cancelScheduledValues(t);mestre.gain.setValueAtTime(mestre.gain.value,t);mestre.gain.linearRampToValueAtTime(0,t+(rapido?0.3:0.8));setTimeout(()=>{nos.forEach(n=>{try{n.stop();}catch(_){}});try{mestre.disconnect();}catch(_){}},1000);}catch(_){}}};
 }
 
@@ -107,13 +114,15 @@ const VEU_FS=[
 ' gl_FragColor=vec4(cor,max(a,borda*0.95)*uOp);',
 '}'].join('\n');
 const PART_VS=[
-'attribute vec3 aAlvo;attribute vec4 aR;uniform float uT;uniform float uIn;uniform float uMorph;uniform float uAnel;uniform float uTam;uniform float uPix;',
+'attribute vec3 aAlvo;attribute vec3 aAlvo2;attribute vec4 aR;uniform float uT;uniform float uIn;uniform float uMorph;uniform float uMorph2;uniform float uAnel;uniform float uTam;uniform float uPix;',
 'uniform vec3 uCorA;uniform vec3 uCorB;varying vec3 vCor;varying float vBri;',
 'void main(){',
 ' float ang=aR.y*6.2832+uT*(0.9/(0.25+aR.x));float rad=0.15+aR.x*1.5;',
 ' float br=floor(aR.w*3.0)*2.0944;float esp=ang+rad*1.8+br*0.0;vec3 vort=vec3(cos(esp)*rad,sin(esp)*rad*0.82,(aR.z-0.5)*0.25*rad+sin(uT*1.3+aR.w*6.28)*0.04);vort.y+=vort.z*0.35;',
 ' vort.z-=(1.0-uIn)*(4.0+aR.w*6.0);vort.xy*=mix(3.0,1.0,uIn);',
-' vec3 logo=aAlvo+vec3(0.0,0.0,sin(uT*3.0+aR.w*20.0)*0.01);',
+' float m2=clamp(uMorph2*1.6-aR.y*0.6,0.0,1.0);m2=m2*m2*(3.0-2.0*m2);',
+' vec3 meio=vec3(0.0,0.0,0.35*sin(m2*3.1416)*(aR.z-0.5)*2.0);',
+' vec3 logo=mix(aAlvo,aAlvo2,m2)+meio+vec3(0.0,0.0,sin(uT*3.0+aR.w*20.0)*0.01);',
 ' float ra=aR.y*6.2832+uT*0.6;vec3 anel=vec3(cos(ra)*0.78,sin(ra)*0.78,0.0)+(aR.xzw-0.5)*0.05;',
 ' float m=clamp(uMorph*1.6-aR.w*0.6,0.0,1.0);m=m*m*(3.0-2.0*m);',
 ' float r=clamp(uAnel*1.6-aR.x*0.6,0.0,1.0);r=r*r*(3.0-2.0*r);',
@@ -141,14 +150,19 @@ function montar(T,opt){
   const geo=new T.BufferGeometry();
   const pos=new Float32Array(N*3),rnd=new Float32Array(N*4);for(let i=0;i<N*4;i++)rnd[i]=Math.random();
   geo.setAttribute('position',new T.BufferAttribute(pos,3));
-  geo.setAttribute('aAlvo',new T.BufferAttribute(alvosDoLogo(opt.img,N,1.3),3));
+  const alvo1=alvosDoLogo(opt.img,N,1.3);geo.setAttribute('aAlvo',new T.BufferAttribute(alvo1,3));
+  const tem2=!!(opt.img2&&opt.img2.naturalWidth);geo.setAttribute('aAlvo2',new T.BufferAttribute(tem2?alvosDoLogo(opt.img2,N,1.3):alvo1,3));
   geo.setAttribute('aR',new T.BufferAttribute(rnd,4));
-  const partMat=mat(new T.ShaderMaterial({vertexShader:PART_VS,fragmentShader:PART_FS,blending:T.AdditiveBlending,uniforms:{uT:{value:0},uIn:{value:0},uMorph:{value:0},uAnel:{value:0},uOp:{value:0},uTam:{value:20},uPix:{value:1},uCorA:{value:corVec(T,'#57d4ff')},uCorB:{value:corVec(T,opt.cor)}}}));
+  const partMat=mat(new T.ShaderMaterial({vertexShader:PART_VS,fragmentShader:PART_FS,blending:T.AdditiveBlending,uniforms:{uT:{value:0},uIn:{value:0},uMorph:{value:0},uMorph2:{value:0},uAnel:{value:0},uOp:{value:0},uTam:{value:20},uPix:{value:1},uCorA:{value:corVec(T,'#57d4ff')},uCorB:{value:corVec(T,opt.cor)}}}));
   const pontos=new T.Points(geo,partMat);pontos.renderOrder=9991;pontos.frustumCulled=false;palco.add(pontos);
   // logo nítido (aparece sobre as partículas quando elas formam a imagem)
   let logoTex=null,logo=null;
   if(opt.img&&opt.img.naturalWidth){logoTex=new T.Texture(opt.img);logoTex.encoding=T.sRGBEncoding;logoTex.needsUpdate=true;
     logo=new T.Mesh(new T.PlaneGeometry(1.3,1.3),mat(new T.MeshBasicMaterial({map:logoTex,opacity:0})));logo.renderOrder=9992;logo.frustumCulled=false;logo.position.z=0.02;palco.add(logo);}
+  let logo2=null;
+  if(tem2){const tx=new T.Texture(opt.img2);tx.encoding=T.sRGBEncoding;tx.needsUpdate=true;
+    logo2=new T.Mesh(new T.PlaneGeometry(1.3,1.3),mat(new T.MeshBasicMaterial({map:tx,opacity:0})));logo2.renderOrder=9992;logo2.frustumCulled=false;logo2.position.z=0.02;palco.add(logo2);}
+  const A=tem2?ATR2:0;
   // halo do anel
   const haloMat=mat(new T.MeshBasicMaterial({color:new T.Color('#9fe8ff'),opacity:0,blending:T.AdditiveBlending,side:T.DoubleSide}));
   const halo=new T.Mesh(new T.RingGeometry(0.765,0.795,128),haloMat);halo.renderOrder=9992;halo.frustumCulled=false;palco.add(halo);
@@ -156,28 +170,34 @@ function montar(T,opt){
   const titTex=texturaTitulo(T,opt.titulo,opt.subtitulo,opt.cor);
   const titMat=mat(new T.MeshBasicMaterial({map:titTex,opacity:0}));
   const titulo=new T.Mesh(new T.PlaneGeometry(2.1,2.1*320/1024),titMat);titulo.renderOrder=9993;titulo.frustumCulled=false;titulo.position.set(0,0.02,-2.2);raiz.add(titulo);
-  return{raiz,veuGrupo,palco,veuMat,partMat,logo,haloMat,titMat,titulo,
+  return{raiz,veuGrupo,palco,veuMat,partMat,logo,logo2,haloMat,titMat,titulo,
     atualizar(t,pix){
       const u=partMat.uniforms;u.uT.value=t;u.uPix.value=pix;veuMat.uniforms.uT.value=t;
       u.uIn.value=sai(fase(t,0.1,2.2));
       u.uMorph.value=suave(fase(t,2.3,3.7));
-      u.uAnel.value=suave(fase(t,4.3,5.3));
-      u.uOp.value=fase(t,0.1,0.8)*(1-fase(t,6.3,7.0));
-      if(logo)logo.material.opacity=fase(t,3.2,3.9)*(1-fase(t,4.3,4.9))*0.95;
-      haloMat.opacity=fase(t,4.9,5.4)*(1-fase(t,6.2,6.8))*0.5;
-      const voo=suave(fase(t,5.0,6.6));palco.position.z=-2.6+voo*2.9;const esc=1+voo*2.4;palco.scale.set(esc,esc,esc);
+      u.uMorph2.value=A?suave(fase(t,4.2,5.4)):0;
+      u.uAnel.value=suave(fase(t,4.3+A,5.3+A));
+      u.uOp.value=fase(t,0.1,0.8)*(1-fase(t,6.3+A,7.0+A));
+      if(logo)logo.material.opacity=fase(t,3.2,3.9)*(1-(A?fase(t,4.0,4.4):fase(t,4.3,4.9)))*0.95;
+      if(logo2)logo2.material.opacity=fase(t,5.0,5.6)*(1-fase(t,4.3+A,4.9+A))*0.95;
+      haloMat.opacity=fase(t,4.9+A,5.4+A)*(1-fase(t,6.2+A,6.8+A))*0.5;
+      const voo=suave(fase(t,5.0+A,6.6+A));palco.position.z=-2.6+voo*2.9;const esc=1+voo*2.4;palco.scale.set(esc,esc,esc);
       palco.rotation.z=t*0.05;
-      veuMat.uniforms.uR.value=t<5.55?-0.4:Math.pow(fase(t,5.55,REVELA_FIM),opt.xr?1.5:1.2)*(opt.angMax||Math.PI+0.5);
-      titMat.opacity=fase(t,7.0,7.6)*(1-fase(t,8.8,9.4));
-      titulo.position.y=0.02+(1-sai(fase(t,7.0,7.7)))*-0.06;
+      veuMat.uniforms.uR.value=t<5.55+A?-0.4:Math.pow(fase(t,5.55+A,REVELA0+A),opt.xr?1.5:1.2)*(opt.angMax||Math.PI+0.5);
+      titMat.opacity=fase(t,7.0+A,7.6+A)*(1-fase(t,8.8+A,9.4+A));
+      titulo.position.y=0.02+(1-sai(fase(t,7.0+A,7.7+A)))*-0.06;
     },
     descartar(){raiz.traverse(o=>{if(o.geometry)o.geometry.dispose();});veu.geometry.dispose();lista.forEach(m=>{if(m.map)m.map.dispose();m.dispose();});}
   };
 }
 
 /* ---------- logo ---------- */
-let logoImg=null,logoPronto=null;
-function carregarLogo(src){if(logoPronto)return logoPronto;logoPronto=new Promise(res=>{if(!src){res(null);return;}const i=new Image();i.onload=()=>{logoImg=i;res(i);};i.onerror=()=>res(null);i.src=src;setTimeout(()=>res(logoImg),2500);});return logoPronto;}
+let logoImg=null,logoPronto=null,logo2Img=null;
+function carregarImg(src,ok){return new Promise(res=>{if(!src){res(null);return;}const i=new Image();i.onload=()=>{ok(i);res(i);};i.onerror=()=>res(null);i.src=src;setTimeout(()=>res(null),2500);});}
+function carregarLogo(src){if(logoPronto)return logoPronto;
+  logoPronto=Promise.all([carregarImg(src,i=>{logoImg=i;}),carregarImg(cfg&&cfg.logo2,i=>{logo2Img=i;})]).then(()=>logoImg);return logoPronto;}
+/* a 2ª formação só entra se o logo2 carregou; sem ele a abertura segue a sequência original */
+function prepararTempos(){definirAtraso(!!(logo2Img&&logo2Img.naturalWidth));}
 
 function liberarFila(){const f=fila;fila=[];f.forEach(x=>{try{x();}catch(e){console.error(e);}});}
 
@@ -188,7 +208,8 @@ function tocarXR(){
   const {renderer,scene,camera}=ctx;const session=renderer.xr.getSession&&renderer.xr.getSession();if(!session)return;
   if(ativo)ativo.fim(true);
   entradasXR++;const curto=entradasXR>1;
-  const c=montar(T,{xr:true,img:logoImg,cor:cfg.cor,titulo:cfg.titulo,subtitulo:cfg.subtitulo});
+  prepararTempos();
+  const c=montar(T,{xr:true,img:logoImg,img2:logo2Img,cor:cfg.cor,titulo:cfg.titulo,subtitulo:cfg.subtitulo});
   scene.add(c.veuGrupo);scene.add(c.raiz);c.raiz.visible=false;
   const som=trilha(audio(),curto);
   const t0=agoraS()-(curto?INICIO_CURTO:0);let saindo=0,fixado=false,revelou=false,encerrado=false;
@@ -209,7 +230,7 @@ function tocarXR(){
     }
     let pix=1.8;try{const l=session.renderState.baseLayer;if(l&&l.framebufferHeight)pix=l.framebufferHeight/1000;}catch(_){}
     c.atualizar(Math.min(t,DUR),pix);
-    if(saindo){const k=1-fase(agora,saindo,saindo+0.4);c.veuMat.uniforms.uOp.value=k;c.partMat.uniforms.uOp.value*=k;c.titMat.opacity*=k;c.haloMat.opacity*=k;if(c.logo)c.logo.material.opacity*=k;if(k<=0){fim(false);return;}}
+    if(saindo){const k=1-fase(agora,saindo,saindo+0.4);c.veuMat.uniforms.uOp.value=k;c.partMat.uniforms.uOp.value*=k;c.titMat.opacity*=k;c.haloMat.opacity*=k;if(c.logo)c.logo.material.opacity*=k;if(c.logo2)c.logo2.material.opacity*=k;if(k<=0){fim(false);return;}}
     if(!revelou&&t>=REVELA_FIM){revelou=true;liberarFila();}
     if(t>=DUR){fim(false);return;}
     session.requestAnimationFrame(quadro);
@@ -235,7 +256,8 @@ function tocar3D(){
     let renderer;try{renderer=new T.WebGLRenderer({canvas:cv,alpha:true,antialias:true,powerPreference:'high-performance'});}catch(e){ov.remove();return false;}
     renderer.outputEncoding=T.sRGBEncoding;renderer.setClearColor(0x000000,0);const dpr=Math.min(window.devicePixelRatio||1,2);renderer.setPixelRatio(dpr);
     const scene=new T.Scene(),camera=new T.PerspectiveCamera(60,1,0.05,50);
-    const c=montar(T,{xr:false,img:logoImg,cor:cfg.cor,titulo:cfg.titulo,subtitulo:cfg.subtitulo,angMax:1.6});scene.add(c.veuGrupo);scene.add(c.raiz);
+    prepararTempos();
+    const c=montar(T,{xr:false,img:logoImg,img2:logo2Img,cor:cfg.cor,titulo:cfg.titulo,subtitulo:cfg.subtitulo,angMax:1.6});scene.add(c.veuGrupo);scene.add(c.raiz);
     function dimensionar(){const w=innerWidth,h=innerHeight;renderer.setSize(w,h,false);camera.aspect=w/h;
       // garante largura útil de ~3,6 m a 2,6 m de distância em tela retrato
       const vfovMin=2*Math.atan(1.7/2.6)*180/Math.PI,hfov=2*Math.atan(1.85/2.6);const vfovPorLargura=2*Math.atan(Math.tan(hfov/2)/camera.aspect)*180/Math.PI;
@@ -250,8 +272,8 @@ function tocar3D(){
     function quadro(){
       const agora=agoraS(),t=agora-t0;
       c.atualizar(Math.min(t,DUR),Math.max(0.9,renderer.domElement.height/1000));
-      if(saindo){const k=1-fase(agora,saindo,saindo+0.4);c.veuMat.uniforms.uOp.value=k;c.partMat.uniforms.uOp.value*=k;c.titMat.opacity*=k;c.haloMat.opacity*=k;if(c.logo)c.logo.material.opacity*=k;if(k<=0){fim();return;}}
-      if(t>6.6)ov.style.pointerEvents='none';
+      if(saindo){const k=1-fase(agora,saindo,saindo+0.4);c.veuMat.uniforms.uOp.value=k;c.partMat.uniforms.uOp.value*=k;c.titMat.opacity*=k;c.haloMat.opacity*=k;if(c.logo)c.logo.material.opacity*=k;if(c.logo2)c.logo2.material.opacity*=k;if(k<=0){fim();return;}}
+      if(t>6.6+ATR)ov.style.pointerEvents='none';
       if(!revelou&&t>=REVELA_FIM){revelou=true;liberarFila();}
       renderer.render(scene,camera);
       if(t>=DUR){fim();return;}
@@ -272,7 +294,7 @@ function ligarRenderer(){
 window.PortalEntrada={
   versao:VERSAO,
   configurar(o){
-    cfg=Object.assign({titulo:'Portal 360º',subtitulo:'Portal 360º · Portal do Educador',cor:'#57d4ff',logo:'assets/logo.png',auto3D:true},o||{});
+    cfg=Object.assign({titulo:'Portal 360º',subtitulo:'Portal 360º · Portal do Educador',cor:'#57d4ff',logo:'assets/logo.png',logo2:null,auto3D:true},o||{});
     carregarLogo(cfg.logo);ligarRenderer();
     if(cfg.auto3D){
       const q=new URLSearchParams(location.search);

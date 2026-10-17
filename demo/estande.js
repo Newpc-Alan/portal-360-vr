@@ -108,6 +108,12 @@ const elastico=x=>{x=Math.min(1,Math.max(0,x));return x===1?1:Math.pow(2,-10*x)*
 function texBrilho(r,g,b){const c=document.createElement('canvas');c.width=c.height=256;const x=c.getContext('2d');const gr=x.createRadialGradient(128,128,0,128,128,128);gr.addColorStop(0,`rgba(${r},${g},${b},1)`);gr.addColorStop(.25,`rgba(${r},${g},${b},.55)`);gr.addColorStop(1,`rgba(${r},${g},${b},0)`);x.fillStyle=gr;x.fillRect(0,0,256,256);return texCanvas(c);}
 const BRILHO_AZUL=texBrilho(140,220,255),BRILHO_BRANCO=texBrilho(255,255,255);
 const LOGO=(()=>{const c=document.createElement('canvas');c.width=c.height=512;const t=texCanvas(c);const im=new Image();im.onload=()=>{const x=c.getContext('2d');x.save();x.beginPath();x.arc(256,256,256,0,Math.PI*2);x.clip();x.drawImage(im,0,0,512,512);x.restore();t.needsUpdate=true;};im.src='assets/logo.png';return t;})();
+/* assinatura Portal 360º VR: as partículas formam a marca antes de explodir no logo do Portal do Educador */
+const P360={tex:null,pts:null};(()=>{const c=document.createElement('canvas');c.width=c.height=1024;const t=texCanvas(c);const im=new Image();
+ im.onload=()=>{const x=c.getContext('2d');x.drawImage(im,0,0,1024,1024);t.needsUpdate=true;
+  try{const S=200,k=document.createElement('canvas');k.width=k.height=S;const g=k.getContext('2d');g.drawImage(im,0,0,S,S);const d=g.getImageData(0,0,S,S).data,pts=[];
+   for(let y=0;y<S;y++)for(let xx=0;xx<S;xx++){const i=(y*S+xx)*4;if(d[i+3]<140)continue;const l=(d[i]*.3+d[i+1]*.59+d[i+2]*.11)/255;pts.push([xx/S-.5,.5-y/S,Math.pow(l,2.2)+.05]);}
+   if(pts.length)P360.pts=pts;}catch(_){}};im.src='assets/entrada-simbolo.png';P360.tex=t;})();
 function spriteBrilho(tex,cor){return new T.Sprite(new T.SpriteMaterial({map:tex,color:cor||0xffffff,transparent:true,depthWrite:false,blending:T.AdditiveBlending}));}
 /* logo do Portal com halo, usado na abertura, na espera e no final */
 function logoComHalo(r){const g=new T.Group();const h=spriteBrilho(BRILHO_AZUL);h.scale.set(r*5,r*5,1);g.add(h);const m=new T.Mesh(new T.CircleGeometry(r,72),new T.MeshBasicMaterial({map:LOGO,transparent:true,depthWrite:false,toneMapped:false}));m.position.z=.01;g.add(m);g.userData.halo=h;return g;}
@@ -118,6 +124,9 @@ function nuvemExplosiva(n,raioIni,raioFim){const pos=new Float32Array(n*3),ini=n
  pos.set(ini);const geo=new T.BufferGeometry();geo.setAttribute('position',new T.BufferAttribute(pos,3));
  const p=new T.Points(geo,new T.PointsMaterial({color:0xa8ecff,size:.045,transparent:true,opacity:0,depthWrite:false,blending:T.AdditiveBlending,map:BRILHO_BRANCO}));
  p.userData={ini,alvo,vel,explodiu:false};
+ /* alvo das partículas desenhando uma imagem (largura L, em metros); sem imagem mantém o disco */
+ p.userData.alvoImagem=(pts,L)=>{if(!pts)return false;for(let i=0;i<n;i++){let q,t=0;do{q=pts[(Math.random()*pts.length)|0];t++;}while(Math.random()>q[2]&&t<24);
+  alvo[i*3]=(q[0]+(Math.random()-.5)/200)*L;alvo[i*3+1]=(q[1]+(Math.random()-.5)/200)*L;alvo[i*3+2]=(Math.random()-.5)*.03;}return true;};
  p.userData.implodir=k=>{const e=easeIn(k);for(let i=0;i<pos.length;i++)pos[i]=ini[i]+(alvo[i]-ini[i])*e;geo.attributes.position.needsUpdate=true;p.material.opacity=Math.min(1,k*2);};
  p.userData.explodir=()=>{for(let i=0;i<n;i++){const x=pos[i*3],y=pos[i*3+1],z=pos[i*3+2]+.02;const l=Math.hypot(x,y,z)||1,v=4+Math.random()*11;vel[i*3]=x/l*v+(Math.random()-.5)*3;vel[i*3+1]=y/l*v+(Math.random()-.5)*3;vel[i*3+2]=Math.abs(z/l)*v+2+Math.random()*9;}p.userData.explodiu=true;};
  p.userData.voar=(dt,f)=>{for(let i=0;i<pos.length;i++){pos[i]+=vel[i]*dt;vel[i]*=1-dt*.7;}geo.attributes.position.needsUpdate=true;p.material.opacity=Math.max(0,f);};
@@ -214,25 +223,29 @@ function carinha(o){const W=320,H=400,c=document.createElement('canvas');c.width
  x.fillStyle='#ffffff';x.font='700 58px Segoe UI,Arial';x.textAlign='center';x.textBaseline='middle';x.fillText(o.rotulo,cx,322);
  const m=new T.Mesh(new T.PlaneGeometry(.48,.6),new T.MeshBasicMaterial({map:texCanvas(c),transparent:true,depthWrite:false,side:T.DoubleSide,toneMapped:false}));m.renderOrder=510;m.userData.valor=o.valor;return m;}
 const CENAS=[
- {id:'abertura',dur:15.5,falaEm:4.2,legenda:'Isto é imersão. Com o Portal 360º VR, o aluno não olha para o conteúdo: ele entra nele.',
+ {id:'abertura',dur:16.7,falaEm:5.4,legenda:'Isto é imersão. Com o Portal 360º VR, o aluno não olha para o conteúdo: ele entra nele.',
   montar(a){const g=new T.Group();aFrente(g,a,3.2,.15);
    const nuvem=nuvemExplosiva(2600,[7,22],.55);g.add(nuvem);
+   const temMarca=nuvem.userData.alvoImagem(P360.pts,1.5);
+   const marca=new T.Mesh(new T.PlaneGeometry(1.5,1.5),new T.MeshBasicMaterial({map:P360.tex,transparent:true,opacity:0,depthWrite:false,toneMapped:false}));marca.position.z=.02;marca.visible=temMarca;g.add(marca);
    const flash=spriteBrilho(BRILHO_BRANCO);flash.scale.set(.01,.01,1);g.add(flash);
    const anel=new T.Mesh(new T.RingGeometry(.96,1,128),new T.MeshBasicMaterial({color:0x7CFFB8,transparent:true,opacity:0,side:T.DoubleSide,depthWrite:false,blending:T.AdditiveBlending}));g.add(anel);
    const anel2=anel.clone();anel2.material=anel.material.clone();anel2.material.color.setHex(0x7fd6ff);g.add(anel2);
    const logo=logoComHalo(.55);logo.scale.setScalar(.001);g.add(logo);
    const tit=placa('Portal 360º VR','',2.4,.34,{fundo:false,tamT:120,y0:100});tit.position.y=-.92;tit.material.opacity=0;g.add(tit);
    const sub=placa('','Isto é imersão.',1.8,.18,{fundo:false,tamC:76,y0:90,corC:'#7CFFB8'});sub.position.y=-1.22;sub.material.opacity=0;g.add(sub);
-   const T1=2.6;let somou=false;
-   g.userData.tick=(t,dt)=>{if(!somou){somou=true;somSubida(T1);}
-    if(t<T1){nuvem.userData.implodir(t/T1);logo.scale.setScalar(.001);return;}
+   /* T1: partículas formam a assinatura Portal 360º VR; T2: ela explode no logo do Portal do Educador */
+   const T1=2.6,T2=temMarca?3.8:T1;let somou=false,brilhou=false;
+   g.userData.tick=(t,dt)=>{if(!somou){somou=true;somSubida(T2);}
+    if(t<T2){nuvem.userData.implodir(Math.min(1,t/T1));logo.scale.setScalar(.001);
+     if(temMarca){marca.material.opacity=ease((t-2.2)/.6);marca.scale.setScalar(1+Math.max(0,t-T1)*.04);if(t>=T1&&!brilhou){brilhou=true;somAcerto();}}return;}
     if(!nuvem.userData.explodiu){nuvem.userData.explodir();somExplosao(1);}
-    const e=t-T1;nuvem.userData.voar(dt,1-e/3.5);
+    const e=t-T2;marca.material.opacity=Math.max(0,1-e/.15);nuvem.userData.voar(dt,1-e/3.5);
     const fl=e<.18?e/.18:Math.max(0,1-(e-.18)/.9);flash.scale.setScalar(.1+fl*9);flash.material.opacity=fl;
     anel.scale.setScalar(.2+e*7);anel.material.opacity=Math.max(0,1-e/1.5);anel2.scale.setScalar(.2+Math.max(0,e-.25)*5);anel2.material.opacity=Math.max(0,1-(e-.25)/1.8)*(e>.25?1:0);
     logo.scale.setScalar(Math.max(.001,elastico(e/1.1)));logo.userData.halo.material.opacity=.75+.25*Math.sin(t*2.2);logo.rotation.y=Math.sin(t*.5)*.12;
     tit.material.opacity=ease((e-1.0)/1.0);sub.material.opacity=ease((e-2.2)/1.0);
-    if(t>13.5){const k=(t-13.5)/2;logo.scale.setScalar(1+easeIn(k)*1.5);}};
+    if(t>T2+10.9){const k=(t-T2-10.9)/2;logo.scale.setScalar(1+easeIn(k)*1.5);}};
    return g;}},
  {id:'solar',dur:40,legenda:'Você está no meio do Sistema Solar. Segure o gatilho e gire os planetas com a mão. Na experiência completa, o aluno examina cada planeta, compara tamanhos, entende o dia e a noite, as fases da Lua e os eclipses.',
   montar(a){const g=new T.Group();const sist=new T.Group();sist.rotation.x=.12;

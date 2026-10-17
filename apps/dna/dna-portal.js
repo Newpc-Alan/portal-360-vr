@@ -127,20 +127,20 @@ Proto.buildXRUI=function(){
   if(!menuAberto)return;
   const atv=D.activities,idx=Math.max(0,atv.findIndex(a=>a.id===S.view));
   const cols=[['MISSÕES',atv.map((a,i)=>[(a.id===S.view?'▶ ':'')+(i+1)+'. '+a.label,'view:'+a.id,a.id===S.view?AT:null])],
-   ['VER',[['Recentralizar a cena','center',null],[S.autoRotate?'Parar o giro do modelo':'Girar o modelo','rotate',null]]],
+   ['VER',[['Recentralizar a cena','center',null],['Aproximar tudo  (X)','xr:perto',null],['Afastar tudo  (Y)','xr:longe',null],[S.autoRotate?'Parar o giro do modelo':'Girar o modelo','rotate',null]]],
    ['SOM E SAÍDA',[['Repetir a explicação','voice:repeat',null],['Parar a voz','voice:stop',null],[narrator.musicOn?'Música de fundo: ligada':'Música de fundo: desligada','xr:musica',null],['Como usar os controles','xr:ajuda',null],['Voltar ao catálogo','catalog',AZ],['Sair do VR','vr',SAI]]]];
   const COLS=cols.length,DX=.5,W=.47,DY=.13,linhas=Math.max(...cols.map(c=>c[1].length)),base=-.52+.06+.075,topo=base+(linhas-1)*DY,cx=-.98+(COLS*DX)/2;
   const fundoC=document.createElement('canvas');fundoC.width=fundoC.height=256;const fg=fundoC.getContext('2d');fg.fillStyle='rgba(4,14,28,.92)';fg.fillRect(0,0,256,256);fg.strokeStyle='rgba(55,177,218,.85)';fg.lineWidth=3;fg.strokeRect(1.5,1.5,253,253);
   const alt=(topo+.36)-(base-.08),fundo=new T.Mesh(new T.PlaneGeometry(COLS*DX+.06,alt),new T.MeshBasicMaterial({map:texturaCanvas(fundoC),transparent:true,side:T.DoubleSide,depthWrite:false}));
   fundo.position.set(cx,(topo+.36+base-.08)/2,UI.z-.03);fundo.rotation.y=-Math.atan2(cx,-UI.z);fundo.userData.ordem=990;this.ui.add(fundo);
   const rot=-Math.atan2(cx,-UI.z);
-  [[('Menu  ·  DNA Imersivo  ·  atividade '+(idx+1)+' de '+atv.length),'#ffffff',topo+.30,64],['Aponte o raio para uma opção e aperte o gatilho · B ou Y fecha','#bfe6f2',topo+.215,44]].forEach(([t,c,y,sz])=>{const r=rotuloPlano(t,c,COLS*DX-.12,sz);r.position.set(cx,y,UI.z-.01);r.rotation.y=rot;r.userData.ordem=995;this.ui.add(r);});
+  [[('Menu  ·  DNA Imersivo  ·  atividade '+(idx+1)+' de '+atv.length),'#ffffff',topo+.30,64],['Aponte o raio e aperte o gatilho · B fecha · X aproxima, Y afasta','#bfe6f2',topo+.215,44]].forEach(([t,c,y,sz])=>{const r=rotuloPlano(t,c,COLS*DX-.12,sz);r.position.set(cx,y,UI.z-.01);r.rotation.y=rot;r.userData.ordem=995;this.ui.add(r);});
   cols.forEach(([cab,itens],c)=>{const x=cx+(c-(COLS-1)/2)*DX;const h=rotuloPlano(cab,'#9fe8ff',W,64);h.position.set(x,topo+.105,UI.z-.005);h.rotation.y=-Math.atan2(x,-UI.z);h.userData.ordem=996;this.ui.add(h);
     itens.forEach(([t,cmd,cor],l)=>this.xrButton(t,cmd,x,topo-l*DY,W,false,cor));});
 };
 function rotuloPlano(text,cor,largura,size){const c=document.createElement('canvas');c.width=512;c.height=128;const g=c.getContext('2d');g.font='600 '+size+'px Segoe UI,Arial';while(g.measureText(text).width>490&&size>17){size-=2;g.font='600 '+size+'px Segoe UI,Arial';}
   g.textAlign='center';g.textBaseline='middle';g.fillStyle=cor;g.fillText(text,256,64);return new T.Mesh(new T.PlaneGeometry(largura,largura/4),new T.MeshBasicMaterial({map:texturaCanvas(c),transparent:true,side:T.DoubleSide,depthWrite:false}));}
-const AJUDA_CONTROLES='Gatilho: escolhe e abre a ficha. Grip (lateral): segura a peça na mão; gire o pulso para olhar em volta. Analógicos para os lados: giram a hélice. B ou Y: abre e fecha o menu. Gatilho fora do menu: fecha o menu ou para a narração.';
+const AJUDA_CONTROLES='Gatilho: escolhe e abre a ficha. Grip (lateral): segura a peça na mão; gire o pulso para olhar em volta. Analógicos para os lados: giram a hélice. B: abre e fecha o menu. X: aproxima tudo. Y: afasta tudo (10 distâncias, o óculos lembra a escolhida). Gatilho fora do menu: fecha o menu ou para a narração.';
 Proto.alternarMenuVR=function(forca){this.menuAberto=forca===undefined?!this.menuAberto:!!forca;this.uiPage=0;if(this.menuAberto)this.xrAjuda=false;this.buildXRUI();};
 /* botão apontado cresce e acende, ponto no toque do raio, B/Y abre o menu; UI por cima do modelo, fundo do menu atrás dos botões */
 const updateOriginalV=Proto.updateXR;
@@ -151,7 +151,7 @@ Proto.updateXR=function(dt){updateOriginalV.call(this,dt);if(!this.xr)return;
     if(!pt){pt=new T.Mesh(new T.SphereGeometry(.012,12,8),new T.MeshBasicMaterial({color:0xffffff,depthTest:false,transparent:true}));pt.renderOrder=1100;this.scene.add(pt);this._pontos.set(ctrl,pt);}
     if(ui){alvos.add(ui.object);pt.visible=true;pt.position.copy(ui.point);}else pt.visible=false;}
   for(const b of this.uiHits){const on=alvos.has(b);if(b.userData.s0===undefined)b.userData.s0=b.scale.x;const k=on?1.1:1;b.scale.set(b.userData.s0*k,b.userData.s0*k,1);if(b.material&&b.material.color)b.material.color.setScalar(on?1:.86);}
-  if(this.xrSession)for(const src of this.xrSession.inputSources){const gp=src.gamepad;if(!gp)continue;const st=src.__menuSt||(src.__menuSt={});const bY=!!(gp.buttons[5]&&gp.buttons[5].pressed);if(bY&&!st.y)this.alternarMenuVR();st.y=bY;}
+  if(this.xrSession)for(const src of this.xrSession.inputSources){const gp=src.gamepad;if(!gp)continue;const st=src.__menuSt||(src.__menuSt={});const esq=src.handedness==='left'&&this.mudarDistancia;const bX=!!(gp.buttons[4]&&gp.buttons[4].pressed);const bY=!!(gp.buttons[5]&&gp.buttons[5].pressed);/* pde-vr-padrao: esquerdo X aproxima, Y afasta; direito B abre o menu */if(esq){if(bX&&!st.x)this.mudarDistancia(-1);if(bY&&!st.y)this.mudarDistancia(1);}else if(bY&&!st.y)this.alternarMenuVR();st.x=bX;st.y=bY;}
 };
 
 /* lista de ações da lateral (o dna-app monta os botões com data-act; lemos de lá para não depender de variáveis internas) */

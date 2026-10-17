@@ -76,3 +76,15 @@ ul.pistas li{margin:3px 0}
  .activity-nav .nav-breve{order:3;flex:0 0 100%}
  .activity-nav .nav-breve button{min-height:28px;font-size:10px}
 }
+
+/* pde-vr-padrao · botões do painel com cara de app atual: cantos maiores, vidro azul nos secundários e ação principal verde viva com seta */
+#lessonPanel button{border-radius:14px;background:linear-gradient(180deg,#1d3d55,#152d40);border:1px solid #2f5a74;box-shadow:0 2px 8px rgba(0,0,0,.25),inset 0 1px 0 rgba(255,255,255,.06);transition:transform .12s,box-shadow .15s,background .15s}
+#lessonPanel button:hover:not(:disabled){background:linear-gradient(180deg,#25506d,#1a3a52);border-color:#5fb3d6;transform:translateY(-1px)}
+#lessonPanel button.primary{background:linear-gradient(180deg,#22d08a,#0c9a62);border:1px solid #8dffd0;color:#fff;font-weight:800;box-shadow:0 4px 16px rgba(22,199,132,.35),inset 0 1px 0 rgba(255,255,255,.25)}
+#lessonPanel button.primary:hover:not(:disabled){background:linear-gradient(180deg,#2fe39a,#10aa6c)}
+#lessonPanel button.primary:not(:disabled)::after{content:" ►";font-size:.85em}
+#lessonPanel .pair-choices button,#lessonPanel .answer-list button{background:var(--base,linear-gradient(180deg,#1d3d55,#152d40))}
+#lessonPanel .pair-choices button.primary::after,#lessonPanel .answer-list button.primary::after{content:none}
+#lessonPanel button.correct{background:linear-gradient(180deg,#1f7a57,#155c41);border-color:#7CFFB8}
+#lessonPanel button.incorrect{background:linear-gradient(180deg,#7a2b3a,#5a1f2b);border-color:#ff9aa6}
+#lessonPanel button.selected{background:linear-gradient(180deg,#2a6a66,#1f4f4c);border-color:#7fe3c8;box-shadow:0 0 0 3px #7fe3c855}

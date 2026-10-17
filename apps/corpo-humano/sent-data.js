@@ -48,7 +48,7 @@ D.activities.push(
 /* ---------- contexto ---------- */
 D.sentContext=[
  {name:'Os cinco sentidos',text:'Tudo o que você sabe sobre o mundo chegou por um dos seus sentidos: a visão, a audição, o olfato, o paladar e o tato. Cada um tem um órgão que capta um tipo de informação e manda a mensagem para o encéfalo. Toque no corpo para a gente avançar.',audio:'sent-contexto-0'},
- {name:'O olho por dentro',text:'Este é um olho de verdade, ampliado. Repare na janela transparente na frente, a córnea, na parte colorida, a íris, e na lente logo atrás, o cristalino. No fundo fica a retina, a tela onde a imagem se forma. Toque de novo para ver a orelha.',audio:'sent-contexto-1'},
+ {name:'O olho por dentro',text:'Este é um olho de verdade, ampliado. Repare na janela transparente na frente, a córnea, na parte colorida, a íris, e na lente logo atrás, o cristalino. No fundo fica a retina, a tela onde a imagem se forma. Toque em uma parte para abrir a ficha dela.',audio:'sent-contexto-1'},
  {name:'A orelha por dentro',text:'E esta é a orelha por dentro, ampliada muitas vezes. O tímpano vibra com o som, três ossinhos passam a vibração adiante e a cóclea, em forma de caracol, transforma tudo em mensagem nervosa. Os anéis ao lado cuidam do equilíbrio.',audio:'sent-contexto-2'}
 ];
 

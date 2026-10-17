@@ -351,3 +351,5 @@ v4.11.1 (realismo dos sentidos)
   coordenadas de textura geradas na hora), córnea e cristalino com verniz e reflexo de ambiente (CORPO_GLTF.envDe), normais suavizadas.
   Glândula lacrimal só aparece na própria ficha. Rótulos do contexto presos a pontos reais das peças.
 - Orelha: ossículos e labirinto com textura de osso (CORPO_TECIDOS), nervo com textura de nervo, tímpano perolado.
+
+4.11.2 · Sentidos: no contexto do olho e da orelha, tocar numa parte abre a ficha (antes avançava para a orelha). Avançar fica no botão do painel. Áudio sent-contexto-1 aparado: saiu a frase "Toque de novo para ver a orelha".

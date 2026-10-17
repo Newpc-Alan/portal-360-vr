@@ -7,7 +7,7 @@ const MS=()=>window.SENT_MODELS;
 const VIEWS={sentContexto:'sent',sentidos:'sent',luz:'sent',lentes:'sent',som:'sent'};
 const CATALOGO={sentidos:[['Olho · visão',D.SENT_OLHO.concat(['optico'])],['Orelha · audição e equilíbrio',D.SENT_ORELHA],['Outros sentidos',D.SENT_OUTROS]]};
 const BOTOES=['Ver o olho por dentro','Ver a orelha por dentro','Explorar os sentidos'];
-const NOTAS=['Os órgãos dos sentidos levam informações ao encéfalo pelos nervos.','Olho real (Z-Anatomy) ampliado cerca de 16 vezes. A esclera aparece transparente para mostrar o interior.','Orelha interna e média reais (Z-Anatomy) ampliadas cerca de 11 vezes. O pavilhão e o canal são esquemáticos.'];
+const NOTAS=['Os órgãos dos sentidos levam informações ao encéfalo pelos nervos.','Olho real (Z-Anatomy) ampliado cerca de 16 vezes. A janela de corte mostra o interior. Toque numa parte para abrir a ficha.','Orelha interna e média reais (Z-Anatomy) ampliadas cerca de 11 vezes. O pavilhão é real e o canal auditivo é esquemático. Toque numa parte para abrir a ficha.'];
 const LEG=[['#f4f1ea','Esclera'],['#cfefff','Córnea'],['#7a5236','Íris'],['#ffe3a0','Cristalino'],['#e0603f','Retina'],['#f6e3a0','Tímpano e nervos'],['#e9e4d6','Ossículos'],['#f0a6c8','Cóclea'],['#a6f0d6','Canais do equilíbrio']];
 
 function lentesInicial(){return{caso:'miopia',escolha:{},feitos:{},erros:0};}

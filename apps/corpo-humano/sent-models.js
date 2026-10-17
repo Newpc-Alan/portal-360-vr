@@ -134,7 +134,8 @@ function par(opt={}){const w=new T.Group(),Mo=M();
   if(opt.rotulos!==false){Mo.textFixo(w,'OLHO · VISÃO',-2.4,2.7,0,2.6,'#9fc5f0');Mo.textFixo(w,'ORELHA · AUDIÇÃO E EQUILÍBRIO',2.7,2.7,0,3.6,'#f0a6c8');}
   return w;}
 
-/* ---------- contexto ---------- */
+/* ---------- contexto ----------
+   v4.11.2: no olho (1) e na orelha (2) tocar numa parte abre a ficha dela; avançar fica só no botão do painel. */
 function sentContexto(level){const Mo=M(),g=G(),w=new T.Group();
   if(level===0){registrar();const sil=g.orgao('silhueta',null,()=>CTX,{opacidade:.14});w.add(sil);
     const pts=[['Visão',[-0.031,1.592,0.08],0x9fc5f0,-1.6,.5],['Visão',[0.031,1.592,0.08],0x9fc5f0,null],['Audição',[-0.076,1.58,0.0],0xf0a6c8,-1.9,-.2],['Audição',[0.076,1.58,0.0],0xf0a6c8,null],
@@ -143,9 +144,9 @@ function sentContexto(level){const Mo=M(),g=G(),w=new T.Group();
       if(dx!==null)label(w,t,b.position.clone().add(V(dx,dy,.5)),'#ffffff',1.2);});
     w.userData.tick=t=>{w.children.forEach(o=>{if(o.userData.pulso)o.scale.setScalar(1+.25*Math.sin(t*3+o.position.x*4));});};
     Mo.textAt(w,'OS CINCO SENTIDOS',0,-7.9,0,4.2,'#9fc5f0');return w;}
-  if(level===1){const a=olhoAmpliado({hit:()=>CTX});a.scale.setScalar(1.15);w.add(a);Mo.textFixo(w,'O OLHO POR DENTRO',0,2.5,0,3.2,'#9fc5f0');
+  if(level===1){const a=olhoAmpliado({});a.scale.setScalar(1.15);w.add(a);Mo.textFixo(w,'O OLHO POR DENTRO',0,2.5,0,3.2,'#9fc5f0');
     marcar(w,a.userData.olho,CENTROS_SENT.olho,[['Córnea',[-0.031,1.594,0.0765],V(-.5,.9,0)],['Íris',[-0.0345,1.5875,0.0735],V(-1.0,-.5,0)],['Cristalino',[-0.031,1.591,0.0715],V(-.7,-1.2,0)],['Retina',[-0.026,1.586,0.058],V(.9,-.9,0)],['Nervo óptico',[-0.024,1.5935,0.0505],V(1.0,.7,0)]]);return w;}
-  const b=orelhaAmpliada({hit:()=>CTX});b.scale.setScalar(.95);b.position.set(-1.1,.1,0);w.add(b);Mo.textFixo(w,'A ORELHA POR DENTRO',0,2.5,0,3.4,'#f0a6c8');
+  const b=orelhaAmpliada({});b.scale.setScalar(.95);b.position.set(-1.1,.1,0);w.add(b);Mo.textFixo(w,'A ORELHA POR DENTRO',0,2.5,0,3.4,'#f0a6c8');
   marcar(w,b.userData.orelha,CENTROS_SENT.orelha,[['Tímpano',[-0.0485,1.578,-0.0045],V(-.3,-1.1,0)],['Ossículos',[-0.047,1.583,-0.005],V(-.4,1.0,0)],['Cóclea',[-0.0395,1.58,0.0],V(-.9,-.9,0)],['Canais do equilíbrio',[-0.04,1.586,-0.009],V(-1.2,.9,0)],['Pavilhão',[-0.08,1.59,-0.008],V(.4,1.4,0)],['Canal auditivo',[-0.06,1.576,-0.004],V(.2,-1.2,0)]]);return w;}
 /* rótulo preso a um ponto real do órgão (m do Z-Anatomy), com uma linha fina até ele */
 function marcar(w,org,centro,itens){w.updateMatrixWorld(true);const inv=new T.Matrix4().copy(w.matrixWorld).invert();

@@ -58,7 +58,7 @@ Proto.textPlane=function(title,body,w,h,tom){
   w=w||1.06;h=h||.86;
   const canvas=document.createElement('canvas');canvas.width=1024;canvas.height=1024;const c=canvas.getContext('2d');
   const cores={ok:['rgba(10,46,34,.97)','#3fd48a'],erro:['rgba(60,16,22,.97)','#ff6b6b'],neutro:['rgba(10,31,46,.97)','#4c8294']}[tom||'neutro'];
-  c.fillStyle=cores[0];c.fillRect(0,0,1024,1024);c.strokeStyle=cores[1];c.lineWidth=8;c.strokeRect(4,4,1016,1016);
+  /* v4.13: painel com cantos arredondados */pilula(c,6,6,1012,1012,56);c.fillStyle=cores[0];c.fill();c.strokeStyle=cores[1];c.lineWidth=6;c.globalAlpha=.8;c.stroke();c.globalAlpha=1;
   const grande=!!(tom&&tom!=='neutro')||(Lab.state.view==='desafio');
   let y=100;
   c.font='600 70px Segoe UI,Arial';c.fillStyle='#a4e6d1';
@@ -75,29 +75,42 @@ Proto.faixaRetorno=function(texto,tom){const c=document.createElement('canvas');
   if(linhas.length>2){linhas=linhas.slice(0,2);linhas[1]=linhas[1].replace(/\s+\S*$/,'')+'…';}
   g.textAlign='left';g.textBaseline='middle';g.fillStyle=cores[2];const passo=size*1.15,y0=116-(linhas.length-1)*passo/2;linhas.forEach((l,i)=>g.fillText(l,60,y0+i*passo));
   return new T.Mesh(new T.PlaneGeometry(1.06,.12),new T.MeshBasicMaterial({map:texturaCanvas(c),transparent:true,side:T.DoubleSide,depthWrite:false}));};
+/* v4.13 · botões do VR no estilo de app atual: pílula arredondada, degradê suave, sombra e brilho no topo.
+   A ação principal (Próximo, Avançar, Ver...) usa PRIMARIO (verde vivo com ►), as demais ficam em vidro azul discreto. */
+const PRIMARIO={bg:'#16c784',bg2:'#0b8f5c',borda:'#8dffd0',texto:'#ffffff',primario:true};
+function clarear(hex,f){const n=parseInt(String(hex).replace('#','').slice(0,6),16);if(isNaN(n))return hex;const c=[n>>16&255,n>>8&255,n&255].map(v=>Math.round(v+(255-v)*f));return 'rgb('+c.join(',')+')';}
+function pilula(g,x,y,w,h,r){g.beginPath();g.moveTo(x+r,y);g.arcTo(x+w,y,x+w,y+h,r);g.arcTo(x+w,y+h,x,y+h,r);g.arcTo(x,y+h,x,y,r);g.arcTo(x,y,x+w,y,r);g.closePath();}
+function pintarBotao(c,linhas,size,paleta,disabled){const g=c.getContext('2d'),W=c.width,H=c.height,m=Math.round(H*.07),r=(H-2*m)*.5;g.clearRect(0,0,W,H);
+  const base=paleta||{bg:'#17344a',borda:'#4fa3c7',texto:'#eaf6ff'};
+  if(!disabled){g.save();g.shadowColor='rgba(0,0,0,.55)';g.shadowBlur=H*.08;g.shadowOffsetY=H*.035;pilula(g,m,m,W-2*m,H-2*m,r);g.fillStyle='#000';g.fill();g.restore();}
+  pilula(g,m,m,W-2*m,H-2*m,r);const gr=g.createLinearGradient(0,m,0,H-m);
+  if(disabled){gr.addColorStop(0,'#162633');gr.addColorStop(1,'#101d27');}else{gr.addColorStop(0,clarear(base.bg,.18));gr.addColorStop(1,base.bg2||base.bg);}
+  g.fillStyle=gr;g.fill();
+  if(!disabled){g.save();pilula(g,m,m,W-2*m,H-2*m,r);g.clip();const br=g.createLinearGradient(0,m,0,m+(H-2*m)*.5);br.addColorStop(0,'rgba(255,255,255,.22)');br.addColorStop(1,'rgba(255,255,255,0)');g.fillStyle=br;g.fillRect(0,m,W,(H-2*m)*.5);g.restore();}
+  pilula(g,m,m,W-2*m,H-2*m,r);g.lineWidth=Math.max(4,H*.025);g.strokeStyle=disabled?'rgba(120,150,170,.18)':(base.borda||'#4fa3c7');g.globalAlpha=disabled?1:.85;g.stroke();g.globalAlpha=1;
+  g.textAlign='center';g.textBaseline='middle';g.fillStyle=disabled?'#4f6575':(base.texto||'#ffffff');g.font='700 '+size+'px Segoe UI,Arial';
+  if(!disabled&&base.primario){g.shadowColor='rgba(0,60,30,.6)';g.shadowBlur=6;}
+  const passo=size*1.15,y0=H/2+size*.04-(linhas.length-1)*passo/2;linhas.forEach((l,i)=>g.fillText(l,W/2,y0+i*passo));}
+function rotuloPrimario(label,paleta){return paleta&&paleta.primario&&!/^[▶►✓↺◀✕☰]/.test(label)?label+'  ►':label;}
 Proto.xrButton=function(label,cmd,x,y,w,disabled,cor){
   w=w||UI.btnW;if(!disabled&&cor!==VERDE&&cor!==VERMELHO)cor=flashCor(this,cmd,cor);
-  const c=document.createElement('canvas');c.width=1024;c.height=256;const g=c.getContext('2d');
-  const paleta=cor||(disabled?{bg:'#172c3b',borda:'#314756',texto:'#6b8190'}:{bg:'#144957',borda:'#6098a7',texto:'#ebfbff'});
-  g.fillStyle=paleta.bg;g.fillRect(0,0,1024,256);g.strokeStyle=paleta.borda;g.lineWidth=10;g.strokeRect(5,5,1014,246);
-  let size=72;g.font='600 '+size+'px Segoe UI,Arial';while(g.measureText(label).width>940&&size>26){size-=3;g.font='600 '+size+'px Segoe UI,Arial';}
-  g.textAlign='center';g.textBaseline='middle';g.fillStyle=paleta.texto;g.fillText(label,512,130);
-  const m=new T.Mesh(new T.PlaneGeometry(w,UI.btnH),new T.MeshBasicMaterial({map:texturaCanvas(c),side:T.DoubleSide}));
+  const c=document.createElement('canvas');c.width=1024;c.height=256;const g=c.getContext('2d');label=rotuloPrimario(label,cor);
+  let size=76;g.font='700 '+size+'px Segoe UI,Arial';let linhas=[label];
+  if(g.measureText(label).width>880){let l2=quebrar(g,label,880);while(l2.length>2&&size>40){size-=4;g.font='700 '+size+'px Segoe UI,Arial';l2=quebrar(g,label,880);}if(l2.length<=2&&size>=48){linhas=l2;size=Math.min(size,62);}else{while(g.measureText(label).width>880&&size>28){size-=3;g.font='700 '+size+'px Segoe UI,Arial';}}}
+  pintarBotao(c,linhas,size,cor,disabled);
+  const m=new T.Mesh(new T.PlaneGeometry(w,UI.btnH),new T.MeshBasicMaterial({map:texturaCanvas(c),side:T.DoubleSide,transparent:true}));
   m.position.set(x,y,UI.z);m.rotation.y=-Math.atan2(x,-UI.z);m.userData.command=cmd;this.ui.add(m);if(!disabled)this.uiHits.push(m);return m;
 };
 
 Proto.xrBotaoLargo=function(label,cmd,x,y,disabled,cor){
-  const w=1.08,h=.2;if(!disabled&&cor!==VERDE&&cor!==VERMELHO)cor=flashCor(this,cmd,cor);const c=document.createElement('canvas');c.width=2048;c.height=384;const g=c.getContext('2d');
-  const paleta=cor||(disabled?{bg:'#172c3b',borda:'#314756',texto:'#6b8190'}:{bg:'#144957',borda:'#6098a7',texto:'#ebfbff'});
-  g.fillStyle=paleta.bg;g.fillRect(0,0,2048,384);g.strokeStyle=paleta.borda;g.lineWidth=12;g.strokeRect(6,6,2036,372);
-  let size=100;g.font='600 '+size+'px Segoe UI,Arial';let linhas=quebrar(g,label,1900);
-  while(linhas.length>2&&size>56){size-=6;g.font='600 '+size+'px Segoe UI,Arial';linhas=quebrar(g,label,1900);}
-  g.textAlign='center';g.textBaseline='middle';g.fillStyle=paleta.texto;
-  const passo=size*1.15,y0=192-(linhas.length-1)*passo/2;linhas.forEach((l,i)=>g.fillText(l,1024,y0+i*passo));
-  const m=new T.Mesh(new T.PlaneGeometry(w,h),new T.MeshBasicMaterial({map:texturaCanvas(c),side:T.DoubleSide}));
+  const w=1.08,h=.2;if(!disabled&&cor!==VERDE&&cor!==VERMELHO)cor=flashCor(this,cmd,cor);const c=document.createElement('canvas');c.width=2048;c.height=384;const g=c.getContext('2d');label=rotuloPrimario(label,cor);
+  let size=100;g.font='700 '+size+'px Segoe UI,Arial';let linhas=quebrar(g,label,1800);
+  while(linhas.length>2&&size>56){size-=6;g.font='700 '+size+'px Segoe UI,Arial';linhas=quebrar(g,label,1800);}
+  pintarBotao(c,linhas,size,cor,disabled);
+  const m=new T.Mesh(new T.PlaneGeometry(w,h),new T.MeshBasicMaterial({map:texturaCanvas(c),side:T.DoubleSide,transparent:true}));
   m.position.set(x,y,UI.z);m.rotation.y=-Math.atan2(x,-UI.z);m.userData.command=cmd;this.ui.add(m);if(!disabled)this.uiHits.push(m);return m;
 };
-const VERDE={bg:'#0f6b3a',borda:'#3fd48a',texto:'#ffffff'},VERMELHO={bg:'#7a1f28',borda:'#ff6b6b',texto:'#ffffff'},APAGADO={bg:'#122531',borda:'#243a47',texto:'#5c7484'},APERTADO={bg:'#2a8fa8',borda:'#ffffff',texto:'#ffffff'};
+const VERDE={bg:'#16a865',bg2:'#0b7a48',borda:'#7CFFB8',texto:'#ffffff'},VERMELHO={bg:'#d6455a',bg2:'#9c2333',borda:'#ff9aa6',texto:'#ffffff'},APAGADO={bg:'#122531',borda:'#243a47',texto:'#5c7484'},APERTADO={bg:'#3cc6ea',bg2:'#1c88b0',borda:'#ffffff',texto:'#ffffff'};
 /* v4.7.7: o botão apertado pelo raio fica aceso por 0,7 s (resposta visível ao toque) */
 const FLASH_MS=700;function flashCor(view,cmd,cor){const a=view._apertado;if(a&&a.cmd===cmd&&performance.now()-a.t<FLASH_MS){if(!view._flashT){view._flashT=setTimeout(()=>{view._flashT=null;if(view.xr)view.buildXRUI();},FLASH_MS+40);}return APERTADO;}return cor;}
 function estadoDesafio(){const S=Lab.state;if(S.view!=='desafio')return null;const q=Lab.quizAtual(),Q=Lab.questoesAtuais();if(q.phase!==1||q.done)return null;const i=q.index,resp=q.answers[i];if(resp===undefined)return null;const item=Q[i];return{correto:item.correct,escolha:resp,acertou:resp===item.correct};}
@@ -127,13 +140,13 @@ Proto.buildXRUI=function(){
     this.ui.remove(panel);const pq=this.textPlane(title,body,1.2,.9,tom);pq.position.set(0,.4,-1.64);this.ui.add(pq);
     let yy=-.14;lista.forEach(a=>{let cor=null;const m=/^quiz:answer:(\d+)$/.exec(a.cmd);
       if(des&&m){const k=Number(m[1]);cor=k===des.correto?VERDE:k===des.escolha?VERMELHO:APAGADO;}
-      if(/^quiz:next$/.test(a.cmd))cor=cor||{bg:'#0f6b3a',borda:'#7CFFB8',texto:'#ffffff'};
+      if(/^quiz:next$/.test(a.cmd))cor=cor||PRIMARIO;
       const bt=this.xrBotaoLargo(a.label,a.cmd,0,yy,a.disabled,cor);bt.scale.set(.95,.9,1);yy-=.195;});
   }else
   lista.slice(this.uiPage*max,(this.uiPage+1)*max).forEach((a,i)=>{
     let cor=null;const m=/^quiz:answer:(\d+)$/.exec(a.cmd);
     if(des&&m){const k=Number(m[1]);cor=k===des.correto?VERDE:k===des.escolha?VERMELHO:APAGADO;}
-    this.xrButton(a.label,a.cmd,1.16+(i%2?.25:-.25),-.22-Math.floor(i/2)*UI.passo,UI.btnW,a.disabled,cor);
+    if(!cor&&a.primario)cor=PRIMARIO;this.xrButton(a.label,a.cmd,1.16+(i%2?.25:-.25),-.22-Math.floor(i/2)*UI.passo,UI.btnW,a.disabled,cor);
   });
   if(pages>1&&!quizFase&&!menuAberto){this.xrButton('◀ Opções','xr:prev',.91,-.86,UI.btnW,this.uiPage===0);this.xrButton('Mais opções ▶','xr:next',1.41,-.86,UI.btnW,this.uiPage===pages-1);}
   /* VR enxuto (padrão Sistema Solar 8.13 / Célula 1.2.2): um botão "☰ Menu" fixo na cena, embaixo à esquerda; o menu abre
@@ -153,7 +166,7 @@ Proto.buildXRUI=function(){
      ['Como usar os controles','xr:ajuda',null],['Voltar ao catálogo','catalog',AZ],[this.xrModo==='ar'?'Sair da realidade mista':'Sair do VR','vr',SAI]]]];
   /* v4.12.3: SISTEMAS sempre numa coluna só (pedido do professor); as outras ainda quebram acima de 7 itens */const MAXL=7,cols=[];colunas.forEach(([cab,it],ci)=>{const n=ci===0?1:Math.ceil(it.length/MAXL),por=Math.ceil(it.length/n);for(let k=0;k<n;k++)cols.push([k?'':cab,it.slice(k*por,(k+1)*por)]);});
   const COLS=cols.length,DX=COLS>4?.40:.45,W=DX-.03,DY=.125,linhas=Math.max(...cols.map(c=>c[1].length)),base=-.52+.06+.075,topo=base+(linhas-1)*DY,cx=-.98+(COLS*DX)/2;
-  const fundoC=document.createElement('canvas');fundoC.width=fundoC.height=256;const fg=fundoC.getContext('2d');fg.fillStyle='rgba(4,14,28,.92)';fg.fillRect(0,0,256,256);fg.strokeStyle='rgba(55,177,218,.85)';fg.lineWidth=3;fg.strokeRect(1.5,1.5,253,253);
+  const fundoC=document.createElement('canvas');fundoC.width=fundoC.height=512;const fg=fundoC.getContext('2d');pilula(fg,3,3,506,506,26);fg.fillStyle='rgba(6,18,34,.9)';fg.fill();fg.strokeStyle='rgba(95,179,214,.45)';fg.lineWidth=3;fg.stroke();
   const alt=(topo+.47)-(base-.08),fundo=new T.Mesh(new T.PlaneGeometry(COLS*DX+.06,alt),new T.MeshBasicMaterial({map:texturaCanvas(fundoC),transparent:true,side:T.DoubleSide,depthWrite:false}));
   fundo.position.set(cx,(topo+.47+base-.08)/2,UI.z-.03);fundo.rotation.y=-Math.atan2(cx,-UI.z);fundo.userData.ordem=990;this.ui.add(fundo);
   const idx=Math.max(0,atv.findIndex(a=>a.id===S.view)),rot=-Math.atan2(cx,-UI.z);
@@ -165,7 +178,7 @@ Proto.buildXRUI=function(){
 const AJUDA_CONTROLES="Gatilho: escolhe e abre a ficha. Grip (lateral): segura o órgão na mão; gire o pulso para olhar em volta. Duas mãos: afaste para aumentar; na missão Coração, afastar as mãos abre o coração. Analógicos para os lados: giram o corpo ou o órgão. Analógico direito para cima ou para baixo: inclina. Analógico esquerdo para cima ou para baixo: sobe e desce. A: centraliza. B ou Y: abre e fecha o menu.";
 Proto.alternarMenuVR=function(forca){this.menuAberto=forca===undefined?!this.menuAberto:!!forca;this.uiPage=0;if(this.menuAberto)this.xrAjuda=false;this.buildXRUI();};
 /* lista de ações da lateral (o dna-app monta os botões com data-act; lemos de lá para não depender de variáveis internas) */
-Proto._acoes=function(){const out=[];const lab=!!(window.CORPO_V4&&window.CORPO_V4.accepts(Lab.state.view));document.querySelectorAll('#lessonPanel [data-act]').forEach(b=>{if(/^seq:target:/.test(b.dataset.act))return;if(b.closest('details')&&(!b.closest('details').open||lab))return;if(lab&&(b.closest('.v4-small')||/^v4:(turn|align|cutStep|axis)/.test(b.dataset.act)))return;const label=(b.title&&b.textContent.trim().length<=1?b.textContent.trim()+' · '+b.title:b.textContent.trim());out.push({label,cmd:b.dataset.act,disabled:b.disabled});});return out;};
+Proto._acoes=function(){const out=[];const lab=!!(window.CORPO_V4&&window.CORPO_V4.accepts(Lab.state.view));document.querySelectorAll('#lessonPanel [data-act]').forEach(b=>{if(/^seq:target:/.test(b.dataset.act))return;if(b.closest('details')&&(!b.closest('details').open||lab))return;if(lab&&(b.closest('.v4-small')||/^v4:(turn|align|cutStep|axis)/.test(b.dataset.act)))return;const label=(b.title&&b.textContent.trim().length<=1?b.textContent.trim()+' · '+b.title:b.textContent.trim());out.push({label,cmd:b.dataset.act,disabled:b.disabled,primario:b.classList.contains('primary')&&!/^(quiz:answer|sent:lente|seq:pick)/.test(b.dataset.act)});});return out;};
 
 /* gatilho no vazio: para a narração (mesmo comportamento do Sistema Solar) */
 const xrSelectOriginal=Proto.xrSelect;

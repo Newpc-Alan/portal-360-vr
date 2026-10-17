@@ -365,3 +365,5 @@ v4.11.1 (realismo dos sentidos)
 4.12.4 · Sentidos/contexto: o corpo deixou de ser alvo de toque (o raio batia na pele antes dos pontos do tato e da boca e avançava para o olho). Cada ponto ganhou área de toque invisível à frente da pele.
 
 4.12.5 · Sentidos/contexto: o nome de cada sentido virou botão grande (no óculos os pontos da cabeça ficam a ~3 cm um do outro e o raio pulava do paladar para o olho); áreas de toque dos pontos da cabeça reduzidas para não se sobreporem.
+
+4.13.0 · Visual dos botões: no VR, botões em pílula com degradê, brilho e sombra; ação principal (Próximo/Avançar/Ver...) em verde vivo com ►; painel e menu com cantos arredondados. No painel 3D, mesmo padrão via CSS (#lessonPanel button / .primary).

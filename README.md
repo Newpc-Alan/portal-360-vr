@@ -58,3 +58,10 @@ O Sistema Solar vira uma maquete inclinada à frente do usuário (ao alcance das
 - DNA e Sistema Solar (out/2026): `sw.js` **rede primeiro** para html/css/js (pacotes atualizados por fora aparecem na hora; sem rede ou após 4 s usa a cópia guardada) e cache persistente para os `.mp3`. O registro fica em `offline.js`, carregado no fim do `index.html`.
 - **Ao trocar o index.html por um pacote novo, mantenha** `<script defer src="offline.js"></script>` antes de `</body>` e rode `python3 tools/gerar-precache.py <app> <arquivo-de-dados>` (dna: `dna-data.js`; sistema-solar: `solar-v8.js`).
 - A VERSAO do `sw.js` leva um hash da casca: qualquer arquivo alterado renova a cópia guardada.
+
+## Marca Portal 360º VR (out/2026)
+Assinatura própria do catálogo, endossada pelo Portal do Educador ("uma experiência Portal do Educador"). Símbolo **Órbita**: um mundo com a órbita passando à frente (o 360º em forma). Slogan: **Entre na aula.**
+- Arquivos em `assets/marca/`: símbolo (cor, claro, branco, navy, animado), assinatura horizontal (escura, clara, branca, navy) e vertical, em SVG com o texto em curvas e em PNG; ícones de app 180/192/512 e favicon 32/48/SVG.
+- Cores: Espaço `#050B18`, Noite `#0B1B31`, Azul Portal `#2E6BE6`, Ciano Técnico `#37B1DA`, Lima Imersão `#B6D752`, Névoa `#F2F7FC`. Gradiente 360 sempre azul → lima, só no "360º" e na órbita. Fonte da assinatura: Sora ExtraBold (já convertida em curvas, não precisa instalar).
+- Portal de entrada: as partículas formam o símbolo Órbita (`assets/entrada-simbolo.png` em cada app; `media/` no Sistema Solar). O `logo.png` de cada app continua sendo o do Portal do Educador (cabeçalho, relatórios e guia do professor).
+- Para regerar os arquivos: em `tools/marca/`, `npm i @fontsource/sora @resvg/resvg-js` e `python3 gerar_marca.py ../../assets/marca` (PNGs com `node render.js entrada.svg saida.png largura`).

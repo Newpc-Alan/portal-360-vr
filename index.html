@@ -5,7 +5,9 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Portal 360º VR | Portal do Educador</title>
 <meta name="theme-color" content="#050b18">
-<link rel="icon" type="image/png" href="assets/logo-portal-educador.png">
+<link rel="icon" type="image/svg+xml" href="assets/marca/p360-favicon.svg">
+<link rel="icon" type="image/png" sizes="32x32" href="assets/marca/p360-favicon-32.png">
+<link rel="apple-touch-icon" href="assets/marca/p360-icone-180.png">
 <style>
 :root{--bg:#050b18;--bg2:#071426;--card:#0b1b31;--card2:#0e233f;--cyan:#37B1DA;--cyan2:#57d4ff;--green:#0F9861;--text:#f7fbff;--muted:#a9bbcc;--border:rgba(255,255,255,.12);}
 *{box-sizing:border-box} html{scroll-behavior:smooth} html,body{margin:0;min-height:100%;background:var(--bg);color:var(--text);font-family:Inter,Segoe UI,Arial,sans-serif} body{overflow-x:hidden} button,a,select{font:inherit} button{cursor:pointer} .hidden{display:none!important}
@@ -19,6 +21,12 @@
 .brand-badge{width:58px;height:58px;border-radius:50%;overflow:hidden;flex:0 0 58px;border:2px solid rgba(87,212,255,.45);display:grid;place-items:center;box-shadow:0 0 26px rgba(55,177,218,.35), inset 0 0 18px rgba(255,255,255,.14);background:rgba(3,10,20,.6)}
 .brand-badge img{width:100%;height:100%;object-fit:cover;display:block}
 .brand small{display:block;color:var(--cyan2);font-size:11px;letter-spacing:.16em;margin-top:2px}
+/* assinatura Portal 360º VR (símbolo Órbita) + endosso Portal do Educador */
+.brand{gap:18px;flex-wrap:wrap}
+.brand-mark{height:56px;width:auto;display:block;filter:drop-shadow(0 4px 18px rgba(0,0,0,.55))}
+.brand-endosso{display:flex;align-items:center;gap:8px;padding-left:16px;border-left:1px solid rgba(255,255,255,.18);color:#a9bbcc;font-size:10px;font-weight:700;letter-spacing:.16em;text-transform:uppercase;line-height:1.35}
+.brand-endosso img{width:34px;height:34px;display:block}
+@media(max-width:760px){.brand-mark{height:38px}.brand-endosso{display:none}}
 #startFallback{position:absolute;inset:0;z-index:6;display:none;align-items:center;justify-content:center;background:rgba(0,0,0,.38);backdrop-filter:blur(3px);pointer-events:auto}
 #startFallback button{border:1px solid rgba(255,255,255,.22);border-radius:999px;padding:14px 22px;background:rgba(5,14,26,.82);color:#fff;font-weight:800;font-size:16px;box-shadow:0 12px 32px rgba(0,0,0,.35)}
 #startFallback button:hover{border-color:rgba(87,212,255,.55)}
@@ -121,9 +129,8 @@ body.intro-fullscreen #btnSkipIntro{cursor:pointer}
   display:flex;flex-direction:column;align-items:center;gap:22px;
 }
 #startFallback .start-logo{
-  width:112px;height:112px;border-radius:50%;
-  object-fit:cover;
-  box-shadow:0 0 45px rgba(55,177,218,.35);
+  width:150px;height:150px;
+  filter:drop-shadow(0 0 28px rgba(55,177,218,.35));
 }
 #startFallback .start-title{
   font-size:clamp(28px,4vw,52px);
@@ -158,9 +165,9 @@ body.intro-fullscreen #btnSkipIntro{cursor:pointer}
 <section id="intro">
   <div id="startFallback" style="display:flex">
     <div class="start-shell">
-      <img class="start-logo" src="assets/logo-portal-educador.png" alt="Portal do Educador">
+      <img class="start-logo" src="assets/marca/p360-simbolo-animado.svg" alt="">
       <div class="start-title">Portal 360º VR</div>
-      <div class="start-sub">Experiência educacional imersiva</div>
+      <div class="start-sub">Uma experiência Portal do Educador</div>
       <button id="btnStartIntro">▶ Iniciar experiência</button>
     </div>
     <div id="introNote"></div>
@@ -169,8 +176,8 @@ body.intro-fullscreen #btnSkipIntro{cursor:pointer}
   <div id="videoWrap"><video id="introVideo" playsinline preload="auto" poster="assets/abertura-poster.jpg" src="assets/abertura.mp4"></video></div>
   <div class="intro-ui">
     <div class="brand">
-      <div class="brand-badge"><img src="assets/logo-portal-educador.png" alt="Logo Portal do Educador"></div>
-      <div>Portal 360º VR<small>PORTAL DO EDUCADOR</small></div>
+      <img class="brand-mark" src="assets/marca/p360-assinatura-horizontal.svg" alt="Portal 360º VR">
+      <div class="brand-endosso"><img src="assets/logo-portal-educador.png" alt="Portal do Educador"><span>uma experiência<br>Portal do Educador</span></div>
     </div>
   </div>
 </section>
@@ -181,14 +188,14 @@ body.intro-fullscreen #btnSkipIntro{cursor:pointer}
     <div class="stars"></div>
     <div class="topnav">
       <div class="brand">
-        <div class="brand-badge"><img src="assets/logo-portal-educador.png" alt="Logo Portal do Educador"></div>
-        <div>Portal 360º VR<small>PORTAL DO EDUCADOR</small></div>
+        <img class="brand-mark" src="assets/marca/p360-assinatura-horizontal.svg" alt="Portal 360º VR">
+        <div class="brand-endosso"><img src="assets/logo-portal-educador.png" alt="Portal do Educador"><span>uma experiência<br>Portal do Educador</span></div>
       </div>
       <div class="navright"><button class="secondary-btn" id="replayIntro">▶ Rever apresentação</button></div>
     </div>
     <div class="hero-inner">
       <div class="kicker">Experiências educacionais imersivas</div>
-      <h1>Explore o conhecimento por dentro.</h1>
+      <h1>Entre na aula.</h1>
       <p>Uma biblioteca de experiências 3D e realidade virtual para transformar conteúdos escolares em exploração, descoberta e aprendizagem ativa.</p>
       <div class="hero-actions">
         <a href="#experiencias" class="primary-btn" id="btnVerExperiencias">Ver experiências ↓</a>

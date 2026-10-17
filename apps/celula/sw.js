@@ -2,7 +2,7 @@
    Objetivo: a aplicação funcionar sem internet depois da primeira abertura (rede de escola oscila; Chromebook, lousa e Quest).
    Duas caches: a "casca" (html, css, js, three.js) muda a cada versão; a "pesada" (modelos .glb e áudios .mp3) é persistente e só
    rebaixa os arquivos cujo hash mudou no precache.json. Pedidos com Range (trilha de fundo) recebem 206 a partir do arquivo em cache. */
-const VERSAO='1.2.2-0c2ae9';
+const VERSAO='1.2.2-f236e4';
 const CASCA='celula-casca-'+VERSAO,PESADA='celula-pesada-v1',META='celula-meta-v1';
 const ESCOPO=new URL(self.registration.scope).pathname;
 let baixando=false;

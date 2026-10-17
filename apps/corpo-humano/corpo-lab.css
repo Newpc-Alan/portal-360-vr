@@ -65,3 +65,6 @@ nav details.nav-breve[open] summary{color:#8fb0c2}
  .activity-nav .nav-breve{order:3;flex:0 0 100%}
  .activity-nav .nav-breve button{min-height:28px;font-size:10px}
 }
+/* v4.12 · cartão "Como fazer" e peças de sequência legíveis no painel */
+.como-fazer{display:flex;gap:10px;align-items:flex-start;margin:10px 0 14px;padding:10px 12px;border:1px solid #d9a44166;border-left:4px solid #e9b44c;border-radius:10px;background:#2a2312}.como-fazer .como-ico{font-size:22px;line-height:1.1}.como-fazer b{display:block;font-size:11px;letter-spacing:1.4px;text-transform:uppercase;color:#ffd98a;margin-bottom:2px}.como-fazer p{margin:0;font-size:14px;line-height:1.45;color:#fff1d6}
+.pair-choices.seq{grid-template-columns:repeat(2,1fr)}.pair-choices.seq button{font-size:15px;font-weight:700;line-height:1.25;padding:8px 10px;min-height:48px;overflow-wrap:anywhere}

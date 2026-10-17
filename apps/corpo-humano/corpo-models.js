@@ -14,11 +14,16 @@ function organico(mesh,amp=.05,freq=3.1,seed=1){const g=mesh.geometry;const pos=
   for(let i=0;i<pos.count;i++){v.fromBufferAttribute(pos,i);n.fromBufferAttribute(nor,i);const d=amp*(Math.sin(v.x*freq+seed)*Math.cos(v.y*freq*1.3+seed*2)+.6*Math.sin(v.z*freq*1.7-seed)*Math.cos(v.x*freq*.7)+.35*Math.sin((v.x+v.y+v.z)*freq*2.3));v.addScaledVector(n,d);pos.setXYZ(i,v.x,v.y,v.z);}
   pos.needsUpdate=true;g.computeVertexNormals();return mesh;}
 function tubo(pts,r,color,extra,seg=48){const curve=new T.CatmullRomCurve3(pts);return new T.Mesh(new T.TubeGeometry(curve,seg,r,12,false),mat(color,extra));}
-function label(text,color='#e7f6ff',width=1.5,size=56){const c=document.createElement('canvas');c.width=512;c.height=128;const ctx=c.getContext('2d');ctx.font='600 '+size+'px Segoe UI,Arial';while(ctx.measureText(text).width>490&&size>17){size-=2;ctx.font='600 '+size+'px Segoe UI,Arial';}ctx.textAlign='center';ctx.textBaseline='middle';ctx.shadowColor='#031220';ctx.shadowBlur=7;ctx.fillStyle=color;ctx.fillText(text,256,64);const tx=new T.CanvasTexture(c);tx.encoding=T.sRGBEncoding;tx.minFilter=T.LinearMipmapLinearFilter;tx.generateMipmaps=true;tx.anisotropy=8;const sp=new T.Sprite(new T.SpriteMaterial({toneMapped:false,map:tx,transparent:true,depthWrite:false,depthTest:true}));sp.scale.set(width,width/4,1);return sp;}
+/* v4.12: quando o texto não cabe numa linha sem encolher muito, quebra em duas linhas maiores (as peças das missões ficavam ilegíveis) */
+function quebraLinhas(ctx,text,size,quebra=true){const F=s=>'600 '+s+'px Segoe UI,Arial',cabe=(s,ls)=>{ctx.font=F(s);return ls.every(l=>ctx.measureText(l).width<=490);};
+  let s1=size;while(!cabe(s1,[text])&&s1>17)s1-=2;const w=String(text).split(' ');if(!quebra||s1>=size*.85||w.length<2){ctx.font=F(s1);return{linhas:[text],size:s1};}
+  let melhor=null;for(let i=1;i<w.length;i++){const ls=[w.slice(0,i).join(' '),w.slice(i).join(' ')];ctx.font=F(40);const m=Math.max(...ls.map(l=>ctx.measureText(l).width));if(!melhor||m<melhor.m)melhor={ls,m};}
+  let s2=Math.min(size,54);while(!cabe(s2,melhor.ls)&&s2>17)s2-=2;if(s2>s1){ctx.font=F(s2);return{linhas:melhor.ls,size:s2};}ctx.font=F(s1);return{linhas:[text],size:s1};}
+function label(text,color='#e7f6ff',width=1.5,size=56,quebra=true){const c=document.createElement('canvas');c.width=512;c.height=128;const ctx=c.getContext('2d');const q=quebraLinhas(ctx,text,size,quebra);ctx.textAlign='center';ctx.textBaseline='middle';ctx.shadowColor='#031220';ctx.shadowBlur=7;ctx.fillStyle=color;if(q.linhas.length===1)ctx.fillText(text,256,64);else{const d=q.size*.56;ctx.fillText(q.linhas[0],256,64-d);ctx.fillText(q.linhas[1],256,64+d);}const tx=new T.CanvasTexture(c);tx.encoding=T.sRGBEncoding;tx.minFilter=T.LinearMipmapLinearFilter;tx.generateMipmaps=true;tx.anisotropy=8;const sp=new T.Sprite(new T.SpriteMaterial({toneMapped:false,map:tx,transparent:true,depthWrite:false,depthTest:true}));sp.scale.set(width,width/4,1);return sp;}
 function textAt(g,text,x,y,z=0,width=1.5,color){const sp=label(text,color,width);sp.position.set(x,y,z);g.add(sp);return sp;}
 /* v4.7.1 · rótulo fixo no mundo (plano, não sprite): no VR as letras dos tabuleiros não giram com a cabeça */
-function rotuloFixo(text,color='#e7f6ff',width=1.5,size=56){const sp=label(text,color,width,size);const m=new T.Mesh(new T.PlaneGeometry(width,width/4),new T.MeshBasicMaterial({map:sp.material.map,transparent:true,depthWrite:false,side:T.DoubleSide}));sp.material.dispose();return m;}
-function textFixo(g,text,x,y,z=0,width=1.5,color){const m=rotuloFixo(text,color,width);m.position.set(x,y,z);g.add(m);return m;}
+function rotuloFixo(text,color='#e7f6ff',width=1.5,size=56,quebra=true){const sp=label(text,color,width,size,quebra);const m=new T.Mesh(new T.PlaneGeometry(width,width/4),new T.MeshBasicMaterial({map:sp.material.map,transparent:true,depthWrite:false,side:T.DoubleSide}));sp.material.dispose();return m;}
+function textFixo(g,text,x,y,z=0,width=1.5,color,quebra=true){const m=rotuloFixo(text,color,width,56,quebra);m.position.set(x,y,z);g.add(m);return m;}
 
 /* ---------- Órgãos ---------- */
 function coracao(opt={}){
@@ -252,7 +257,8 @@ function respire(state){
 /* ordenação de etapas (caminho do ar / caminho do sangue) */
 function sequencia(state,cfg){
   const g=new T.Group();const n=cfg.ordem.length,dy=.62,top=(n-1)*dy/2+.3;
-  textFixo(g,cfg.titulo,.9,top+.75,0,3.4,cfg.cor);
+  textFixo(g,cfg.titulo,.9,top+1.32,0,3.6,cfg.cor);
+  if(!state.done)textFixo(g,'PEÇA → ESPAÇO AMARELO',.9,top+.5,0,3.0,'#ffe3a8',false);
   for(let i=0;i<n;i++){const y=top-i*dy;const key=state.colocados[i];
     const num=rotuloFixo(String(i+1),i===state.target?'#ffdb9f':'#8fb0c2',.5,96);num.position.set(-.55,y,.05);g.add(num);
     const placa=new T.Mesh(new T.BoxGeometry(2.6,.46,.16),mat(key?0x1d4f63:0x15303f,{transparent:!key,opacity:key?1:.65}));placa.position.set(.9,y,0);tag(placa,{type:'seqSlot',index:i});g.add(placa);
@@ -262,12 +268,14 @@ function sequencia(state,cfg){
   }
   // bandeja de peças (embaralhadas, sem as já colocadas)
   const restantes=state.bandeja.filter(k=>!state.colocados.includes(k));
-  restantes.forEach((k,i)=>{const cols=2,c=i%cols,r=Math.floor(i/cols);const x=(cfg.titulo==='CAMINHO DO ALIMENTO'?2.75:-3.75)+c*1.6,y=top-.1-r*.72;
-    const peca=new T.Mesh(new T.BoxGeometry(1.48,.56,.2),mat(0x2b6f88,{roughness:.4}));peca.position.set(x,y,.1);peca.userData.draggable=true;tag(peca,{type:'seqPiece',key:k});g.add(peca);
-    const t=rotuloFixo(cfg.rotulos[k],'#ffffff',1.46,66);t.position.set(x,y,.22);g.add(t);
-    if(state.selected===k){const anel=new T.Mesh(new T.BoxGeometry(1.6,.68,.08),new T.MeshBasicMaterial({color:0xffffff,wireframe:true}));anel.position.set(x,y,.1);g.add(anel);}
+  /* v4.12: peças maiores (1,9 × 0,64) e texto em até duas linhas */
+  const dir=cfg.titulo==='CAMINHO DO ALIMENTO',x0=dir?3.4:-4.25;
+  restantes.forEach((k,i)=>{const cols=2,c=i%cols,r=Math.floor(i/cols);const x=x0+c*2.02,y=top-.1-r*.78;
+    const peca=new T.Mesh(new T.BoxGeometry(1.9,.64,.2),mat(0x2b6f88,{roughness:.4}));peca.position.set(x,y,.1);peca.userData.draggable=true;tag(peca,{type:'seqPiece',key:k});g.add(peca);
+    const t=rotuloFixo(cfg.rotulos[k],'#ffffff',1.86,64);t.position.set(x,y,.22);g.add(t);
+    if(state.selected===k){const anel=new T.Mesh(new T.BoxGeometry(2.04,.78,.08),new T.MeshBasicMaterial({color:0xffffff,wireframe:true}));anel.position.set(x,y,.1);g.add(anel);}
   });
-  if(!state.done)textFixo(g,'PEÇAS',cfg.titulo==='CAMINHO DO ALIMENTO'?3.55:-2.95,top+.75,0,1.4,'#9cbed0');
+  if(!state.done)textFixo(g,'PEÇAS',x0+1.01,top+.5,0,1.4,'#9cbed0');
   const gl=G();
   if(state.done&&cfg.titulo==='CAMINHO DO SANGUE'){
     let pts;const base=V(-2.9,-.2,0),esc=1.15;
@@ -297,6 +305,8 @@ function sequencia(state,cfg){
     g.userData.tick=(t)=>{parts.forEach(d=>{const u=(t*.12+d.userData.f)%1;d.position.copy(d.userData.c.getPointAt(u));});};
   }
   g.userData.slots={top,dy};
+  /* v4.12: a câmera mira x=0; marcadores invisíveis simétricos garantem que as peças maiores caibam no quadro */
+  {const bx=new T.Box3().setFromObject(g),mx=Math.max(Math.abs(bx.min.x),Math.abs(bx.max.x));[-mx,mx].forEach(x=>{const m=new T.Mesh(new T.BoxGeometry(.01,.01,.01),new T.MeshBasicMaterial({visible:false}));m.position.x=x;g.add(m);});}
   return g;
 }
 /* alvéolo com capilar e gases */

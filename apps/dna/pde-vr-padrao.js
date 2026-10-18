@@ -8,7 +8,7 @@
       guardada no aparelho. A cena se afasta a partir dos olhos sem mudar de tamanho real.
    Fonte única: tools/pde-vr-padrao.js (copiada para cada app por tools/copiar-vr-padrao.sh). Regra 9: sem onclick. */
 (function(){'use strict';
-const LABS=['CelulaLab','TerraLab','DNALab','CorpoLab'];
+const LABS=['CelulaLab','TerraLab','DNALab','CorpoLab','HistoriaLab'];
 function labAtual(){for(const k of LABS){const L=window[k];if(L&&L.view)return L;}return null;}
 function pronto(fn,n){const L=labAtual();const P=L&&Object.getPrototypeOf(L.view);if(P&&P.alternarMenuVR&&P.xrBotaoLargo&&P.textPlane&&!P.__vrPadrao)fn(L,P);else if((n||0)<500)setTimeout(()=>pronto(fn,(n||0)+1),60);}
 pronto(function(Lab,Proto){

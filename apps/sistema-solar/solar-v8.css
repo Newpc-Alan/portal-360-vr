@@ -49,3 +49,11 @@ body.v8-system-focus .painel{position:relative;z-index:8;box-shadow:-12px 0 28px
 body.v8-system-focus .palco .dica{opacity:.35}
 body.v8-system-focus .palco .badge{opacity:.7}
 @media(max-width:720px){body.v8-system-focus .painel{box-shadow:none}}
+/* 9.9 · padrão 3D do catálogo: o botão "Entrar na sala" vira um selo pequeno no rodapé, sem cobrir textos */
+body .p360s-chip{bottom:3px;left:10px;padding:3px 11px;font-size:12px;box-shadow:none}
+body .p360s-chip i{width:8px;height:8px}
+footer.v8-footer{padding-left:170px}
+@media (max-width:800px){
+  body .p360s-chip{left:auto;right:12px;bottom:12px;padding:7px 13px;font-size:13px;box-shadow:0 6px 18px rgba(0,0,0,.4)}
+  footer.v8-footer{padding-left:12px;padding-bottom:46px}
+}

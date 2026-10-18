@@ -5,7 +5,7 @@
    o logo vira um anel de luz → o anel avança e atravessa o aluno → o mundo do app se revela numa onda de luz → título.
    - VR/realidade mista: desenhado dentro da cena do próprio app (mesmo renderer), por cima de tudo, sem pós-processamento.
    - 3D: camada própria por cima da página (canvas transparente), que se abre revelando o app.
-   - Gatilho do controle, clique, toque, Esc ou Espaço pulam. Na 2ª entrada no VR da mesma página, versão curta.
+   - Gatilho do controle, clique, toque, Esc ou Espaço pulam. Na 2ª entrada no VR da mesma página, versão curta. v1.2: no 3D toca a cada abertura do app (não a cada recarga).
    - Som sintetizado no navegador (sem arquivos). Requer THREE r128 global.
    Uso (no app, depois que a cena existe):
      PortalEntrada.configurar({titulo, subtitulo, cor, logo, logo2, obter:()=>({renderer,scene,camera}), auto3D:true});
@@ -15,7 +15,7 @@
 (function(){
 'use strict';
 if(window.PortalEntrada)return;
-const VERSAO='1.1.0';
+const VERSAO='1.2.0';
 /* ATR: tempo extra da 2ª formação (logo2). Tudo do anel em diante é empurrado por ATR. */
 const ATR2=1.6;let ATR=0;
 const DUR0=9.4,REVELA0=7.6,CURTO0=5.2;
@@ -241,7 +241,9 @@ function tocarXR(){
 
 /* ---------- 3D: camada própria por cima da página ---------- */
 function tocar3D(){
-  const T=window.THREE;if(!T||!cfg||ativo||reduzido())return Promise.resolve(false);
+  const T=window.THREE;if(!T||!cfg||ativo)return Promise.resolve(false);
+  /* v1.2: com "reduzir movimento" ligado no sistema (comum em PCs de escola) a abertura não some mais: toca a versão curta */
+  const curto=reduzido();
   return carregarLogo(cfg.logo).then(()=>{
     if(ativo)return false;
     // <dialog> modal entra na "camada de topo": fica acima até de outros diálogos modais do app (ex.: boas-vindas do Corpo Humano)
@@ -263,8 +265,8 @@ function tocar3D(){
       const vfovMin=2*Math.atan(1.7/2.6)*180/Math.PI,hfov=2*Math.atan(1.85/2.6);const vfovPorLargura=2*Math.atan(Math.tan(hfov/2)/camera.aspect)*180/Math.PI;
       camera.fov=Math.max(60,Math.min(100,camera.aspect<1?vfovPorLargura:vfovMin));camera.updateProjectionMatrix();}
     dimensionar();addEventListener('resize',dimensionar);
-    const som=trilha(audio(),false);
-    const t0=agoraS();let saindo=0,revelou=false,encerrado=false,raf=0;
+    const som=trilha(audio(),curto);
+    const t0=agoraS()-(curto?INICIO_CURTO:0);let saindo=0,revelou=false,encerrado=false,raf=0;
     function pular(){if(!saindo&&!encerrado){saindo=agoraS();if(som)som.parar(true);}}
     const tecla=e=>{if(e.key==='Escape'||e.key===' '||e.key==='Enter'){e.preventDefault();pular();}};
     ov.addEventListener('pointerdown',e=>{e.preventDefault();pular();});addEventListener('keydown',tecla,true);
@@ -298,8 +300,10 @@ window.PortalEntrada={
     carregarLogo(cfg.logo);ligarRenderer();
     if(cfg.auto3D){
       const q=new URLSearchParams(location.search);
-      const chave='portal360_entrada_'+location.pathname;let ja=false;try{ja=sessionStorage.getItem(chave)==='1';}catch(_){}
-      if(q.get('vr')!=='1'&&q.get('embed')!=='1'&&q.get('abertura')!=='0'&&!ja){try{sessionStorage.setItem(chave,'1');}catch(_){}setTimeout(()=>tocar3D(),150);}
+      /* v1.2: a abertura toca toda vez que o app é aberto no 3D (antes era uma vez por aba, e quem voltava ao catálogo e abria de novo não via).
+         Recarregar a página (F5) no meio da aula não repete. Pular: botão, clique, Esc ou Espaço. ?abertura=0 desliga. */
+      let recarga=false;try{const n=performance.getEntriesByType('navigation')[0];recarga=!!(n&&n.type==='reload');}catch(_){}
+      if(q.get('vr')!=='1'&&q.get('embed')!=='1'&&q.get('abertura')!=='0'&&!recarga)setTimeout(()=>tocar3D(),150);
     }
   },
   tocar3D,

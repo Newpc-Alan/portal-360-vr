@@ -15,9 +15,10 @@
 (function(){
 'use strict';
 if(window.PortalEntrada)return;
-const VERSAO='1.2.0';
+const VERSAO='1.2.1';
 /* ATR: tempo extra da 2ª formação (logo2). Tudo do anel em diante é empurrado por ATR. */
-const ATR2=1.6;let ATR=0;
+/* v1.2.1: HOLD segura o logo Portal 360º VR nítido por mais tempo antes de virar o logo do Portal do Educador */
+const HOLD=1.4,ATR2=1.6+HOLD;let ATR=0;
 const DUR0=9.4,REVELA0=7.6,CURTO0=5.2;
 let DUR=DUR0,REVELA_FIM=REVELA0,INICIO_CURTO=CURTO0;
 function definirAtraso(tem2){ATR=tem2?ATR2:0;DUR=DUR0+ATR;REVELA_FIM=REVELA0+ATR;INICIO_CURTO=CURTO0+ATR;}
@@ -162,7 +163,7 @@ function montar(T,opt){
   let logo2=null;
   if(tem2){const tx=new T.Texture(opt.img2);tx.encoding=T.sRGBEncoding;tx.needsUpdate=true;
     logo2=new T.Mesh(new T.PlaneGeometry(1.3,1.3),mat(new T.MeshBasicMaterial({map:tx,opacity:0})));logo2.renderOrder=9992;logo2.frustumCulled=false;logo2.position.z=0.02;palco.add(logo2);}
-  const A=tem2?ATR2:0;
+  const A=tem2?ATR2:0,H=tem2?HOLD:0;
   // halo do anel
   const haloMat=mat(new T.MeshBasicMaterial({color:new T.Color('#9fe8ff'),opacity:0,blending:T.AdditiveBlending,side:T.DoubleSide}));
   const halo=new T.Mesh(new T.RingGeometry(0.765,0.795,128),haloMat);halo.renderOrder=9992;halo.frustumCulled=false;palco.add(halo);
@@ -175,11 +176,11 @@ function montar(T,opt){
       const u=partMat.uniforms;u.uT.value=t;u.uPix.value=pix;veuMat.uniforms.uT.value=t;
       u.uIn.value=sai(fase(t,0.1,2.2));
       u.uMorph.value=suave(fase(t,2.3,3.7));
-      u.uMorph2.value=A?suave(fase(t,4.2,5.4)):0;
+      u.uMorph2.value=A?suave(fase(t,4.2+H,5.4+H)):0;
       u.uAnel.value=suave(fase(t,4.3+A,5.3+A));
       u.uOp.value=fase(t,0.1,0.8)*(1-fase(t,6.3+A,7.0+A));
-      if(logo)logo.material.opacity=fase(t,3.2,3.9)*(1-(A?fase(t,4.0,4.4):fase(t,4.3,4.9)))*0.95;
-      if(logo2)logo2.material.opacity=fase(t,5.0,5.6)*(1-fase(t,4.3+A,4.9+A))*0.95;
+      if(logo)logo.material.opacity=fase(t,3.2,3.9)*(1-(A?fase(t,4.0+H,4.4+H):fase(t,4.3,4.9)))*0.97;
+      if(logo2)logo2.material.opacity=fase(t,5.0+H,5.6+H)*(1-fase(t,4.3+A,4.9+A))*0.95;
       haloMat.opacity=fase(t,4.9+A,5.4+A)*(1-fase(t,6.2+A,6.8+A))*0.5;
       const voo=suave(fase(t,5.0+A,6.6+A));palco.position.z=-2.6+voo*2.9;const esc=1+voo*2.4;palco.scale.set(esc,esc,esc);
       palco.rotation.z=t*0.05;
@@ -242,8 +243,8 @@ function tocarXR(){
 /* ---------- 3D: camada própria por cima da página ---------- */
 function tocar3D(){
   const T=window.THREE;if(!T||!cfg||ativo)return Promise.resolve(false);
-  /* v1.2: com "reduzir movimento" ligado no sistema (comum em PCs de escola) a abertura não some mais: toca a versão curta */
-  const curto=reduzido();
+  /* v1.2.1: no 3D toca sempre a versão completa (a versão curta pulava os logos e a abertura parecia cortada) */
+  const curto=false;
   return carregarLogo(cfg.logo).then(()=>{
     if(ativo)return false;
     // <dialog> modal entra na "camada de topo": fica acima até de outros diálogos modais do app (ex.: boas-vindas do Corpo Humano)

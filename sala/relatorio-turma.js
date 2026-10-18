@@ -101,7 +101,7 @@ ul{margin:6px 0 0 18px;padding:0}li{margin:4px 0}
 </style></head><body>
 <div class="acoes"><button class="sec" data-action="salvar">Baixar arquivo</button><button data-action="imprimir">Imprimir ou salvar em PDF</button></div>
 <div class="folha">
-<div class="topo"><div><h1>Relatório da turma</h1><p class="sub">Portal 360º VR · aula de ${esc(data)} · sala ${esc(info.codigo||'')}</p>
+<div class="topo"><div><img src="${new URL('../assets/marca/p360-assinatura-horizontal-claro.svg?v=2',location.href).href}" alt="Portal 360º VR" style="height:30px;display:block;margin-bottom:8px"><h1>Relatório da turma</h1><p class="sub">Portal 360º VR · aula de ${esc(data)} · sala ${esc(info.codigo||'')}</p>
 <div class="campos"><div>Escola: <span contenteditable data-c="escola">${esc(cab.escola||'')}</span></div><div>Turma: <span contenteditable data-c="turma">${esc(cab.turma||'')}</span></div>
 <div>Professor(a): <span contenteditable data-c="professor">${esc(cab.professor||'')}</span></div><div>Componente: <span contenteditable data-c="componente">${esc(cab.componente||'Ciências')}</span></div></div></div>
 ${info.logo?'<img src="'+esc(info.logo)+'" alt="" style="width:64px;height:64px;border-radius:50%">':''}</div>

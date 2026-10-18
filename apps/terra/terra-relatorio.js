@@ -25,7 +25,7 @@ function html(){
  const logo=location.origin+location.pathname.replace(/[^/]*$/,'')+CFG.logo;
  return '<!DOCTYPE html><html lang="pt-BR"><head><meta charset="utf-8"><title>Relatório · '+esc(CFG.app)+'</title><style>'+
  '*{box-sizing:border-box}body{margin:0;font:11.5px/1.45 "Segoe UI",Roboto,Arial,sans-serif;color:#17202a;background:#fff}@page{size:A4;margin:12mm}'+
- '.cab{display:flex;align-items:center;gap:14px;border-bottom:3px solid #1a6b2a;padding-bottom:10px;margin-bottom:12px}.cab img{width:48px;height:48px;object-fit:contain}.k{font-size:9px;letter-spacing:2px;color:#1a6b2a;font-weight:700}h1{margin:2px 0 0;font-size:21px;color:#0f2c4a}.cab small{color:#5b6b7a;font-size:10px}'+
+ '.cab{display:flex;align-items:center;gap:14px;border-bottom:3px solid #1a6b2a;padding-bottom:10px;margin-bottom:12px}.cab img{width:48px;height:48px;object-fit:contain}.cab img.marca{width:auto;height:34px;margin-left:auto}.k{font-size:9px;letter-spacing:2px;color:#1a6b2a;font-weight:700}h1{margin:2px 0 0;font-size:21px;color:#0f2c4a}.cab small{color:#5b6b7a;font-size:10px}'+
  '.ident{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-bottom:8px}.ident div{border:1px solid #d7e4da;border-radius:8px;padding:6px 8px}.ident span{display:block;font-size:9px;color:#5b6b7a;text-transform:uppercase;letter-spacing:.6px}.ident b{font-size:12px;color:#0f2c4a}.linha{display:block;height:14px;border-bottom:1px solid #9aa9b5}'+
  '.meta{display:flex;flex-wrap:wrap;gap:4px 16px;font-size:10px;color:#5b6b7a;margin-bottom:10px}.meta b{color:#0f2c4a}'+
  '.resumo{display:grid;grid-template-columns:repeat('+d.cards.length+',1fr);gap:8px;margin-bottom:12px}.resumo div{background:#f3f7f4;border:1px solid #d7e4da;border-radius:10px;padding:8px;text-align:center}.resumo b{display:block;font-size:19px;color:#1a6b2a}.resumo span{font-size:9.5px;color:#5b6b7a}'+
@@ -35,7 +35,7 @@ function html(){
  '.rod{margin-top:14px;padding-top:8px;border-top:1px solid #d7e4da;font-size:9px;color:#6b7a88;line-height:1.5}'+
  '@media screen{body{padding:24px;background:#e9edf0}.folha{max-width:210mm;margin:0 auto;background:#fff;padding:14mm;box-shadow:0 8px 40px #0002}}@media print{.folha{padding:0}}'+
  '</style></head><body><div class="folha">'+
- '<header class="cab"><img src="'+logo+'" alt=""><div><div class="k">PORTAL 360º VR · '+esc(CFG.app.toUpperCase())+'</div><h1>Relatório do professor</h1><small>Registro da sessão para acompanhamento pedagógico e evidência de uso em sala</small></div></header>'+
+ '<header class="cab"><img src="'+logo+'" alt=""><div><div class="k">PORTAL 360º VR · '+esc(CFG.app.toUpperCase())+'</div><h1>Relatório do professor</h1><small>Registro da sessão para acompanhamento pedagógico e evidência de uso em sala</small></div><img class="marca" src="'+new URL('../../assets/marca/p360-assinatura-horizontal-claro.svg?v=2',location.href).href+'" alt="Portal 360º VR"></header>'+
  '<div class="ident">'+ident+'</div>'+
  '<div class="meta"><span>Data: <b>'+dataBR(agora)+'</b></span><span>Duração da sessão: <b>'+duracao(d.inicio)+'</b></span><span>Versão: <b>'+esc(d.versao||'')+'</b></span></div>'+
  '<div class="resumo">'+cards+'</div>'+blocos+

@@ -134,8 +134,12 @@ body.intro-fullscreen #btnSkipIntro{cursor:pointer}
   filter:drop-shadow(0 0 28px rgba(55,177,218,.35));
 }
 #startFallback .start-title{
-  font-size:clamp(28px,4vw,52px);
-  font-weight:800;letter-spacing:-.03em;color:#fff;
+  margin:0;line-height:0;
+}
+/* assinatura oficial: Portal (branco) · 360º (gradiente azul → lima) · selo VR, abaixo do globo animado */
+#startFallback .start-title img{
+  display:block;width:clamp(260px,32vw,460px);height:auto;
+  filter:drop-shadow(0 4px 22px rgba(55,177,218,.22));
 }
 #startFallback .start-sub{
   color:#8fdfff;font-size:13px;letter-spacing:.16em;text-transform:uppercase;
@@ -167,7 +171,7 @@ body.intro-fullscreen #btnSkipIntro{cursor:pointer}
   <div id="startFallback" style="display:flex">
     <div class="start-shell">
       <img class="start-logo" src="assets/marca/p360-simbolo-animado.svg" alt="">
-      <div class="start-title">Portal 360º VR</div>
+      <h1 class="start-title"><img src="assets/marca/p360-palavra.svg" alt="Portal 360º VR"></h1>
       <div class="start-sub">Uma experiência Portal do Educador</div>
       <button id="btnStartIntro">▶ Iniciar experiência</button>
     </div>

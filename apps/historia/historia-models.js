@@ -1,4 +1,4 @@
-/* História VR · modelos (v1.0)
+/* História VR · modelos (v1.2: Museu do Egito em tamanho real no lugar da maquete do Nilo)
    Tudo gerado no navegador pela NEWPC, sem arquivos externos: o vale do Nilo em maquete (rio, margens férteis, deserto),
    as pirâmides de Gizé, a Esfinge, templo, obelisco, barco, shaduf, casas de adobe e figuras estilizadas; a pirâmide social;
    a mesa do embalsamador; o interior da Grande Pirâmide em metros reais; a parede de hieróglifos. Os hieróglifos são
@@ -143,48 +143,18 @@ function terreno(opt={}){const g=new T.Group();const W=opt.w||16,H=opt.h||11,seg
 function rotulo(g,t,x,y,z,w,c){return textAt(g,t,x,y,z,w||1.6,c||'#fff2d6');}
 function contexto(level){const g=new T.Group();const CTX={type:'context'};
  if(level===0){/* mapa: nordeste da África, Mediterrâneo ao norte, o Nilo cortando o deserto */
-  const W=9,H=7;const tx=texCanvas('mapaEgito',512,400,(x,w,h)=>{pixels(x,w,h,91,(u,v,nz)=>{const n=nz(u*8,v*8)*.5;return [cl(214+n*40),cl(184+n*36),cl(130+n*30)];});
-    x.fillStyle='#3a78a8';x.beginPath();x.moveTo(0,0);x.lineTo(w,0);x.lineTo(w,62);x.bezierCurveTo(w*.75,80,w*.62,52,w*.55,74);x.bezierCurveTo(w*.48,92,w*.4,70,w*.3,80);x.bezierCurveTo(w*.18,88,w*.08,70,0,78);x.closePath();x.fill();
-    x.beginPath();x.moveTo(w*.72,120);x.lineTo(w*.78,110);x.lineTo(w,330);x.lineTo(w,400);x.lineTo(w*.92,400);x.closePath();x.fill();
-    x.strokeStyle='#6aa040';x.lineWidth=18;x.lineCap='round';x.beginPath();x.moveTo(w*.5,82);x.bezierCurveTo(w*.52,170,w*.47,240,w*.56,300);x.bezierCurveTo(w*.6,340,w*.52,370,w*.55,400);x.stroke();
-    x.strokeStyle='#2a6aa0';x.lineWidth=6;x.stroke();x.fillStyle='#6aa040';x.beginPath();x.moveTo(w*.42,84);x.lineTo(w*.58,84);x.lineTo(w*.51,118);x.closePath();x.fill();
-    x.fillStyle='#4a2a10';x.font='bold 15px Segoe UI';x.fillText('▲ Gizé',w*.52,132);x.fillText('● Tebas (Luxor)',w*.57,262);});
+  const W=9,H=7;const tx=texMapa();
   const mapa=new T.Mesh(new T.BoxGeometry(W,.12,H*.78),[mat(0xc8a878),mat(0xc8a878),mat(0xffffff,{map:tx,roughness:.9}),mat(0xc8a878),mat(0xc8a878),mat(0xc8a878)]);mapa.position.y=-.06;g.add(mapa);
   const rioHit=new T.Mesh(new T.BoxGeometry(.7,.2,H*.7),new T.MeshBasicMaterial({transparent:true,opacity:0,depthWrite:false}));rioHit.position.set(.15,.05,.4);rioHit.userData.hit=CTX;g.add(rioHit);mapa.userData.hit=CTX;
   [[0.2,-1.95],[0.3,-1.7]].forEach(([x,z],i)=>{const p=piramide(.35,.25);p.position.set(x+i*.25,0,z);g.add(p);});
   rotulo(g,'Mar Mediterrâneo',-1.8,.5,-2.6,2.4,'#dff2ff');rotulo(g,'Rio Nilo',1.2,.5,0,1.6,'#cfeaff');rotulo(g,'Deserto',-2.6,.5,.8,1.4);rotulo(g,'Mar Vermelho',3.4,.5,1.2,2,'#dff2ff');rotulo(g,'ÁFRICA',-2.4,.5,2.2,1.6,'#ffe3a8');
   const linha=textFixo(g,'NORDESTE DA ÁFRICA · HÁ MAIS DE 5 MIL ANOS',0,2.4,-2.6,6,'#ffe3a8');return g;}
- if(level===1){const t=terreno({w:12,h:8});g.add(t);t.traverse(o=>{if(o.isMesh)o.userData.hit=CTX;});
-  const sh=shaduf();sh.position.set(-1.2,0,rioZ(-1.2)-1.0);sh.rotation.y=.4;g.add(sh);[[-3,.9],[2.5,1.1],[4,.8]].forEach(([x,dz],i)=>{const c=casa();c.position.set(x,0,rioZ(x)-1.9-dz*.2);c.rotation.y=(i-1)*.3;g.add(c);});
-  for(let i=0;i<9;i++){const x=-5+i*1.25;const p=palmeira(1.5+(i%3)*.3,i+1);p.position.set(x,0,rioZ(x)+(i%2?1.25:-1.25));g.add(p);}
-  const b=barco();b.position.set(.5,.08,rioZ(.5));b.rotation.y=.2;g.add(b);[-2.4,-.4,1.6,3.4].forEach((x,i)=>{const f=pessoa({tecido:0xf2ead6});f.scale.setScalar(.55);f.position.set(x,0,rioZ(x)-1.45+(i%2)*.3);g.add(f);});
-  rotulo(g,'Cheia: julho a outubro',-3.5,1.6,0,2.6,'#cfeaff');rotulo(g,'Lama fértil = plantação',3.2,1.6,0,2.8,'#d8f0b0');
-  const ag=t.userData.agua;g.userData.tick=tt=>{t.userData.tick(tt);ag.scale.z=1+.35*(.5+.5*Math.sin(tt*.6));sh.userData.tick(tt);b.position.y=.08+Math.sin(tt*1.4)*.02;};return g;}
+ if(level===1)return perfilVale();
  /* 2: pirâmide social */
  const niveis=[['Faraó','#e8c048'],['Sacerdotes e nobres','#c89048'],['Escribas','#b8a070'],['Artesãos e comerciantes','#a89070'],['Camponeses','#8a9a58'],['Escravizados','#7a6a58']];const h=.55;
  niveis.forEach(([n,c],i)=>{const w=.9+i*.95;const b=new T.Mesh(new T.BoxGeometry(w,h,1.2),mat(new T.Color(c).getHex(),{roughness:.7}));b.position.y=(niveis.length-1-i)*h+h/2;g.add(b);const r=rotuloFixo(n,'#1a120a',Math.min(w*.92,1.9),60,false);r.position.set(0,b.position.y,.61);g.add(r);
   if(i===0){const f=pessoa({nemes:true,colar:true});f.scale.setScalar(.75);f.position.set(0,niveis.length*h,0);g.add(f);}});
  rotulo(g,'Topo: poucos, com muito poder',2.3,3.05,0,2.4,'#ffe3a8');rotulo(g,'Base: a maioria da população',3.0,1.3,0,2.3,'#d8f0b0');g.userData.semGiro=true;return g;}
-/* explorar: tarde às margens do Nilo, com Gizé ao fundo */
-const EX={piramides:[[-4.2,-3.6,2.6,1.75],[-1.4,-3.95,2.4,1.62],[.8,-4.1,1.3,.86]],esfinge:[-2.6,-1.6],templo:[3.6,-1.2],obelisco:[2.3,-.6],farao:[4.9,-.3],escriba:[1.4,-1.1],estela:[.3,-.9],roseta:[.95,-.75],casas:[[-5.6,.6],[-4.4,.75]],palmeiras:[-6.3,-5,-3.1,-.8,2.2,4.6,6],papiros:[[-2.2,1],[3.2,1.1],[5.5,1]],shaduf:[-3.2,.95],nilometro:[1.1,1.2],campones:[[-4.8,1.25],[-2.8,1.45]],barco:[.2]};
-function explorar(opt={}){const g=new T.Group();const t=terreno();g.add(t);const ins=k=>({type:'inspect',key:k});tag(t.userData.agua,ins('nilo'));
- {const gz=new T.Group();EX.piramides.forEach(([x,z,l,a],i)=>{const p=piramide(l,a,{topo:i===1});p.position.set(x,0,z);gz.add(p);});tag(gz,ins('piramide'));g.add(real('piramide-giza',gz));}
- const ef0=esfinge();ef0.scale.setScalar(.55);tag(ef0,ins('esfinge'));const ef=real('esfinge-giza',ef0,{altura:.5});ef.position.set(EX.esfinge[0],0,EX.esfinge[1]);ef.rotation.y=-.2;g.add(ef);
- const tp0=templo();tp0.scale.setScalar(.6);tag(tp0,ins('templo'));const tp=real('templo-cgbang',tp0,{altura:.72});tp.position.set(EX.templo[0],0,EX.templo[1]-.9);tp.rotation.y=-.12;/* templo real: entrada voltada para o rio */g.add(tp);
- const ob=obelisco(2.2);ob.position.set(EX.obelisco[0],0,EX.obelisco[1]);tag(ob,ins('obelisco'));g.add(ob);
- const fa=estatuaFarao();fa.scale.setScalar(.6);fa.position.set(EX.farao[0],0,EX.farao[1]);fa.rotation.y=-.5;tag(fa,ins('farao'));g.add(fa);
- const es=escribaSentado();es.scale.setScalar(.8);es.position.set(EX.escriba[0],0,EX.escriba[1]);es.rotation.y=.3;tag(es,ins('escriba'));g.add(es);
- const st=estela();st.scale.setScalar(.55);st.position.set(EX.estela[0],0,EX.estela[1]);tag(st,ins('hieroglifos'));g.add(st);
- const rs=roseta();rs.scale.setScalar(.6);rs.position.set(EX.roseta[0],0,EX.roseta[1]);rs.rotation.y=-.3;tag(rs,ins('roseta'));g.add(rs);
- EX.casas.forEach(([x,dz],i)=>{const c=casa();c.scale.setScalar(.75);c.position.set(x,0,rioZ(x)-1.6-dz);c.rotation.y=i*.4-.2;tag(c,ins('casa'));g.add(c);});
- EX.palmeiras.forEach((x,i)=>{const p=palmeira(1.3+(i%3)*.25,i+2);p.position.set(x,0,rioZ(x)+(i%2?1.2:-1.15));g.add(p);});
- EX.papiros.forEach(([x,dz],i)=>{const p=papiro(9,i+4);p.position.set(x,-.05,rioZ(x)+(i%2?-.68:.7));tag(p,ins('papiro'));g.add(p);});
- const sh=shaduf();sh.scale.setScalar(.75);sh.position.set(EX.shaduf[0],0,rioZ(EX.shaduf[0])-.85);sh.rotation.y=.5;tag(sh,ins('shaduf'));g.add(sh);
- const nm=nilometro();nm.scale.setScalar(.6);nm.position.set(EX.nilometro[0],-.05,rioZ(EX.nilometro[0])-1.25);tag(nm,ins('cheias'));g.add(nm);
- const camps=EX.campones.map(([x,dz],i)=>{const f=pessoa({tecido:0xf2ead6,bracoAberto:i===1});f.scale.setScalar(.5);f.position.set(x,0,rioZ(x)-dz);f.rotation.y=i?2.4:.6;tag(f,ins('campones'));g.add(f);return f;});
- const bc=barco();bc.scale.setScalar(.8);bc.position.set(EX.barco[0],.04,rioZ(EX.barco[0]));tag(bc,ins('barco'));g.add(bc);
- g.userData.tick=tt=>{t.userData.tick(tt);sh.userData.tick&&sh.userData.tick(tt);bc.position.x=EX.barco[0]+Math.sin(tt*.12)*2.2;bc.position.z=rioZ(bc.position.x);bc.position.y=.04+Math.sin(tt*1.3)*.015;camps[1].rotation.y=2.4+Math.sin(tt*.8)*.3;};
- return g;}
 /* ---------- fichas ampliadas ---------- */
 function inspection(key){const g=new T.Group();let o;
  if(PECA_MUSEU[key]){const pm=PECA_MUSEU[key],h=key==='caixoes'?.9:key==='reserva'||key==='nefertiti'?1.1:1.9,w=key==='caixoes'?2.6:.9;o=real(pm.arq,caixaEspera(w,h,w*.7),{yaw:pm.yaw,ajuste:'altura'});}
@@ -287,7 +257,6 @@ function hieroglifosCena(state){const g=new T.Group();const R=window.HISTORIA_DA
  R.forEach((r,i)=>{const p=new T.Mesh(new T.PlaneGeometry(.55,.55),new T.MeshBasicMaterial({map:placaGlifo(r.glifo,false),transparent:true,opacity:i<state.rodada||state.done?1:.35}));p.position.set(-2.7+i*.9,-.25,-.35);g.add(p);if(i===state.rodada&&!state.done){const m=new T.Mesh(new T.PlaneGeometry(.66,.66),new T.MeshBasicMaterial({color:0xffd27f,wireframe:true}));m.position.copy(p.position).add(V(0,0,-.01));g.add(m);}});
  textFixo(g,state.done?'VOCÊ LEU COMO UM ESCRIBA':'O QUE ESTE SINAL QUER DIZER?',0,4.05,-.35,4.4,'#ffe3a8',false);
  const piso=new T.Mesh(new T.BoxGeometry(10,.1,3),matTex('calcario',0xd8c8a0));piso.position.set(0,-.65,.6);g.add(piso);g.userData.semGiro=true;return g;}
-function desafio(){const g=explorar();g.scale.setScalar(.85);return g;}
 function dispose(g){if(!g)return;const geos=new Set(),mats=new Set(),tex=new Set();const comp=new Set(Object.values(TEXP));g.traverse(o=>{if(o.userData.compartilhado)return;if(o.geometry&&!o.isSprite)geos.add(o.geometry);for(const m of [].concat(o.material||[])){if(!m)continue;mats.add(m);for(const t of [m.map,m.emissiveMap,m.normalMap,m.bumpMap]){if(t&&!comp.has(t))tex.add(t);}}});geos.forEach(x=>x.dispose());mats.forEach(x=>x.dispose());tex.forEach(x=>x.dispose());if(g.parent)g.parent.remove(g);}
 /* ---------- modelos reais (Sketchfab, CC BY 4.0; otimizados pela NEWPC para o Quest) ----------
    Cada peça nasce procedural (aparece na hora, sem esperar a rede) e é trocada pelo modelo real assim que ele carrega,
@@ -304,7 +273,7 @@ function real(arq,proc,o={}){const g=new T.Group();g.add(proc);proc.updateMatrix
  g.userData.real=arq;
  glb(arq,u=>{const rr=new T.Group(),c=u.clone(true);c.rotation.y=o.yaw||0;rr.add(c);rr.updateMatrixWorld(true);const s2=new T.Box3().setFromObject(rr).getSize(new T.Vector3());
   const k=(o.altura?o.altura/s2.y:o.ajuste==='altura'?ps.y/s2.y:Math.min(ps.x/s2.x,ps.y/s2.y,ps.z/s2.z))*(o.escala||1);rr.scale.setScalar(k);rr.position.set(pc.x,pb.min.y,pc.z);
-  let hit=null;proc.traverse(x=>{if(!hit&&x.userData.hit)hit=x.userData.hit;});if(hit)tag(rr,hit);g.remove(proc);dispose(proc);g.add(rr);g.userData.trocado=true;});
+  let hit=null;proc.traverse(x=>{if(!hit&&x.userData.hit)hit=x.userData.hit;});if(hit)tag(rr,hit);g.remove(proc);dispose(proc);g.add(rr);g.userData.trocado=true;const MM=window.HISTORIA_MODELS;if(hit&&MM&&MM.aoTrocar)MM.aoTrocar();});
  return g;}
 /* peças de museu: escaneamentos reais (ficha, arquivo, giro, altura em metros na vitrine) */
 const MUSEU=[['menkaure','estatua-menkaure-rainha',0,1.45],['triade','triade-menkaure',0,1.1],['reserva','cabeca-reserva',0,.5],['senenmut','estatua-senenmut',-Math.PI/2,1.0],
@@ -312,14 +281,178 @@ const MUSEU=[['menkaure','estatua-menkaure-rainha',0,1.45],['triade','triade-men
 const PECA_MUSEU=Object.fromEntries(MUSEU.map(([k,a,y,h])=>[k,{arq:a,yaw:y,h}]));
 function caixaEspera(w,h,d){const m=new T.Mesh(new T.BoxGeometry(w,h,d),new T.MeshBasicMaterial({color:0xe8d8b0,transparent:true,opacity:.18,depthWrite:false}));m.position.y=h/2;const g=new T.Group();g.add(m);return g;}
 function pedestal(w=.62,hh=.8){const g=new T.Group();const b=new T.Mesh(new T.BoxGeometry(w,hh,.62),mat(0x2a2620,{roughness:.6}));b.position.y=hh/2;g.add(b);const t=new T.Mesh(new T.BoxGeometry(w+.08,.04,.7),mat(0xc8a860,{metalness:.4,roughness:.4}));t.position.y=hh+.02;g.add(t);return g;}
-function museu(){const g=new T.Group();const D=window.HISTORIA_DATA;
- const piso=new T.Mesh(new T.CircleGeometry(4.5,64),mat(0xffffff,{map:(()=>{const t=TX.calcario().clone();t.needsUpdate=true;t.repeat.set(6,6);return t;})(),roughness:.9}));piso.rotation.x=-Math.PI/2;piso.userData.semEnquadre=true;g.add(piso);
- const n=MUSEU.length,R=3.6;
- MUSEU.forEach(([k,arq,yaw,h],i)=>{const a=-1.25+2.5*i/(n-1);const x=Math.sin(a)*R,z=-Math.cos(a)*R;const base=new T.Group();base.position.set(x,0,z);base.rotation.y=-a;g.add(base);
-  const cx=k==='caixoes',ph=cx?.45:.8;const p=pedestal(cx?1.5:.62,ph);base.add(p);const larg=cx?1.45:.6;const esp=caixaEspera(larg,h,cx?.6:larg*.7);tag(esp,{type:'inspect',key:k});
-  const r=real(arq,esp,{yaw,ajuste:cx?'max':'altura'});r.position.y=ph+.04;base.add(r);
-  const nome=(D.info[k]||{}).name||k;const pl=rotuloFixo(nome,'#ffe9b8',cx?1.3:.6,cx?60:72);pl.position.set(0,ph*.62,.315);base.add(pl);tag(p,{type:'inspect',key:k});});
- textFixo(g,'PEÇAS REAIS · ESCANEADAS EM MUSEUS',0,2.5,-3.4,3.6,'#e8c050',false);
- g.userData.semGiro=true;return g;}
-window.HISTORIA_MODELS={V,mat,ball,label,rotuloFixo,textFixo,textAt,tag,contexto,explorar,inspection,sequencia,viagemCena,hieroglifosCena,desafio,dispose,glifo,ESCALA_VR,museu,real,glb};
+/* ---------- v1.2 · Museu do Egito: um átrio e quatro alas, em tamanho real ----------
+   No óculos o aluno fica dentro do prédio e anda por teleporte (marcadores no chão ou qualquer ponto do piso).
+   No 3D a câmera vê o prédio em corte, como casa de bonecas: paredes e teto são planos de um lado só, virados para dentro,
+   então fecham a sala vistos de dentro e somem vistos de fora. Cada peça tem uma caixa invisível de clique, para o raio
+   não testar os milhares de triângulos dos escaneamentos (importante no Quest). Medidas em metros. */
+const MU={A:7,L:6,H:4.4};MU.R=MU.A/2+MU.L/2;
+const ALA_TH=[0,-Math.PI/2,Math.PI/2,Math.PI];
+const EIXO_Y=V(0,1,0);
+const TIPO={real:'Escaneamento 3D de peça real',peca:'Modelo 3D de peça real',repro:'Reprodução digital',did:'Modelo didático',replica:'Réplica didática',art:'Modelo 3D artístico',sitio:'Modelo 3D de lugar real'};
+TX.piso=()=>texCanvas('pisoMuseu',512,512,(x,W,H)=>{pixels(x,W,H,17,(u,v,nz)=>{const n=nz(u*10,v*10)*.5+nz(u*50,v*50)*.2;return [cl(172+n*40),cl(148+n*36),cl(110+n*30)];});x.strokeStyle='rgba(70,50,30,.55)';x.lineWidth=3;for(let i=0;i<=4;i++){x.beginPath();x.moveTo(i*W/4,0);x.lineTo(i*W/4,H);x.stroke();x.beginPath();x.moveTo(0,i*H/4);x.lineTo(W,i*H/4);x.stroke();}});
+TX.parede=()=>texBlocos('paredeMuseu',[204,182,142],6,3,19);
+TX.friso=()=>texParedeGlifos('frisoMuseu','#5a3a1c',[214,192,148],83);
+TX.glifosParede=()=>texParedeGlifos('paredeEscrita','#3a2614',[212,188,142],97);
+function geoUV(w,h,ru,rv){const g=new T.PlaneGeometry(w,h);const uv=g.attributes.uv;for(let i=0;i<uv.count;i++)uv.setXY(i,uv.getX(i)*ru,uv.getY(i)*rv);uv.needsUpdate=true;return g;}
+/* texto nítido em placa grande (2048 px de largura): títulos, faixas e letreiros */
+function textoPlano(txt,cor,w,h,opt={}){const W=2048,H=Math.max(64,Math.round(W*h/w));const c=document.createElement('canvas');c.width=W;c.height=H;const x=c.getContext('2d');if(opt.fundo){x.fillStyle=opt.fundo;x.fillRect(0,0,W,H);}
+ x.textAlign='center';x.textBaseline='middle';const f=s=>(opt.peso||'700')+' '+s+'px Segoe UI,Arial';let s=Math.round(H*(opt.k||.62));x.font=f(s);while(x.measureText(txt).width>W*.94&&s>12){s-=4;x.font=f(s);}
+ if(opt.sombra!==false){x.shadowColor='rgba(0,0,0,.65)';x.shadowBlur=Math.max(4,s*.1);}x.fillStyle=cor;x.fillText(txt,W/2,H/2+s*.04);
+ const tx=new T.CanvasTexture(c);tx.encoding=T.sRGBEncoding;tx.anisotropy=8;tx.minFilter=T.LinearMipmapLinearFilter;tx.generateMipmaps=true;
+ return new T.Mesh(new T.PlaneGeometry(w,h),new T.MeshBasicMaterial({map:tx,transparent:!opt.fundo,depthWrite:!!opt.fundo,toneMapped:false}));}
+/* etiqueta da peça: nome e o que ela é (peça real escaneada, réplica, modelo didático) */
+function placa(nome,tipo,cor,w=.56){const c=document.createElement('canvas');c.width=512;c.height=200;const x=c.getContext('2d');x.fillStyle='#1c1610';x.fillRect(0,0,512,200);x.fillStyle=cor||'#c8a860';x.fillRect(0,0,512,12);x.textAlign='center';x.textBaseline='middle';
+ const caber=(t,s0,peso,min)=>{let s=s0;x.font=peso+' '+s+'px Segoe UI,Arial';while(x.measureText(t).width>484&&s>min){s-=2;x.font=peso+' '+s+'px Segoe UI,Arial';}};
+ caber(nome,58,'600',24);x.fillStyle='#f6e8c6';x.fillText(nome,256,86);caber(tipo,34,'400',16);x.fillStyle='#c4b089';x.fillText(tipo,256,152);
+ const tx=new T.CanvasTexture(c);tx.encoding=T.sRGBEncoding;tx.anisotropy=8;return new T.Mesh(new T.PlaneGeometry(w,w*200/512),new T.MeshBasicMaterial({map:tx,toneMapped:false}));}
+function pedestal2(w,d,hh){const g=new T.Group();const b=new T.Mesh(new T.BoxGeometry(w,hh,d),mat(0x2c2620,{roughness:.55}));b.position.y=hh/2;g.add(b);const t=new T.Mesh(new T.BoxGeometry(w+.06,.04,d+.06),mat(0xb89a58,{metalness:.45,roughness:.38}));t.position.y=hh+.02;g.add(t);const r=new T.Mesh(new T.BoxGeometry(w+.04,.06,d+.04),mat(0x1a1612));r.position.y=.03;g.add(r);return g;}
+function vitrine(w,d,h){const g=new T.Group();const vid=new T.Mesh(new T.BoxGeometry(w,h,d),new T.MeshStandardMaterial({color:0xe6f4ff,transparent:true,opacity:.1,roughness:.05,metalness:0,envMap:env(),envMapIntensity:1.2,depthWrite:false}));vid.position.y=h/2;vid.renderOrder=3;g.add(vid);
+ const tampa=new T.Mesh(new T.BoxGeometry(w+.02,.03,d+.02),mat(0x2c2620,{roughness:.5}));tampa.position.y=h+.015;g.add(tampa);return g;}
+/* encaixa um modelo procedural na altura h, centrado e apoiado em y=0 */
+function ajustar(o,h,maxW){o.updateMatrixWorld(true);const b=new T.Box3().setFromObject(o),s=b.getSize(V()),c=b.getCenter(V());let k=h/Math.max(s.y,1e-3);if(maxW&&Math.max(s.x,s.z)*k>maxW)k=maxW/Math.max(s.x,s.z);o.position.sub(V(c.x,b.min.y,c.z));const g=new T.Group();g.add(o);g.scale.setScalar(k);if(o.userData.tick)g.userData.tick=o.userData.tick;return g;}
+/* caixa de clique invisível (não desenha, mas o raio encontra) */
+function caixaHit(w,h,d,y0,data){const m=new T.Mesh(new T.BoxGeometry(w,h,d),new T.MeshBasicMaterial({visible:false}));m.position.y=y0+h/2;m.userData.hit=data;m.userData.semEnquadre=true;return m;}
+function coluna(h){const g=new T.Group();const pedra=matTex('calcarioInt',0xffffff,{roughness:.8});const f=new T.Mesh(new T.CylinderGeometry(.26,.31,h-.75,18),pedra);f.position.y=(h-.75)/2;g.add(f);
+ [.9,1.05].forEach(y=>{const a=new T.Mesh(new T.CylinderGeometry(.315,.315,.06,18),mat(0x2a5a8a,{roughness:.5}));a.position.y=y;g.add(a);});
+ const cap=new T.Mesh(new T.CylinderGeometry(.5,.27,.55,18),mat(0x5f8f4e,{roughness:.7}));cap.position.y=h-.48;g.add(cap);const ab=new T.Mesh(new T.BoxGeometry(.72,.2,.72),pedra);ab.position.y=h-.1;g.add(ab);return g;}
+function texMapa(){return texCanvas('mapaEgito',512,400,(x,w,h)=>{pixels(x,w,h,91,(u,v,nz)=>{const n=nz(u*8,v*8)*.5;return [cl(214+n*40),cl(184+n*36),cl(130+n*30)];});
+ x.fillStyle='#3a78a8';x.beginPath();x.moveTo(0,0);x.lineTo(w,0);x.lineTo(w,62);x.bezierCurveTo(w*.75,80,w*.62,52,w*.55,74);x.bezierCurveTo(w*.48,92,w*.4,70,w*.3,80);x.bezierCurveTo(w*.18,88,w*.08,70,0,78);x.closePath();x.fill();
+ x.beginPath();x.moveTo(w*.72,120);x.lineTo(w*.78,110);x.lineTo(w,330);x.lineTo(w,400);x.lineTo(w*.92,400);x.closePath();x.fill();
+ x.strokeStyle='#6aa040';x.lineWidth=18;x.lineCap='round';x.beginPath();x.moveTo(w*.5,82);x.bezierCurveTo(w*.52,170,w*.47,240,w*.56,300);x.bezierCurveTo(w*.6,340,w*.52,370,w*.55,400);x.stroke();
+ x.strokeStyle='#2a6aa0';x.lineWidth=6;x.stroke();x.fillStyle='#6aa040';x.beginPath();x.moveTo(w*.42,84);x.lineTo(w*.58,84);x.lineTo(w*.51,118);x.closePath();x.fill();
+ x.fillStyle='#4a2a10';x.font='bold 15px Segoe UI';x.fillText('▲ Gizé',w*.52,132);x.fillText('● Tebas (Luxor)',w*.57,262);});}
+function texFarao(){return texCanvas('bandeiraFarao',256,384,(x,W,H)=>{const g=x.createLinearGradient(0,0,0,H);g.addColorStop(0,'#1d3a72');g.addColorStop(1,'#0f2246');x.fillStyle=g;x.fillRect(0,0,W,H);x.strokeStyle='#e8c048';x.lineWidth=8;x.strokeRect(10,10,W-20,H-20);
+ glifo(x,'sol',W/2,70,70,'#e8c048');glifo(x,'cartucho',W/2,190,120,'#e8c048');glifo(x,'ankh',W*.27,320,60,'#e8c048');glifo(x,'olho',W*.73,320,60,'#e8c048');});}
+/* placa de parede (mapa, bandeira, parede de hieróglifos) com moldura escura */
+function painel(par,o){const g=new T.Group();g.position.set(o.x,o.y,o.z);g.rotation.y=o.r;par.add(g);const mo=new T.Mesh(new T.PlaneGeometry(o.w+.12,o.h+.12),mat(0x241a12,{roughness:.6}));mo.position.z=.005;g.add(mo);
+ const m=new T.Mesh(o.geo||new T.PlaneGeometry(o.w,o.h),new T.MeshStandardMaterial({map:o.map,roughness:.85,envMap:env(),envMapIntensity:.25}));m.position.z=.012;g.add(m);if(o.key){const hit={type:'inspect',key:o.key};m.userData.hit=hit;mo.userData.hit=hit;}return g;}
+/* porta da missão no fundo de cada ala */
+function portaMissao(par,ala){const hit={type:'missao',view:ala.missao};const g=new T.Group();g.position.set(0,0,-MU.L/2+.02);par.add(g);
+ const tx=texCanvas('porta-'+ala.id,256,512,(x,W,H)=>{const gr=x.createLinearGradient(0,0,0,H);gr.addColorStop(0,'#07090c');gr.addColorStop(.55,'#141414');gr.addColorStop(1,ala.cor);x.fillStyle=gr;x.fillRect(0,0,W,H);const rg=x.createRadialGradient(W/2,H*.62,10,W/2,H*.62,W*.8);rg.addColorStop(0,'rgba(255,236,190,.55)');rg.addColorStop(1,'rgba(255,236,190,0)');x.fillStyle=rg;x.fillRect(0,0,W,H);});
+ const vao=new T.Mesh(new T.PlaneGeometry(1.6,2.6),new T.MeshBasicMaterial({map:tx,toneMapped:false}));vao.position.y=1.3;vao.userData.hit=hit;g.add(vao);
+ const ouro=mat(0xc8a050,{metalness:.55,roughness:.32});[[-.88,1.36,.14,2.72],[.88,1.36,.14,2.72],[0,2.74,1.9,.18]].forEach(([x,y,w,h])=>{const b=new T.Mesh(new T.BoxGeometry(w,h,.14),ouro);b.position.set(x,y,.05);b.userData.hit=hit;g.add(b);});
+ const t1=textoPlano('ENTRAR NA MISSÃO','#ffe3a8',1.4,.2,{k:.7});t1.position.set(0,1.62,.02);t1.userData.hit=hit;g.add(t1);
+ const t2=textoPlano(ala.missaoNome,'#ffffff',1.46,.32,{k:.66});t2.position.set(0,1.3,.02);t2.userData.hit=hit;g.add(t2);
+ const t3=textoPlano('▶','#ffffff',.4,.4,{k:.8});t3.position.set(0,.88,.02);t3.userData.hit=hit;g.add(t3);
+ return vao;}
+/* marcador de teleporte no chão */
+function marcador(par,x,z,nome,data,cor){const g=new T.Group();g.position.set(x,0,z);par.add(g);
+ const disco=new T.Mesh(new T.CircleGeometry(.42,40),new T.MeshBasicMaterial({color:new T.Color(cor),transparent:true,opacity:.38,depthWrite:false,toneMapped:false}));disco.rotation.x=-Math.PI/2;disco.position.y=.012;disco.userData.hit=data;g.add(disco);
+ const anel=new T.Mesh(new T.RingGeometry(.43,.5,48),new T.MeshBasicMaterial({color:0xffffff,transparent:true,opacity:.9,depthWrite:false,toneMapped:false}));anel.rotation.x=-Math.PI/2;anel.position.y=.014;anel.userData.hit=data;g.add(anel);
+ const t=textoPlano(nome,'#ffffff',1.6,.24,{k:.7});t.rotation.x=-Math.PI/2;t.position.set(0,.016,.72);t.userData.hit=data;g.add(t);
+ g.userData.anel=anel;return g;}
+/* uma peça no pedestal: escaneamento real (arq) ou modelo didático (proc) */
+function pecaMuseu(par,o,cor,ticks){const D=window.HISTORIA_DATA;const b=new T.Group();b.position.set(o.x,0,o.z);b.rotation.y=o.r||0;par.add(b);
+ const w=o.w||.62,d=o.d||.62,ph=o.ph||.3,hit={type:'inspect',key:o.key};const p=pedestal2(w,d,ph);tag(p,hit);b.add(p);
+ let corpo;if(o.arq)corpo=real(o.arq,caixaEspera(o.cw||w*.82,o.h,o.cd||d*.82),{yaw:o.yaw||0,ajuste:o.ajuste||'altura'});else{corpo=ajustar(o.proc(),o.h,o.maxW||Math.max(w,d)*.9);if(corpo.userData.tick)ticks.push(corpo.userData.tick);}
+ corpo.position.y=ph+.04;b.add(corpo);
+ if(o.vit){const v=vitrine(w-.04,d-.04,o.h+.14);v.position.y=ph+.04;b.add(v);}
+ b.add(caixaHit(w,o.h+.12,d,ph,hit));
+ const i=D.info[o.key]||{};const pl=placa(i.name||o.key,o.tipo,cor,Math.min(.6,w*.92));pl.position.set(0,Math.max(.16,ph*.58),d/2+.007);pl.userData.hit=hit;b.add(pl);
+ return {b,ph,h:o.h};}
+const ALAS_PECAS=[
+ /* Vida no Nilo */
+ [{key:'nilo',painel:true,x:-3.47,y:1.75,z:-.85,r:Math.PI/2,w:3.2,h:2.5,map:()=>texMapa()},
+  {key:'campones',x:-1.8,z:-2.3,r:.35,proc:()=>{const g=new T.Group();const f=pessoa({tecido:0xf2ead6,bracoAberto:true});g.add(f);const ce=new T.Mesh(new T.CylinderGeometry(.18,.14,.28,12),mat(0xc89048));ce.position.set(.42,.14,.15);g.add(ce);const ba=new T.Mesh(new T.BoxGeometry(.8,.06,.5),mat(0x8a6a44));ba.position.y=-.03;g.add(ba);return g;},h:.6,vit:1,ph:.95,tipo:TIPO.did},
+  {key:'barco',x:1.8,z:-2.3,r:-.35,proc:barco,h:.62,w:1.0,d:.55,vit:1,ph:.95,tipo:TIPO.did},
+  {key:'cheias',x:2.85,z:-1.15,r:-Math.PI/2,proc:nilometro,h:.42,w:.8,d:.8,vit:1,ph:.95,tipo:TIPO.did},
+  {key:'shaduf',x:2.85,z:.75,r:-Math.PI/2,proc:shaduf,h:.62,w:1.0,d:.62,vit:1,ph:.9,tipo:TIPO.did},
+  {key:'casa',x:-2.85,z:1.9,r:Math.PI/2,proc:casa,h:.4,w:.75,d:.65,vit:1,ph:.95,tipo:TIPO.did}],
+ /* Faraós e deuses */
+ [{key:'farao',painel:true,x:-2.3,y:2.42,z:-2.97,r:0,w:.9,h:1.3,map:()=>texFarao()},
+  {key:'menkaure',x:-2.85,z:-1.9,r:Math.PI/2,arq:'estatua-menkaure-rainha',h:1.42,ph:.35,tipo:TIPO.real},
+  {key:'triade',x:-2.85,z:-.1,r:Math.PI/2,arq:'triade-menkaure',h:.95,ph:.75,tipo:TIPO.real},
+  {key:'ramses',x:-2.85,z:1.7,r:Math.PI/2,arq:'estatua-ramses',h:1.1,ph:.6,tipo:TIPO.peca},
+  {key:'mentuhotep',x:2.85,z:-1.9,r:-Math.PI/2,arq:'estatua-mentuhotep',h:2.05,ph:.3,tipo:TIPO.real},
+  {key:'nefertiti',x:2.85,z:-.1,r:-Math.PI/2,arq:'nefertiti',yaw:Math.PI/2,h:.49,ph:1.0,vit:1,tipo:TIPO.repro},
+  {key:'tanwetamani',x:2.85,z:1.7,r:-Math.PI/2,arq:'estatua-tanwetamani',yaw:-Math.PI/2,h:1.3,ph:.45,tipo:TIPO.real},
+  {key:'senenmut',x:-1.4,z:-2.4,r:.25,arq:'estatua-senenmut',yaw:-Math.PI/2,h:.95,ph:.7,tipo:TIPO.real},
+  {key:'obelisco',x:1.75,z:-2.35,r:0,proc:()=>obelisco(2.6),h:2.75,ph:.3,tipo:TIPO.replica}],
+ /* Mumificação e vida após a morte */
+ [{key:'hunefer',x:-1.75,z:-2.3,r:.3,arq:'sarcofago-hunefer',h:1.9,ph:.3,w:.8,d:.7,tipo:TIPO.real},
+  {key:'mumia',x:-2.75,z:-.5,r:Math.PI/2,proc:mumia,h:.36,w:2.0,d:.75,vit:1,ph:.75,maxW:1.8,tipo:TIPO.did},
+  {key:'caixoes',x:-2.75,z:1.75,r:Math.PI/2,arq:'caixoes-padimut',ajuste:'max',cw:1.85,cd:.62,h:.72,w:1.95,d:.75,ph:.4,tipo:TIPO.real},
+  {key:'canopicos',x:2.85,z:-1.9,r:-Math.PI/2,arq:'vaso-canopico',h:.42,ph:1.0,vit:1,tipo:TIPO.real},
+  {key:'reserva',x:2.85,z:-.3,r:-Math.PI/2,arq:'cabeca-reserva',h:.32,ph:1.1,vit:1,tipo:TIPO.real},
+  {key:'sarcofago',x:2.6,z:1.6,r:-Math.PI/2,arq:'sarcofago-khufudjedef',ajuste:'max',cw:2.0,cd:.85,h:.95,w:2.1,d:.95,ph:.3,tipo:TIPO.real}],
+ /* Escrita e memória */
+ [{key:'hieroglifos',painel:true,x:-3.47,y:1.65,z:-.3,r:Math.PI/2,w:5.0,h:2.2,map:()=>TX.glifosParede(),geo:()=>geoUV(5,2.2,5/(8*.32),2.2/(8*.32))},
+  {key:'roseta',x:-1.7,z:-2.3,r:.3,proc:roseta,h:1.12,w:.9,d:.5,ph:.45,tipo:TIPO.replica},
+  {key:'escriba',x:2.85,z:-1.9,r:-Math.PI/2,proc:escribaSentado,h:.53,ph:.95,vit:1,tipo:TIPO.did},
+  {key:'papiro',x:2.85,z:-.2,r:-Math.PI/2,proc:()=>{const g=new T.Group();const p=papiro(14,5);g.add(p);const vaso=new T.Mesh(new T.CylinderGeometry(.36,.3,.3,16),mat(0x8a5a34,{roughness:.9}));vaso.position.y=.1;g.add(vaso);const folha=new T.Mesh(new T.PlaneGeometry(.5,.36),mat(0xffffff,{map:texParedeGlifos('papiroGlifos','#2a2018',[232,220,176],61),side:T.DoubleSide}));folha.position.set(.05,.5,.42);folha.rotation.x=-.5;g.add(folha);return g;},h:1.0,w:.8,d:.8,ph:.3,tipo:TIPO.did},
+  {key:'templo',x:2.6,z:1.7,r:-Math.PI/2,arq:'templo-cgbang',ajuste:'max',cw:1.35,cd:.9,h:.6,w:1.5,d:1.0,ph:.8,tipo:TIPO.art}]
+];
+function museuEgito(){const D=window.HISTORIA_DATA;const g=new T.Group();const ticks=[],marcas=[],portas=[];const A=MU.A,L=MU.L,H=MU.H;
+ const mPiso=mat(0xffffff,{map:TX.piso(),roughness:.42,envMapIntensity:.6}),mParede=mat(0xffffff,{map:TX.parede(),roughness:.9}),mFriso=mat(0xffffff,{map:TX.friso(),roughness:.85}),mTeto=new T.MeshStandardMaterial({color:0x2a2018,roughness:.95}),mRodape=mat(0x2a2018,{roughness:.6});
+ const chaoHit={type:'chao'};
+ const piso=(w,d,x,z)=>{const m=new T.Mesh(geoUV(w,d,w/3.6,d/3.6),mPiso);m.rotation.x=-Math.PI/2;m.position.set(x,0,z);m.userData.semEnquadre=true;g.add(m);const h=new T.Mesh(new T.PlaneGeometry(w,d),new T.MeshBasicMaterial({visible:false}));h.rotation.x=-Math.PI/2;h.position.set(x,.004,z);h.userData.hit=chaoHit;h.userData.semEnquadre=true;g.add(h);
+  const t=new T.Mesh(new T.PlaneGeometry(w,d),mTeto);t.rotation.x=Math.PI/2;t.position.set(x,H,z);t.userData.semEnquadre=true;g.add(t);};
+ /* parede com rodapé, faixa da cor da ala e friso de hieróglifos; plano virado para dentro (+z local) */
+ const parede=(par,w,x,z,r,cor)=>{const p=new T.Group();p.position.set(x,0,z);p.rotation.y=r;par.add(p);const m=new T.Mesh(geoUV(w,H,w/4.2,H/4.2),mParede);m.position.y=H/2;p.add(m);
+  const rd=new T.Mesh(new T.PlaneGeometry(w,.28),mRodape);rd.position.set(0,.14,.006);p.add(rd);
+  const fr=new T.Mesh(geoUV(w,.5,w/.5/8,.125),mFriso);fr.position.set(0,H-.55,.006);p.add(fr);
+  const bl=new T.Mesh(new T.PlaneGeometry(w,H),new T.MeshBasicMaterial({visible:false}));bl.position.y=H/2;bl.userData.hit={type:'parede'};bl.userData.semEnquadre=true;p.add(bl);/* bloqueia o raio (só por dentro) */
+  if(cor){const fx=new T.Mesh(new T.PlaneGeometry(w,.07),new T.MeshBasicMaterial({color:new T.Color(cor),toneMapped:false}));fx.position.set(0,H-.86,.008);p.add(fx);}return p;};
+ piso(A,A,0,0);
+ /* luz zenital sobre a maquete de Gizé */
+ const zen=new T.Mesh(new T.PlaneGeometry(2.6,2.6),new T.MeshBasicMaterial({color:0xfff2d2,toneMapped:false}));zen.rotation.x=Math.PI/2;zen.position.y=H-.01;g.add(zen);
+ [[1,1],[1,-1],[-1,1],[-1,-1]].forEach(([sx,sz])=>{const c=coluna(H);c.position.set(sx*A/2,0,sz*A/2);g.add(c);});
+ const alas=[];const pecas={};
+ D.ALAS.forEach((ala,i)=>{const th=ALA_TH[i];const dir=V(-Math.sin(th),0,-Math.cos(th)),centro=dir.clone().multiplyScalar(MU.R);
+  const ga=new T.Group();ga.position.copy(centro);ga.rotation.y=th;g.add(ga);
+  {const m=new T.Mesh(geoUV(A,L,A/3.6,L/3.6),mPiso);m.rotation.x=-Math.PI/2;m.userData.semEnquadre=true;ga.add(m);const h=new T.Mesh(new T.PlaneGeometry(A,L),new T.MeshBasicMaterial({visible:false}));h.rotation.x=-Math.PI/2;h.position.y=.004;h.userData.hit=chaoHit;h.userData.semEnquadre=true;ga.add(h);
+   const t=new T.Mesh(new T.PlaneGeometry(A,L),mTeto);t.rotation.x=Math.PI/2;t.position.y=H;t.userData.semEnquadre=true;ga.add(t);}
+  parede(ga,A,0,-L/2,0,ala.cor);parede(ga,L,-A/2,0,Math.PI/2,ala.cor);parede(ga,L,A/2,0,-Math.PI/2,ala.cor);
+  /* título no fundo e letreiro na entrada (virado para o átrio) */
+  const tt=textoPlano(ala.nome.toUpperCase(),'#fff4dc',5.4,.42,{k:.72});tt.position.set(0,3.3,-L/2+.02);ga.add(tt);
+  const st=textoPlano(ala.sub,'#e8d6b0',4.6,.24,{k:.66,peso:'500'});st.position.set(0,2.98,-L/2+.02);ga.add(st);
+  const viga=new T.Mesh(new T.BoxGeometry(A,.5,.3),mat(0x3a2a1a,{roughness:.7}));viga.position.set(0,H-.25,L/2);ga.add(viga);
+  const fx=new T.Mesh(new T.BoxGeometry(A,.06,.31),new T.MeshBasicMaterial({color:new T.Color(ala.cor),toneMapped:false}));fx.position.set(0,H-.52,L/2);ga.add(fx);
+  const lt=textoPlano(ala.nome.toUpperCase(),'#ffe9b8',A-.4,.4,{k:.7});lt.position.set(0,H-.25,L/2+.16);ga.add(lt);
+  portas.push(portaMissao(ga,ala));
+  const local=(x,z)=>V(x,0,z).applyAxisAngle(EIXO_Y,th).add(centro);
+  ALAS_PECAS[i].forEach(o=>{if(o.painel){painel(ga,Object.assign({},o,{map:o.map(),geo:o.geo&&o.geo()}));pecas[o.key]={pos:local(o.x+Math.sin(o.r)*.02,o.z+Math.cos(o.r)*.02),yaw:th+o.r,y:o.y,h:o.h,ala:i,painel:true};return;}
+   const r=pecaMuseu(ga,o,ala.cor,ticks);pecas[o.key]={pos:local(o.x,o.z),yaw:th+(o.r||0),y:r.ph+.04+o.h/2,h:o.h,ala:i};
+   const lz=new T.Mesh(new T.CircleGeometry(.2,24),new T.MeshBasicMaterial({color:0xfff3d6,toneMapped:false}));lz.rotation.x=Math.PI/2;lz.position.set(o.x,H-.012,o.z);ga.add(lz);});
+  const mk=marcador(ga,0,1.55,ala.nome,{type:'ala',index:i},ala.cor);marcas.push(mk);
+  alas.push({theta:th,centro,spot:local(0,1.55),nome:ala.nome});});
+ /* átrio: maquete de Gizé com os modelos 3D das pirâmides e da Esfinge */
+ {const m=new T.Group();g.add(m);const base=new T.Mesh(new T.CylinderGeometry(1.1,1.16,.78,48),mat(0x2c2620,{roughness:.55}));base.position.y=.39;m.add(base);const tampo=new T.Mesh(new T.CylinderGeometry(1.16,1.16,.05,48),mat(0xb89a58,{metalness:.45,roughness:.38}));tampo.position.y=.8;m.add(tampo);
+  const areia=new T.Mesh(new T.CylinderGeometry(1.08,1.08,.03,48),matTex('areia',0xffffff,{roughness:1}));areia.position.y=.84;m.add(areia);
+  const gz0=new T.Group();[[-.5,-.2,.6,.4],[.05,-.3,.56,.37],[.5,-.38,.3,.2]].forEach(([x,z,l,a],k)=>{const p=piramide(l,a,{topo:k===1});p.position.set(x,0,z);gz0.add(p);});
+  const gz=real('piramide-giza',gz0);gz.position.y=.855;m.add(gz);const ph=caixaHit(1.6,.45,1.0,.85,{type:'inspect',key:'piramide'});ph.position.z=-.15;m.add(ph);
+  const ef0=esfinge();const ef=real('esfinge-giza',ajustar(ef0,.12),{altura:.12});ef.position.set(-.35,.855,.5);ef.rotation.y=.2;m.add(ef);const eh=caixaHit(.42,.22,.26,.85,{type:'inspect',key:'esfinge'});eh.position.x=-.35;eh.position.z=.5;m.add(eh);
+  const pl=placa('Planalto de Gizé','Pirâmides e Esfinge · '+TIPO.sitio,'#d8c088',.62);pl.position.set(.45,.5,1.13);pl.rotation.y=.4;pl.userData.hit={type:'inspect',key:'piramide'};m.add(pl);
+  pecas.piramide={pos:V(0,0,0),yaw:0,y:1.05,h:.45,ala:-1};pecas.esfinge={pos:V(-.35,0,.5),yaw:0,y:.95,h:.15,ala:-1};}
+ const inicio={spot:V(0,0,2.4),theta:0};marcas.push(marcador(g,0,2.4,'Átrio',{type:'ala',index:-1},'#d8c088'));
+ const boas=textoPlano('MUSEU DO EGITO ANTIGO','#5a3a1c',3.4,.34,{k:.72,sombra:false});boas.rotation.x=-Math.PI/2;boas.position.set(0,.006,1.45);boas.userData.semEnquadre=true;g.add(boas);/* inscrição no piso do átrio */
+ g.userData={museu:true,semGiro:true,alas,pecas,inicio,
+  alaDe:p=>{const a=MU.A/2;if(Math.abs(p.x)<=a&&Math.abs(p.z)<=a)return -1;if(p.z<-a)return 0;if(p.x>a)return 1;if(p.x<-a)return 2;return 3;},
+  tick:t=>{ticks.forEach(f=>f(t));marcas.forEach((m,i)=>{const k=1+.07*Math.sin(t*2.4+i);m.userData.anel.scale.set(k,k,1);});portas.forEach((p,i)=>p.material.color.setScalar(.82+.18*Math.sin(t*1.6+i)));}};
+ return g;}
+/* desafio: a maquete de Gizé numa mesa, com os modelos 3D reais */
+function desafio(){const g=new T.Group();const mesa=new T.Mesh(new T.CylinderGeometry(2.3,2.4,.24,56),matTex('calcarioInt',0xffffff,{roughness:.85}));mesa.position.y=-.12;mesa.userData.semEnquadre=true;g.add(mesa);const ins=k=>({type:'inspect',key:k});
+ const gz0=new T.Group();[[-1.3,-.5,1.5,1.0],[0,-.75,1.4,.95],[1.15,-.95,.8,.52]].forEach(([x,z,l,a],i)=>{const p=piramide(l,a,{topo:i===1});p.position.set(x,0,z);gz0.add(p);});tag(gz0,ins('piramide'));g.add(real('piramide-giza',gz0));
+ const ef0=esfinge();ef0.scale.setScalar(.3);tag(ef0,ins('esfinge'));const ef=real('esfinge-giza',ef0,{altura:.3});ef.position.set(-.6,0,1.05);ef.rotation.y=-.2;g.add(ef);
+ [-1.7,1.7].forEach(x=>{const ob=obelisco(1.1);ob.position.set(x,0,1.25);tag(ob,ins('obelisco'));g.add(ob);});return g;}
+/* contexto, etapa 2: corte do vale do Nilo (esquema fora de escala): deserto, lama fértil e o rio que enche e baixa */
+function perfilVale(){const g=new T.Group();const CTX={type:'context'};const Z=2.4;
+ const topo=[[-4.2,.95],[-2.7,.95],[-2.25,.4],[-.62,.34],[-.48,.06],[.48,.06],[.62,.34],[2.25,.4],[2.7,.95],[4.2,.95]];
+ const off=(pts,d)=>pts.map(([x,y])=>[x,y-d]);
+ const ext=(pts,cor)=>{const s=new T.Shape();s.moveTo(pts[0][0],pts[0][1]);pts.slice(1).forEach(p=>s.lineTo(p[0],p[1]));const geo=new T.ExtrudeGeometry(s,{depth:Z,bevelEnabled:false});geo.translate(0,0,-Z/2);const m=new T.Mesh(geo,mat(cor,{roughness:.95}));m.userData.hit=CTX;g.add(m);return m;};
+ ext([[-4.2,-.5],...off(topo,.14),[4.2,-.5]],0x7a5a3c);
+ const faixa=(pts,cor)=>ext([...pts,...off(pts,.14).reverse()],cor);
+ faixa(topo.slice(0,3),0xe0c48e);faixa(topo.slice(7),0xe0c48e);faixa(topo.slice(2,5),0x3a2c1c);faixa(topo.slice(5,8),0x3a2c1c);faixa(topo.slice(4,6),0x5a4630);
+ const agua=new T.Mesh(new T.BoxGeometry(4.7,1,Z-.06).translate(0,.5,0),new T.MeshStandardMaterial({color:0x3f8fc0,transparent:true,opacity:.82,roughness:.2,envMap:env(),envMapIntensity:.8}));agua.position.y=.06;agua.userData.hit=CTX;g.add(agua);
+ const plantas=new T.InstancedMesh(new T.ConeGeometry(.05,.18,6).translate(0,.09,0),mat(0x6aa040,{roughness:.7}),48);const mt=new T.Matrix4();let n=0;[-1,1].forEach(sd=>{for(let i=0;i<6;i++)for(let j=0;j<4;j++){const x=sd*(.85+i*.24),y=.34+(Math.abs(x)-.62)/(2.25-.62)*.06;mt.makeTranslation(x,y,-.8+j*.55);plantas.setMatrixAt(n++,mt);}});plantas.instanceMatrix.needsUpdate=true;plantas.userData.hit=CTX;g.add(plantas);
+ [[-2.05,-.7],[2.1,.5],[-2.1,.6]].forEach(([x,z],i)=>{const p=palmeira(.75,i+3);p.position.set(x,.4,z);g.add(p);});
+ const c=casa();c.scale.setScalar(.38);c.position.set(-3.4,.95,-.2);c.traverse(o=>{if(o.isMesh)o.userData.hit=CTX;});g.add(c);
+ const sh=shaduf();sh.scale.setScalar(.36);sh.position.set(.82,.34,.5);sh.rotation.y=Math.PI;g.add(sh);
+ rotulo(g,'Deserto',-3.4,1.55,0,1.3);rotulo(g,'Deserto',3.4,1.55,0,1.3);rotulo(g,'Rio Nilo',0,1.0,0,1.3,'#cfeaff');rotulo(g,'Lama fértil = plantação',1.45,1.45,0,2.4,'#d8f0b0');
+ const cheia=rotulo(g,'Cheia (julho a outubro): a água cobre os campos',0,2.15,0,4.6,'#cfeaff'),vaz=rotulo(g,'O rio baixa e deixa a lama preta: hora de plantar',0,2.15,0,4.6,'#d8f0b0');
+ textFixo(g,'CORTE DO VALE DO NILO · ESQUEMA FORA DE ESCALA',0,2.75,-1.25,5,'#ffe3a8',false);
+ g.userData.semGiro=true;g.userData.tick=t=>{const k=.5-.5*Math.cos(t*.45),L=.22+.27*k;agua.scale.y=L-.06;plantas.visible=L<.36;cheia.visible=L>=.36;vaz.visible=L<.36;sh.userData.tick&&sh.userData.tick(t);};
+ g.traverse(o=>{if(o.isMesh&&!o.userData.hit)o.userData.hit=CTX;});return g;}
+window.HISTORIA_MODELS={V,mat,ball,label,rotuloFixo,textFixo,textAt,tag,contexto,museuEgito,inspection,sequencia,viagemCena,hieroglifosCena,desafio,dispose,glifo,ESCALA_VR,real,glb,MU};
 })();

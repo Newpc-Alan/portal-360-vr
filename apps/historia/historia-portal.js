@@ -116,7 +116,7 @@ Proto.buildXRUI=function(){
   if(des){title=des.acertou?'✅ ACERTOU!':'❌ ERROU';tom=des.acertou?'ok':'erro';body=Lab.questoesAtuais()[Lab.quizAtual().index].why;}
   else if(S.view==='desafio'&&Lab.quizAtual().phase===1&&!Lab.quizAtual().done){const q=Lab.quizAtual(),Q=Lab.questoesAtuais();title='Situação '+(q.index+1)+' de '+Q.length;body=Q[q.index].q;}/* v4.1: a pergunta sempre na tela, mesmo durante a narração de abertura */
   if(this.xrReport){const r=Lab.report();title='Resumo da experiência';body=S.completed.length+' atividades concluídas. '+r.independent+' respostas independentes. '+r.errors+' tentativas incorretas. '+r.hints+' pistas consultadas. '+r.skips+' posições puladas. Gere o relatório do professor no modo 3D.';tom='neutro';}
-  if(this.xrAjuda&&!this.xrReport){title='Como usar os controles';body=AJUDA_CONTROLES;tom='neutro';}
+  if(this.xrAjuda&&!this.xrReport){title='Como usar os controles';body=S.view==='explorar'?AJUDA_MUSEU:AJUDA_CONTROLES;tom='neutro';}
   const menuAberto=!!this.menuAberto;
   const panel=this.textPlane(title,body,1.06,.74,tom);if(menuAberto)panel.visible=false;panel.position.set(1.16,.37,-1.64);panel.rotation.y=-.6;this.ui.add(panel);
   if(!menuAberto&&feedback&&!this.xrReport&&!(S.view==='desafio'&&Lab.quizAtual().phase===1)){const faixa=this.faixaRetorno(feedback,fbTom);faixa.position.set(1.16,-.095,-1.64);faixa.rotation.y=-.6;this.ui.add(faixa);}
@@ -149,8 +149,8 @@ Proto.buildXRUI=function(){
   const colunas=[
    ['TEMA',D.temas.filter(x=>!x.breve).map(x=>[(x.id===S.tema?'✓ ':'')+x.nome,'tema:'+x.id,x.id===S.tema?AT:AZ])],
    ['MISSÕES',atv.map((a,i)=>[(a.id===S.view?'▶ ':'')+(i+1)+'. '+a.label,'view:'+a.id,a.id===S.view?AT:null])],
-   ['VER',[[this.dentro?'Voltar ao tamanho normal':'Ver a maquete gigante','xr:dentro',this.dentro?{bg:'#4a2a0f',borda:'#ffc77a',texto:'#fff6e8'}:{bg:'#2a1050',borda:'#c9a6ff',texto:'#ffffff'}],
-     ['Recentralizar a cena','center',null],['Aproximar tudo  (X)','xr:perto',null],['Afastar tudo  (Y)','xr:longe',null],[S.autoRotate?'Parar o giro do modelo':'Girar o modelo','rotate',null]].concat(ar?[[this.xrModo==='ar'?'Voltar ao VR':'Ver na minha sala','xr:'+(this.xrModo==='ar'?'vr':'ar'),{bg:'#0f3a4a',borda:'#7fd6ff',texto:'#ffffff'}]]:[])],
+   ['VER',(S.view==='explorar'?[['Voltar ao átrio','ala:-1',{bg:'#2a1050',borda:'#c9a6ff',texto:'#ffffff'}]]:[[this.dentro?'Voltar ao tamanho normal':'Ver a maquete gigante','xr:dentro',this.dentro?{bg:'#4a2a0f',borda:'#ffc77a',texto:'#fff6e8'}:{bg:'#2a1050',borda:'#c9a6ff',texto:'#ffffff'}]]).concat([
+     [S.view==='explorar'?'Voltar à frente da peça ou da ala':'Recentralizar a cena','center',null],['Aproximar tudo  (X)','xr:perto',null],['Afastar tudo  (Y)','xr:longe',null],[S.autoRotate?'Parar o giro do modelo':'Girar o modelo','rotate',null]]).concat(ar?[[this.xrModo==='ar'?'Voltar ao VR':'Ver na minha sala','xr:'+(this.xrModo==='ar'?'vr':'ar'),{bg:'#0f3a4a',borda:'#7fd6ff',texto:'#ffffff'}]]:[])],
    ['SOM E SAÍDA',[['Repetir a explicação','voice:repeat',null],['Parar a voz','voice:stop',null],[narrator.musicOn?'Música de fundo: ligada':'Música de fundo: desligada','xr:musica',null],
      ['Como usar os controles','xr:ajuda',null],['Voltar ao catálogo','catalog',AZ],[this.xrModo==='ar'?'Sair da realidade mista':'Sair do VR','vr',SAI]]]];
   const COLS=colunas.length,DX=.45,W=.42,DY=.13,linhas=Math.max(...colunas.map(c=>c[1].length)),base=-.52+.06+.075,topo=base+(linhas-1)*DY,cx=-.98+(COLS*DX)/2;
@@ -163,6 +163,7 @@ Proto.buildXRUI=function(){
     itens.forEach(([t,cmd,cor],l)=>this.xrButton(t,cmd,x,topo-l*DY,W,false,cor));});
 };
 const AJUDA_CONTROLES='Gatilho: escolhe e abre a ficha. Grip (lateral): segura a peça na mão; gire o pulso para ver em volta. Duas mãos: afaste para aumentar. Analógicos para os lados: giram o modelo. Analógico direito para cima ou para baixo: inclina. Analógico esquerdo para cima ou para baixo: sobe e desce. A: centraliza. B: abre e fecha o menu. X: aproxima tudo. Y: afasta tudo (10 distâncias, o óculos lembra a escolhida).';
+const AJUDA_MUSEU='No museu você está em tamanho real. Para andar: aponte para um círculo no chão ou para o piso e aperte o gatilho. Analógico para os lados: vira 30°. Analógico direito para a frente: avança 1,5 m. Gatilho numa peça: abre a ficha. A porta no fundo de cada ala abre a missão. A: volta para a frente da peça ou da ala. B: menu.';
 Proto.alternarMenuVR=function(forca){this.menuAberto=forca===undefined?!this.menuAberto:!!forca;this.uiPage=0;if(this.menuAberto)this.xrAjuda=false;this.buildXRUI();};
 /* lista de ações da lateral (o dna-app monta os botões com data-act; lemos de lá para não depender de variáveis internas) */
 Proto._acoes=function(){const out=[];const lab=false;document.querySelectorAll('#lessonPanel [data-act]').forEach(b=>{if(/^seq:target:/.test(b.dataset.act))return;if(b.closest('details')&&(!b.closest('details').open||lab))return;if(lab&&(b.closest('.v4-small')||/^v4:(turn|align|cutStep|axis)/.test(b.dataset.act)))return;const label=(b.title&&b.textContent.trim().length<=1?b.textContent.trim()+' · '+b.title:b.textContent.trim());out.push({label,cmd:b.dataset.act,disabled:b.disabled});});return out;};
@@ -270,7 +271,7 @@ Proto.frame=function(time,frame){
   else if(this.xr){if(!ambiente||ambiente.userData.modo2d)entrarAmbiente(false);}else{if(!ambiente)entrarAmbiente(true);armarMusica2d();
     /* no 3D o piso acompanha a base do modelo (corpo inteiro nunca fica com os pés abaixo do chão) */
     ambiente.userData.n=(ambiente.userData.n||0)+1;if(ambiente.userData.n%15===1&&this.model){const b=this.boxDe?this.boxDe(this.model,true):new T.Box3().setFromObject(this.model);const y=b.isEmpty()?-3.6:Math.min(-3.6,b.min.y-.12);if(Math.abs((ambiente.userData.pisoY??-3.6)-y)>.01){ambiente.userData.pisoY=y;(ambiente.userData.piso||[]).forEach(([o,d])=>{o.position.y=y+d;});}}}
-  if(ambiente){ambiente.visible=Lab.state.view!=='piramide';/* dentro da pirâmide o céu e o chão são da própria cena */const t=(time||performance.now())*0.001;ambiente.children.forEach(o=>{if(o.isPoints){o.rotation.y=t*o.userData.vel;o.position.y=Math.sin(t*0.35+o.userData.vel*50)*0.08;}});}
+  if(ambiente){ambiente.visible=Lab.state.view!=='piramide'&&Lab.state.view!=='explorar';/* dentro da pirâmide e no museu o céu e o chão são da própria cena */const t=(time||performance.now())*0.001;ambiente.children.forEach(o=>{if(o.isPoints){o.rotation.y=t*o.userData.vel;o.position.y=Math.sin(t*0.35+o.userData.vel*50)*0.08;}});}
   return frameOriginal.call(this,time,frame);
 };
 const exitOriginal2=Proto.exitXR;
@@ -281,7 +282,7 @@ const placeOriginal=Proto.placeXR;
 const quizFaseXR=v=>{const S=Lab.state;return S.view==='desafio'&&Lab.quizAtual().phase===1&&!v.xrReport;};
 Proto.placeXR=function(){
   if(Lab.state.view==='piramide'){if(!this.anchor){try{this.anchor=this.head();}catch(_){}}if(this.anchor){this.uiPose=this.uiPose||{};}return;}/* v4.6: a Viagem posiciona o mundo a cada quadro (viagemTick) */
-  if(Lab.state.view==='museu'&&this.xr&&this.model){/* v1.1: no óculos o museu fica em tamanho real, com as peças em volta do aluno */if(!this.anchor){try{this.anchor=this.head();}catch(_){}}const a=this.anchor;if(a){this.root.scale.setScalar(this.xrZoom||1);this.root.rotation.set(0,a.yaw,0);this.root.position.set(a.p.x,0,a.p.z);this.root.updateMatrixWorld(true);return;}}
+  /* v1.2: o Museu do Egito (view explorar) é posicionado por historia-museu.js */
   placeInterno.call(this);
   /* v4.1: no Desafio o painel fica à frente; o modelo gira 50° para a direita em volta do aluno, sem mudar de tamanho */
   if(this.xr&&this.model&&this.anchor&&quizFaseXR(this)){const a=this.anchor,up=new T.Vector3(0,1,0);this.root.position.sub(a.p).applyAxisAngle(up,-.87).add(a.p);this.root.rotation.y-=.87;this.root.updateMatrixWorld(true);}

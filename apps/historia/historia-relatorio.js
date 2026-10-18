@@ -73,7 +73,7 @@ window.PDERelatorio.ligar({app:'História VR',arquivo:'HistoriaVR',chave:'pde_hi
   const DD=window.HISTORIA_DATA||{};
   const ativ=id=>(DD.activities||[]).find(a=>a.id===id)||{label:id};
   const lista=v=>((DD.CATALOGO||{})[v]||[]).flatMap(g=>g[1]);const vistos=v=>lista(v).filter(k=>(S.visited||[]).includes(k)).length;
-  const det=id=>{try{if(id==='explorar'||id==='museu')return vistos(id)+' de '+lista(id).length+(id==='museu'?' peças':' fichas');
+  const det=id=>{try{if(id==='explorar')return vistos(id)+' de '+lista(id).length+' peças';
    if(id==='mumificacao')return S.mumificacao.colocados.filter(Boolean).length+' de '+DD.sequencias.mumificacao.ordem.length+' etapas'+(S.mumificacao.erros?' · '+S.mumificacao.erros+' erros':'');
    if(id==='piramide')return c.includes('piramide')?DD.viagem.length+' trechos':'trecho '+(S.viagem.trecho+1)+' de '+DD.viagem.length;
    if(id==='hieroglifos')return S.hieroglifos.done?S.hieroglifos.acertos+' de '+DD.HIEROGLIFOS.length+' na primeira tentativa':'sinal '+(S.hieroglifos.rodada+1)+' de '+DD.HIEROGLIFOS.length;}catch(_){}return '';};

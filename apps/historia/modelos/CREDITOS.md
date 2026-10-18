@@ -17,3 +17,5 @@ Todos sob licença Creative Commons Atribuição 4.0 (CC BY 4.0, https://creativ
 | templo-cgbang.glb | Egyptian Temple | CG BANG! | https://sketchfab.com/3d-models/egyptian-temple-c46e7c4460ab4bea9628823a037068ed |
 | triade-menkaure.glb | Triad of Menkaure, Hare nome | pmanuelian | https://sketchfab.com/3d-models/triad-of-menkaure-hare-nome-56c17979d2184f9bb83728d17c400acd |
 | vaso-canopico.glb | Canopic Jar | NCMA Explore | NCMA Explore | North Carolina Museum of Art | https://sketchfab.com/3d-models/canopic-jar-ncma-explore-58768265e9a44bb78d0cab5bd66192db |
+| estatua-mentuhotep.glb | Statue of Mentuhotep III | pmanuelian | https://sketchfab.com/3d-models/statue-of-mentuhotep-iii-35f203a5ae154258901f48202bfdbd6f |
+| sarcofago-hunefer.glb | Sarcophagus of Hunefer | Fitzwilliam Museum | https://sketchfab.com/3d-models/sarcophagus-of-hunefer-21642b701f9c45d6a472214fea274f75 |

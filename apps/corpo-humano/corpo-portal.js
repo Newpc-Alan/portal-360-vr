@@ -27,7 +27,7 @@ window.PortalCorpo={versao:'2.0.0',get emVR(){return !!view.xr;}};
 
 
 /* ---------- Portal de entrada (abertura cinematográfica ao entrar no VR e no 3D) ---------- */
-if(window.PortalEntrada)window.PortalEntrada.configurar({titulo:'Corpo Humano Imersivo',cor:'#ff6b6b',logo:'assets/entrada-simbolo.png',logo2:'assets/entrada-pde.png',auto3D:!EMBED,obter:()=>({renderer:view.renderer,scene:view.scene,camera:view.camera})});
+if(window.PortalEntrada)window.PortalEntrada.configurar({titulo:'Corpo Humano Imersivo',cor:'#ff6b6b',logo:'assets/entrada-simbolo.png?v=2',logo2:'assets/entrada-pde.png',auto3D:!EMBED,obter:()=>({renderer:view.renderer,scene:view.scene,camera:view.camera})});
 const depoisAbertura=(fn,ms)=>{if(window.PortalEntrada)window.PortalEntrada.depois(fn,ms);else setTimeout(fn,ms||0);};
 const abertura3D=()=>{if(window.PortalEntrada)window.PortalEntrada.tocar3D();};
 

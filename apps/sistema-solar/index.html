@@ -1433,7 +1433,7 @@ try{
   if(!aplicarDeepLink())entrarVista('sistema');
   setKiosk(true); // abre já em tela cheia, sem cabeçalho/rodapé do Portal
   // Portal de entrada: abertura cinematográfica ao entrar no VR (e uma vez por sessão no 3D)
-  if(window.PortalEntrada)PortalEntrada.configurar({titulo:'Sistema Solar VR',cor:'#ffb347',logo:'media/entrada-simbolo.png',logo2:'media/entrada-pde.png',auto3D:!/[?&]embed=1/.test(location.search),obter:()=>({renderer,scene,camera})});
+  if(window.PortalEntrada)PortalEntrada.configurar({titulo:'Sistema Solar VR',cor:'#ffb347',logo:'media/entrada-simbolo.png?v=2',logo2:'media/entrada-pde.png',auto3D:!/[?&]embed=1/.test(location.search),obter:()=>({renderer,scene,camera})});
   if(/[?&]vr=1/.test(location.search)){
     // O WebXR só abre a sessão a partir de um toque nesta página: mostramos uma tela de entrada com um único botão.
     const semVR=()=>vrMensagem('🥽 Para a experiência em VR, abra este mesmo link no navegador do óculos (Meta Quest). Aqui você pode explorar em 3D normalmente.',9000);

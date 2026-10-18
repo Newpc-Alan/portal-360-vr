@@ -113,7 +113,7 @@ const P360={tex:null,pts:null};(()=>{const c=document.createElement('canvas');c.
  im.onload=()=>{const x=c.getContext('2d');x.drawImage(im,0,0,1024,1024);t.needsUpdate=true;
   try{const S=200,k=document.createElement('canvas');k.width=k.height=S;const g=k.getContext('2d');g.drawImage(im,0,0,S,S);const d=g.getImageData(0,0,S,S).data,pts=[];
    for(let y=0;y<S;y++)for(let xx=0;xx<S;xx++){const i=(y*S+xx)*4;if(d[i+3]<140)continue;const l=(d[i]*.3+d[i+1]*.59+d[i+2]*.11)/255;pts.push([xx/S-.5,.5-y/S,Math.pow(l,2.2)+.05]);}
-   if(pts.length)P360.pts=pts;}catch(_){}};im.src='assets/entrada-simbolo.png';P360.tex=t;})();
+   if(pts.length)P360.pts=pts;}catch(_){}};im.src='assets/entrada-simbolo.png?v=2';P360.tex=t;})();
 function spriteBrilho(tex,cor){return new T.Sprite(new T.SpriteMaterial({map:tex,color:cor||0xffffff,transparent:true,depthWrite:false,blending:T.AdditiveBlending}));}
 /* logo do Portal com halo, usado na abertura, na espera e no final */
 function logoComHalo(r){const g=new T.Group();const h=spriteBrilho(BRILHO_AZUL);h.scale.set(r*5,r*5,1);g.add(h);const m=new T.Mesh(new T.CircleGeometry(r,72),new T.MeshBasicMaterial({map:LOGO,transparent:true,depthWrite:false,toneMapped:false}));m.position.z=.01;g.add(m);g.userData.halo=h;return g;}

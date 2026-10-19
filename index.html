@@ -178,7 +178,7 @@ body.intro-fullscreen #btnSkipIntro{cursor:pointer}
     <div id="introNote"></div>
   </div>
   <button id="btnSkipIntro" type="button">Pular ▸</button>
-  <div id="videoWrap"><video id="introVideo" playsinline preload="auto" poster="assets/abertura-poster.jpg?v=2" src="assets/abertura.mp4?v=2"></video></div>
+  <div id="videoWrap"><video id="introVideo" playsinline preload="auto" poster="assets/abertura-poster-v2.jpg" src="assets/abertura-v2.mp4"></video></div>
   <div class="intro-ui">
     <div class="brand">
       <img class="brand-mark" src="assets/marca/p360-assinatura-horizontal.svg?v=2" alt="Portal 360º VR">
@@ -365,7 +365,7 @@ function mountHeroVideo(){
   if(window.matchMedia&&window.matchMedia('(prefers-reduced-motion: reduce)').matches)return;
   if(window.innerWidth<760||(navigator.connection&&navigator.connection.saveData))return; // celular ou economia de dados: fica a imagem de capa
   const v=document.createElement('video');
-  v.src='assets/abertura-fundo.mp4?v=2';v.muted=true;v.loop=true;v.autoplay=true;v.playsInline=true;v.setAttribute('playsinline','');v.setAttribute('muted','');
+  v.src='assets/abertura-fundo-v2.mp4';v.muted=true;v.loop=true;v.autoplay=true;v.playsInline=true;v.setAttribute('playsinline','');v.setAttribute('muted','');
   v.preload='auto';v.setAttribute('aria-hidden','true');v.title='Vídeo de abertura em loop';
   v.addEventListener('playing',function(){ v.classList.add('ready'); },{once:true});
   v.addEventListener('error',function(){ v.remove(); },{once:true});
@@ -459,7 +459,7 @@ if(introVideo){
 function shouldOpenCatalogDirect(){
   try{
     const q=new URLSearchParams(location.search);
-    return q.get('catalog')==='1' || sessionStorage.getItem('portal360_intro_done')==='1';
+    return q.get('catalog')==='1';/* out/2026: ao recarregar a página a apresentação volta a aparecer; quem volta de uma aplicação vem com ?catalog=1 */
   }catch(e){ return false; }
 }
 if(shouldOpenCatalogDirect()){

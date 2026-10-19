@@ -162,7 +162,7 @@ class LabView {
   if(this.animatedInspect){const i=this.animatedInspect,tt=Math.min(1,(now-i.start)/300),s=S.reducedMotion?1:.82+.18*(1-(1-tt)**3);i.object.scale.setScalar(i.target*s);if(tt>=1)this.animatedInspect=null;}
   if(this.model){if(this.obj&&this.obj.userData.tick)this.obj.userData.tick(t);if(this.copy&&this.copy.userData.tick)this.copy.userData.tick(t);}
   if(this.xr){if(this.waitFrames){this.waitFrames--;if(!this.waitFrames){this.anchor=null;this.placeXR();this.buildXRUI();}}this.updateXR(dt);}
-  if(S.view==='piramide'&&this.obj&&this.obj.userData.viagem){this.viagemTick(dt);this.luzes(this.obj.userData.viagem.claro?.85:.22);}else{if(this.farol)this.farol.visible=false;this.luzes(1);}
+  if(S.view==='piramide'&&this.obj&&this.obj.userData.viagem){this.viagemTick(dt);this.luzes(this.obj.userData.viagem.claro?.85:.22);}else{if(this.farol)this.farol.visible=false;this.luzes(1);if(this._vFadeMesh)this._vFadeMesh.visible=false;this._vParada=null;this._vFade=null;}
   this.renderer.render(this.scene,this.camera);
  }
  viagemTick(dt){const v=S.viagem,tr=D.viagem[v.trecho],info=this.obj.userData.viagem;if(!tr||!info)return;const agora=performance.now();dt=Math.min(.25,(agora-(this._vt||agora))/1000);this._vt=agora;
@@ -170,7 +170,19 @@ class LabView {
   if(!this.farol){this.farol=new T.PointLight(0xfff1e0,.6,60,1.3);this.camera.add(this.farol);}this.farol.visible=true;this.farol.color.setHex(0xfff4ea);
   const up=new T.Vector3(0,1,0);const p=info.curva.getPointAt(v.u),tg=info.curva.getTangentAt(v.u).normalize();
   const yawDe=d=>Math.atan2(-d.x,-d.z);const olhar=info.fixo&&info.alvo?(()=>{const d=info.alvo.clone().sub(p);d.y=0;return d.lengthSq()>1e-4?d.normalize():tg;})():tg;
-  if(this.xr){if(!this.anchor)this.anchor=this.head();const a=this.anchor,K=info.escalaVR*(this.xrZoom||1);const alvo=a.yaw-yawDe(olhar);let y=this.root.rotation.y;let d=alvo-y;while(d>Math.PI)d-=2*Math.PI;while(d<-Math.PI)d+=2*Math.PI;y+=d*Math.min(1,dt*2.5);this.root.scale.setScalar(K);this.root.rotation.set(0,y,0);const pw=p.clone().multiplyScalar(K).applyAxisAngle(up,y);this.root.position.copy(a.p).sub(pw);this.root.updateMatrixWorld(true);}
+  if(this.xr){if(!this.anchor)this.anchor=this.head();const a=this.anchor,K=info.escalaVR*(this.xrZoom||1);
+   /* v1.4.1 · conforto no óculos: deslizar pelo túnel e o mundo girando sozinho causavam enjoo (vertigem). Agora a viagem anda por
+      paradas: o aluno fica parado em cada ponto, olha em volta virando a cabeça, e entre um ponto e outro a visão escurece por
+      meio segundo enquanto ele é levado. O mundo nunca gira nem desliza diante dos olhos. */
+   const N=3,uq=Math.round(v.u*N)/N,chave=v.trecho+':'+uq+':'+K;if(this._vAnc!==a){this._vAnc=a;this._vParada=null;}
+   const aplicar=()=>{const pq=info.curva.getPointAt(uq),tq=info.curva.getTangentAt(uq).normalize();let oq=tq;if(info.fixo&&info.alvo){const dd=info.alvo.clone().sub(pq);dd.y=0;if(dd.lengthSq()>1e-4)oq=dd.normalize();}
+    const y=a.yaw-yawDe(oq);this.root.scale.setScalar(K);this.root.rotation.set(0,y,0);const pw=pq.clone().multiplyScalar(K).applyAxisAngle(up,y);this.root.position.copy(a.p).sub(pw);this.root.updateMatrixWorld(true);this._vParada=chave;};
+   if(!this._vFadeMesh){const fm=new T.Mesh(new T.SphereGeometry(.35,16,12),new T.MeshBasicMaterial({color:0x000000,side:T.BackSide,transparent:true,opacity:0,depthTest:false,depthWrite:false}));fm.renderOrder=9999;fm.frustumCulled=false;this.scene.add(fm);this._vFadeMesh=fm;}
+   const fm=this._vFadeMesh;try{this.renderer.xr.getCamera(this.camera).getWorldPosition(fm.position);}catch(_){}
+   if(this._vParada===undefined||this._vParada===null||S.reducedMotion){if(this._vParada!==chave)aplicar();this._vFade=null;}
+   else if(this._vParada!==chave&&!this._vFade)this._vFade={t:0};
+   const f=this._vFade;if(f){f.t+=dt;if(f.t>=.2&&!f.feito){aplicar();f.feito=true;}fm.material.opacity=f.t<.2?f.t/.2:Math.max(0,1-(f.t-.2)/.3);if(f.t>=.5){this._vFade=null;fm.material.opacity=0;}}
+   fm.visible=fm.material.opacity>0.01;}
   else{this.camera.position.copy(p);let base=olhar.clone();if(info.fixo&&info.alvo)base=info.alvo.clone().sub(p).normalize();else if(info.alvo){const para=info.alvo.clone().sub(p).normalize();base.lerp(para,Math.min(1,v.u*1.6)*.8).normalize();}const dir=base.applyAxisAngle(up,this.az-.45);dir.y+=Math.max(-.9,Math.min(.9,this.elev-.3));dir.normalize();this.camera.lookAt(p.clone().add(dir));this.camera.updateMatrixWorld(true);}
  }
  luzes(k){if(this._luzK===k)return;this._luzK=k;this.scene.children.forEach(o=>{if(o.isLight&&o!==this.farol){if(o.userData.base===undefined)o.userData.base=o.intensity;o.intensity=o.userData.base*k;}});}

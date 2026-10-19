@@ -4,7 +4,7 @@
    Próximos temas (em breve): Grécia Antiga, Roma Antiga, Brasil Colônia, Pré-história e primeiros povos.
    Textos no tom falado das narrações (chaves = nomes dos MP3 em audio/). Datas aproximadas, como nos livros didáticos. */
 (function(){'use strict';
-const D={version:'1.4.1'};
+const D={version:'1.5.0'};
 D.temas=[
  {id:'egito',nome:'Egito Antigo',estuda:'A civilização que nasceu às margens do Nilo.',exemplos:'O rio Nilo, pirâmides, faraós, mumificação e hieróglifos',modulo:'egi',atividades:['explorar','mumificacao','piramide','hieroglifos'],questoes:['nilo','cheias','piramides','mumia','fontes','escriba','roseta','faraoDeus','tempo']},
  {id:'grecia',nome:'Grécia Antiga',estuda:'Cidades-estado, democracia e filosofia.',exemplos:'Atenas, Esparta, ágora e Olimpíadas',modulo:'gre',breve:true,atividades:[]},

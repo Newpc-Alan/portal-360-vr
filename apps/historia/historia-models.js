@@ -420,7 +420,7 @@ function museuEgito(){const D=window.HISTORIA_DATA;const g=new T.Group();const t
   portas.push(portaMissao(ga,ala));
   const local=(x,z)=>V(x,0,z).applyAxisAngle(EIXO_Y,th).add(centro);
   ALAS_PECAS[i].forEach(o=>{if(o.ignorar)return;if(o.painel){painel(ga,Object.assign({},o,{map:o.map(),geo:o.geo&&o.geo()}));pecas[o.key]={pos:local(o.x+Math.sin(o.r)*.02,o.z+Math.cos(o.r)*.02),yaw:th+o.r,y:o.y,h:o.h,ala:i,painel:true};return;}
-   const r=pecaMuseu(ga,o,ala.cor,ticks);pecas[o.key]={pos:local(o.x,o.z),yaw:th+(o.r||0),y:r.ph+.04+o.h/2,h:o.h,ala:i};
+   const r=pecaMuseu(ga,o,ala.cor,ticks);pecas[o.key]={pos:local(o.x,o.z),yaw:th+(o.r||0),y:r.ph+.04+o.h/2,h:o.h,ala:i,raio:Math.hypot(o.w||.62,o.d||.62)/2+.22};
    const lz=new T.Mesh(new T.CircleGeometry(.16,24),new T.MeshBasicMaterial({color:0xfff3d6,toneMapped:false}));lz.rotation.x=Math.PI/2;lz.position.set(o.x,H-.012,o.z);ga.add(lz);
    const pc=poca(2.0,2.0,.75);pc.rotation.x=-Math.PI/2;pc.position.set(o.x,.01,o.z);ga.add(pc);
    const lado=Math.abs(o.x)>2.4?Math.sign(o.x):0;const pw=poca(2.2,3.6,.6);
@@ -434,13 +434,15 @@ function museuEgito(){const D=window.HISTORIA_DATA;const g=new T.Group();const t
   const gz=real('piramide-giza',gz0);gz.position.y=.855;m.add(gz);const ph=caixaHit(1.6,.45,1.0,.85,{type:'inspect',key:'piramide'});ph.position.z=-.15;m.add(ph);
   const ef0=esfinge();const ef=real('esfinge-giza',ajustar(ef0,.12),{altura:.12});ef.position.set(-.35,.855,.5);ef.rotation.y=.2;m.add(ef);const eh=caixaHit(.42,.22,.26,.85,{type:'inspect',key:'esfinge'});eh.position.x=-.35;eh.position.z=.5;m.add(eh);
   const pz=poca(3.4,3.4,.55);pz.rotation.x=-Math.PI/2;pz.position.y=.01;m.add(pz);const pl=placa('Planalto de Gizé','Pirâmides e Esfinge · '+TIPO.sitio,'#d8c088',.62);pl.position.set(.45,.5,1.13);pl.rotation.y=.4;pl.userData.hit={type:'inspect',key:'piramide'};m.add(pl);
-  pecas.piramide={pos:V(0,0,0),yaw:0,y:1.05,h:.45,ala:-1};
+  pecas.piramide={pos:V(0,0,0),yaw:0,y:1.05,h:.45,ala:-1,raio:1.45};
   /* v1.3: Quéfren e a estela da Esfinge nos cantos do átrio, virados para quem entra */
-  ATRIO_PECAS.forEach(o=>{const r=pecaMuseu(g,o,'#d8c088',ticks);pecas[o.key]={pos:V(o.x,0,o.z),yaw:o.r,y:r.ph+.04+o.h/2,h:o.h,ala:-1};
+  ATRIO_PECAS.forEach(o=>{const r=pecaMuseu(g,o,'#d8c088',ticks);pecas[o.key]={pos:V(o.x,0,o.z),yaw:o.r,y:r.ph+.04+o.h/2,h:o.h,ala:-1,raio:Math.hypot(o.w||.62,o.d||.62)/2+.22};
    const pc=poca(2.0,2.0,.75);pc.rotation.x=-Math.PI/2;pc.position.set(o.x,.01,o.z);g.add(pc);const lz=new T.Mesh(new T.CircleGeometry(.16,24),new T.MeshBasicMaterial({color:0xfff3d6,toneMapped:false}));lz.rotation.x=Math.PI/2;lz.position.set(o.x,MU.H-.012,o.z);g.add(lz);});pecas.esfinge={pos:V(-.35,0,.5),yaw:0,y:.95,h:.15,ala:-1};}
  const inicio={spot:V(0,0,2.4),theta:0};marcas.push(marcador(g,0,2.4,'Átrio',{type:'ala',index:-1},'#d8c088'));
  const boas=textoPlano('MUSEU DO EGITO ANTIGO','#c9a35a',3.4,.34,{k:.72,sombra:false});boas.rotation.x=-Math.PI/2;boas.position.set(0,.006,1.45);boas.userData.semEnquadre=true;g.add(boas);/* inscrição no piso do átrio */
- g.userData={museu:true,semGiro:true,alas,pecas,inicio,
+ /* obstáculos para quem anda: pedestais, a mesa de Gizé e as colunas do átrio (círculos no piso) */
+ const obst=Object.values(pecas).filter(p=>p.raio).map(p=>({x:p.pos.x,z:p.pos.z,r:p.raio})).concat([[1,1],[1,-1],[-1,1],[-1,-1]].map(([a,b])=>({x:a*MU.A/2,z:b*MU.A/2,r:.62})));
+ g.userData={museu:true,semGiro:true,alas,pecas,inicio,obst,
   alaDe:p=>{const a=MU.A/2;if(Math.abs(p.x)<=a&&Math.abs(p.z)<=a)return -1;if(p.z<-a)return 0;if(p.x>a)return 1;if(p.x<-a)return 2;return 3;},
   tick:t=>{ticks.forEach(f=>f(t));marcas.forEach((m,i)=>{const k=1+.07*Math.sin(t*2.4+i);m.userData.anel.scale.set(k,k,1);});portas.forEach((p,i)=>p.material.color.setScalar(.82+.18*Math.sin(t*1.6+i)));}};
  return g;}

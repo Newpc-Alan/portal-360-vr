@@ -178,7 +178,7 @@ body.intro-fullscreen #btnSkipIntro{cursor:pointer}
     <div id="introNote"></div>
   </div>
   <button id="btnSkipIntro" type="button">Pular ▸</button>
-  <div id="videoWrap"><video id="introVideo" playsinline preload="auto" poster="assets/abertura-poster.jpg" src="assets/abertura.mp4"></video></div>
+  <div id="videoWrap"><video id="introVideo" playsinline preload="auto" poster="assets/abertura-poster.jpg?v=2" src="assets/abertura.mp4?v=2"></video></div>
   <div class="intro-ui">
     <div class="brand">
       <img class="brand-mark" src="assets/marca/p360-assinatura-horizontal.svg?v=2" alt="Portal 360º VR">
@@ -352,7 +352,7 @@ body.intro-fullscreen #btnSkipIntro{cursor:pointer}
 </section>
 
 <script>
-/* Vídeo de abertura local (assets/abertura.mp4): funciona na rede da escola, sem YouTube, e entra no cache do navegador.
+/* Vídeo de abertura local (assets/abertura.mp4, out/2026: nova abertura 1920×960, 33 s): funciona na rede da escola, sem YouTube, e entra no cache do navegador.
    O fundo do herói usa a versão 720p sem áudio (assets/abertura-fundo.mp4), em loop e sem som. */
 const SKIP_AFTER_MS=2000;      // "Pular" aparece depois disso
 const PLAY_TIMEOUT_MS=6000;    // se o vídeo não começar a tocar nesse prazo (rede lenta ou bloqueio), entra no catálogo
@@ -365,7 +365,7 @@ function mountHeroVideo(){
   if(window.matchMedia&&window.matchMedia('(prefers-reduced-motion: reduce)').matches)return;
   if(window.innerWidth<760||(navigator.connection&&navigator.connection.saveData))return; // celular ou economia de dados: fica a imagem de capa
   const v=document.createElement('video');
-  v.src='assets/abertura-fundo.mp4';v.muted=true;v.loop=true;v.autoplay=true;v.playsInline=true;v.setAttribute('playsinline','');v.setAttribute('muted','');
+  v.src='assets/abertura-fundo.mp4?v=2';v.muted=true;v.loop=true;v.autoplay=true;v.playsInline=true;v.setAttribute('playsinline','');v.setAttribute('muted','');
   v.preload='auto';v.setAttribute('aria-hidden','true');v.title='Vídeo de abertura em loop';
   v.addEventListener('playing',function(){ v.classList.add('ready'); },{once:true});
   v.addEventListener('error',function(){ v.remove(); },{once:true});

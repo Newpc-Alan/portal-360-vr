@@ -1,6 +1,6 @@
 # Créditos dos modelos 3D
 
-Todos sob licença Creative Commons Atribuição 4.0 (CC BY 4.0, https://creativecommons.org/licenses/by/4.0/). Modificações da NEWPC: redução de polígonos e de texturas para o Meta Quest 3S; no escriba Tjenty, remoção do fundo de estúdio da fotogrametria.
+Todos sob licença Creative Commons Atribuição 4.0 ou CC0 (domínio público, indicado na tabela) (CC BY 4.0, https://creativecommons.org/licenses/by/4.0/). Modificações da NEWPC: redução de polígonos e de texturas para o Meta Quest 3S; no escriba Tjenty, remoção do fundo de estúdio da fotogrametria.
 
 | Arquivo | Modelo | Autor | Fonte |
 |---|---|---|---|
@@ -26,3 +26,7 @@ Todos sob licença Creative Commons Atribuição 4.0 (CC BY 4.0, https://creativ
 | estatua-quefren.glb | Statue of Khafre, Egyptian Museum, Cairo | danderson4 | https://sketchfab.com/3d-models/statue-of-khafre-egyptian-museum-cairo-071b25978c054c73bd179f89c33a5ffe |
 | estela-hmane.glb | Stela | Harvard Museum of the Ancient Near East | https://sketchfab.com/3d-models/stela-6303e29d465a448db4ba45539a9e6dfd |
 | tairkap.glb | Funerary ensemble of the lady Tairkap | Bonn Center for Digital Humanities | https://sketchfab.com/3d-models/funerary-ensemble-of-the-lady-tairkap-739d45b6c82a40ff9e3efd13e5c925ea |
+| portadora-oferendas.glb | 1914.602 Female Offering Bearer (CC0, domínio público) | Cleveland Museum of Art | https://sketchfab.com/3d-models/1914602-female-offering-bearer-5ae6e783d2ed40efa424deb0e2bcf4df |
+| obelisco.glb | Obelisk | Ankledot | https://sketchfab.com/3d-models/obelisk-0b4dc3d42d1b4ceb8a19a0001a427864 |
+| paleta-escriba.glb | Model Scribal Palette (EC2018) (CC0, domínio público) | The Egypt Centre | https://sketchfab.com/3d-models/model-scribal-palette-ec2018-20b29a7a17404dd98f26f82b01d99c30 |
+| papiro-rolo.glb | Papyrus Scroll (New Kingdom) | Rollins College Archaeology | https://sketchfab.com/3d-models/papyrus-scroll-new-kingdom-dc20401e0b75486bb34de07956739c4f |

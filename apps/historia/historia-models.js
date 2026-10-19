@@ -359,7 +359,8 @@ function pecaMuseu(par,o,cor,ticks){const D=window.HISTORIA_DATA;const b=new T.G
 const ALAS_PECAS=[
  /* Vida no Nilo */
  [{key:'nilo',painel:true,x:-3.47,y:1.75,z:-.85,r:Math.PI/2,w:3.2,h:2.5,map:()=>texMapa()},
-  {key:'campones',x:-1.8,z:-2.3,r:.35,proc:()=>{const g=new T.Group();const f=pessoa({tecido:0xf2ead6,bracoAberto:true});g.add(f);const ce=new T.Mesh(new T.CylinderGeometry(.18,.14,.28,12),mat(0xc89048));ce.position.set(.42,.14,.15);g.add(ce);const ba=new T.Mesh(new T.BoxGeometry(.8,.06,.5),mat(0x8a6a44));ba.position.y=-.03;g.add(ba);return g;},h:.6,vit:1,ph:.95,tipo:TIPO.did},
+  {key:'portadora',x:-1.8,z:-2.3,r:.35,arq:'portadora-oferendas',h:.3,ph:.95,vit:1,tipo:TIPO.real},
+  {key:'camponesOld',ignorar:true,proc:()=>{const g=new T.Group();const f=pessoa({tecido:0xf2ead6,bracoAberto:true});g.add(f);const ce=new T.Mesh(new T.CylinderGeometry(.18,.14,.28,12),mat(0xc89048));ce.position.set(.42,.14,.15);g.add(ce);const ba=new T.Mesh(new T.BoxGeometry(.8,.06,.5),mat(0x8a6a44));ba.position.y=-.03;g.add(ba);return g;},h:.6,vit:1,ph:.95,tipo:TIPO.did},
   {key:'barco',x:1.65,z:-2.2,r:-.35,arq:'barco-ncma',ajuste:'max',cw:1.2,cd:.6,h:.9,w:1.3,d:.72,vit:1,ph:.75,tipo:TIPO.real},
   {key:'cheias',x:2.85,z:-1.15,r:-Math.PI/2,proc:nilometro,h:.42,w:.8,d:.8,vit:1,ph:.95,tipo:TIPO.did},
   {key:'shaduf',x:2.85,z:.75,r:-Math.PI/2,proc:shaduf,h:.62,w:1.0,d:.62,vit:1,ph:.9,tipo:TIPO.did},
@@ -373,7 +374,7 @@ const ALAS_PECAS=[
   {key:'nefertiti',x:2.85,z:-.1,r:-Math.PI/2,arq:'nefertiti',yaw:Math.PI/2,h:.49,ph:1.0,vit:1,tipo:TIPO.repro},
   {key:'tanwetamani',x:2.85,z:1.7,r:-Math.PI/2,arq:'estatua-tanwetamani',yaw:-Math.PI/2,h:1.3,ph:.45,tipo:TIPO.real},
   {key:'senenmut',x:-1.4,z:-2.4,r:.25,arq:'estatua-senenmut',yaw:-Math.PI/2,h:.95,ph:.7,tipo:TIPO.real},
-  {key:'obelisco',x:1.75,z:-2.35,r:0,proc:()=>obelisco(2.6),h:2.75,ph:.3,tipo:TIPO.replica}],
+  {key:'obelisco',x:1.75,z:-2.35,r:0,arq:'obelisco',h:2.75,ph:.3,tipo:TIPO.art}],
  /* Mumificação e vida após a morte */
  [{key:'caixaCanopica',x:1.75,z:-2.3,r:-.3,arq:'caixa-canopica',ajuste:'max',cw:.62,cd:.62,h:.5,w:.75,d:.75,vit:1,ph:.85,tipo:TIPO.real},
   {key:'hunefer',x:-1.75,z:-2.3,r:.3,arq:'sarcofago-hunefer',h:1.9,ph:.3,w:.8,d:.7,tipo:TIPO.real},
@@ -387,7 +388,9 @@ const ALAS_PECAS=[
   {key:'roseta',x:-1.7,z:-2.3,r:.3,proc:roseta,h:1.12,w:.9,d:.5,ph:.45,tipo:TIPO.replica},
   {key:'escriba',x:2.85,z:-1.9,r:-Math.PI/2,arq:'escriba-tjenty',h:.34,ph:1.0,vit:1,tipo:TIPO.real},
   {key:'estela',x:1.75,z:-2.3,r:-.3,arq:'estela-hmane',h:.5,ph:.95,vit:1,tipo:TIPO.real},
-  {key:'papiro',x:2.85,z:-.2,r:-Math.PI/2,proc:()=>{const g=new T.Group();const p=papiro(14,5);g.add(p);const vaso=new T.Mesh(new T.CylinderGeometry(.36,.3,.3,16),mat(0x8a5a34,{roughness:.9}));vaso.position.y=.1;g.add(vaso);const folha=new T.Mesh(new T.PlaneGeometry(.5,.36),mat(0xffffff,{map:texParedeGlifos('papiroGlifos','#2a2018',[232,220,176],61),side:T.DoubleSide}));folha.position.set(.05,.5,.42);folha.rotation.x=-.5;g.add(folha);return g;},h:1.0,w:.8,d:.8,ph:.3,tipo:TIPO.did},
+  {key:'papiro',x:2.85,z:-.2,r:-Math.PI/2,arq:'papiro-rolo',yaw:Math.PI/2,ajuste:'max',cw:.62,cd:.3,h:.25,w:.8,d:.55,vit:1,ph:1.0,tipo:'Escaneamento 3D · Rollins College'},
+  {key:'paleta',x:-2.75,z:1.75,r:Math.PI/2,arq:'paleta-escriba',yaw:-Math.PI/2,h:.3,ph:1.0,vit:1,tipo:TIPO.real},
+  {key:'papiroOld',ignorar:true,proc:()=>{const g=new T.Group();const p=papiro(14,5);g.add(p);const vaso=new T.Mesh(new T.CylinderGeometry(.36,.3,.3,16),mat(0x8a5a34,{roughness:.9}));vaso.position.y=.1;g.add(vaso);const folha=new T.Mesh(new T.PlaneGeometry(.5,.36),mat(0xffffff,{map:texParedeGlifos('papiroGlifos','#2a2018',[232,220,176],61),side:T.DoubleSide}));folha.position.set(.05,.5,.42);folha.rotation.x=-.5;g.add(folha);return g;},h:1.0,w:.8,d:.8,ph:.3,tipo:TIPO.did},
   {key:'templo',x:2.6,z:1.7,r:-Math.PI/2,arq:'templo-cgbang',ajuste:'max',cw:1.35,cd:.9,h:.6,w:1.5,d:1.0,ph:.8,tipo:TIPO.art}]
 ];
 function museuEgito(){const D=window.HISTORIA_DATA;const g=new T.Group();const ticks=[],marcas=[],portas=[];const A=MU.A,L=MU.L,H=MU.H;
@@ -419,7 +422,7 @@ function museuEgito(){const D=window.HISTORIA_DATA;const g=new T.Group();const t
   const lt=textoPlano(ala.nome.toUpperCase(),'#e9c987',A-.4,.4,{k:.7});lt.position.set(0,H-.25,L/2+.16);ga.add(lt);
   portas.push(portaMissao(ga,ala));
   const local=(x,z)=>V(x,0,z).applyAxisAngle(EIXO_Y,th).add(centro);
-  ALAS_PECAS[i].forEach(o=>{if(o.painel){painel(ga,Object.assign({},o,{map:o.map(),geo:o.geo&&o.geo()}));pecas[o.key]={pos:local(o.x+Math.sin(o.r)*.02,o.z+Math.cos(o.r)*.02),yaw:th+o.r,y:o.y,h:o.h,ala:i,painel:true};return;}
+  ALAS_PECAS[i].forEach(o=>{if(o.ignorar)return;if(o.painel){painel(ga,Object.assign({},o,{map:o.map(),geo:o.geo&&o.geo()}));pecas[o.key]={pos:local(o.x+Math.sin(o.r)*.02,o.z+Math.cos(o.r)*.02),yaw:th+o.r,y:o.y,h:o.h,ala:i,painel:true};return;}
    const r=pecaMuseu(ga,o,ala.cor,ticks);pecas[o.key]={pos:local(o.x,o.z),yaw:th+(o.r||0),y:r.ph+.04+o.h/2,h:o.h,ala:i};
    const lz=new T.Mesh(new T.CircleGeometry(.16,24),new T.MeshBasicMaterial({color:0xfff3d6,toneMapped:false}));lz.rotation.x=Math.PI/2;lz.position.set(o.x,H-.012,o.z);ga.add(lz);
    const pc=poca(2.0,2.0,.75);pc.rotation.x=-Math.PI/2;pc.position.set(o.x,.01,o.z);ga.add(pc);

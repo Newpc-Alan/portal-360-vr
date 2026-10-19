@@ -360,7 +360,7 @@ const ALAS_PECAS=[
  /* Vida no Nilo */
  [{key:'nilo',painel:true,x:-3.47,y:1.75,z:-.85,r:Math.PI/2,w:3.2,h:2.5,map:()=>texMapa()},
   {key:'campones',x:-1.8,z:-2.3,r:.35,proc:()=>{const g=new T.Group();const f=pessoa({tecido:0xf2ead6,bracoAberto:true});g.add(f);const ce=new T.Mesh(new T.CylinderGeometry(.18,.14,.28,12),mat(0xc89048));ce.position.set(.42,.14,.15);g.add(ce);const ba=new T.Mesh(new T.BoxGeometry(.8,.06,.5),mat(0x8a6a44));ba.position.y=-.03;g.add(ba);return g;},h:.6,vit:1,ph:.95,tipo:TIPO.did},
-  {key:'barco',x:1.8,z:-2.3,r:-.35,proc:barco,h:.62,w:1.0,d:.55,vit:1,ph:.95,tipo:TIPO.did},
+  {key:'barco',x:1.65,z:-2.2,r:-.35,arq:'barco-ncma',ajuste:'max',cw:1.2,cd:.6,h:.9,w:1.3,d:.72,vit:1,ph:.75,tipo:TIPO.real},
   {key:'cheias',x:2.85,z:-1.15,r:-Math.PI/2,proc:nilometro,h:.42,w:.8,d:.8,vit:1,ph:.95,tipo:TIPO.did},
   {key:'shaduf',x:2.85,z:.75,r:-Math.PI/2,proc:shaduf,h:.62,w:1.0,d:.62,vit:1,ph:.9,tipo:TIPO.did},
   {key:'casa',x:-2.85,z:1.9,r:Math.PI/2,proc:casa,h:.4,w:.75,d:.65,vit:1,ph:.95,tipo:TIPO.did}],
@@ -375,8 +375,9 @@ const ALAS_PECAS=[
   {key:'senenmut',x:-1.4,z:-2.4,r:.25,arq:'estatua-senenmut',yaw:-Math.PI/2,h:.95,ph:.7,tipo:TIPO.real},
   {key:'obelisco',x:1.75,z:-2.35,r:0,proc:()=>obelisco(2.6),h:2.75,ph:.3,tipo:TIPO.replica}],
  /* Mumificação e vida após a morte */
- [{key:'hunefer',x:-1.75,z:-2.3,r:.3,arq:'sarcofago-hunefer',h:1.9,ph:.3,w:.8,d:.7,tipo:TIPO.real},
-  {key:'mumia',x:-2.75,z:-.5,r:Math.PI/2,proc:mumia,h:.36,w:2.0,d:.75,vit:1,ph:.75,maxW:1.8,tipo:TIPO.did},
+ [{key:'caixaCanopica',x:1.75,z:-2.3,r:-.3,arq:'caixa-canopica',ajuste:'max',cw:.62,cd:.62,h:.5,w:.75,d:.75,vit:1,ph:.85,tipo:TIPO.real},
+  {key:'hunefer',x:-1.75,z:-2.3,r:.3,arq:'sarcofago-hunefer',h:1.9,ph:.3,w:.8,d:.7,tipo:TIPO.real},
+  {key:'tairkap',x:-2.7,z:-.45,r:Math.PI/2,arq:'tairkap',yaw:Math.PI/2,ajuste:'max',cw:1.95,cd:.75,h:.8,w:2.05,d:.85,ph:.35,tipo:TIPO.real},
   {key:'caixoes',x:-2.75,z:1.75,r:Math.PI/2,arq:'caixoes-padimut',ajuste:'max',cw:1.85,cd:.62,h:.72,w:1.95,d:.75,ph:.4,tipo:TIPO.real},
   {key:'canopicos',x:2.85,z:-1.9,r:-Math.PI/2,arq:'vaso-canopico',h:.42,ph:1.0,vit:1,tipo:TIPO.real},
   {key:'reserva',x:2.85,z:-.3,r:-Math.PI/2,arq:'cabeca-reserva',h:.32,ph:1.1,vit:1,tipo:TIPO.real},
@@ -384,7 +385,8 @@ const ALAS_PECAS=[
  /* Escrita e memória */
  [{key:'hieroglifos',painel:true,x:-3.47,y:1.65,z:-.3,r:Math.PI/2,w:5.0,h:2.2,map:()=>TX.glifosParede(),geo:()=>geoUV(5,2.2,5/(8*.32),2.2/(8*.32))},
   {key:'roseta',x:-1.7,z:-2.3,r:.3,proc:roseta,h:1.12,w:.9,d:.5,ph:.45,tipo:TIPO.replica},
-  {key:'escriba',x:2.85,z:-1.9,r:-Math.PI/2,proc:escribaSentado,h:.53,ph:.95,vit:1,tipo:TIPO.did},
+  {key:'escriba',x:2.85,z:-1.9,r:-Math.PI/2,arq:'escriba-tjenty',h:.34,ph:1.0,vit:1,tipo:TIPO.real},
+  {key:'estela',x:1.75,z:-2.3,r:-.3,arq:'estela-hmane',h:.5,ph:.95,vit:1,tipo:TIPO.real},
   {key:'papiro',x:2.85,z:-.2,r:-Math.PI/2,proc:()=>{const g=new T.Group();const p=papiro(14,5);g.add(p);const vaso=new T.Mesh(new T.CylinderGeometry(.36,.3,.3,16),mat(0x8a5a34,{roughness:.9}));vaso.position.y=.1;g.add(vaso);const folha=new T.Mesh(new T.PlaneGeometry(.5,.36),mat(0xffffff,{map:texParedeGlifos('papiroGlifos','#2a2018',[232,220,176],61),side:T.DoubleSide}));folha.position.set(.05,.5,.42);folha.rotation.x=-.5;g.add(folha);return g;},h:1.0,w:.8,d:.8,ph:.3,tipo:TIPO.did},
   {key:'templo',x:2.6,z:1.7,r:-Math.PI/2,arq:'templo-cgbang',ajuste:'max',cw:1.35,cd:.9,h:.6,w:1.5,d:1.0,ph:.8,tipo:TIPO.art}]
 ];
@@ -432,7 +434,10 @@ function museuEgito(){const D=window.HISTORIA_DATA;const g=new T.Group();const t
   const gz=real('piramide-giza',gz0);gz.position.y=.855;m.add(gz);const ph=caixaHit(1.6,.45,1.0,.85,{type:'inspect',key:'piramide'});ph.position.z=-.15;m.add(ph);
   const ef0=esfinge();const ef=real('esfinge-giza',ajustar(ef0,.12),{altura:.12});ef.position.set(-.35,.855,.5);ef.rotation.y=.2;m.add(ef);const eh=caixaHit(.42,.22,.26,.85,{type:'inspect',key:'esfinge'});eh.position.x=-.35;eh.position.z=.5;m.add(eh);
   const pz=poca(3.4,3.4,.55);pz.rotation.x=-Math.PI/2;pz.position.y=.01;m.add(pz);const pl=placa('Planalto de Gizé','Pirâmides e Esfinge · '+TIPO.sitio,'#d8c088',.62);pl.position.set(.45,.5,1.13);pl.rotation.y=.4;pl.userData.hit={type:'inspect',key:'piramide'};m.add(pl);
-  pecas.piramide={pos:V(0,0,0),yaw:0,y:1.05,h:.45,ala:-1};pecas.esfinge={pos:V(-.35,0,.5),yaw:0,y:.95,h:.15,ala:-1};}
+  pecas.piramide={pos:V(0,0,0),yaw:0,y:1.05,h:.45,ala:-1};
+  /* v1.3: Quéfren e a estela da Esfinge nos cantos do átrio, virados para quem entra */
+  [{key:'quefren',x:-2.5,z:-2.35,r:.5,arq:'estatua-quefren',h:1.68,ph:.3,w:.75,d:.95,cw:.62,cd:.85,tipo:TIPO.real},{key:'estelaRamses',x:2.45,z:-2.35,r:-.5,arq:'estela-ramses',ajuste:'max',cw:1.45,cd:.4,h:1.0,w:1.55,d:.55,ph:.4,tipo:TIPO.real}].forEach(o=>{const r=pecaMuseu(g,o,'#d8c088',ticks);pecas[o.key]={pos:V(o.x,0,o.z),yaw:o.r,y:r.ph+.04+o.h/2,h:o.h,ala:-1};
+   const pc=poca(2.0,2.0,.75);pc.rotation.x=-Math.PI/2;pc.position.set(o.x,.01,o.z);g.add(pc);const lz=new T.Mesh(new T.CircleGeometry(.16,24),new T.MeshBasicMaterial({color:0xfff3d6,toneMapped:false}));lz.rotation.x=Math.PI/2;lz.position.set(o.x,MU.H-.012,o.z);g.add(lz);});pecas.esfinge={pos:V(-.35,0,.5),yaw:0,y:.95,h:.15,ala:-1};}
  const inicio={spot:V(0,0,2.4),theta:0};marcas.push(marcador(g,0,2.4,'Átrio',{type:'ala',index:-1},'#d8c088'));
  const boas=textoPlano('MUSEU DO EGITO ANTIGO','#c9a35a',3.4,.34,{k:.72,sombra:false});boas.rotation.x=-Math.PI/2;boas.position.set(0,.006,1.45);boas.userData.semEnquadre=true;g.add(boas);/* inscrição no piso do átrio */
  g.userData={museu:true,semGiro:true,alas,pecas,inicio,

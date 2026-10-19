@@ -1,6 +1,6 @@
 # Créditos dos modelos 3D
 
-Todos sob licença Creative Commons Atribuição 4.0 (CC BY 4.0, https://creativecommons.org/licenses/by/4.0/). Modificações da NEWPC: redução de polígonos e de texturas para o Meta Quest 3S.
+Todos sob licença Creative Commons Atribuição 4.0 (CC BY 4.0, https://creativecommons.org/licenses/by/4.0/). Modificações da NEWPC: redução de polígonos e de texturas para o Meta Quest 3S; no escriba Tjenty, remoção do fundo de estúdio da fotogrametria.
 
 | Arquivo | Modelo | Autor | Fonte |
 |---|---|---|---|
@@ -19,3 +19,10 @@ Todos sob licença Creative Commons Atribuição 4.0 (CC BY 4.0, https://creativ
 | vaso-canopico.glb | Canopic Jar | NCMA Explore | NCMA Explore | North Carolina Museum of Art | https://sketchfab.com/3d-models/canopic-jar-ncma-explore-58768265e9a44bb78d0cab5bd66192db |
 | estatua-mentuhotep.glb | Statue of Mentuhotep III | pmanuelian | https://sketchfab.com/3d-models/statue-of-mentuhotep-iii-35f203a5ae154258901f48202bfdbd6f |
 | sarcofago-hunefer.glb | Sarcophagus of Hunefer | Fitzwilliam Museum | https://sketchfab.com/3d-models/sarcophagus-of-hunefer-21642b701f9c45d6a472214fea274f75 |
+| barco-ncma.glb | Model of a Boat | NCMA Explore (North Carolina Museum of Art) | https://sketchfab.com/3d-models/model-of-a-boat-ncma-explore-v2-82e8aaff19db416dbd3daedb42031be2 |
+| caixa-canopica.glb | Canopic chest of Hetepheres I | pmanuelian | https://sketchfab.com/3d-models/canopic-chest-of-hetepheres-i-1e1e2b86d69742248fc9354aa890860e |
+| escriba-tjenty.glb | Tjenty as a scribe | pmanuelian | https://sketchfab.com/3d-models/tjenty-as-a-scribe-7ee8a197e9c44ca6b109e5d3b4a4acf4 |
+| estela-ramses.glb | Sphinx Stela of Ramesses II (1) | hsugita | https://sketchfab.com/3d-models/sphinx-stela-of-ramesses-ii-1-bc2474c323424c7caa385e95aa36b71e |
+| estatua-quefren.glb | Statue of Khafre, Egyptian Museum, Cairo | danderson4 | https://sketchfab.com/3d-models/statue-of-khafre-egyptian-museum-cairo-071b25978c054c73bd179f89c33a5ffe |
+| estela-hmane.glb | Stela | Harvard Museum of the Ancient Near East | https://sketchfab.com/3d-models/stela-6303e29d465a448db4ba45539a9e6dfd |
+| tairkap.glb | Funerary ensemble of the lady Tairkap | Bonn Center for Digital Humanities | https://sketchfab.com/3d-models/funerary-ensemble-of-the-lady-tairkap-739d45b6c82a40ff9e3efd13e5c925ea |

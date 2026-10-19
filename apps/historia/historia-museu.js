@@ -89,6 +89,8 @@ Proto.updateXR=function(dt){updAnt.call(this,dt);
   if(Math.abs(x)>.7&&!st.giro){st.giro=true;const at=ondeEstou(this);if(at){posicionar(this,at.Q,at.th-Math.sign(x)*Math.PI/6);if(this.buildXRUI)this.buildXRUI();}}else if(Math.abs(x)<.3)st.giro=false;
   if(y<-.7&&!st.frente&&src.handedness!=='left'){st.frente=true;const at=ondeEstou(this);if(at){const Q=at.Q.clone().add(new T.Vector3(-Math.sin(at.th),0,-Math.cos(at.th)).multiplyScalar(1.5));if(valido(this,Q)){posicionar(this,Q,at.th);trocarAla(this,dados(this).alaDe(Q));if(this.buildXRUI)this.buildXRUI();}}}else if(y>-.3)st.frente=false;}};
 
+/* luz geral mais baixa no museu: as peças se destacam com as manchas de luz */
+const luzAnt=Proto.luzes;Proto.luzes=function(k){return luzAnt.call(this,(Lab.state.view==='explorar'&&ehMuseu(this))?k*.82:k);};
 /* ---------- 3D: voo da câmera ---------- */
 const frameAnt=Proto.frame;
 Proto.frame=function(time,frame){const vo=this._voo;

@@ -1,8 +1,8 @@
-/* História VR · service worker (v1.0)
+/* História VR · service worker (v1.2: página pela rede primeiro)
    Objetivo: a aplicação funcionar sem internet depois da primeira abertura (rede de escola oscila; Chromebook, lousa e Quest).
    Duas caches: a "casca" (html, css, js, three.js) muda a cada versão; a "pesada" (modelos .glb e áudios .mp3) é persistente e só
    rebaixa os arquivos cujo hash mudou no precache.json. Pedidos com Range (trilha de fundo) recebem 206 a partir do arquivo em cache. */
-const VERSAO='1.2.0-bbd26f';
+const VERSAO='1.2.1-df73bf';
 const CASCA='historia-casca-'+VERSAO,PESADA='historia-pesada-v1',META='historia-meta-v1';
 const ESCOPO=new URL(self.registration.scope).pathname;
 let baixando=false;
@@ -44,6 +44,11 @@ self.addEventListener('fetch',e=>{
   const req=e.request;if(req.method!=='GET')return;const url=new URL(req.url);if(url.origin!==location.origin||!url.pathname.startsWith(ESCOPO))return;
   if(url.pathname.endsWith('/precache.json')||url.pathname.endsWith('/sw.js'))return;
   const pesado=/\.(glb|mp3)$/.test(url.pathname);
+  /* v1.2: a página (index.html) vem da rede quando há internet, para a versão nova aparecer já na primeira abertura;
+     sem rede em 3,5 s, usa a cópia guardada */
+  if(req.mode==='navigate'){e.respondWith((async()=>{const c=await caches.open(CASCA);
+    try{const r=await Promise.race([fetch(req,{cache:'no-cache'}),new Promise((_,rej)=>setTimeout(()=>rej(new Error('lento')),3500))]);if(r&&r.ok){c.put('index.html',r.clone());return r;}throw new Error('falha');}
+    catch(_){const idx=await c.match(req,{ignoreSearch:true})||await c.match('index.html',{ignoreSearch:true});return idx||new Response('',{status:504,statusText:'offline'});}})());return;}
   e.respondWith((async()=>{
     const range=req.headers.get('range');
     const c=await caches.open(pesado?PESADA:CASCA);

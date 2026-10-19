@@ -249,6 +249,8 @@ function offlineUI(d){const st=$('offlineStatus'),det=$('offlineDetalhe');if(!st
  const pct=d.total?Math.round(100*d.feitos/d.total):0;st.textContent='Preparando uso sem internet… '+pct+'%';st.className='offline';if(det)det.textContent='Baixando as narrações para este dispositivo: '+d.feitos+' de '+d.total+' arquivos ('+mb+'). Pode continuar usando normalmente.';}
 function registrarSW(){if(!('serviceWorker' in navigator))return offlineUI({erro:'navegador sem suporte'});if(!(location.protocol==='https:'||location.hostname==='localhost'||location.hostname==='127.0.0.1'))return offlineUI({erro:'precisa de HTTPS'});
  navigator.serviceWorker.addEventListener('message',e=>{if(e.data&&e.data.tipo==='offline')offlineUI(e.data);});
+ /* v1.2: quando uma versão nova assume o controle, recarrega uma vez (fora do VR) para o aluno já ver a atualização */
+ {const tinha=!!navigator.serviceWorker.controller;let recarregou=false;navigator.serviceWorker.addEventListener('controllerchange',()=>{if(!tinha||recarregou)return;if(view&&view.xr)return;recarregou=true;location.reload();});}
  navigator.serviceWorker.register('sw.js').then(reg=>{const pedir=()=>{if(navigator.serviceWorker.controller)navigator.serviceWorker.controller.postMessage({tipo:'status'});};if(navigator.serviceWorker.controller)pedir();else navigator.serviceWorker.addEventListener('controllerchange',pedir);offlineUI({feitos:0,total:0});}).catch(e=>offlineUI({erro:e.message}));}
 function offlineBaixar(){if(navigator.serviceWorker&&navigator.serviceWorker.controller)navigator.serviceWorker.controller.postMessage({tipo:'precache'});else registrarSW();}
  registrarSW();

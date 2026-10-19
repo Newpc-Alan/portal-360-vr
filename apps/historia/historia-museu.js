@@ -18,8 +18,9 @@ M.aoTrocar=()=>{if(view.refreshHits)view.refreshHits();};
 function alaAtual(){const a=Lab.state.ala;return a>=0&&D.ALAS[a]?a:-1;}
 function poseAla(v,i){const u=dados(v);if(i<0||!u.alas[i])return{Q:u.inicio.spot.clone(),th:u.inicio.theta};return{Q:u.alas[i].spot.clone(),th:u.alas[i].theta};}
 function posePeca(v,k){const p=dados(v).pecas[k];if(!p)return null;const f=new T.Vector3(Math.sin(p.yaw),0,Math.cos(p.yaw));const d=p.painel?2.6:Math.max(1.25,Math.min(2.4,1.0+p.h*.55));return{Q:p.pos.clone().addScaledVector(f,d).setY(0),th:p.yaw};}
-function poseFoco(v){const k=Lab.inspectKey;return(k&&posePeca(v,k))||poseAla(v,alaAtual());}
-function focoDe(){const k=Lab.inspectKey;if(k&&view.obj&&dados(view).pecas[k])return 'p:'+k;return 'a:'+alaAtual();}
+/* v1.4: a peça escolhida vem até o aluno (cópia flutuante); o aluno e a câmera não se movem mais por causa dela */
+function poseFoco(v){return poseAla(v,alaAtual());}
+function focoDe(){return 'a:'+alaAtual();}
 /* piso válido: átrio ou dentro de uma ala (longe das paredes) */
 function valido(v,Q){const a=MU.A/2;if(Math.abs(Q.x)<a-.2&&Math.abs(Q.z)<a-.2)return true;return dados(v).alas.some(al=>{const l=Q.clone().sub(al.centro).applyAxisAngle(UP,-al.theta);return Math.abs(l.x)<a-.35&&l.z>-MU.L/2+.35&&l.z<MU.L/2+.3;});}
 
@@ -44,15 +45,37 @@ function atualizar(v,novo){const foco=focoDe();
   else if((foco!==v._foco||v._forcarFoco)&&!(foco.startsWith('p:')&&v._semTeleporte))irPara(v,poseFoco(v));
   if(v.buildXRUI)v.buildXRUI();}
  else if(novo||foco!==v._foco||v._forcarFoco){voar(v,alvoCamera(v,foco),novo);}
- v._foco=foco;v._semTeleporte=false;v._forcarFoco=false;
+ v._foco=foco;v._semTeleporte=false;v._forcarFoco=false;sincronizarCopia(v);
  const ci=document.getElementById('closeInspect');if(ci){ci.hidden=!Lab.inspectKey;ci.textContent='← Voltar à ala';}
- const sh=document.getElementById('stageHint');if(sh)sh.textContent=Lab.inspectKey?'Arraste para olhar a peça de vários lados · Fechar ficha volta para a ala':'Toque numa ala, num círculo do chão ou numa peça · arraste para olhar em volta · roda do mouse aproxima';
+ const sh=document.getElementById('stageHint');if(sh)sh.textContent=Lab.inspectKey?'Arraste a peça para girar · Esc ou Voltar à ala fecha':'Toque numa ala, num círculo do chão ou numa peça · arraste para olhar em volta · roda do mouse aproxima';
  if(v.legend)v.legend();}
 
+/* ---------- v1.4: a peça vem para a frente do aluno ----------
+   Clicou numa peça: uma cópia dela aparece flutuando à frente (0,75 m no óculos, 2,3 m da câmera no 3D), com um fundo
+   escuro suave atrás para destacar, girando devagar. No 3D dá para girar arrastando; no óculos, segurar com o grip.
+   A ficha (texto e voz) só aparece nesse momento. */
+function fecharCopia(v){const c=v._copia;if(!c)return;v._copia=null;const gi=c.userData.giro;if(gi&&gi.parent!==c){for(const [ct,o] of [...v.held])if(o===gi)v.held.delete(ct);if(v.duasMaos&&v.duasMaos.obj===gi)v.duasMaos=null;if(gi.parent)gi.parent.remove(gi);M.dispose(gi);}if(c.parent)c.parent.remove(c);M.dispose(c);if(v.refreshHits)v.refreshHits();}
+function posicaoCopia(v){if(v.xr){let h;try{h=v.head();}catch(_){return null;}const p=h.p.clone().addScaledVector(h.f,.75);p.y=h.p.y-.12;return{p,olho:h.p};}
+ const cam=v.camera;cam.updateMatrixWorld(true);const o=cam.getWorldPosition(new T.Vector3()),d=cam.getWorldDirection(new T.Vector3());return{p:o.clone().addScaledVector(d,2.3),olho:o};}
+function encaraOlho(v,c,olho){const ol=v.model.worldToLocal(olho.clone());c.rotation.set(0,Math.atan2(ol.x-c.position.x,ol.z-c.position.z),0);}
+function abrirCopia(v,key){fecharCopia(v);const g=M.copiaPeca(key);if(!g)return;const pos=posicaoCopia(v);if(!pos)return;
+ const c=new T.Group();c.userData={copiaMuseu:true,chave:key,t0:performance.now()};
+ g.updateMatrixWorld(true);const b=new T.Box3().setFromObject(g),sz=b.getSize(new T.Vector3()),ce=b.getCenter(new T.Vector3());g.position.sub(ce);
+ const giro=new T.Group();giro.userData={rotateCopy:true,pegavel:true};giro.add(g);c.add(giro);c.userData.giro=giro;
+ const maior=Math.max(sz.x,sz.y,sz.z,1e-3),alvo=v.xr?.55:1.15,k=alvo/maior;giro.scale.setScalar(k);c.userData.k=k;
+ const hit=new T.Mesh(new T.BoxGeometry(sz.x,sz.y,sz.z),new T.MeshBasicMaterial({visible:false}));hit.userData.hit={type:'inspect',key};giro.add(hit);
+ const fundo=M.poca(alvo*2.4,alvo*2.4,.0);fundo.material=new T.MeshBasicMaterial({map:fundo.material.map,color:0x000000,transparent:true,opacity:.62,depthWrite:false,toneMapped:false});fundo.position.z=-alvo*.75;fundo.renderOrder=1;c.add(fundo);c.userData.fundo=fundo;
+ const luz=M.poca(alvo*1.6,alvo*1.6,.55);luz.position.z=-alvo*.7;luz.renderOrder=2;c.add(luz);
+ c.position.copy(v.model.worldToLocal(pos.p.clone()));encaraOlho(v,c,pos.olho);
+ v.model.add(c);v._copia=c;if(v.refreshHits)v.refreshHits();}
+function sincronizarCopia(v){const k=Lab.inspectKey&&Lab.state.view==='explorar'?Lab.inspectKey:null;if(!k){fecharCopia(v);return;}if(v._copia&&v._copia.userData.chave===k&&v._copia.parent)return;abrirCopia(v,k);}
+function animarCopia(v,dt){const c=v._copia;if(!c||!c.parent)return;const t=Math.min(1,(performance.now()-c.userData.t0)/320),e=1-Math.pow(1-t,3);const s=Lab.state.reducedMotion?1:.55+.45*e;c.scale.setScalar(s);
+ const gi=c.userData.giro;if(!gi.userData.held&&gi.parent===c&&!(v.drag&&v.drag.group===gi&&v.drag.moved)&&!Lab.state.reducedMotion)gi.rotation.y+=dt*.35;
+ if(!v.xr){const pos=posicaoCopia(v);if(pos){c.position.copy(v.model.worldToLocal(pos.p.clone()));const r=c.rotation.y;encaraOlho(v,c,pos.olho);}}}
 const showAnt=Proto.show;
 Proto.show=function(){const S=Lab.state;
  if(S.view==='explorar'&&ehMuseu(this)&&this.lastView==='explorar'&&this._museuXR===this.xr){atualizar(this,false);return;}
- showAnt.call(this);const ci=document.getElementById('closeInspect');if(ci&&S.view!=='explorar')ci.textContent='← Voltar ao modelo';
+ this._copia=null;showAnt.call(this);const ci=document.getElementById('closeInspect');if(ci&&S.view!=='explorar')ci.textContent='← Voltar ao modelo';
  if(S.view==='explorar'&&ehMuseu(this)){this._museuXR=this.xr;if(!this.xr)this._museuRoot=null;atualizar(this,true);}};
 
 const placeAnt=Proto.placeXR;
@@ -95,6 +118,7 @@ const luzAnt=Proto.luzes;Proto.luzes=function(k){return luzAnt.call(this,(Lab.st
 const frameAnt=Proto.frame;
 Proto.frame=function(time,frame){const vo=this._voo;
  if(vo&&!this.xr){const k=Math.min(1,(performance.now()-vo.t0)/vo.dur),e=k<.5?4*k*k*k:1-Math.pow(-2*k+2,3)/2;this.target.lerpVectors(vo.de.t,vo.para.t,e);this.az=vo.de.az+(vo.para.az-vo.de.az)*e;this.elev=vo.de.elev+(vo.para.elev-vo.de.elev)*e;this.dist=vo.de.dist+(vo.para.dist-vo.de.dist)*e;this.cameraPosition();if(k>=1)this._voo=null;}
+ if(this._copia&&Lab.state.view==='explorar'){const ag=performance.now(),dt=Math.min(.05,(ag-(this._tc||ag))/1000);this._tc=ag;animarCopia(this,dt);}
  return frameAnt.call(this,time,frame);};
 view.canvas.addEventListener('pointerdown',()=>{view._voo=null;});
 

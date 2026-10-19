@@ -356,15 +356,12 @@ function pecaMuseu(par,o,cor,ticks){const D=window.HISTORIA_DATA;const b=new T.G
  b.add(caixaHit(w,o.h+.12,d,ph,hit));
  const i=D.info[o.key]||{};const pl=placa(i.name||o.key,o.tipo,cor,Math.min(.6,w*.92));pl.position.set(0,Math.max(.16,ph*.58),d/2+.007);pl.userData.hit=hit;b.add(pl);
  return {b,ph,h:o.h};}
+const ATRIO_PECAS=[{key:'quefren',x:-2.5,z:-2.35,r:.5,arq:'estatua-quefren',h:1.68,ph:.3,w:.75,d:.95,cw:.62,cd:.85,tipo:TIPO.real},{key:'estelaRamses',x:2.45,z:-2.35,r:-.5,arq:'estela-ramses',ajuste:'max',cw:1.45,cd:.4,h:1.0,w:1.55,d:.55,ph:.4,tipo:TIPO.real}];
 const ALAS_PECAS=[
  /* Vida no Nilo */
  [{key:'nilo',painel:true,x:-3.47,y:1.75,z:-.85,r:Math.PI/2,w:3.2,h:2.5,map:()=>texMapa()},
-  {key:'portadora',x:-1.8,z:-2.3,r:.35,arq:'portadora-oferendas',h:.3,ph:.95,vit:1,tipo:TIPO.real},
-  {key:'camponesOld',ignorar:true,proc:()=>{const g=new T.Group();const f=pessoa({tecido:0xf2ead6,bracoAberto:true});g.add(f);const ce=new T.Mesh(new T.CylinderGeometry(.18,.14,.28,12),mat(0xc89048));ce.position.set(.42,.14,.15);g.add(ce);const ba=new T.Mesh(new T.BoxGeometry(.8,.06,.5),mat(0x8a6a44));ba.position.y=-.03;g.add(ba);return g;},h:.6,vit:1,ph:.95,tipo:TIPO.did},
-  {key:'barco',x:1.65,z:-2.2,r:-.35,arq:'barco-ncma',ajuste:'max',cw:1.2,cd:.6,h:.9,w:1.3,d:.72,vit:1,ph:.75,tipo:TIPO.real},
-  {key:'cheias',x:2.85,z:-1.15,r:-Math.PI/2,proc:nilometro,h:.42,w:.8,d:.8,vit:1,ph:.95,tipo:TIPO.did},
-  {key:'shaduf',x:2.85,z:.75,r:-Math.PI/2,proc:shaduf,h:.62,w:1.0,d:.62,vit:1,ph:.9,tipo:TIPO.did},
-  {key:'casa',x:-2.85,z:1.9,r:Math.PI/2,proc:casa,h:.4,w:.75,d:.65,vit:1,ph:.95,tipo:TIPO.did}],
+  {key:'portadora',x:2.85,z:-1.7,r:-Math.PI/2,arq:'portadora-oferendas',h:.3,ph:1.0,vit:1,tipo:TIPO.real},
+  {key:'barco',x:2.75,z:.55,r:-Math.PI/2,arq:'barco-ncma',ajuste:'max',cw:1.2,cd:.6,h:.9,w:1.4,d:.8,vit:1,ph:.75,tipo:TIPO.real}],
  /* Faraós e deuses */
  [{key:'farao',painel:true,x:-2.3,y:2.42,z:-2.97,r:0,w:.9,h:1.3,map:()=>texFarao()},
   {key:'menkaure',x:-2.85,z:-1.9,r:Math.PI/2,arq:'estatua-menkaure-rainha',h:1.42,ph:.35,tipo:TIPO.real},
@@ -439,13 +436,22 @@ function museuEgito(){const D=window.HISTORIA_DATA;const g=new T.Group();const t
   const pz=poca(3.4,3.4,.55);pz.rotation.x=-Math.PI/2;pz.position.y=.01;m.add(pz);const pl=placa('Planalto de Gizé','Pirâmides e Esfinge · '+TIPO.sitio,'#d8c088',.62);pl.position.set(.45,.5,1.13);pl.rotation.y=.4;pl.userData.hit={type:'inspect',key:'piramide'};m.add(pl);
   pecas.piramide={pos:V(0,0,0),yaw:0,y:1.05,h:.45,ala:-1};
   /* v1.3: Quéfren e a estela da Esfinge nos cantos do átrio, virados para quem entra */
-  [{key:'quefren',x:-2.5,z:-2.35,r:.5,arq:'estatua-quefren',h:1.68,ph:.3,w:.75,d:.95,cw:.62,cd:.85,tipo:TIPO.real},{key:'estelaRamses',x:2.45,z:-2.35,r:-.5,arq:'estela-ramses',ajuste:'max',cw:1.45,cd:.4,h:1.0,w:1.55,d:.55,ph:.4,tipo:TIPO.real}].forEach(o=>{const r=pecaMuseu(g,o,'#d8c088',ticks);pecas[o.key]={pos:V(o.x,0,o.z),yaw:o.r,y:r.ph+.04+o.h/2,h:o.h,ala:-1};
+  ATRIO_PECAS.forEach(o=>{const r=pecaMuseu(g,o,'#d8c088',ticks);pecas[o.key]={pos:V(o.x,0,o.z),yaw:o.r,y:r.ph+.04+o.h/2,h:o.h,ala:-1};
    const pc=poca(2.0,2.0,.75);pc.rotation.x=-Math.PI/2;pc.position.set(o.x,.01,o.z);g.add(pc);const lz=new T.Mesh(new T.CircleGeometry(.16,24),new T.MeshBasicMaterial({color:0xfff3d6,toneMapped:false}));lz.rotation.x=Math.PI/2;lz.position.set(o.x,MU.H-.012,o.z);g.add(lz);});pecas.esfinge={pos:V(-.35,0,.5),yaw:0,y:.95,h:.15,ala:-1};}
  const inicio={spot:V(0,0,2.4),theta:0};marcas.push(marcador(g,0,2.4,'Átrio',{type:'ala',index:-1},'#d8c088'));
  const boas=textoPlano('MUSEU DO EGITO ANTIGO','#c9a35a',3.4,.34,{k:.72,sombra:false});boas.rotation.x=-Math.PI/2;boas.position.set(0,.006,1.45);boas.userData.semEnquadre=true;g.add(boas);/* inscrição no piso do átrio */
  g.userData={museu:true,semGiro:true,alas,pecas,inicio,
   alaDe:p=>{const a=MU.A/2;if(Math.abs(p.x)<=a&&Math.abs(p.z)<=a)return -1;if(p.z<-a)return 0;if(p.x>a)return 1;if(p.x<-a)return 2;return 3;},
   tick:t=>{ticks.forEach(f=>f(t));marcas.forEach((m,i)=>{const k=1+.07*Math.sin(t*2.4+i);m.userData.anel.scale.set(k,k,1);});portas.forEach((p,i)=>p.material.color.setScalar(.82+.18*Math.sin(t*1.6+i)));}};
+ return g;}
+/* v1.4: cópia de uma peça do museu, para aparecer à frente do aluno (base em y=0, frente para +z) */
+function copiaPeca(key){let g=null;
+ if(key==='piramide'){const gz0=new T.Group();[[-.5,-.2,.6,.4],[.05,-.3,.56,.37],[.5,-.38,.3,.2]].forEach(([x,z,l,a],k)=>{const p=piramide(l,a,{topo:k===1});p.position.set(x,0,z);gz0.add(p);});g=real('piramide-giza',gz0);}
+ else if(key==='esfinge')g=real('esfinge-giza',ajustar(esfinge(),.4),{altura:.4});
+ else{const o=ALAS_PECAS.flat().concat(ATRIO_PECAS).find(x=>x.key===key&&!x.ignorar);if(!o)return null;
+  if(o.painel){const mp=o.map();const geo=o.geo?o.geo():new T.PlaneGeometry(o.w,o.h);geo.translate(0,o.h/2,0);g=new T.Group();g.add(new T.Mesh(geo,new T.MeshBasicMaterial({map:mp,side:T.DoubleSide,toneMapped:false})));}
+  else if(o.arq)g=real(o.arq,caixaEspera(o.cw||.5,o.h,o.cd||.4),{yaw:o.yaw||0,ajuste:o.ajuste||'altura'});
+  else g=ajustar(o.proc(),o.h);}
  return g;}
 /* desafio: a maquete de Gizé numa mesa, com os modelos 3D reais */
 function desafio(){const g=new T.Group();const mesa=new T.Mesh(new T.CylinderGeometry(2.3,2.4,.24,56),matTex('calcarioInt',0xffffff,{roughness:.85}));mesa.position.y=-.12;mesa.userData.semEnquadre=true;g.add(mesa);const ins=k=>({type:'inspect',key:k});
@@ -470,5 +476,5 @@ function perfilVale(){const g=new T.Group();const CTX={type:'context'};const Z=2
  textFixo(g,'CORTE DO VALE DO NILO · ESQUEMA FORA DE ESCALA',0,2.75,-1.25,5,'#ffe3a8',false);
  g.userData.semGiro=true;g.userData.tick=t=>{const k=.5-.5*Math.cos(t*.45),L=.22+.27*k;agua.scale.y=L-.06;plantas.visible=L<.36;cheia.visible=L>=.36;vaz.visible=L<.36;sh.userData.tick&&sh.userData.tick(t);};
  g.traverse(o=>{if(o.isMesh&&!o.userData.hit)o.userData.hit=CTX;});return g;}
-window.HISTORIA_MODELS={V,mat,ball,label,rotuloFixo,textFixo,textAt,tag,contexto,museuEgito,inspection,sequencia,viagemCena,hieroglifosCena,desafio,dispose,glifo,ESCALA_VR,real,glb,MU};
+window.HISTORIA_MODELS={copiaPeca,poca,V,mat,ball,label,rotuloFixo,textFixo,textAt,tag,contexto,museuEgito,inspection,sequencia,viagemCena,hieroglifosCena,desafio,dispose,glifo,ESCALA_VR,real,glb,MU};
 })();

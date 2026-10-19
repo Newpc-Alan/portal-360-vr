@@ -4,9 +4,9 @@
    Próximos temas (em breve): Grécia Antiga, Roma Antiga, Brasil Colônia, Pré-história e primeiros povos.
    Textos no tom falado das narrações (chaves = nomes dos MP3 em audio/). Datas aproximadas, como nos livros didáticos. */
 (function(){'use strict';
-const D={version:'1.3.1'};
+const D={version:'1.4.0'};
 D.temas=[
- {id:'egito',nome:'Egito Antigo',estuda:'A civilização que nasceu às margens do Nilo.',exemplos:'O rio Nilo, pirâmides, faraós, mumificação e hieróglifos',modulo:'egi',atividades:['contexto','explorar','mumificacao','piramide','hieroglifos'],questoes:['nilo','cheias','piramides','mumia','fontes','escriba','roseta','faraoDeus','tempo']},
+ {id:'egito',nome:'Egito Antigo',estuda:'A civilização que nasceu às margens do Nilo.',exemplos:'O rio Nilo, pirâmides, faraós, mumificação e hieróglifos',modulo:'egi',atividades:['explorar','mumificacao','piramide','hieroglifos'],questoes:['nilo','cheias','piramides','mumia','fontes','escriba','roseta','faraoDeus','tempo']},
  {id:'grecia',nome:'Grécia Antiga',estuda:'Cidades-estado, democracia e filosofia.',exemplos:'Atenas, Esparta, ágora e Olimpíadas',modulo:'gre',breve:true,atividades:[]},
  {id:'roma',nome:'Roma Antiga',estuda:'Da República ao Império.',exemplos:'Fórum, Coliseu, aquedutos e estradas',modulo:'rom',breve:true,atividades:[]},
  {id:'colonia',nome:'Brasil Colônia',estuda:'O engenho, a vila e os povos que formaram o Brasil.',exemplos:'Engenho de açúcar, povos indígenas e africanos',modulo:'col',breve:true,atividades:[]},
@@ -15,7 +15,6 @@ D.temas=[
 D.modulos=[{id:'egi',label:'Egito Antigo',curto:'Egito',pergunta:'Como um rio no deserto fez nascer uma civilização?'}];
 D.PREF={egi:''};
 D.activities=[
- {id:'contexto',label:'Contexto',title:'Onde e quando?',subtitle:'Do mapa da África até as margens do Nilo, há mais de 5 mil anos.',kicker:'LOCALIZE',modulo:'egi'},
  {id:'explorar',label:'Museu do Egito',title:'Um museu do Egito Antigo.',subtitle:'Quatro alas com peças reais escaneadas em 3D. Cada ala abre uma missão.',kicker:'VISITE',modulo:'egi'},
  {id:'mumificacao',label:'Mumificação',title:'Preparar para a eternidade.',subtitle:'Coloque em ordem as etapas que os embalsamadores seguiam.',kicker:'ORGANIZE',modulo:'egi'},
  {id:'piramide',label:'Dentro da pirâmide',title:'Entre na Grande Pirâmide.',subtitle:'Uma viagem em primeira pessoa, da entrada até a Câmara do Rei.',kicker:'VIAJE',modulo:'egi'},
@@ -69,7 +68,7 @@ D.info={
 /* v1.2 · Museu do Egito: as quatro alas (ordem = posição no prédio: frente, direita, esquerda, fundo) */
 D.MUSEU_INTRO='Bem-vindo ao Museu do Egito. Aqui no átrio está a maquete de Gizé, e em volta ficam as entradas das quatro alas. Escolha uma ala, observe as peças e ouça as fichas. No fundo de cada ala há uma porta para a missão daquele tema.';
 D.ALAS=[
- {id:'nilo',nome:'Vida no Nilo',sub:'O rio, as cheias e o trabalho no campo',cor:'#3f8fc0',missao:'contexto',missaoNome:'Onde e quando?',pecas:['nilo','cheias','shaduf','barco','casa','portadora'],texto:'Ala Vida no Nilo. Aqui há um mapa e modelos que mostram como o rio organizava a vida: as cheias, a irrigação, os barcos e as casas de quem trabalhava no campo.'},
+ {id:'nilo',nome:'Vida no Nilo',sub:'O rio que deu vida ao Egito',cor:'#3f8fc0',missao:'desafio',missaoNome:'Desafio final',pecas:['nilo','barco','portadora'],texto:'Ala Vida no Nilo. O mapa mostra o Egito como uma faixa verde no meio do deserto, ao longo do rio. O barco e a portadora de oferendas mostram o transporte e o trabalho do dia a dia.'},
  {id:'faraos',nome:'Faraós e deuses',sub:'Reis, rainhas e o poder sagrado',cor:'#d4a838',missao:'piramide',missaoNome:'Dentro da pirâmide',pecas:['farao','menkaure','triade','mentuhotep','ramses','nefertiti','senenmut','tanwetamani','obelisco'],texto:'Ala Faraós e deuses. A maioria destas esculturas foi feita há milhares de anos e hoje está em museus de vários países. Repare nas coroas, nas poses e em quem aparece ao lado do rei.'},
  {id:'morte',nome:'Mumificação e vida após a morte',sub:'Corpos preservados para a eternidade',cor:'#c0703a',missao:'mumificacao',missaoNome:'Mumificação',pecas:['tairkap','sarcofago','hunefer','caixoes','caixaCanopica','canopicos','reserva'],texto:'Ala Mumificação e vida após a morte. Os egípcios acreditavam que a vida continuava depois da morte. Por isso preservavam o corpo e o guardavam em caixões e sarcófagos, junto com objetos para a outra vida.'},
  {id:'escrita',nome:'Escrita e memória',sub:'Hieróglifos, escribas e a Pedra de Roseta',cor:'#5a8ac0',missao:'hieroglifos',missaoNome:'Hieróglifos',pecas:['hieroglifos','roseta','estela','escriba','paleta','papiro','templo'],texto:'Ala Escrita e memória. Foi a escrita que guardou a história do Egito: nas paredes dos templos, em pedras e em rolos de papiro.'}
@@ -121,7 +120,6 @@ D.questions=[
 D.todasQuestoes=D.questions;
 /* aula guiada */
 D.guide=[
- {view:'contexto',title:'Localize-se',goal:'Encontre o Egito no mapa, veja como o Nilo dava vida ao deserto e conheça a sociedade egípcia.',check:'contexto',audio:'aula-contexto'},
  {view:'explorar',title:'Visite o Museu do Egito',goal:'Entre no museu, visite as alas e observe pelo menos três peças, ouvindo a ficha de cada uma.',check:'explorar',audio:'aula-explorar'},
  {view:'mumificacao',title:'Prepare para a eternidade',goal:'Coloque em ordem as sete etapas da mumificação.',check:'mumificacao',audio:'aula-mumificacao'},
  {view:'piramide',title:'Entre na pirâmide',goal:'Faça a viagem completa, da entrada da Grande Pirâmide até a Câmara do Rei.',check:'piramide',audio:'aula-piramide'},

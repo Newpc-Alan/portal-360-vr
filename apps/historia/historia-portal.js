@@ -118,9 +118,11 @@ Proto.buildXRUI=function(){
   if(this.xrReport){const r=Lab.report();title='Resumo da experiência';body=S.completed.length+' atividades concluídas. '+r.independent+' respostas independentes. '+r.errors+' tentativas incorretas. '+r.hints+' pistas consultadas. '+r.skips+' posições puladas. Gere o relatório do professor no modo 3D.';tom='neutro';}
   if(this.xrAjuda&&!this.xrReport){title='Como usar os controles';body=S.view==='explorar'?AJUDA_MUSEU:AJUDA_CONTROLES;tom='neutro';}
   const menuAberto=!!this.menuAberto;
-  const panel=this.textPlane(title,body,1.06,.74,tom);if(menuAberto)panel.visible=false;panel.position.set(1.16,.37,-1.64);panel.rotation.y=-.6;this.ui.add(panel);
-  if(!menuAberto&&feedback&&!this.xrReport&&!(S.view==='desafio'&&Lab.quizAtual().phase===1)){const faixa=this.faixaRetorno(feedback,fbTom);faixa.position.set(1.16,-.095,-1.64);faixa.rotation.y=-.6;this.ui.add(faixa);}
-  const lista=menuAberto?[]:this.xrReport?[{label:'Voltar à atividade',cmd:'xr:reportclose'}]:this.xrAjuda?[{label:'Voltar à atividade',cmd:'xr:ajudaclose'}]:this._acoes();
+  /* v1.4: no museu, sem peça escolhida, o óculos fica limpo: só o botão Menu. O texto aparece quando o aluno escolhe uma peça */
+  const museuLimpo=S.view==='explorar'&&!Lab.inspectKey&&!this.xrReport&&!this.xrAjuda&&!menuAberto;
+  const panel=this.textPlane(title,body,1.06,.74,tom);if(menuAberto||museuLimpo)panel.visible=false;panel.position.set(1.16,.37,-1.64);panel.rotation.y=-.6;this.ui.add(panel);
+  if(!menuAberto&&!museuLimpo&&feedback&&!this.xrReport&&!(S.view==='desafio'&&Lab.quizAtual().phase===1)){const faixa=this.faixaRetorno(feedback,fbTom);faixa.position.set(1.16,-.095,-1.64);faixa.rotation.y=-.6;this.ui.add(faixa);}
+  const lista=(menuAberto||museuLimpo)?[]:this.xrReport?[{label:'Voltar à atividade',cmd:'xr:reportclose'}]:this.xrAjuda?[{label:'Voltar à atividade',cmd:'xr:ajudaclose'}]:this._acoes();
   const max=8,pages=Math.max(1,Math.ceil(lista.length/max));this.uiPage=Math.min(this.uiPage||0,pages-1);
   const quizFase=(S.view==='desafio'&&Lab.quizAtual().phase===1)&&!this.xrReport&&!this.xrAjuda&&!menuAberto;
   if(quizFase){/* v4.1: pergunta e alternativas centralizadas à frente, maiores; o modelo vai para a direita (placeXR) */

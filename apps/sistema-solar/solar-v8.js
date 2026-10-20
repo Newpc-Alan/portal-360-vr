@@ -458,6 +458,13 @@ updateXRPanel=function(){
 };
 const acaoV8=acaoBotaoVR;
 acaoBotaoVR=function(action){
+  /* v9.20: controles do céu no menu do óculos (os mesmos do painel do 3D, que ficam sincronizados) */
+  if(action.startsWith('ceu:')){const a=action.slice(4);
+   if(a==='toggle'){const cb=$v('ceuReal');if(cb){cb.checked=!cb.checked;cb.dispatchEvent(new Event('change'));}}
+   else if(a==='const'){const cb=$v('tgConst');if(cb)cb.click();}
+   else if(a==='naves'){const cb=$v('tgNaves');if(cb){cb.click();if(estado.vr&&(estado.vista==='sistema'||estado.vista==='desafio'))setupXRActivity();}}
+   else{S.dia=a==='hoje'?(Date.now()-J2000)/DIA:S.dia+Number(a);if(!S.ceuReal){S.ceuReal=true;const cb=$v('ceuReal');if(cb)cb.checked=true;}aplicarCeuReal();atualizarData(true);caption('Céu em '+rotuloData(),4);}
+   if(estado.vr)menuVRAbrir();return;}
   if(action.startsWith('resp:')){const b=$v('qOps').children[Number(action.slice(5))];if(b&&!quiz.respondida)b.click();return;}
   if(action==='proxima'){novaQuestao();setupXRActivity();return;}
   if(action==='rodada'){iniciarRodada();novaQuestao();setupXRActivity();return;}
@@ -524,8 +531,9 @@ function menuVRAbrir(){menuVRFechar();
  const vistas=[['Sistema Solar','sistema'],['Examinar um planeta','planeta'],['Comparar tamanhos','comparar'],['Dia e noite','diaNoite'],['Fases da Lua','fases'],['Estações do ano','estacoes'],['Eclipses','eclipse'],['Desafio','desafio'],['Escala real','escala']].map(([t,k])=>[(k===v?'▶ ':'')+t,'view:'+k,k===v?AT:null]);
  const cols=[['ATIVIDADES',vistas.slice(0,4)],['',vistas.slice(4)],
   ['AULA E VER',[[S.guide<0?'Começar aula guiada':'Encerrar aula guiada',S.guide<0?'guide':'guideStop',AZ],[S.nomesVR?'Nomes: só ao apontar':'Nomes: mostrar todos','nomes',null],[estado.playing?'Pausar o movimento':'Retomar o movimento','pause',null],['Recentralizar a cena','center',null]]],
+  ['CÉU',[[S.ceuReal?'Céu de hoje: '+rotuloData():'Céu de hoje: desligado','ceu:toggle',S.ceuReal?AT:null],['Avançar 1 mês','ceu:30',null],['Voltar 1 mês','ceu:-30',null],['Voltar para hoje','ceu:hoje',null],[(window.CEU_REAL&&CEU_REAL.constGrupo.visible)?'Constelações: ligadas':'Constelações: desligadas','ceu:const',null],[($v('tgNaves')&&$v('tgNaves').checked)?'Naves: ligadas':'Naves: desligadas','ceu:naves',null]]],
   ['SOM E SAÍDA',[[musicaOn?'Música de fundo: ligada':'Música de fundo: desligada','musica',null],['Como usar os controles','ajuda',null],['Voltar ao catálogo','catalogo',null],['Sair do VR','sair','rgba(140,20,20,.95)']]]];
- const Z=1.5,COLS=cols.length,DX=.42,W=.39,DY=.12,cx=-.95+(COLS*DX+.08)/2,linhas=Math.max(4,...cols.map(c=>c[1].length)),base=-.38,topo=base+(linhas-1)*DY,bot=[],extras=[];
+ const Z=1.5,COLS=cols.length,DX=COLS>4?.36:.42,W=COLS>4?.335:.39,DY=.12,cx=-.95+(COLS*DX+.08)/2,linhas=Math.max(4,...cols.map(c=>c[1].length)),base=-.38,topo=base+(linhas-1)*DY,bot=[],extras=[];
  const fundo=textoCanvasVR(1024,700,(g,c)=>{g.fillStyle='rgba(4,14,28,.9)';g.beginPath();g.roundRect(0,0,c.width,c.height,40);g.fill();g.strokeStyle='rgba(55,177,218,.8)';g.lineWidth=6;g.stroke();});fundo.renderOrder=990;fundo.scale.set(COLS*DX+.08,(topo+.3)-(base-.07),1);fundo.position.copy(P(cx,(topo+.3+base-.07)/2,Z+.03));scene.add(fundo);extras.push(fundo);
  const rot=(t,cor,w,sz,x,y)=>{const m=textoCanvasVR(1024,160,(g,c)=>{let s=sz;g.font='700 '+s+'px Segoe UI,Arial';while(g.measureText(t).width>990&&s>24){s-=3;g.font='700 '+s+'px Segoe UI,Arial';}g.fillStyle=cor;g.textAlign='center';g.textBaseline='middle';g.fillText(t,512,80);});m.renderOrder=995;m.scale.set(w,w*160/1024,1);m.position.copy(P(x,y,Z+.01));scene.add(m);extras.push(m);};
  const nomeVista=(vistas.find(x=>x[1]==='view:'+v)||['',''])[0].replace('▶ ','');

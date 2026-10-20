@@ -1,7 +1,7 @@
 /* Sistema Solar VR · Medidor de quadros (v9.20)
    Escondido por padrão. Liga abrindo o app uma vez com ?fps=1 no endereço; fica lembrado no aparelho até abrir com ?fps=0.
    Mostra quadros por segundo (média de 1 s), o pior segundo dos últimos 10 s e o quadro mais lento (ms).
-   No 3D aparece embaixo, no centro da tela; no óculos, numa plaquinha presa à visão, abaixo do centro.
+   No 3D aparece embaixo, no centro do palco; no óculos, numa plaquinha presa à visão, abaixo do centro.
    Referência no Quest: 72 qps é o mínimo confortável; abaixo de 60 por vários segundos, há risco de enjoo. */
 (function(){'use strict';
 /* ?fps=1 liga e fica lembrado neste aparelho (vale também entrando pelo catálogo); ?fps=0 desliga */
@@ -10,7 +10,7 @@ if(!ligado)return;
 function pronto(fn){if(window.THREE&&typeof atualizarLabels==='function'&&typeof camera!=='undefined'&&camera)fn();else setTimeout(()=>pronto(fn),100);}
 pronto(()=>{
 const T=THREE;let n=0,ini=performance.now(),ult=ini,pior=0,hist=[],qps=0;
-const div=document.createElement('div');div.style.cssText='position:absolute;left:50%;top:10px;transform:translateX(-50%);z-index:50;background:rgba(0,0,0,.82);color:#9fffb0;font:700 16px/1.3 "Segoe UI",Arial,sans-serif;padding:7px 14px;border-radius:10px;border:2px solid currentColor;pointer-events:none;white-space:pre';(document.querySelector('.palco')||document.body).appendChild(div);
+const div=document.createElement('div');div.style.cssText='position:absolute;left:50%;bottom:12px;transform:translateX(-50%);z-index:50;background:rgba(0,0,0,.82);color:#9fffb0;font:700 16px/1.3 "Segoe UI",Arial,sans-serif;padding:7px 14px;border-radius:10px;border:2px solid currentColor;pointer-events:none;white-space:pre';(document.querySelector('.palco')||document.body).appendChild(div);
 let placa=null,ctx=null,tex=null;
 function placaVR(){if(placa)return;const c=document.createElement('canvas');c.width=768;c.height=96;ctx=c.getContext('2d');tex=new T.CanvasTexture(c);
  placa=new T.Mesh(new T.PlaneGeometry(.48,.06),new T.MeshBasicMaterial({map:tex,transparent:true,depthTest:false,depthWrite:false}));placa.renderOrder=9999;placa.frustumCulled=false;scene.add(placa);}

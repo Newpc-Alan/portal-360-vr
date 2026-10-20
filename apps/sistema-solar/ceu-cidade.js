@@ -89,7 +89,7 @@ function atualizar(){const dd=base(),Tc=dd/36525;
  const M=matrizCeu();CEU_REAL.grupo.matrixAutoUpdate=false;CEU_REAL.grupo.matrix.copy(M);CEU_REAL.grupo.matrixWorldNeedsUpdate=true;
  const t=helio('terra',Tc),solEq=eclEq(-t[0],-t[1],-t[2]).normalize(),sv=cena(solEq),so=onde(sv);
  const dia=Math.max(0,Math.min(1,(sv.y+.1)/.25)),noite=Math.max(0,Math.min(1,(-sv.y-.05)/.16)),cre=Math.max(0,1-Math.abs(sv.y+.05)/.15);
- fundo.material.uniforms.sol.value.copy(sv);fundo.material.uniforms.dia.value=dia;fundo.material.uniforms.cre.value=cre;brilhoCeu(Math.max(.05,noite));
+ fundo.material.uniforms.sol.value.copy(sv);fundo.material.uniforms.dia.value=dia;chao.material.color.setRGB(1+dia*7,1+dia*8,1+dia*5);fundo.material.uniforms.cre.value=cre;brilhoCeu(Math.max(.05,noite));
  itens.sol.s.position.copy(sv).multiplyScalar(R);itens.sol.l.position.copy(itens.sol.s.position).add(new T.Vector3(0,70,0));itens.sol.s.visible=itens.sol.l.visible=so.alt>-1;
  const L=lua(dd),lv=cena(L.v),lo=onde(lv);itens.lua.s.position.copy(lv).multiplyScalar(R*.98);itens.lua.l.position.copy(itens.lua.s.position).add(new T.Vector3(0,42,0));itens.lua.s.visible=itens.lua.l.visible=lo.alt>-1;
  luzLua.position.copy(itens.lua.s.position).addScaledVector(sv,3000);
@@ -154,13 +154,13 @@ let fovAntes=45;
 function entrar(){if(window.SOLAR_ESCALA&&SOLAR_ESCALA.estado().ativo)SOLAR_ESCALA.sair(false);if(estado.vista!=='sistema')entrarVista('sistema');if(typeof narrParar==='function')narrParar();
  const S=PortalSolarV8.state;if(S.desktopFocus){const d=S.desktopFocus;if(d.parent)d.parent.remove(d);S.desktopFocus=null;S.desktopFocusKey=null;document.body.classList.remove('v8-system-focus');}
  modo=estado.vr?'vr':'tela';ativo=true;root.visible=false;ms=noiteDeHoje();rodando=false;montar();btn.classList.add('on');if(btnIm)btnIm.textContent='✕ Sair do céu da cidade';
- if(modo==='tela'){document.getElementById('labels').style.visibility='hidden';painel.hidden=false;document.querySelectorAll('.barrasup [data-v]').forEach(b=>b.classList.remove('on'));
+ if(modo==='tela'){document.getElementById('labels').style.visibility='hidden';painel.hidden=false;{const gt=document.getElementById('grpTempo');if(gt)gt.style.display='none';}document.querySelectorAll('.barrasup [data-v]').forEach(b=>b.classList.remove('on'));
   const bd=document.getElementById('badge');if(bd)bd.textContent='Céu da cidade';const dc=document.getElementById('dica');if(dc)dc.style.visibility='hidden';
   fovAntes=camera.fov;camera.fov=75;camera.updateProjectionMatrix();camAzim=Math.PI;camElev=.22;atualizarCamera();}
  else{ancora=null;ancorar();if(S.menuVR&&PortalSolarV8.menuVRAlternar)PortalSolarV8.menuVRAlternar();esconderXR();}
  atualizar();if(typeof atualizarBncc==='function')atualizarBncc();}
 function sair(volta){if(!ativo)return;ativo=false;rodando=false;desmontar();restaurarCeu();root.visible=!(window.SOLAR_ESCALA&&SOLAR_ESCALA.estado().ativo);painel.hidden=true;btn.classList.remove('on');if(btnIm)btnIm.textContent='🌃 Céu da cidade';
- document.getElementById('labels').style.visibility='';const dc=document.getElementById('dica');if(dc)dc.style.visibility='';
+ document.getElementById('labels').style.visibility='';const dc=document.getElementById('dica');if(dc)dc.style.visibility='';try{mostrarGrupos();}catch(_){}
  if(modo==='tela'){camera.fov=fovAntes;camera.updateProjectionMatrix();}
  if(volta!==false)entrarVista('sistema');else if(typeof atualizarBncc==='function')atualizarBncc();}
 /* câmera do 3D em primeira pessoa (no chão, olhando em volta): arrastar "puxa" o céu */

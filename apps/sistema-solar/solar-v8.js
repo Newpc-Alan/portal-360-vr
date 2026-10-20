@@ -49,6 +49,15 @@ const footer=el('footer',{className:'v8-footer',innerHTML:'<b>Explore · compare
 const dialog=el('div',{className:'v8-dialog',id:'v8Summary',hidden:true,role:'dialog','aria-modal':'true'},app);
 function applyQuality(){if(cinturao)cinturao.visible=S.environment;for(const c of cometas)c.piv.visible=S.environment;if(starfield)starfield.children.forEach(o=>o.visible=S.environment);if(renderer.xr.setFoveation)renderer.xr.setFoveation(S.quality==='alto'?.25:.7);}
 
+/* v9.17: a cópia ampliada (zoom à frente no 3D, foco no óculos) fecha ao fim da narração ou com um novo clique no mesmo corpo */
+function fecharFoco(){let mudou=false;
+ if(S.desktopFocus){clearDesktopFocus();mudou=true;}
+ if(S.xrFocus){release(S.xrFocus);S.xrFocus=null;S.xrFocusKey=null;mudou=true;}
+ if(!mudou)return;
+ if(estado.vr){S.lastPanel='';S.lastCaption='';try{updateXRPanel();}catch(e){}try{xrContexto();}catch(e){}}
+ else if(estado.vista==='sistema'){try{renderPanel();}catch(e){}}}
+function fecharAoTerminar(key){setTimeout(()=>{if(narrAtual)return;if(S.desktopFocusKey===key||S.xrFocusKey===key)fecharFoco();},1400);}
+function pararEFechar(){stopNarrationExclusive();narrAtual=null;duckMusica(false);atualizarBotoesNarr();fecharFoco();}
 function stopNarrationExclusive(){
   // Invalida qualquer callback assíncrono de uma narração anterior.
   S.narrSeq++;
@@ -188,7 +197,7 @@ narrFallback=function(key,seq){
   const C=CORPOS[key],u=new SpeechSynthesisUtterance(C.nome+'. '+C.tipo+'. '+C.fato);u.lang='pt-BR';u.rate=.94;u.volume=S.voice;
   const pt=speechSynthesis.getVoices().find(x=>/pt[-_]BR/i.test(x.lang));if(pt)u.voice=pt;
   narrAtual=key;duckMusica(true);atualizarBotoesNarr();
-  u.onend=u.onerror=()=>{if(seq===undefined||seq===S.narrSeq){narrAtual=null;duckMusica(false);atualizarBotoesNarr();}};
+  u.onend=u.onerror=()=>{if(seq===undefined||seq===S.narrSeq){narrAtual=null;duckMusica(false);atualizarBotoesNarr();fecharAoTerminar(key);}};
   speechSynthesis.speak(u);
 };
 narrar=function(key,mesh){
@@ -199,7 +208,7 @@ narrar=function(key,mesh){
   const a=new Audio(NARR_BASE+key+'.mp3');
   S.narrAudio=a;narrAtual=key;a.preload='auto';a.volume=Math.max(0,Math.min(1,S.voice));
   duckMusica(true);atualizarBotoesNarr();
-  const finish=()=>{if(seq!==S.narrSeq||S.narrAudio!==a)return;S.narrAudio=null;narrAtual=null;duckMusica(false);atualizarBotoesNarr();};
+  const finish=()=>{if(seq!==S.narrSeq||S.narrAudio!==a)return;S.narrAudio=null;narrAtual=null;duckMusica(false);atualizarBotoesNarr();fecharAoTerminar(key);};
   a.onended=finish;
   a.onerror=()=>{if(seq!==S.narrSeq||S.narrAudio!==a)return;S.narrAudio=null;narrAtual=null;duckMusica(false);atualizarBotoesNarr();narrFallback(key,seq);};
   const p=a.play();if(p&&p.catch)p.catch(()=>{if(seq===S.narrSeq&&S.narrAudio===a){S.narrAudio=null;narrAtual=null;duckMusica(false);atualizarBotoesNarr();narrFallback(key,seq);}});
@@ -512,7 +521,7 @@ acaoBotaoVR=function(a){if(a==='menu'){menuVRAlternar();return;}menuVRFechar();
  if(a==='nomes'){S.nomesVR=!S.nomesVR;return;}if(a==='ajuda'){dicasVR();return;}if(a==='guideStop'){S.guide=-1;renderGuide();xrContexto();return;}
  _acaoV8(a);if(estado.vr&&!a.startsWith('view:')&&a!=='center'&&a!=='sair'&&a!=='catalogo')xrContexto();};
 const _selV8=tratarSelecaoVR;
-tratarSelecaoVR=function(ctrl){if(S.menuVR&&!raycastBotoesVR(ctrl)){menuVRFechar();return;}const antes=S.xrFocusKey;_selV8(ctrl);if(estado.vr&&S.xrFocusKey!==antes)xrContexto();};
+tratarSelecaoVR=function(ctrl){if(S.menuVR&&!raycastBotoesVR(ctrl)){menuVRFechar();return;}if(estado.vista==='sistema'&&S.xrFocus&&!raycastBotoesVR(ctrl)){const h=raycastController(ctrl);let naCopia=false;try{naCopia=vrRaycaster.intersectObject(S.xrFocus,true).length>0;}catch(e){}if(naCopia||(h&&h.object.userData.corpoKey===S.xrFocusKey)){pararEFechar();return;}}const antes=S.xrFocusKey;_selV8(ctrl);if(estado.vr&&S.xrFocusKey!==antes)xrContexto();};
 const _atuV8=atualizarVR;
 atualizarVR=function(){_atuV8();if(S.xrWait||!S.xrAnchor)return;
  if(!S.pilulaVR){const esq=maoVR('left')||vrControllers[0];if(esq&&esq.userData.mao){const p=criarBotaoVR('☰ Menu (Y)','menu');const k=vrBotoes.indexOf(p);if(k>=0)vrBotoes.splice(k,1);p.scale.set(.11,.0275,1);p.position.set(0,.045,-.04);esq.add(p);S.pilulaVR=p;dicasVR();}}
@@ -562,6 +571,15 @@ const _sairV94=sairVRFinal;
 sairVRFinal=function(){if(S.pontosVR){for(const pt of S.pontosVR.values())release(pt);S.pontosVR=null;}if(S.btnMenuCena){const i=vrBotoes.indexOf(S.btnMenuCena);if(i>=0)vrBotoes.splice(i,1);release(S.btnMenuCena);S.btnMenuCena=null;}_sairV94();};
 
 /* v9.9: volta ao comportamento do VR validado na 8.14 (distâncias e botões originais); mantém o resumo para o Relatório da turma */
-window.PortalSolarV8={version:'9.16',state:S,seasons,daylight,setDay,beginMission,checkMission,finishMission,enterView:entrarVista,exportSummary,setupXRActivity,resetStudent,menuVRAlternar,resumo:()=>({vistas:[...(S.activities||[])],missao:!!S.complete,tentativasErradas:Math.max(0,(S.attempts||0)-(S.complete?1:0)),acertos:(S.qr&&S.qr.acertos)||0,respondidas:S.qr?((S.qr.acertos||0)+(S.qr.erros||0)):0,total:(S.qr&&S.qr.n)||0,quizFim:!!(S.qr&&S.qr.fim)})};
+/* 3D: clique de novo no mesmo corpo, ou na cópia ampliada, fecha a cópia e para a narração.
+   Roda antes do clique original (fase de captura) e só o interrompe quando fecha. */
+{const ray=new T.Raycaster(),ndc=new T.Vector2();let dx=0,dy=0,dt=0;
+ const alvoFechar=(cx,cy)=>{if(estado.vr||estado.vista!=='sistema'||!S.desktopFocus)return false;const r=canvas3d.getBoundingClientRect();ndc.set(((cx-r.left)/r.width)*2-1,-((cy-r.top)/r.height)*2+1);ray.setFromCamera(ndc,camera);
+  if(ray.intersectObject(S.desktopFocus,true).length)return true;const h=ray.intersectObjects(objetosVR(),false);return !!(h.length&&h[0].object.userData.corpoKey===S.desktopFocusKey);};
+ canvas3d.addEventListener('mousedown',e=>{dx=e.clientX;dy=e.clientY;dt=performance.now();},true);
+ canvas3d.addEventListener('click',e=>{if(Math.hypot(e.clientX-dx,e.clientY-dy)<6&&performance.now()-dt<600&&alvoFechar(e.clientX,e.clientY)){e.stopImmediatePropagation();pararEFechar();}},true);
+ let tx=0,ty=0,tt=0;canvas3d.addEventListener('touchstart',e=>{tx=e.touches[0].clientX;ty=e.touches[0].clientY;tt=performance.now();},{capture:true,passive:true});
+ canvas3d.addEventListener('touchend',e=>{const c=e.changedTouches&&e.changedTouches[0];if(c&&Math.hypot(c.clientX-tx,c.clientY-ty)<10&&performance.now()-tt<500&&alvoFechar(c.clientX,c.clientY)){e.stopImmediatePropagation();pararEFechar();}},true);}
+window.PortalSolarV8={version:'9.17',state:S,seasons,daylight,setDay,beginMission,checkMission,finishMission,enterView:entrarVista,exportSummary,setupXRActivity,resetStudent,menuVRAlternar,resumo:()=>({vistas:[...(S.activities||[])],missao:!!S.complete,tentativasErradas:Math.max(0,(S.attempts||0)-(S.complete?1:0)),acertos:(S.qr&&S.qr.acertos)||0,respondidas:S.qr?((S.qr.acertos||0)+(S.qr.erros||0)):0,total:(S.qr&&S.qr.n)||0,quizFim:!!(S.qr&&S.qr.fim)})};
 entrarVista(S.views.includes(estado.vista)?estado.vista:'sistema');renderer.setAnimationLoop(animate);
 })();

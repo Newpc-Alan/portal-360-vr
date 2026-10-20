@@ -280,8 +280,23 @@ atualizarVR=function(){if(S.xrWait){S.xrWait--;if(!S.xrWait){S.xrAnchor=xrAnchor
 };
 
 // Boucle única com delta-time. A pausa interrompe toda a simulação, inclusive os cometas.
+/* v9.10 · Céu de hoje: os planetas começam na posição real da data de hoje (longitude heliocêntrica a partir dos
+   elementos orbitais aproximados do JPL/NASA, válidos de 1800 a 2050, precisão de cerca de 1°) e o tempo corre com a
+   velocidade escolhida, mostrando a data. As distâncias continuam didáticas; o que é real é o ângulo de cada planeta. */
+const ELEM={mercurio:[252.25032350,149472.67411175,77.45779628,.20563593],venus:[181.97909950,58517.81538729,131.60246718,.00677672],terra:[100.46457166,35999.37244981,102.93768193,.01671123],marte:[-4.55343205,19140.30268499,-23.94362959,.09339410],jupiter:[34.39644051,3034.74612775,14.72847983,.04838624],saturno:[49.95424423,1222.49362201,92.59887831,.05386179],urano:[313.23810451,428.48202785,170.95427630,.04725744],netuno:[-55.12002969,218.45945325,44.96476227,.00859048]};
+const J2000=Date.UTC(2000,0,1,12),DIA=86400000;S.ceuReal=true;S.dia=(Date.now()-J2000)/DIA;
+function longitude(k,dia){const e=ELEM[k];if(!e)return null;const Tc=dia/36525,R=Math.PI/180;const L=(e[0]+e[1]*Tc)*R,M=L-e[2]*R,ec=e[3];return L+2*ec*Math.sin(M)+1.25*ec*ec*Math.sin(2*M);}
+function dataDoDia(dia){return new Date(J2000+dia*DIA);}
+function rotuloData(){const d=dataDoDia(S.dia);return d.toLocaleDateString('pt-BR',{day:'2-digit',month:'short',year:'numeric',timeZone:'UTC'}).replace('.','');}
+function aplicarCeuReal(){for(const s of sis){const l=longitude(s.k,S.dia);if(l!==null)s.pivot.rotation.y=l;}}
+function montarCeuReal(){const g=$v('grpTempo');if(!g||$v('ceuHoje'))return;const box=el('div',{id:'ceuHoje',className:'campo'},g);
+ box.innerHTML='<label style="display:flex;justify-content:space-between;align-items:center;gap:8px"><span>📅 <b id="ceuData">'+rotuloData()+'</b></span><span class="chk" style="font-size:12px"><input type="checkbox" id="ceuReal" checked> posições reais</span></label><div class="segbtns" style="margin-top:6px"><button class="btn" data-ceu="-365" title="Um ano antes">« ano</button><button class="btn" data-ceu="-30" title="Um mês antes">‹ mês</button><button class="btn" data-ceu="hoje" title="Voltar para hoje">Hoje</button><button class="btn" data-ceu="30" title="Um mês depois">mês ›</button><button class="btn" data-ceu="365" title="Um ano depois">ano »</button></div><p class="fine" style="margin:6px 0 0;font-size:11.5px;opacity:.8">Ângulos reais de hoje (dados da NASA). As distâncias e tamanhos estão fora de escala.</p>';
+ box.addEventListener('click',e=>{const b=e.target.closest('[data-ceu]');if(!b)return;const a=b.dataset.ceu;S.dia=a==='hoje'?(Date.now()-J2000)/DIA:S.dia+Number(a);if(S.ceuReal)aplicarCeuReal();atualizarData(true);});
+ $v('ceuReal').addEventListener('change',e=>{S.ceuReal=e.target.checked;if(S.ceuReal)aplicarCeuReal();});}
+let _ultData='';function atualizarData(forca){const t=rotuloData();if(!forca&&t===_ultData)return;_ultData=t;const d=$v('ceuData');if(d)d.textContent=t;}
+setTimeout(()=>{montarCeuReal();if(S.ceuReal)aplicarCeuReal();},0);
 animate=function(){const now=performance.now(),dt=Math.min(.05,Math.max(0,(now-vvLast)/1000));vvLast=now;S.dt=dt;resize();_frames++;const v=estado.playing?estado.vel:0,step=dt*v;S.simTime+=step;
- if(estado.vista==='sistema'||estado.vista==='desafio'){for(const s of sis){s.pivot.rotation.y+=s.revSpeed*step*5.4;s.mesh.rotation.y+=s.spinSpeed*step*1.8;if(s.mesh.userData.luaPivot)s.mesh.userData.luaPivot.rotation.y+=step*2.7;}if(cinturao)cinturao.rotation.y+=step*.14;for(const c of cometas)cometStep(c,step);}
+ if(estado.vista==='sistema'||estado.vista==='desafio'){S.dia+=step*5.4*365.25/(365*TAU);atualizarData();for(const s of sis){const lr=S.ceuReal?longitude(s.k,S.dia):null;if(lr!==null)s.pivot.rotation.y=lr;else s.pivot.rotation.y+=s.revSpeed*step*5.4;s.mesh.rotation.y+=s.spinSpeed*step*1.8;if(s.mesh.userData.luaPivot)s.mesh.userData.luaPivot.rotation.y+=step*2.7;}if(cinturao)cinturao.rotation.y+=step*.14;for(const c of cometas)cometStep(c,step);}
  if(estado.vista==='planeta'&&focoMesh&&!S.manual)focoMesh.mesh.rotation.y+=focoMesh.spin*step*1.8;
  if(estado.vista==='diaNoite'&&terraDia){if(v){S.dayAngle=(S.dayAngle+step)%TAU;terraDia.mesh.rotation.y=S.dayAngle;}updateDayStatus();}
  if(estado.vista==='fases'&&fasesObj){fasesObj.luaPivot.rotation.y+=step*.6;atualizarFase();}
@@ -538,6 +553,6 @@ const _sairV94=sairVRFinal;
 sairVRFinal=function(){if(S.pontosVR){for(const pt of S.pontosVR.values())release(pt);S.pontosVR=null;}if(S.btnMenuCena){const i=vrBotoes.indexOf(S.btnMenuCena);if(i>=0)vrBotoes.splice(i,1);release(S.btnMenuCena);S.btnMenuCena=null;}_sairV94();};
 
 /* v9.9: volta ao comportamento do VR validado na 8.14 (distâncias e botões originais); mantém o resumo para o Relatório da turma */
-window.PortalSolarV8={version:'9.9',state:S,seasons,daylight,setDay,beginMission,checkMission,finishMission,enterView:entrarVista,exportSummary,setupXRActivity,resetStudent,menuVRAlternar,resumo:()=>({vistas:[...(S.activities||[])],missao:!!S.complete,tentativasErradas:Math.max(0,(S.attempts||0)-(S.complete?1:0)),acertos:(S.qr&&S.qr.acertos)||0,respondidas:S.qr?((S.qr.acertos||0)+(S.qr.erros||0)):0,total:(S.qr&&S.qr.n)||0,quizFim:!!(S.qr&&S.qr.fim)})};
+window.PortalSolarV8={version:'9.10',state:S,seasons,daylight,setDay,beginMission,checkMission,finishMission,enterView:entrarVista,exportSummary,setupXRActivity,resetStudent,menuVRAlternar,resumo:()=>({vistas:[...(S.activities||[])],missao:!!S.complete,tentativasErradas:Math.max(0,(S.attempts||0)-(S.complete?1:0)),acertos:(S.qr&&S.qr.acertos)||0,respondidas:S.qr?((S.qr.acertos||0)+(S.qr.erros||0)):0,total:(S.qr&&S.qr.n)||0,quizFim:!!(S.qr&&S.qr.fim)})};
 entrarVista(S.views.includes(estado.vista)?estado.vista:'sistema');renderer.setAnimationLoop(animate);
 })();

@@ -108,6 +108,7 @@ function painelTexto(){const c=CIDADES[cidade],so=itens.sol.info;let ceu=so.alt>
 /* ---------- interface do 3D ---------- */
 const css=document.createElement('style');css.textContent=`
 #cidPainel{position:absolute;right:12px;top:12px;width:min(390px,calc(100% - 24px));max-height:calc(100% - 24px);overflow:auto;background:rgba(6,18,34,.92);border:1px solid #2c5b7a;border-radius:14px;padding:12px 14px;color:#e8f2ff;font:14px/1.45 'Segoe UI',Arial,sans-serif;box-shadow:0 8px 30px rgba(0,0,0,.45)}
+body.imersao #cidPainel{top:66px;max-height:calc(100% - 80px)}
 #cidPainel .topo{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
 #cidPainel h3{margin:0;font-size:16px;color:#8fe0b4;flex:1;min-width:220px}
 #cidPainel select{background:#0d2a40;color:#e8f2ff;border:1px solid #2f6b8f;border-radius:8px;padding:5px 8px;font:600 13px 'Segoe UI',Arial}
@@ -117,6 +118,7 @@ const css=document.createElement('style');css.textContent=`
 #cidPainel .ceu{margin:8px 0 4px;color:#bfe6f2;font-size:13px}
 #cidPainel ul{margin:0;padding-left:18px}#cidPainel li{break-inside:avoid;margin:2px 0;font-size:13px}#cidPainel li b{color:#ffe9a8}
 #cidPainel .nota{font-size:11.5px;opacity:.7;margin-top:6px}
+body.imersao #cidPainel{top:66px;max-height:calc(100% - 80px)}
 #cidPainel.min .bts,#cidPainel.min .ceu,#cidPainel.min ul,#cidPainel.min .nota,#cidPainel.min select{display:none}#cidPainel .rec{margin-left:auto;padding:2px 9px}#cidPainel h3{font-size:15px}`;document.head.appendChild(css);
 const palco=document.querySelector('.palco');const painel=document.createElement('div');painel.id='cidPainel';painel.hidden=true;palco.appendChild(painel);
 painel.innerHTML='<div class="topo"><h3 id="cidTit"></h3><button data-cid="recolher" class="rec" title="Recolher ou abrir o painel">–</button><select id="cidSel" aria-label="Cidade"></select></div><div class="bts"><button data-cid="-1440">« dia</button><button data-cid="-60">‹ 1 hora</button><button data-cid="noite">Hoje à noite</button><button data-cid="agora">Agora</button><button data-cid="60">1 hora ›</button><button data-cid="1440">dia »</button><button data-cid="rodar" id="cidRodar">▶ Passar as horas</button><button data-cid="sair" class="sair">✕ Sair</button></div><div class="ceu" id="cidCeu"></div><ul id="cidLista"></ul><div class="nota">Arraste para olhar em volta. A Lua aparece 3 vezes maior que o real para facilitar a observação; planetas são pontos, como a olho nu.</div>';

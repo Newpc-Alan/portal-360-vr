@@ -49,7 +49,7 @@ const css=document.createElement('style');css.textContent=`
 #escPainel .regua i{display:block;height:6px;border:2px solid #cfe6ff;border-top:0}
 #escPainel .nav button{border:0;border-radius:8px;padding:6px 12px;font:600 13px 'Segoe UI',Arial;cursor:pointer;margin-left:6px}
 #escPainel .nav .ant{background:#22405a;color:#fff}#escPainel .nav .prox{background:#1a6b2a;color:#fff}#escPainel .nav .sair{background:#5a2222;color:#fff}
-#escAviso{position:absolute;top:12px;right:12px;background:rgba(10,16,32,.75);color:#cbd6e6;font:12px 'Segoe UI',Arial;padding:5px 10px;border-radius:8px;pointer-events:none}
+#escAviso{position:absolute;top:12px;left:50%;transform:translateX(-50%);white-space:nowrap;background:rgba(10,16,32,.75);color:#cbd6e6;font:12px 'Segoe UI',Arial;padding:5px 10px;border-radius:8px;pointer-events:none}
 @media(max-width:640px){#escPainel{font-size:13px}#escPainel h3{font-size:15px}}`;document.head.appendChild(css);
 const palco=document.querySelector('.palco');
 const camadaLab=document.createElement('div');camadaLab.id='escLabels';camadaLab.hidden=true;palco.appendChild(camadaLab);
@@ -63,6 +63,9 @@ painel.addEventListener('click',e=>{const b=e.target.closest('button');if(!b)ret
 const barra=document.querySelector('.barrasup');const btn=document.createElement('button');btn.className='btn';btn.id='btnEscala';btn.textContent='📏 Escala real';
 const depois=barra.querySelector('[data-v="desafio"]');if(depois&&depois.nextSibling)barra.insertBefore(btn,depois.nextSibling);else barra.appendChild(btn);
 btn.addEventListener('click',()=>{if(ativo)sair();else entrar();});
+/* no modo Imersão a barra de vistas some: a viagem entra no menu do canto, como no menu do óculos */
+const imMenu=document.getElementById('imMenu');let btnIm=null;
+if(imMenu){btnIm=document.createElement('button');btnIm.id='btnEscalaIm';btnIm.textContent='📏 Escala real';imMenu.insertBefore(btnIm,imMenu.firstChild);btnIm.addEventListener('click',()=>{if(ativo)sair();else entrar();});}
 /* ---------- cena ---------- */
 /* dois modos: 'tela' (computador e lousa, rótulos em HTML) e 'vr' (óculos: cena 1,8 m à frente, rótulos, painel e botões em 3D) */
 let ativo=false,modo='tela',grupo=null,itens=[],atual=0,anim=null,foco=new T.Vector3(),W=46000,luz=null,vr={painel:null,botoes:[]};
@@ -129,17 +132,19 @@ function ancorar(){/* cena 1,8 m à frente, um pouco abaixo dos olhos, virada pa
  const f=new T.Vector3(0,0,-1).applyQuaternion(q);f.y=0;if(f.lengthSq()<.01)f.set(0,0,-1);f.normalize();const r=new T.Vector3(-f.z,0,f.x),up=new T.Vector3(0,1,0);
  grupo.position.copy(p).addScaledVector(f,1.8).add(new T.Vector3(0,-.12,0));grupo.quaternion.setFromRotationMatrix(new T.Matrix4().makeBasis(r,up,f.clone().negate()));}
 /* os painéis normais do óculos somem durante a viagem (voltam ao sair) */
-function esconderXR(){const S=window.PortalSolarV8&&PortalSolarV8.state;if(!S)return;[S.xrPanel,S.xrCaption,S.xrFocus].concat(S.ctxBtns||[]).forEach(o=>{if(o)o.visible=false;});}
+function esconderXR(){const S=window.PortalSolarV8&&PortalSolarV8.state;if(!S)return;[S.xrPanel,S.xrCaption,S.xrFocus].concat(S.ctxBtns||[],S.inspections||[]).forEach(o=>{if(o)o.visible=false;});}
+/* a cópia ampliada de um planeta ou nave clicado antes (zoom à frente da câmera) sai da cena ao começar a viagem */
+function limparZoom(){const S=window.PortalSolarV8&&PortalSolarV8.state;if(!S||!S.desktopFocus)return;const g=S.desktopFocus;if(g.parent)g.parent.remove(g);g.traverse(o=>{if(o.geometry)o.geometry.dispose();});S.desktopFocus=null;S.desktopFocusKey=null;S.desktopFocusT=0;document.body.classList.remove('v8-system-focus');}
 /* ---------- entrar e sair ---------- */
 function entrar(){if(estado.vista!=='sistema')entrarVista('sistema');if(typeof narrParar==='function')narrParar();
- modo=estado.vr?'vr':'tela';ativo=true;root.visible=false;montar();btn.classList.add('on');
+ modo=estado.vr?'vr':'tela';ativo=true;root.visible=false;limparZoom();montar();btn.classList.add('on');if(btnIm)btnIm.textContent='✕ Sair da escala';
  if(modo==='tela'){document.getElementById('labels').style.visibility='hidden';camadaLab.hidden=false;painel.hidden=false;aviso.hidden=false;
   document.querySelectorAll('.barrasup [data-v]').forEach(b=>b.classList.remove('on'));
   const bd=document.getElementById('badge');if(bd)bd.textContent='Escala real';const dc=document.getElementById('dica');if(dc)dc.style.visibility='hidden';
   camTarget.set(0,0,0);camDist=34;camElev=.18;camAzim=0;atualizarCamera();}
  else{ancorar();const S=PortalSolarV8.state;if(S&&S.menuVR&&PortalSolarV8.menuVRAlternar)PortalSolarV8.menuVRAlternar();esconderXR();}
  foco.set(...PARADAS[0].foco);W=PARADAS[0].W;anim=null;ir(0);}
-function sair(volta){if(!ativo)return;ativo=false;testeVR=false;calar();desmontar();root.visible=true;document.getElementById('labels').style.visibility='';camadaLab.hidden=true;const dc=document.getElementById('dica');if(dc)dc.style.visibility='';painel.hidden=true;aviso.hidden=true;btn.classList.remove('on');anim=null;
+function sair(volta){if(!ativo)return;ativo=false;testeVR=false;calar();desmontar();root.visible=true;document.getElementById('labels').style.visibility='';camadaLab.hidden=true;const dc=document.getElementById('dica');if(dc)dc.style.visibility='';painel.hidden=true;aviso.hidden=true;btn.classList.remove('on');if(btnIm)btnIm.textContent='📏 Escala real';anim=null;
  if(volta!==false)entrarVista('sistema');}
 /* trocar de vista encerra a viagem; 'escala' é a vista nova do menu do óculos */
 const vistaAntes=entrarVista;entrarVista=function(v){if(v==='escala'){entrar();return;}if(ativo)sair(false);const r=vistaAntes.apply(this,arguments);if(v==='sistema'){const b=document.querySelector('.barrasup [data-v="sistema"]');b&&b.classList.add('on');}return r;};

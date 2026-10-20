@@ -64,54 +64,84 @@ const barra=document.querySelector('.barrasup');const btn=document.createElement
 const depois=barra.querySelector('[data-v="desafio"]');if(depois&&depois.nextSibling)barra.insertBefore(btn,depois.nextSibling);else barra.appendChild(btn);
 btn.addEventListener('click',()=>{if(ativo)sair();else entrar();});
 /* ---------- cena ---------- */
-let ativo=false,grupo=null,itens=[],atual=0,anim=null,foco=new T.Vector3(),W=46000,luz=null;
+/* dois modos: 'tela' (computador e lousa, rótulos em HTML) e 'vr' (óculos: cena 1,8 m à frente, rótulos, painel e botões em 3D) */
+let ativo=false,modo='tela',grupo=null,itens=[],atual=0,anim=null,foco=new T.Vector3(),W=46000,luz=null,vr={painel:null,botoes:[]};
 const TEX_PONTO=(()=>{const c=document.createElement('canvas');c.width=c.height=64;const x=c.getContext('2d');const g=x.createRadialGradient(32,32,0,32,32,32);g.addColorStop(0,'rgba(255,255,255,1)');g.addColorStop(.45,'rgba(255,255,255,.9)');g.addColorStop(1,'rgba(255,255,255,0)');x.fillStyle=g;x.fillRect(0,0,64,64);return new T.CanvasTexture(c);})();
-const ESC_VISTA=36;/* unidades da cena ocupadas pela largura W */
+const CFG={tela:{esc:36,lim:3500,minR:.0008},vr:{esc:2.4,lim:4.2,minR:.0006}};/* esc: largura da cena (unidades/metros) ocupada por W */
+function rotuloVR(txt,cor){const sp=textoCanvasVR(512,112,(g,c)=>{g.font='700 52px Segoe UI,Arial';const w=Math.min(500,g.measureText(txt).width+44);g.fillStyle='rgba(8,18,36,.78)';g.beginPath();g.roundRect((512-w)/2,14,w,84,40);g.fill();g.strokeStyle=cor;g.lineWidth=4;g.stroke();g.fillStyle='#eef6ff';g.textAlign='center';g.textBaseline='middle';g.fillText(txt,256,58);});sp.scale.set(.26,.057,1);return sp;}
 function montar(){grupo=new T.Group();grupo.name='escalaReal';scene.add(grupo);itens=[];
  luz=new T.PointLight(0xffffff,1.7,0,0);grupo.add(luz);grupo.add(new T.AmbientLight(0xffffff,.12));
  CORPOS_E.forEach(c=>{let m=null;
   if(c.r>0){const temTex=(typeof TEX!=='undefined')&&TEX[c.k];m=c.k==='proxima'?new T.Mesh(new T.SphereGeometry(1,48,32),new T.MeshBasicMaterial({color:0xff7a45})):esfera(1,(typeof CORPOS!=='undefined'&&CORPOS[c.k])?CORPOS[c.k].cor:0x999999,c.k==='sol',temTex?c.k:null);
    m.userData.corpoKey=null;m.userData.vrInterativo=false;if(c.k==='saturno'&&typeof criarAnelSaturno==='function')m.add(criarAnelSaturno(1));grupo.add(m);}
-  const s=new T.Sprite(new T.SpriteMaterial({map:TEX_PONTO,color:new T.Color(c.cor),sizeAttenuation:false,transparent:true,depthWrite:false}));s.scale.set(.014,.014,1);s.renderOrder=2;grupo.add(s);
-  const el=document.createElement('div');el.className='lab';el.textContent=c.nome;camadaLab.appendChild(el);
-  itens.push({c,m,s,el});});}
-function desmontar(){if(grupo){scene.remove(grupo);grupo.traverse(o=>{if(o.geometry)o.geometry.dispose();});}grupo=null;itens=[];camadaLab.innerHTML='';}
-function posicionar(){const s=ESC_VISTA/W,v=new T.Vector3();
+  const s=new T.Sprite(new T.SpriteMaterial({map:TEX_PONTO,color:new T.Color(c.cor),sizeAttenuation:modo==='vr',transparent:true,depthWrite:false}));
+  if(modo==='vr')s.scale.set(.028,.028,1);else s.scale.set(.014,.014,1);s.renderOrder=2;grupo.add(s);
+  let el=null,lab=null;if(modo==='tela'){el=document.createElement('div');el.className='lab';el.textContent=c.nome;camadaLab.appendChild(el);}else{lab=rotuloVR(c.nome,c.cor);grupo.add(lab);}
+  itens.push({c,m,s,el,lab});});}
+function desmontar(){if(grupo){scene.remove(grupo);grupo.traverse(o=>{if(o.geometry)o.geometry.dispose();if(o.isSprite&&o.material&&o.material.map&&o.material.map!==TEX_PONTO)o.material.map.dispose();});}grupo=null;itens=[];camadaLab.innerHTML='';limparVR();}
+function posicionar(){const K=CFG[modo],s=K.esc/W,v=new T.Vector3();
  const sol=POR.sol;luz.position.set((sol.p[0]-foco.x)*s,(sol.p[1]-foco.y)*s,(sol.p[2]-foco.z)*s);
  const w=palco.clientWidth,h=palco.clientHeight;
- for(const it of itens){const c=it.c;v.set((c.p[0]-foco.x)*s,(c.p[1]-foco.y)*s,(c.p[2]-foco.z)*s);
-  if(it.m){it.m.position.copy(v);const r=c.r*s;it.m.scale.setScalar(Math.max(r,1e-6));it.m.visible=r>.0008&&v.length()<3500;}
-  it.s.position.copy(v);it.s.visible=v.length()<3500;
-  /* rótulo: só se estiver na frente e não colado em outro maior */
-  const q=v.clone();grupo.localToWorld(q);q.project(camera);const dentro=q.z<1&&Math.abs(q.x)<1.05&&Math.abs(q.y)<1.05&&it.s.visible;
+ for(const it of itens){const c=it.c;v.set((c.p[0]-foco.x)*s,(c.p[1]-foco.y)*s,(c.p[2]-foco.z)*s);const perto=v.length()<K.lim;
+  if(it.m){it.m.position.copy(v);const r=c.r*s;it.m.scale.setScalar(Math.max(r,1e-6));it.m.visible=r>K.minR&&perto;}
+  it.s.position.copy(v);it.s.visible=perto;
+  if(modo==='vr'){const r=it.m?c.r*s:0;it.lab.position.set(v.x,v.y+Math.max(.055,r+.04),v.z);it.lab.visible=perto&&Math.abs(v.x)<1.9;it.px=it.lab.visible?[v.x,v.y]:null;continue;}
+  const q=v.clone();grupo.localToWorld(q);q.project(camera);const dentro=q.z<1&&Math.abs(q.x)<1.05&&Math.abs(q.y)<1.05&&perto;
   it.el.style.display=dentro?'block':'none';if(dentro){it.el.style.left=((q.x*.5+.5)*w)+'px';it.el.style.top=((-q.y*.5+.5)*h)+'px';it.px=[(q.x*.5+.5)*w,(-q.y*.5+.5)*h];}else it.px=null;}
  /* rótulos sobrepostos: fica o do corpo maior (a Terra vence a Lua, o Sol vence Mercúrio quando tudo vira um ponto) */
- const vis=itens.filter(i=>i.px);for(let a=0;a<vis.length;a++)for(let b=a+1;b<vis.length;b++){const A=vis[a],B=vis[b];if(A.el.style.display==='none'||B.el.style.display==='none')continue;if(Math.abs(A.px[0]-B.px[0])<80&&Math.abs(A.px[1]-B.px[1])<18)(A.c.r>=B.c.r?B:A).el.style.display='none';}
- regua(w);}
+ const vis=itens.filter(i=>i.px),dx=modo==='vr'?.25:80,dy=modo==='vr'?.06:18,esc=i=>modo==='vr'?!i.lab.visible:i.el.style.display==='none',some=i=>{if(modo==='vr')i.lab.visible=false;else i.el.style.display='none';};
+ for(let a=0;a<vis.length;a++)for(let b=a+1;b<vis.length;b++){const A=vis[a],B=vis[b];if(esc(A)||esc(B))continue;if(Math.abs(A.px[0]-B.px[0])<dx&&Math.abs(A.px[1]-B.px[1])<dy)some(A.c.r>=B.c.r?B:A);}
+ if(modo==='tela')regua(w);}
 function fmtKm(km){if(km>=1e12)return (km/1e12).toLocaleString('pt-BR',{maximumFractionDigits:1})+' trilhões de km';if(km>=1e9)return (km/1e9).toLocaleString('pt-BR',{maximumFractionDigits:1})+' bilhões de km';if(km>=1e6)return (km/1e6).toLocaleString('pt-BR',{maximumFractionDigits:1})+' milhões de km';return km.toLocaleString('pt-BR',{maximumFractionDigits:0})+' km';}
-function regua(w){const visW=2*camDist*Math.tan(camera.fov*Math.PI/360)*camera.aspect;const kmPorPx=(visW/(ESC_VISTA/W))/w;let alvo=kmPorPx*140;const e=Math.pow(10,Math.floor(Math.log10(alvo)));const n=[1,2,5,10].map(x=>x*e).reduce((a,b)=>Math.abs(b-alvo)<Math.abs(a-alvo)?b:a);
+function regua(w){const visW=2*camDist*Math.tan(camera.fov*Math.PI/360)*camera.aspect;const kmPorPx=(visW/(CFG.tela.esc/W))/w;let alvo=kmPorPx*140;const e=Math.pow(10,Math.floor(Math.log10(alvo)));const n=[1,2,5,10].map(x=>x*e).reduce((a,b)=>Math.abs(b-alvo)<Math.abs(a-alvo)?b:a);
  const bar=painel.querySelector('#escBarra');bar.style.width=Math.round(n/kmPorPx)+'px';painel.querySelector('#escBarraTxt').textContent=fmtKm(n);}
 function texto(i){const p=PARADAS[i];painel.querySelector('#escTit').textContent=(i+1)+' de '+PARADAS.length+' · '+p.tit;painel.querySelector('#escTxt').innerHTML=p.txt;
- chips.querySelectorAll('.chip').forEach((b,j)=>b.classList.toggle('on',j===i));painel.querySelector('[data-esc="ant"]').disabled=i===0;painel.querySelector('[data-esc="prox"]').disabled=i===PARADAS.length-1;}
+ chips.querySelectorAll('.chip').forEach((b,j)=>b.classList.toggle('on',j===i));painel.querySelector('[data-esc="ant"]').disabled=i===0;painel.querySelector('[data-esc="prox"]').disabled=i===PARADAS.length-1;
+ if(modo==='vr')painelVR(i);}
 function ir(i){const p=PARADAS[i];atual=i;texto(i);anim={t:0,dur:i===0&&!anim?0:3.2,f0:foco.clone(),f1:new T.Vector3(...p.foco),w0:W,w1:p.W};}
 function passo(dt){if(!anim)return;anim.t=anim.dur?Math.min(1,anim.t+dt/anim.dur):1;const e=anim.t<.5?4*anim.t*anim.t*anim.t:1-Math.pow(-2*anim.t+2,3)/2;
  const lw=Math.log(anim.w0)+(Math.log(anim.w1)-Math.log(anim.w0))*e;W=Math.exp(lw);
  /* o foco anda junto com a largura da visão: os dois corpos ficam em quadro durante a viagem */
  const g=Math.abs(anim.w1-anim.w0)>1?(W-anim.w0)/(anim.w1-anim.w0):e;foco.copy(anim.f0).lerp(anim.f1,Math.max(0,Math.min(1,g)));if(anim.t>=1)anim=null;}
-function entrar(){if(estado.vr)return;if(estado.vista!=='sistema')entrarVista('sistema');if(typeof narrParar==='function')narrParar();
- ativo=true;root.visible=false;document.getElementById('labels').style.visibility='hidden';montar();camadaLab.hidden=false;painel.hidden=false;aviso.hidden=false;btn.classList.add('on');
- document.querySelectorAll('.barrasup [data-v]').forEach(b=>b.classList.remove('on'));
- const bd=document.getElementById('badge');if(bd)bd.textContent='Escala real';const dc=document.getElementById('dica');if(dc)dc.style.visibility='hidden';
- camTarget.set(0,0,0);camDist=34;camElev=.18;camAzim=0;atualizarCamera();
+/* ---------- óculos: painel e botões 3D ---------- */
+function limparVR(){if(vr.painel){if(vr.painel.parent)vr.painel.parent.remove(vr.painel);vr.painel.material.map.dispose();vr.painel=null;}
+ for(const b of vr.botoes){const k=vrBotoes.indexOf(b);if(k>=0)vrBotoes.splice(k,1);if(b.parent)b.parent.remove(b);b.material.map.dispose();}vr.botoes=[];}
+function painelVR(i){if(vr.painel){grupo.remove(vr.painel);vr.painel.material.map.dispose();}
+ const p=PARADAS[i],limpo=p.txt.replace(/<[^>]+>/g,'');
+ vr.painel=textoCanvasVR(1024,400,(g,c)=>{g.fillStyle='rgba(5,19,34,.94)';g.beginPath();g.roundRect(0,0,c.width,c.height,30);g.fill();g.strokeStyle='#37b1da';g.lineWidth=5;g.stroke();
+  g.fillStyle='#8fe0b4';g.font='700 44px Segoe UI,Arial';g.fillText((i+1)+' de '+PARADAS.length+' · '+p.tit,36,64);
+  g.fillStyle='#e4f3ff';g.font='500 33px Segoe UI,Arial';let y=116;for(const l of quebrarLinhas(g,limpo,c.width-72).slice(0,6)){g.fillText(l,36,y);y+=44;}
+  g.fillStyle='#bfe6f2';g.font='600 30px Segoe UI,Arial';g.fillText('Largura da cena: '+fmtKm(p.W)+' · proporção real',36,c.height-26);});
+ vr.painel.scale.set(1.15,.45,1);vr.painel.position.set(0,-.66,.35);grupo.add(vr.painel);
+ if(!vr.botoes.length){[['‹ Voltar','esc:ant',-.42],['Próxima ›','esc:prox',0],['✕ Sair','esc:sair',.42]].forEach(([t,a,x])=>{const b=criarBotaoVR(t,a,a==='esc:sair'?'rgba(120,26,26,.96)':a==='esc:prox'?'rgba(26,107,42,.96)':null);b.scale.set(.34,.085,1);b.position.set(x,-.97,.38);grupo.add(b);vr.botoes.push(b);});}}
+function ancorar(){/* cena 1,8 m à frente, um pouco abaixo dos olhos, virada para o aluno */
+ const p=new T.Vector3(),q=new T.Quaternion();let cam=camera;try{if(renderer.xr.isPresenting)cam=renderer.xr.getCamera(camera);}catch(_){}cam.getWorldPosition(p);cam.getWorldQuaternion(q);
+ const f=new T.Vector3(0,0,-1).applyQuaternion(q);f.y=0;if(f.lengthSq()<.01)f.set(0,0,-1);f.normalize();const r=new T.Vector3(-f.z,0,f.x),up=new T.Vector3(0,1,0);
+ grupo.position.copy(p).addScaledVector(f,1.8).add(new T.Vector3(0,-.12,0));grupo.quaternion.setFromRotationMatrix(new T.Matrix4().makeBasis(r,up,f.clone().negate()));}
+/* os painéis normais do óculos somem durante a viagem (voltam ao sair) */
+function esconderXR(){const S=window.PortalSolarV8&&PortalSolarV8.state;if(!S)return;[S.xrPanel,S.xrCaption,S.xrFocus].concat(S.ctxBtns||[]).forEach(o=>{if(o)o.visible=false;});}
+/* ---------- entrar e sair ---------- */
+function entrar(){if(estado.vista!=='sistema')entrarVista('sistema');if(typeof narrParar==='function')narrParar();
+ modo=estado.vr?'vr':'tela';ativo=true;root.visible=false;montar();btn.classList.add('on');
+ if(modo==='tela'){document.getElementById('labels').style.visibility='hidden';camadaLab.hidden=false;painel.hidden=false;aviso.hidden=false;
+  document.querySelectorAll('.barrasup [data-v]').forEach(b=>b.classList.remove('on'));
+  const bd=document.getElementById('badge');if(bd)bd.textContent='Escala real';const dc=document.getElementById('dica');if(dc)dc.style.visibility='hidden';
+  camTarget.set(0,0,0);camDist=34;camElev=.18;camAzim=0;atualizarCamera();}
+ else{ancorar();const S=PortalSolarV8.state;if(S&&S.menuVR&&PortalSolarV8.menuVRAlternar)PortalSolarV8.menuVRAlternar();esconderXR();}
  foco.set(...PARADAS[0].foco);W=PARADAS[0].W;anim=null;ir(0);}
-function sair(volta){if(!ativo)return;ativo=false;desmontar();root.visible=true;document.getElementById('labels').style.visibility='';camadaLab.hidden=true;const dc=document.getElementById('dica');if(dc)dc.style.visibility='';painel.hidden=true;aviso.hidden=true;btn.classList.remove('on');anim=null;
+function sair(volta){if(!ativo)return;ativo=false;testeVR=false;desmontar();root.visible=true;document.getElementById('labels').style.visibility='';camadaLab.hidden=true;const dc=document.getElementById('dica');if(dc)dc.style.visibility='';painel.hidden=true;aviso.hidden=true;btn.classList.remove('on');anim=null;
  if(volta!==false)entrarVista('sistema');}
-/* trocar de vista ou entrar no óculos encerra a viagem */
-const vistaAntes=entrarVista;entrarVista=function(v){if(ativo)sair(false);const r=vistaAntes.apply(this,arguments);if(v==='sistema'){const b=document.querySelector('.barrasup [data-v="sistema"]');b&&b.classList.add('on');}return r;};
+/* trocar de vista encerra a viagem; 'escala' é a vista nova do menu do óculos */
+const vistaAntes=entrarVista;entrarVista=function(v){if(v==='escala'){entrar();return;}if(ativo)sair(false);const r=vistaAntes.apply(this,arguments);if(v==='sistema'){const b=document.querySelector('.barrasup [data-v="sistema"]');b&&b.classList.add('on');}return r;};
+const acaoAntes=acaoBotaoVR;acaoBotaoVR=function(a){if(a==='view:escala'){entrar();return;}if(a&&a.startsWith('esc:')){if(a==='esc:prox')ir(Math.min(PARADAS.length-1,atual+1));else if(a==='esc:ant')ir(Math.max(0,atual-1));else sair();return;}return acaoAntes.apply(this,arguments);};
 let ult=performance.now();const labelsAntes=atualizarLabels;
 atualizarLabels=function(){const t=performance.now(),dt=Math.min(.05,(t-ult)/1000);ult=t;
- if(ativo){if(estado.vr){sair();}else{passo(dt);posicionar();for(const it of itens)if(it.m&&it.c.k!=='proxima')it.m.rotation.y+=dt*.05;}}
+ if(ativo){if((modo==='vr')!==(!!estado.vr||testeVR)){sair();}else{passo(dt);posicionar();for(const it of itens)if(it.m&&it.c.k!=='proxima')it.m.rotation.y+=dt*.05;}}
  return labelsAntes.apply(this,arguments);};
-window.SOLAR_ESCALA={entrar,sair,ir,estado:()=>({ativo,atual,W,foco:foco.toArray()})};
+if(typeof atualizarVR==='function'){const vrAntes=atualizarVR;atualizarVR=function(){const r=vrAntes.apply(this,arguments);if(ativo&&modo==='vr')esconderXR();return r;};}
+/* teste no computador do layout do óculos (sem headset): SOLAR_ESCALA._testeVR() */
+let testeVR=false;
+function _testeVR(){testeVR=true;if(estado.vista!=='sistema')entrarVista('sistema');modo='vr';ativo=true;root.visible=false;montar();ancorar();foco.set(...PARADAS[0].foco);W=PARADAS[0].W;anim=null;ir(0);}
+window.SOLAR_ESCALA={entrar,sair,ir,_testeVR,estado:()=>({ativo,modo,atual,W,foco:foco.toArray()})};
 });
 })();

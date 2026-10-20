@@ -478,11 +478,11 @@ function menuVRAbrir(){menuVRFechar();
  const h=xrAnchor();let a=S.xrAnchor||h;if(a.f.dot(h.f)<.64)a={p:a.p.clone(),f:h.f,r:h.r};
  const P=(x,y,z)=>a.p.clone().addScaledVector(a.r,x).addScaledVector(a.f,z).add(new T.Vector3(0,y,0));
  const v=estado.vista,AT='rgba(26,107,42,.96)',AZ='rgba(15,74,110,.96)';
- const vistas=[['Sistema Solar','sistema'],['Examinar um planeta','planeta'],['Comparar tamanhos','comparar'],['Dia e noite','diaNoite'],['Fases da Lua','fases'],['Estações do ano','estacoes'],['Eclipses','eclipse'],['Desafio','desafio']].map(([t,k])=>[(k===v?'▶ ':'')+t,'view:'+k,k===v?AT:null]);
+ const vistas=[['Sistema Solar','sistema'],['Examinar um planeta','planeta'],['Comparar tamanhos','comparar'],['Dia e noite','diaNoite'],['Fases da Lua','fases'],['Estações do ano','estacoes'],['Eclipses','eclipse'],['Desafio','desafio'],['Escala real','escala']].map(([t,k])=>[(k===v?'▶ ':'')+t,'view:'+k,k===v?AT:null]);
  const cols=[['ATIVIDADES',vistas.slice(0,4)],['',vistas.slice(4)],
   ['AULA E VER',[[S.guide<0?'Começar aula guiada':'Encerrar aula guiada',S.guide<0?'guide':'guideStop',AZ],[S.nomesVR?'Nomes: só ao apontar':'Nomes: mostrar todos','nomes',null],[estado.playing?'Pausar o movimento':'Retomar o movimento','pause',null],['Recentralizar a cena','center',null]]],
   ['SOM E SAÍDA',[[musicaOn?'Música de fundo: ligada':'Música de fundo: desligada','musica',null],['Como usar os controles','ajuda',null],['Voltar ao catálogo','catalogo',null],['Sair do VR','sair','rgba(140,20,20,.95)']]]];
- const Z=1.5,COLS=cols.length,DX=.42,W=.39,DY=.12,cx=-.95+(COLS*DX+.08)/2,linhas=4,base=-.38,topo=base+(linhas-1)*DY,bot=[],extras=[];
+ const Z=1.5,COLS=cols.length,DX=.42,W=.39,DY=.12,cx=-.95+(COLS*DX+.08)/2,linhas=Math.max(4,...cols.map(c=>c[1].length)),base=-.38,topo=base+(linhas-1)*DY,bot=[],extras=[];
  const fundo=textoCanvasVR(1024,700,(g,c)=>{g.fillStyle='rgba(4,14,28,.9)';g.beginPath();g.roundRect(0,0,c.width,c.height,40);g.fill();g.strokeStyle='rgba(55,177,218,.8)';g.lineWidth=6;g.stroke();});fundo.renderOrder=990;fundo.scale.set(COLS*DX+.08,(topo+.3)-(base-.07),1);fundo.position.copy(P(cx,(topo+.3+base-.07)/2,Z+.03));scene.add(fundo);extras.push(fundo);
  const rot=(t,cor,w,sz,x,y)=>{const m=textoCanvasVR(1024,160,(g,c)=>{let s=sz;g.font='700 '+s+'px Segoe UI,Arial';while(g.measureText(t).width>990&&s>24){s-=3;g.font='700 '+s+'px Segoe UI,Arial';}g.fillStyle=cor;g.textAlign='center';g.textBaseline='middle';g.fillText(t,512,80);});m.renderOrder=995;m.scale.set(w,w*160/1024,1);m.position.copy(P(x,y,Z+.01));scene.add(m);extras.push(m);};
  const nomeVista=(vistas.find(x=>x[1]==='view:'+v)||['',''])[0].replace('▶ ','');
@@ -553,6 +553,6 @@ const _sairV94=sairVRFinal;
 sairVRFinal=function(){if(S.pontosVR){for(const pt of S.pontosVR.values())release(pt);S.pontosVR=null;}if(S.btnMenuCena){const i=vrBotoes.indexOf(S.btnMenuCena);if(i>=0)vrBotoes.splice(i,1);release(S.btnMenuCena);S.btnMenuCena=null;}_sairV94();};
 
 /* v9.9: volta ao comportamento do VR validado na 8.14 (distâncias e botões originais); mantém o resumo para o Relatório da turma */
-window.PortalSolarV8={version:'9.13',state:S,seasons,daylight,setDay,beginMission,checkMission,finishMission,enterView:entrarVista,exportSummary,setupXRActivity,resetStudent,menuVRAlternar,resumo:()=>({vistas:[...(S.activities||[])],missao:!!S.complete,tentativasErradas:Math.max(0,(S.attempts||0)-(S.complete?1:0)),acertos:(S.qr&&S.qr.acertos)||0,respondidas:S.qr?((S.qr.acertos||0)+(S.qr.erros||0)):0,total:(S.qr&&S.qr.n)||0,quizFim:!!(S.qr&&S.qr.fim)})};
+window.PortalSolarV8={version:'9.14',state:S,seasons,daylight,setDay,beginMission,checkMission,finishMission,enterView:entrarVista,exportSummary,setupXRActivity,resetStudent,menuVRAlternar,resumo:()=>({vistas:[...(S.activities||[])],missao:!!S.complete,tentativasErradas:Math.max(0,(S.attempts||0)-(S.complete?1:0)),acertos:(S.qr&&S.qr.acertos)||0,respondidas:S.qr?((S.qr.acertos||0)+(S.qr.erros||0)):0,total:(S.qr&&S.qr.n)||0,quizFim:!!(S.qr&&S.qr.fim)})};
 entrarVista(S.views.includes(estado.vista)?estado.vista:'sistema');renderer.setAnimationLoop(animate);
 })();

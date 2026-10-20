@@ -10,26 +10,26 @@ function pronto(fn){if(window.THREE&&THREE.GLTFLoader&&typeof CORPOS!=='undefine
 pronto(()=>{
 const T=THREE,R2D=Math.PI/180;
 const NAVES={
- iss:{arq:'iss',nome:'ISS',tamanho:.42,
+ iss:{arq:'iss',fala:"Esta é a Estação Espacial Internacional, a ISS. Ela tem o tamanho de um campo de futebol e voa a cerca de quatrocentos quilômetros de altura, a vinte e oito mil quilômetros por hora. É tão rápida que dá uma volta inteira na Terra em uma hora e meia: os astronautas veem dezesseis nasceres do Sol por dia! Desde o ano dois mil, sempre tem gente morando lá dentro, fazendo experiências científicas. E dá para vê-la daqui do chão: logo depois do pôr do Sol, ela cruza o céu como um ponto brilhante e rápido, que não pisca.",nome:'ISS',tamanho:.42,
   ficha:{nome:'Estação Espacial Internacional',tipo:'Laboratório tripulado em órbita da Terra',
    dados:[['Tamanho','109 m × 73 m (um campo de futebol)'],['Altitude','cerca de 400 km'],['Velocidade','cerca de 28.000 km/h'],['Uma volta na Terra','cerca de 90 min (16 por dia)'],['Ocupada desde','novembro de 2000']],
    fato:'Dá para ver a ISS a olho nu: ela cruza o céu como um ponto brilhante e rápido, sem piscar, logo depois do pôr do sol ou antes do amanhecer. É um projeto de cinco agências espaciais (EUA, Rússia, Europa, Japão e Canadá).'}},
- hubble:{arq:'hubble',nome:'Hubble',tamanho:.3,
+ hubble:{arq:'hubble',fala:"Este é o Telescópio Espacial Hubble, do tamanho de um ônibus. Ele foi lançado em mil novecentos e noventa e gira em volta da Terra a mais de quinhentos quilômetros de altura, acima do ar que embaça a visão dos telescópios aqui do chão. Com o seu espelho de dois metros e quarenta, o Hubble fotografou galáxias tão distantes que a luz delas viajou bilhões de anos até chegar até nós. Foi com a ajuda dele que os cientistas calcularam a idade do Universo: cerca de treze bilhões e oitocentos milhões de anos.",nome:'Hubble',tamanho:.3,
   ficha:{nome:'Telescópio Espacial Hubble',tipo:'Telescópio de luz visível em órbita da Terra',
    dados:[['Tamanho','13,2 m de comprimento (um ônibus)'],['Espelho','2,4 m de diâmetro'],['Altitude','cerca de 530 km'],['Lançamento','abril de 1990'],['Uma volta na Terra','cerca de 95 min']],
    fato:'Acima do ar que embaça a visão, o Hubble ajudou a medir a idade do Universo (cerca de 13,8 bilhões de anos) e fotografou galáxias tão distantes que vemos a luz que saiu delas há bilhões de anos.'}},
- webb:{arq:'webb',nome:'James Webb',tamanho:.62,
+ webb:{arq:'webb',fala:"Este é o Telescópio Espacial James Webb, o maior telescópio já lançado ao espaço. O espelho dele tem seis metros e meio e é formado por dezoito peças douradas. O Webb enxerga o calor, a luz infravermelha, e por isso precisa trabalhar muito frio, a mais de duzentos graus abaixo de zero. Ele fica a um milhão e meio de quilômetros da Terra, sempre do lado oposto ao Sol, protegido por um escudo do tamanho de uma quadra de tênis. Assim, consegue enxergar algumas das primeiras galáxias que se formaram no Universo.",nome:'James Webb',tamanho:.62,
   ficha:{nome:'Telescópio Espacial James Webb',tipo:'Telescópio infravermelho no ponto L2',
    dados:[['Espelho','6,5 m, com 18 segmentos dourados'],['Escudo solar','cerca de 21 m × 14 m (uma quadra de tênis)'],['Distância da Terra','cerca de 1,5 milhão de km (4 vezes a Lua)'],['Lançamento','25 de dezembro de 2021'],['Temperatura de trabalho','cerca de −233 °C']],
    fato:'O Webb enxerga o calor (infravermelho), por isso precisa ficar muito frio: o escudo do tamanho de uma quadra de tênis bloqueia a luz do Sol, da Terra e da Lua. Fica sempre do lado oposto ao Sol, acompanhando a Terra.'}},
- voyager:{arq:'voyager',nome:'Voyager 1',tamanho:2.2,
+ voyager:{arq:'voyager',fala:"Esta é a sonda Voyager 1, lançada em mil novecentos e setenta e sete. Ela passou por Júpiter e por Saturno, mandou fotos incríveis e seguiu viagem. Em dois mil e doze, saiu da bolha formada pelo vento do Sol e entrou no espaço entre as estrelas. Hoje ela está a mais de vinte e cinco bilhões de quilômetros daqui: o sinal de rádio dela, viajando na velocidade da luz, leva quase um dia inteiro para chegar à Terra. A bordo, ela leva o Disco de Ouro, com músicas, sons e imagens do nosso planeta: uma mensagem para quem um dia encontrá-la.",nome:'Voyager 1',tamanho:2.2,
   ficha:{nome:'Sonda Voyager 1',tipo:'Sonda no espaço interestelar',
    dados:[['Lançamento','5 de setembro de 1977'],['Distância do Sol','mais de 25 bilhões de km (cerca de 170 UA)'],['Sinal até a Terra','quase 24 horas na velocidade da luz'],['Velocidade','cerca de 61.000 km/h'],['Saiu da heliosfera','agosto de 2012']],
    fato:'É o objeto feito por humanos mais distante da Terra. Passou por Júpiter (1979) e Saturno (1980) e leva o Disco de Ouro, com sons e imagens da Terra. Por volta de novembro de 2026 fica a 1 dia-luz de nós.'}}
 };
 /* fichas como "corpos" do app (sem órbita própria: não entram em ORDEM nem em PLANETAS) */
 Object.keys(NAVES).forEach(k=>{const n=NAVES[k],f=n.ficha;
- CORPOS[k]={nome:f.nome,tipo:f.tipo,cor:0xcfd8e3,raio:1.6,orbita:0,rotDias:40,anoDias:0,ua:0,diam:f.dados[0][1],dist:f.dados[1][1],luas:'—',incl:0,temp:'—',fato:f.fato,nave:true,
+ CORPOS[k]={nome:f.nome,tipo:f.tipo,cor:0xcfd8e3,raio:1.6,orbita:0,rotDias:40,anoDias:0,ua:0,diam:f.dados[0][1],dist:f.dados[1][1],luas:'—',incl:0,temp:'—',fato:n.fala,nave:true,
   linhasVR:[f.nome,f.tipo].concat(f.dados.slice(0,3).map(d=>d[0]+': '+d[1]),[f.fato,'Gire com o analógico · Grip segura na mão'])};});
 let mostrar=true;try{mostrar=localStorage.getItem('pde_solar_naves')!=='0';}catch(_){}
 /* modelos: carregados uma vez, centralizados e normalizados para medir 1 unidade no maior lado */

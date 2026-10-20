@@ -91,10 +91,10 @@ function montar(){if(grupo&&grupo.parent)grupo.parent.remove(grupo);grupo=null;
  grupo=new T.Group();grupo.name='naves';root.add(grupo);
  /* ISS e Hubble: órbitas baixas e inclinadas em volta da Terra */
  const orbita=(k,dist,incl,fase,vel)=>{if(!MOLDE[k])return;const p=new T.Group();p.rotation.z=incl*R2D;h.add(p);presos.push(p);const q=new T.Group();q.rotation.y=fase;p.add(q);
-  const m=alvo(k,.45,NAVES[k].tamanho);m.position.x=dist;q.add(m);objs[k]={m,q,vel,donos:[p]};addLabel(m,NAVES[k].nome);};
+  const m=alvo(k,.45,NAVES[k].tamanho);m.position.x=dist;q.add(m);objs[k]={m,q,vel,donos:[p],x0:dist};brilho(m);addLabel(m,NAVES[k].nome);};
  orbita('iss',rT+.55,51.6,0,2.2);orbita('hubble',rT+.85,28.5,2.4,1.9);
  /* Webb: no ponto L2, do lado oposto ao Sol (o +x do suporte da Terra aponta para fora), escudo virado para o Sol */
- if(MOLDE.webb){const m=alvo('webb',.6,NAVES.webb.tamanho);m.position.set(dLua*1.75,.25,0);m.userData.modelo&&(m.userData.modelo.rotation.y=-Math.PI/2);h.add(m);presos.push(m);objs.webb={m,donos:[]};addLabel(m,'James Webb');}
+ if(MOLDE.webb){const m=alvo('webb',.6,NAVES.webb.tamanho);m.position.set(dLua*1.75,.25,0);m.userData.modelo&&(m.userData.modelo.rotation.y=-Math.PI/2);h.add(m);presos.push(m);objs.webb={m,donos:[],x0:m.position.x};brilho(m);addLabel(m,'James Webb');}
  /* Voyager 1: além de Netuno, na direção real (longitude eclíptica ~255°, latitude ~+35°), com o rastro desde o Sol */
  if(MOLDE.voyager){const lam=255*R2D,bet=35*R2D,d=raioOrbita('netuno')*1.5;const dir=new T.Vector3(Math.cos(bet)*Math.cos(lam),Math.sin(bet),-Math.cos(bet)*Math.sin(lam));
   const m=alvo('voyager',2.2,NAVES.voyager.tamanho);m.position.copy(dir.clone().multiplyScalar(d));m.lookAt(0,0,0);grupo.add(m);objs.voyager={m,donos:[]};addLabel(m,'Voyager 1');
@@ -103,10 +103,18 @@ function montar(){if(grupo&&grupo.parent)grupo.parent.remove(grupo);grupo=null;
 const buildAntes=buildSistema;
 buildSistema=function(){const r=buildAntes.apply(this,arguments);montar();return r;};
 /* movimento: chamado a cada quadro pelo laço de animação (via atualizarLabels) */
+const _p=new T.Vector3(),_c=new T.Vector3(),_s=new T.Vector3();
+/* ponto de brilho: tamanho fixo na tela, marca a nave de longe (padrão de planetários); some quando o modelo já está grande */
+const TEX_BRILHO=(()=>{const c=document.createElement('canvas');c.width=c.height=64;const x=c.getContext('2d');const g=x.createRadialGradient(32,32,0,32,32,32);g.addColorStop(0,'rgba(255,255,255,1)');g.addColorStop(.18,'rgba(235,245,255,.95)');g.addColorStop(.45,'rgba(160,210,255,.35)');g.addColorStop(1,'rgba(160,210,255,0)');x.fillStyle=g;x.fillRect(0,0,64,64);return new T.CanvasTexture(c);})();
+function brilho(m){const sp=new T.Sprite(new T.SpriteMaterial({map:TEX_BRILHO,transparent:true,depthWrite:false,sizeAttenuation:false,opacity:.95}));sp.userData.base=.065;sp.scale.set(.065,.065,1);sp.renderOrder=3;m.add(sp);m.userData.brilho=sp;}
 let ult=performance.now();
 const labelsAntes=atualizarLabels;
 atualizarLabels=function(){const t=performance.now(),dt=Math.min(.05,(t-ult)/1000);ult=t;const v=estado.playing?estado.vel:0;
- for(const k in objs){const o=objs[k];if(o.q)o.q.rotation.y+=o.vel*dt*(v||.15);const md=o.m.userData.modelo;if(md&&k!=='voyager')md.rotation.y+=dt*.05;}
+ for(const k in objs){const o=objs[k];if(o.q)o.q.rotation.y+=o.vel*dt*(v||.15);const md=o.m.userData.modelo;if(md&&k!=='voyager')md.rotation.y+=dt*.05;
+  /* tamanho mínimo na tela (cerca de 1° de visão): de perto a nave fica no tamanho normal; de longe cresce o suficiente para ser vista,
+     e a órbita abre junto para não atravessar a Terra. Vale no 3D e na maquete do óculos (a conta é feita em unidades do mundo). */
+  if(k!=='voyager'){o.m.getWorldPosition(_p);camera.getWorldPosition(_c);o.m.parent.getWorldScale(_s);const d=_p.distanceTo(_c),base=NAVES[k].tamanho*1.3*_s.x;
+   const f=Math.min(6,Math.max(1,d*(k==='hubble'?.0155:.024)/Math.max(base,1e-6)));o.m.scale.setScalar(f);const br=o.m.userData.brilho;if(br){const e=br.userData.base/f;br.scale.set(e,e,1);/* de longe (f alto) o brilho aparece inteiro; de perto (f=1) apaga */br.material.opacity=Math.min(.95,Math.max(0,(f-1.15)/1.2));br.visible=br.material.opacity>.02;}if(o.x0!==undefined)o.m.position.x=o.x0+NAVES[k].tamanho*(f-1)*.55;}}
  return labelsAntes.apply(this,arguments);};
 /* controle no painel Exibir */
 function controle(){const g=document.getElementById('grpExibir');if(!g||document.getElementById('tgNaves'))return;const tg=g.querySelector('.toggles')||g;

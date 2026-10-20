@@ -153,7 +153,7 @@ Proto.buildXRUI=function(){
    ['MISSÕES',atv.map((a,i)=>[(a.id===S.view?'▶ ':'')+(i+1)+'. '+a.label,'view:'+a.id,a.id===S.view?AT:null])],
    ['VER',(S.view==='explorar'?[['Voltar ao átrio','ala:-1',{bg:'#2a1050',borda:'#c9a6ff',texto:'#ffffff'}]]:[[this.dentro?'Voltar ao tamanho normal':'Ver a maquete gigante','xr:dentro',this.dentro?{bg:'#4a2a0f',borda:'#ffc77a',texto:'#fff6e8'}:{bg:'#2a1050',borda:'#c9a6ff',texto:'#ffffff'}]]).concat([
      [S.view==='explorar'?'Voltar à frente da peça ou da ala':'Recentralizar a cena','center',null],['Aproximar tudo  (X)','xr:perto',null],['Afastar tudo  (Y)','xr:longe',null],[S.autoRotate?'Parar o giro do modelo':'Girar o modelo','rotate',null]]).concat(ar?[[this.xrModo==='ar'?'Voltar ao VR':'Ver na minha sala','xr:'+(this.xrModo==='ar'?'vr':'ar'),{bg:'#0f3a4a',borda:'#7fd6ff',texto:'#ffffff'}]]:[])],
-   ['SOM E SAÍDA',[['Repetir a explicação','voice:repeat',null],['Parar a voz','voice:stop',null],[narrator.musicOn?'Música de fundo: ligada':'Música de fundo: desligada','xr:musica',null],
+   ['SOM E SAÍDA',[['Repetir a explicação','voice:repeat',null],['Parar a voz','voice:stop',null],[narrator.musicOn?'Trilha do museu: ligada':'Trilha do museu: desligada','xr:musica',null],
      ['Como usar os controles','xr:ajuda',null],['Voltar ao catálogo','catalog',AZ],[this.xrModo==='ar'?'Sair da realidade mista':'Sair do VR','vr',SAI]]]];
   const COLS=colunas.length,DX=.45,W=.42,DY=.13,linhas=Math.max(...colunas.map(c=>c[1].length)),base=-.52+.06+.075,topo=base+(linhas-1)*DY,cx=-.98+(COLS*DX)/2;
   const fundoC=document.createElement('canvas');fundoC.width=fundoC.height=256;const fg=fundoC.getContext('2d');fg.fillStyle='rgba(4,14,28,.92)';fg.fillRect(0,0,256,256);fg.strokeStyle='rgba(55,177,218,.85)';fg.lineWidth=3;fg.strokeRect(1.5,1.5,253,253);
@@ -179,7 +179,7 @@ Proto.xrSelect=function(ctrl){
   if(ui&&ui.object.userData.command){this._apertado={cmd:ui.object.userData.command,t:performance.now()};}
   const cmdUI=ui&&ui.object.userData.command;
   if(cmdUI==='xr:abrirmenu'){this.alternarMenuVR();return;}
-  if(cmdUI==='xr:musica'){this.menuAberto=false;narrator.setMusic(!narrator.musicOn,Math.max(.12,narrator.musicVolume||.2));const cb=document.getElementById('musicEnabled');if(cb)cb.checked=narrator.musicOn;setTimeout(()=>{if(this.xr)this.buildXRUI();},120);return;}
+  if(cmdUI==='xr:musica'){this.menuAberto=false;narrator.setMusic(!narrator.musicOn,Math.max(.12,narrator.musicVolume||.35));const cb=document.getElementById('musicEnabled');if(cb)cb.checked=narrator.musicOn;setTimeout(()=>{if(this.xr)this.buildXRUI();},120);return;}
   if(cmdUI==='xr:ajuda'){this.menuAberto=false;this.xrAjuda=true;this.buildXRUI();return;}
   if(cmdUI==='xr:ajudaclose'){this.xrAjuda=false;this.buildXRUI();return;}
   if(this.menuAberto&&!ui){this.alternarMenuVR(false);return;}
@@ -255,12 +255,10 @@ function criarAmbiente(modo2d){
 }
 function entrarAmbiente(modo2d){if(ambiente&&ambiente.userData.modo2d===!!modo2d)return;if(ambiente){M.dispose(ambiente);view.scene.remove(ambiente);ambiente=null;}ambiente=criarAmbiente(modo2d);view.scene.add(ambiente);
   if(modo2d)return;
-  musicaAntes=narrator.musicOn;if(!narrator.musicOn){const vol=Math.max(.12,narrator.musicVolume||.2);narrator.setMusic(true,vol);const cb=document.getElementById('musicEnabled');if(cb)cb.checked=true;}}
+  /* v1.7: a trilha do museu segue a escolha do aluno (Ajustes ou menu do óculos); não força mais ligar ao entrar */}
 /* no 3D a trilha também toca, mas só depois do primeiro toque (política de autoplay); respeita o checkbox de Ajustes */
 let musica2dArmada=false;
-function armarMusica2d(){if(musica2dArmada)return;musica2dArmada=true;const cb=document.getElementById('musicEnabled');if(cb&&!cb.checked&&!narrator.musicOn){cb.checked=true;}
-  const ligar=()=>{if(view.xr)return;const c=document.getElementById('musicEnabled');if(c&&c.checked&&!narrator.musicOn)narrator.setMusic(true,Math.max(.12,narrator.musicVolume||.2));};
-  ['pointerdown','keydown'].forEach(ev=>window.addEventListener(ev,ligar,{once:true,capture:true}));}
+function armarMusica2d(){/* v1.7: a própria trilha espera o primeiro toque (historia-audio.js) */}
 function sairAmbiente(){if(ambiente){M.dispose(ambiente);view.scene.remove(ambiente);ambiente=null;}
   musicaAntes=null;entrarAmbiente(true);}
 const frameOriginal=Proto.frame;

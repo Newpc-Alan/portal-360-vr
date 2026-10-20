@@ -2,9 +2,12 @@
    Nenhum áudio do Sistema Solar é reutilizado como narração do DNA. */
 (function(){'use strict';
 class Narrator {
- constructor(notify){this.notify=notify;this.player=new Audio();this.player.preload='auto';this.player.playsInline=true;this.music=new Audio('audio/fundo.mp3');this.music.loop=true;this.music.volume=.2;this.voiceVolume=1;this.musicVolume=.2;this.musicOn=false;this.synthetic=true;this.token=0;this.abort=null;this.url=null;this.busy=false;this.last={text:'',key:null};this.cache=new Map();}
+ constructor(notify){this.notify=notify;this.player=new Audio();this.player.preload='auto';this.player.playsInline=true;this.music=new Audio('audio/museu-fundo.mp3');this.music.loop=true;this.music.preload='auto';this.music.volume=0;this.voiceVolume=1;this.musicVolume=.35;this.musicOn=true;try{if(localStorage.getItem('pde_hist_trilha')==='0')this.musicOn=false;}catch(_){}this.amb=false;this.synthetic=true;this.token=0;this.abort=null;this.url=null;this.busy=false;this.last={text:'',key:null};this.cache=new Map();}
  status(state,text,key){this.busy=['loading','playing','speech'].includes(state);this.duck();this.notify({state,text,key});}
- duck(){this.music.volume=this.musicOn?this.musicVolume*(this.busy?.12:1):0;}
+ duck(){this.music.volume=(this.musicOn&&this.amb)?this.musicVolume*(this.busy?.3:1):0;}
+ /* v1.7: a trilha ambiente toca só durante a visita ao museu (ambiente=true) e baixa embaixo das narrações */
+ ambiente(a){a=!!a;if(this.amb===a)return;this.amb=a;this.tocar();}
+ tocar(){this.duck();if(!(this.musicOn&&this.amb)||document.hidden){this.music.pause();return;}const p=this.music.play();if(p&&p.catch)p.catch(()=>{if(this._esperaGesto)return;this._esperaGesto=true;const vai=()=>{this._esperaGesto=false;['pointerdown','keydown','touchstart'].forEach(e=>document.removeEventListener(e,vai,true));this.tocar();};['pointerdown','keydown','touchstart'].forEach(e=>document.addEventListener(e,vai,true));});}
  stop(notify=true){++this.token;this.next=null;if(this.abort)this.abort.abort();this.abort=null;this.player.onended=null;this.player.onerror=null;this.player.pause();try{this.player.currentTime=0;}catch(_){}this.player.removeAttribute('src');this.player.load();if(this.url){URL.revokeObjectURL(this.url);this.url=null;}if(window.speechSynthesis)window.speechSynthesis.cancel();this.busy=false;this.duck();if(notify)this.notify({state:'stopped',text:this.last.text,key:this.last.key});}
  async say(text,key,next){this.stop(false);const token=this.token;this.last={text,key};this.next=next||null;this.status('loading',text,key);if(!this.voiceVolume){this.status('text',text,key);return;}
   if(!key){this.fallback(text,token);return;}
@@ -26,7 +29,7 @@ class Narrator {
  encadear(token){const n=this.next;if(!n||token!==this.token)return;this.next=null;setTimeout(()=>{if(token===this.token)this.say(n.text,n.key,n.next||null);},350);}
  repeat(){return this.say(this.last.text,this.last.key);}
  setVoice(v){this.voiceVolume=Math.max(0,Math.min(1,v));this.player.volume=this.voiceVolume;if(!v)this.stop();}
- async setMusic(on,volume){this.musicOn=on;if(volume!==undefined)this.musicVolume=volume;this.duck();if(!on){this.music.pause();return;}try{await this.music.play();}catch(_){this.musicOn=false;this.music.pause();}}
+ setMusic(on,volume){this.musicOn=!!on;if(volume!==undefined)this.musicVolume=volume;try{localStorage.setItem('pde_hist_trilha',this.musicOn?'1':'0');}catch(_){}this.tocar();}
  dispose(){this.stop();this.music.pause();this.cache.clear();}
 }
 window.DNANarrator=Narrator;window.CorpoNarrator=Narrator;

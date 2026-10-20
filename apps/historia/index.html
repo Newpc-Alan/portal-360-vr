@@ -9,12 +9,12 @@
 <script defer src="vendor/three.r128.min.js"></script>
 <script defer src="vendor/GLTFLoader.r128.js?v=r128"></script>
 <script defer src="historia-data.js?v=1.7.0"></script>
-<script defer src="historia-models.js?v=1.7.0"></script>
-<script defer src="historia-audio.js?v=1.0.0"></script>
-<script defer src="historia-app.js?v=1.7.0"></script>
+<script defer src="historia-models.js?v=1.7.1"></script>
+<script defer src="historia-audio.js?v=1.7.1"></script>
+<script defer src="historia-app.js?v=1.7.1"></script>
 <script defer src="portal-entrada.js?v=1.5.0"></script>
 <script defer src="sala-cliente.js?v=1.9.0"></script>
-<script defer src="historia-portal.js?v=1.6.0"></script><script defer src="historia-museu.js?v=1.5.0"></script><script defer src="pde-vr-padrao.js?v=1.0.0"></script>
+<script defer src="historia-portal.js?v=1.7.1"></script><script defer src="historia-museu.js?v=1.5.0"></script><script defer src="pde-vr-padrao.js?v=1.0.0"></script>
 <link rel="stylesheet" href="pde-3d-padrao.css?v=1.0.1">
 </head>
 <body>
@@ -53,8 +53,8 @@
 <dialog id="settingsDialog"><form method="dialog"><div class="dialog-head"><h2>Ajustes da experiência</h2><button aria-label="Fechar ajustes" class="icon">✕</button></div></form>
  <label>Profundidade da explicação<select id="level"><option value="intro">Introdutória</option><option value="medio">Aprofundamento</option></select></label>
  <label>Voz <output id="voiceValue">100%</output><input id="voiceVolume" type="range" min="0" max="100" value="100"></label>
- <label>Trilha de fundo <output id="musicValue">20%</output><input id="musicVolume" type="range" min="0" max="60" value="20"></label>
- <label class="check"><input id="musicEnabled" type="checkbox"> Tocar a trilha enviada em loop</label>
+ <label>Trilha do museu <output id="musicValue">35%</output><input id="musicVolume" type="range" min="0" max="80" value="35"></label>
+ <label class="check"><input id="musicEnabled" type="checkbox" checked> Tocar a trilha ambiente durante a visita ao museu</label>
  <label class="check"><input id="autoVoice" type="checkbox" checked> Narrar ao selecionar ou mudar de etapa</label>
  <label class="check"><input id="syntheticVoice" type="checkbox" checked> Usar voz do navegador quando não houver MP3</label>
  <label class="check"><input id="captionsEnabled" type="checkbox" checked> Mostrar texto da orientação na lateral</label>

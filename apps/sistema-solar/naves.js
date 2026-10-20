@@ -24,8 +24,8 @@ const NAVES={
    fato:'O Webb enxerga o calor (infravermelho), por isso precisa ficar muito frio: o escudo do tamanho de uma quadra de tênis bloqueia a luz do Sol, da Terra e da Lua. Fica sempre do lado oposto ao Sol, acompanhando a Terra.'}},
  voyager:{arq:'voyager',fala:"Esta é a sonda Voyager 1, lançada em mil novecentos e setenta e sete. Ela passou por Júpiter e por Saturno, mandou fotos incríveis e seguiu viagem. Em dois mil e doze, saiu da bolha formada pelo vento do Sol e entrou no espaço entre as estrelas. Hoje ela está a mais de vinte e cinco bilhões de quilômetros daqui: o sinal de rádio dela, viajando na velocidade da luz, leva quase um dia inteiro para chegar à Terra. A bordo, ela leva o Disco de Ouro, com músicas, sons e imagens do nosso planeta: uma mensagem para quem um dia encontrá-la.",nome:'Voyager 1',tamanho:2.2,
   ficha:{nome:'Sonda Voyager 1',tipo:'Sonda no espaço interestelar',
-   dados:[['Lançamento','5 de setembro de 1977'],['Distância do Sol','mais de 25 bilhões de km (cerca de 170 UA)'],['Sinal até a Terra','quase 24 horas na velocidade da luz'],['Velocidade','cerca de 61.000 km/h'],['Saiu da heliosfera','agosto de 2012']],
-   fato:'É o objeto feito por humanos mais distante da Terra. Passou por Júpiter (1979) e Saturno (1980) e leva o Disco de Ouro, com sons e imagens da Terra. Por volta de novembro de 2026 fica a 1 dia-luz de nós.'}}
+   dados:[['Lançamento','5 de setembro de 1977'],['Distância do Sol','mais de 25 bilhões de km (cerca de 170 UA)'],['Sinal até a Terra','cerca de 1 dia na velocidade da luz'],['Velocidade','cerca de 61.000 km/h'],['Saiu da heliosfera','agosto de 2012']],
+   fato:'É o objeto feito por humanos mais distante da Terra. Passou por Júpiter (1979) e Saturno (1980) e leva o Disco de Ouro, com sons e imagens da Terra. Ela está tão longe que a luz leva cerca de um dia inteiro para chegar até lá, e essa distância aumenta a cada segundo.'}}
 };
 /* fichas como "corpos" do app (sem órbita própria: não entram em ORDEM nem em PLANETAS) */
 Object.keys(NAVES).forEach(k=>{const n=NAVES[k],f=n.ficha;

@@ -54,6 +54,17 @@ const footer=el('footer',{className:'v8-footer',innerHTML:'<b>Explore · compare
 const dialog=el('div',{className:'v8-dialog',id:'v8Summary',hidden:true,role:'dialog','aria-modal':'true'},app);
 function applyQuality(){if(cinturao)cinturao.visible=S.environment;for(const c of cometas)c.piv.visible=S.environment;if(starfield)starfield.children.forEach(o=>o.visible=S.environment);if(renderer.xr.setFoveation)renderer.xr.setFoveation(S.quality==='alto'?.25:.7);}
 
+/* v9.20: BNCC dos recursos novos. Céu real -> EF05CI10; estrutura do Sistema Solar, escala real e Via Láctea -> EF09CI14;
+   naves e distâncias das viagens espaciais -> EF09CI16. */
+B.ceu={cod:'EF05CI10',txt:'Identificar constelações no céu com apoio de mapas celestes e aplicativos digitais, e os períodos do ano em que são visíveis.'};
+B.estr={cod:'EF09CI14',txt:'Descrever a composição e a estrutura do Sistema Solar (Sol, planetas rochosos, gigantes gasosos e corpos menores) e sua localização na Via Láctea e no Universo.'};
+B.vida={cod:'EF09CI16',txt:'Argumentar sobre a viabilidade da vida humana fora da Terra, considerando as condições para a vida e as distâncias e tempos das viagens espaciais.'};
+const _bnccAntes=bnccVista;
+bnccVista=function(){const v=estado.vista,C=CORPOS[estado.sel],nave=!!(C&&C.nave);
+ if(window.SOLAR_ESCALA&&SOLAR_ESCALA.estado().ativo)return[B.estr,B.vida];
+ if(v==='sistema')return nave?[B.vida,B.estr]:[B.estr,B.ceu,B.rot,B.transl];
+ if(v==='planeta')return nave?[B.vida]:[B.estr,B.transl];
+ return _bnccAntes.apply(this,arguments);};
 /* v9.17: a cópia ampliada (zoom à frente no 3D, foco no óculos) fecha ao fim da narração ou com um novo clique no mesmo corpo */
 function fecharFoco(){let mudou=false;
  if(S.desktopFocus){clearDesktopFocus();mudou=true;}
@@ -164,7 +175,7 @@ function setPhase(a){if(fasesObj)fasesObj.luaPivot.rotation.y=a*PI/180;pause(tru
 function rebuildView(v){if(v==='comparar')buildCompare();else if(v==='sistema')buildSistema();else if(v==='planeta')buildPlaneta();else if(v==='diaNoite')buildDiaNoite();else if(v==='estacoes')buildEstacoes();else if(v==='fases')buildFases();else if(v==='eclipse')buildEclipse();else if(v==='desafio'){buildSistema();novaQuestao();}}
 entrarVista=function(v){if(!S.views.includes(v))v='sistema';stopNarrationExclusive();if(v!=='sistema')clearDesktopFocus();clearXRUI();estado.vista=v;S.activities.add(v);mostrarGrupos();$v('badge').textContent=BADGES[v];$v('dica').textContent=DICAS[v]||'';$v('modeinfo').classList.remove('show');context.textContent=(INFOS[v]||'Observe, manipule e compare.');atualizarBncc();rebuildView(v);ambient.intensity=['diaNoite','fases','eclipse'].includes(v)?.045:.36;renderPanel();syncPause();applyQuality();syncPlanetDock();if(estado.vr)setupXRActivity();emit('atividade',v);};
 mostrarGrupos=function(){original.mostrarGrupos();$v('grpTempo').style.display=['estacoes','eclipse','desafio','comparar'].includes(estado.vista)?'none':'block';$v('grpBncc').style.display=['sistema','planeta','comparar','desafio'].includes(estado.vista)?'none':'block';};
-selecionar=function(k){if(!CORPOS[k])return;S.visited.add(k);if(estado.vr&&estado.vista==='planeta'){estado.sel=k;entrarVista('planeta');}else{original.selecionar(k);if(!estado.vr&&estado.vista==='sistema')createDesktopFocus(k);}emit('corpo',k);if(['sistema','planeta'].includes(estado.vista))renderPanel();syncPlanetDock();};
+selecionar=function(k){if(!CORPOS[k])return;S.visited.add(k);setTimeout(()=>{try{atualizarBncc();}catch(e){}},0);if(estado.vr&&estado.vista==='planeta'){estado.sel=k;entrarVista('planeta');}else{original.selecionar(k);if(!estado.vr&&estado.vista==='sistema')createDesktopFocus(k);}emit('corpo',k);if(['sistema','planeta'].includes(estado.vista))renderPanel();syncPlanetDock();};
 atualizarLabels=function(){const show=estado.nomes&&!estado.vr&&['sistema','comparar','estacoes'].includes(estado.vista);for(const l of labelsMap){l.el.style.display=show?'block':'none';if(!show)continue;const p=new T.Vector3();l.mesh.getWorldPosition(p);p.project(camera);if(p.z>1||p.z< -1){l.el.style.display='none';continue;}l.el.style.left=((p.x*.5+.5)*canvas3d.clientWidth)+'px';l.el.style.top=((-p.y*.5+.5)*canvas3d.clientHeight)+'px';}};
 
 function renderPanel(){experiment.innerHTML='';const v=estado.vista;
@@ -594,6 +605,6 @@ sairVRFinal=function(){if(S.pontosVR){for(const pt of S.pontosVR.values())releas
  canvas3d.addEventListener('click',e=>{if(Math.hypot(e.clientX-dx,e.clientY-dy)<6&&performance.now()-dt<600&&alvoFechar(e.clientX,e.clientY)){e.stopImmediatePropagation();pararEFechar();}},true);
  let tx=0,ty=0,tt=0;canvas3d.addEventListener('touchstart',e=>{tx=e.touches[0].clientX;ty=e.touches[0].clientY;tt=performance.now();},{capture:true,passive:true});
  canvas3d.addEventListener('touchend',e=>{const c=e.changedTouches&&e.changedTouches[0];if(c&&Math.hypot(c.clientX-tx,c.clientY-ty)<10&&performance.now()-tt<500&&alvoFechar(c.clientX,c.clientY)){e.stopImmediatePropagation();pararEFechar();}},true);}
-window.PortalSolarV8={version:'9.19',state:S,seasons,daylight,setDay,beginMission,checkMission,finishMission,enterView:entrarVista,exportSummary,setupXRActivity,resetStudent,menuVRAlternar,resumo:()=>({vistas:[...(S.activities||[])],missao:!!S.complete,tentativasErradas:Math.max(0,(S.attempts||0)-(S.complete?1:0)),acertos:(S.qr&&S.qr.acertos)||0,respondidas:S.qr?((S.qr.acertos||0)+(S.qr.erros||0)):0,total:(S.qr&&S.qr.n)||0,quizFim:!!(S.qr&&S.qr.fim)})};
+window.PortalSolarV8={version:'9.20',state:S,seasons,daylight,setDay,beginMission,checkMission,finishMission,enterView:entrarVista,exportSummary,setupXRActivity,resetStudent,menuVRAlternar,resumo:()=>({vistas:[...(S.activities||[])],missao:!!S.complete,tentativasErradas:Math.max(0,(S.attempts||0)-(S.complete?1:0)),acertos:(S.qr&&S.qr.acertos)||0,respondidas:S.qr?((S.qr.acertos||0)+(S.qr.erros||0)):0,total:(S.qr&&S.qr.n)||0,quizFim:!!(S.qr&&S.qr.fim)})};
 entrarVista(S.views.includes(estado.vista)?estado.vista:'sistema');renderer.setAnimationLoop(animate);
 })();

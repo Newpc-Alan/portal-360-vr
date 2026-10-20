@@ -553,6 +553,6 @@ const _sairV94=sairVRFinal;
 sairVRFinal=function(){if(S.pontosVR){for(const pt of S.pontosVR.values())release(pt);S.pontosVR=null;}if(S.btnMenuCena){const i=vrBotoes.indexOf(S.btnMenuCena);if(i>=0)vrBotoes.splice(i,1);release(S.btnMenuCena);S.btnMenuCena=null;}_sairV94();};
 
 /* v9.9: volta ao comportamento do VR validado na 8.14 (distâncias e botões originais); mantém o resumo para o Relatório da turma */
-window.PortalSolarV8={version:'9.12',state:S,seasons,daylight,setDay,beginMission,checkMission,finishMission,enterView:entrarVista,exportSummary,setupXRActivity,resetStudent,menuVRAlternar,resumo:()=>({vistas:[...(S.activities||[])],missao:!!S.complete,tentativasErradas:Math.max(0,(S.attempts||0)-(S.complete?1:0)),acertos:(S.qr&&S.qr.acertos)||0,respondidas:S.qr?((S.qr.acertos||0)+(S.qr.erros||0)):0,total:(S.qr&&S.qr.n)||0,quizFim:!!(S.qr&&S.qr.fim)})};
+window.PortalSolarV8={version:'9.13',state:S,seasons,daylight,setDay,beginMission,checkMission,finishMission,enterView:entrarVista,exportSummary,setupXRActivity,resetStudent,menuVRAlternar,resumo:()=>({vistas:[...(S.activities||[])],missao:!!S.complete,tentativasErradas:Math.max(0,(S.attempts||0)-(S.complete?1:0)),acertos:(S.qr&&S.qr.acertos)||0,respondidas:S.qr?((S.qr.acertos||0)+(S.qr.erros||0)):0,total:(S.qr&&S.qr.n)||0,quizFim:!!(S.qr&&S.qr.fim)})};
 entrarVista(S.views.includes(estado.vista)?estado.vista:'sistema');renderer.setAnimationLoop(animate);
 })();

@@ -121,11 +121,18 @@ Proto.buildXRUI=function(){
   /* v1.4: no museu, sem peça escolhida, o óculos fica limpo: só o botão Menu. O texto aparece quando o aluno escolhe uma peça */
   const museuLimpo=S.view==='explorar'&&!Lab.inspectKey&&!(S.cadernoAberto>=0)&&!this.xrReport&&!this.xrAjuda&&!menuAberto;
   const panel=this.textPlane(title,body,1.06,.74,tom);if(menuAberto||museuLimpo)panel.visible=false;panel.position.set(1.16,.37,-1.64);panel.rotation.y=-.6;this.ui.add(panel);
-  if(!menuAberto&&!museuLimpo&&feedback&&!this.xrReport&&!(S.view==='desafio'&&Lab.quizAtual().phase===1)){const faixa=this.faixaRetorno(feedback,fbTom);faixa.position.set(1.16,-.095,-1.64);faixa.rotation.y=-.6;this.ui.add(faixa);}
+  /* v1.7.3: Caderno no óculos como o Desafio: pergunta ao centro e alternativas largas, uma por linha */
+  const cadFase=S.view==='explorar'&&S.cadernoAberto>=0&&!this.xrReport&&!this.xrAjuda&&!menuAberto;
+  if(!menuAberto&&!museuLimpo&&!cadFase&&feedback&&!this.xrReport&&!(S.view==='desafio'&&Lab.quizAtual().phase===1)){const faixa=this.faixaRetorno(feedback,fbTom);faixa.position.set(1.16,-.095,-1.64);faixa.rotation.y=-.6;this.ui.add(faixa);}
   const lista=(menuAberto||museuLimpo)?[]:this.xrReport?[{label:'Voltar à atividade',cmd:'xr:reportclose'}]:this.xrAjuda?[{label:'Voltar à atividade',cmd:'xr:ajudaclose'}]:this._acoes();
   const max=8,pages=Math.max(1,Math.ceil(lista.length/max));this.uiPage=Math.min(this.uiPage||0,pages-1);
   const quizFase=(S.view==='desafio'&&Lab.quizAtual().phase===1)&&!this.xrReport&&!this.xrAjuda&&!menuAberto;
-  if(quizFase){/* v4.1: pergunta e alternativas centralizadas à frente, maiores; o modelo vai para a direita (placeXR) */
+  if(cadFase){const D=window.HISTORIA_DATA,al=D.ALAS[S.cadernoAberto],R=al.reflexao,c=(S.caderno||{})[al.id]||{},resp=c.resp;
+    this.ui.remove(panel);const feito=resp!==undefined;
+    const pq=this.textPlane(feito?(c.certa?'✅ ACERTOU!':'❌ NÃO É BEM ASSIM'):'✎ Caderno · '+al.nome,feito?R.why:R.q,1.2,.6,feito?(c.certa?'ok':'erro'):'neutro');pq.position.set(0,.37,-1.64);this.ui.add(pq);
+    let yy=-.06;R.options.forEach((o,k)=>{const cor=feito?(k===R.correct?VERDE:k===resp?VERMELHO:APAGADO):null;const bt=this.xrBotaoLargo(o,'cad:resp:'+k,0,yy,feito&&k!==R.correct&&k!==resp,cor);bt.scale.set(.95,.9,1);yy-=.185;});
+    const bf=this.xrBotaoLargo('Fechar caderno','cad:fechar',0,yy-.03,false,{bg:'#0f6b3a',borda:'#7CFFB8',texto:'#ffffff'});bf.scale.set(.6,.85,1);
+  }else if(quizFase){/* v4.1: pergunta e alternativas centralizadas à frente, maiores; o modelo vai para a direita (placeXR) */
     this.ui.remove(panel);const pq=this.textPlane(title,body,1.2,.9,tom);pq.position.set(0,.4,-1.64);this.ui.add(pq);
     let yy=-.14;lista.forEach(a=>{let cor=null;const m=/^quiz:answer:(\d+)$/.exec(a.cmd);
       if(des&&m){const k=Number(m[1]);cor=k===des.correto?VERDE:k===des.escolha?VERMELHO:APAGADO;}
@@ -137,7 +144,7 @@ Proto.buildXRUI=function(){
     if(des&&m){const k=Number(m[1]);cor=k===des.correto?VERDE:k===des.escolha?VERMELHO:APAGADO;}
     this.xrButton(a.label,a.cmd,1.16+(i%2?.25:-.25),-.22-Math.floor(i/2)*UI.passo,UI.btnW,a.disabled,cor);
   });
-  if(pages>1&&!quizFase&&!menuAberto){this.xrButton('◀ Opções','xr:prev',.91,-.86,UI.btnW,this.uiPage===0);this.xrButton('Mais opções ▶','xr:next',1.41,-.86,UI.btnW,this.uiPage===pages-1);}
+  if(pages>1&&!quizFase&&!cadFase&&!menuAberto){this.xrButton('◀ Opções','xr:prev',.91,-.86,UI.btnW,this.uiPage===0);this.xrButton('Mais opções ▶','xr:next',1.41,-.86,UI.btnW,this.uiPage===pages-1);}
   /* v1.2 · VR enxuto (padrão do Sistema Solar 8.13): a coluna fixa da esquerda saiu. Um único botão "☰ Menu" fica na cena,
      embaixo à esquerda; o menu completo abre logo acima dele (gatilho no botão, ou B/Y) e fecha com B/Y, escolhendo uma opção
      ou com o gatilho fora do menu. Na frente do aluno ficam só o painel e os botões da atividade. */

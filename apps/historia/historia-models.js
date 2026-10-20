@@ -324,10 +324,10 @@ let MDISCO=null;
 function pilone(par,ala){let lt0=null;const g=new T.Group();g.position.set(0,0,MU.L/2);par.add(g);const H=MU.H,A=MU.A;
  const rel=texParedeGlifos('paredeTemplo','#5a3a1c',[214,182,132],101).clone();rel.needsUpdate=true;rel.repeat.set(.5,1.4);
  const pedra=new T.MeshStandardMaterial({map:rel,roughness:.85,envMap:envMuseu(),envMapIntensity:.3});const liso=new T.MeshStandardMaterial({map:imgM('arenito.jpg',true,[3,1]),normalMap:imgM('arenito-n.jpg',false,[3,1]),roughness:.85,envMap:envMuseu(),envMapIntensity:.3});
- const vao=4.4,wt=(A-vao)/2,mFx=new T.MeshBasicMaterial({color:new T.Color(ala.cor),toneMapped:false});[-1,1].forEach(s=>{const t=new T.Mesh(caixaTalude(wt,wt*.86,.8,.62,H),[pedra,pedra,liso,liso,pedra,pedra]);t.position.x=s*(vao/2+wt/2);g.add(t);
-  const fx=new T.Mesh(new T.BoxGeometry(wt*.9,.08,.84),mFx);fx.position.set(s*(vao/2+wt/2),2.95,0);g.add(fx);});
+ const vao=4.4,wt=(A-vao)/2+.1,mFx=new T.MeshBasicMaterial({color:new T.Color(ala.cor),toneMapped:false});[-1,1].forEach(s=>{const t=new T.Mesh(caixaTalude(wt,wt*.84,.8,.62,H),[pedra,pedra,liso,liso,pedra,pedra]);t.position.x=s*(vao/2+wt/2);/* a base entra na parede da ala (não coincide com ela) */g.add(t);
+  const fx=new T.Mesh(new T.BoxGeometry(wt*.97,.08,.86),mFx);fx.position.set(s*(vao/2+wt/2),2.95,0);g.add(fx);});
  const lin=new T.Mesh(new T.BoxGeometry(vao+.1,H-3.3,.66),liso);lin.position.y=(3.3+H)/2;g.add(lin);
- const fx=new T.Mesh(new T.BoxGeometry(vao+.1,.06,.68),mFx);fx.position.y=3.33;g.add(fx);
+ const fx=new T.Mesh(new T.BoxGeometry(vao+.1,.07,.7),mFx);fx.position.y=3.285;/* desce abaixo do lintel: sem face no mesmo plano (piscava) */g.add(fx);
  const sh=new T.Shape();sh.moveTo(0,0);sh.lineTo(.04,0);sh.quadraticCurveTo(.06,.2,.24,.26);sh.lineTo(.24,.3);sh.lineTo(0,.3);sh.closePath();
  [1,-1].forEach(s=>{const ge=new T.ExtrudeGeometry(sh,{depth:vao+.1,bevelEnabled:false});const c=new T.Mesh(ge,ouroM());c.rotation.y=-s*Math.PI/2;c.position.set(s*(vao+.1)/2,H-.32,s*.33);g.add(c);
   const da=new T.Mesh(new T.PlaneGeometry(2.0,.5),MDISCO||(MDISCO=new T.MeshBasicMaterial({map:texDiscoAlado(),transparent:true,toneMapped:false,depthWrite:false})));da.position.set(0,H-.6,s*.335);if(s<0)da.rotation.y=Math.PI;g.add(da);
@@ -408,15 +408,15 @@ function portaMissao(par,ala){const hit={type:'caderno',ala:ala.id};const g=new 
   x.fillStyle=ala.cor;x.fillRect(0,H-10,W,10);x.strokeStyle='rgba(232,192,80,.85)';x.lineWidth=5;x.strokeRect(6,6,W-12,H-12);glifo(x,'ankh',W/2,H*.19,60,'rgba(236,198,96,.95)');tx.needsUpdate=true;};im.src='media/museu/porta-madeira.jpg';}
  const vao=new T.Mesh(new T.PlaneGeometry(VW,VH),new T.MeshBasicMaterial({map:tx,toneMapped:false}));vao.position.y=VH/2;vao.userData.hit=hit;g.add(vao);
  const deco=new T.Group();g.add(deco);
- {const halo=poca(VW*2.8,VH*1.8,.6);halo.position.set(0,VH*.6,-.012);halo.renderOrder=0;g.add(halo);}/* atrás da porta: ilumina a parede em volta, não a madeira */
+ {const halo=poca(VW*2.8,VH*1.8,.6);halo.position.set(0,VH*.6,-.007);halo.renderOrder=0;g.add(halo);}/* atrás da porta: ilumina a parede em volta, não a madeira */
  const rel=texParedeGlifos('paredeTemplo','#5a3a1c',[214,182,132],101).clone();rel.needsUpdate=true;rel.repeat.set(.3,1.1);
  const pedra=new T.MeshStandardMaterial({map:rel,roughness:.85,envMap:envMuseu(),envMapIntensity:.35}),liso=new T.MeshStandardMaterial({map:imgM('arenito.jpg',true,[1,.4]),normalMap:imgM('arenito-n.jpg',false,[1,.4]),roughness:.85,envMap:envMuseu(),envMapIntensity:.35});
  const mFx=new T.MeshBasicMaterial({color:new T.Color(ala.cor),toneMapped:false});
  [-1,1].forEach(sx=>{const j=new T.Mesh(caixaTalude(JW,JW*.82,JD,JD*.8,VH+.02),[pedra,pedra,liso,liso,pedra,pedra]);j.position.set(sx*(VW/2+JW/2-.02),0,JD/2);deco.add(j);
-  const b=new T.Mesh(new T.BoxGeometry(JW*.84,.06,JD*.86),mFx);b.position.set(sx*(VW/2+JW/2-.02),VH*.78,JD/2);deco.add(b);
-  const p=new T.Mesh(new T.BoxGeometry(JW+.08,.12,JD+.08),ouroM());p.position.set(sx*(VW/2+JW/2-.02),.06,JD/2);deco.add(p);});
+  const b=new T.Mesh(new T.BoxGeometry(JW*.92,.06,JD*.94),mFx);/* maior que o batente nessa altura (sem faces no mesmo plano) */b.position.set(sx*(VW/2+JW/2-.02),VH*.78,JD/2);deco.add(b);
+  const p=new T.Mesh(new T.BoxGeometry(JW+.08,.12,JD+.08),ouroM());p.position.set(sx*(VW/2+JW/2-.02),.061,JD/2+.003);deco.add(p);});
  const LW=VW+2*JW+.1;const lin=new T.Mesh(new T.BoxGeometry(LW,LH,JD+.04),liso);lin.position.set(0,VH+LH/2,JD/2);deco.add(lin);
- const fx=new T.Mesh(new T.BoxGeometry(LW,.05,JD+.06),mFx);fx.position.set(0,VH+.025,JD/2);deco.add(fx);
+ const fx=new T.Mesh(new T.BoxGeometry(LW+.03,.05,JD+.07),mFx);fx.position.set(0,VH+.026,JD/2);deco.add(fx);
  {const sh=new T.Shape();sh.moveTo(-JD-.02,0);sh.lineTo(.02,0);sh.quadraticCurveTo(.04,.13,.16,.17);sh.lineTo(.16,.2);sh.lineTo(-JD-.02,.2);sh.closePath();const ge=new T.ExtrudeGeometry(sh,{depth:LW+.1,bevelEnabled:false});const c=new T.Mesh(ge,ouroM());c.rotation.y=-Math.PI/2;c.position.set((LW+.1)/2,VH+LH,JD+.02);deco.add(c);}
  fundir(deco);
  const da=new T.Mesh(new T.PlaneGeometry(1.5,.37),MDISCO||(MDISCO=new T.MeshBasicMaterial({map:texDiscoAlado(),transparent:true,toneMapped:false,depthWrite:false})));da.position.set(0,VH+LH/2,JD+.025);g.add(da);

@@ -30,3 +30,8 @@ Todos sob licença Creative Commons Atribuição 4.0 ou CC0 (domínio público, 
 | obelisco.glb | Obelisk | Ankledot | https://sketchfab.com/3d-models/obelisk-0b4dc3d42d1b4ceb8a19a0001a427864 |
 | paleta-escriba.glb | Model Scribal Palette (EC2018) (CC0, domínio público) | The Egypt Centre | https://sketchfab.com/3d-models/model-scribal-palette-ec2018-20b29a7a17404dd98f26f82b01d99c30 |
 | papiro-rolo.glb | Papyrus Scroll (New Kingdom) | Rollins College Archaeology | https://sketchfab.com/3d-models/papyrus-scroll-new-kingdom-dc20401e0b75486bb34de07956739c4f |
+
+## Acabamento do museu (v1.7)
+- `media/museu/arenito*.jpg`, `piso*.jpg`, `teto.jpg`: texturas geradas por código para o projeto (NEWPC), sem material de terceiros. O teto azul com estrelas douradas segue o padrão dos tetos de tumbas e templos egípcios.
+- `media/museu/mapa-egito.jpg`: mapa ilustrado gerado por IA (ChatGPT) a pedido da NEWPC; geografia conferida (delta, Sinai, Mar Vermelho, Gizé, Faium, Tebas, 1ª catarata) e nomes aplicados pela equipe. Representação didática, sem escala.
+- Pilones, colunas papiriformes e disco solar alado: modelados por código, inspirados na arquitetura dos templos do Novo Império (Karnak, Luxor, Edfu).

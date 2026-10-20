@@ -281,6 +281,63 @@ const MUSEU=[['menkaure','estatua-menkaure-rainha',0,1.45],['triade','triade-men
 const PECA_MUSEU=Object.fromEntries(MUSEU.map(([k,a,y,h])=>[k,{arq:a,yaw:y,h}]));
 function caixaEspera(w,h,d){const m=new T.Mesh(new T.BoxGeometry(w,h,d),new T.MeshBasicMaterial({color:0xe8d8b0,transparent:true,opacity:.18,depthWrite:false}));m.position.y=h/2;const g=new T.Group();g.add(m);return g;}
 function pedestal(w=.62,hh=.8){const g=new T.Group();const b=new T.Mesh(new T.BoxGeometry(w,hh,.62),mat(0x2a2620,{roughness:.6}));b.position.y=hh/2;g.add(b);const t=new T.Mesh(new T.BoxGeometry(w+.08,.04,.7),mat(0xc8a860,{metalness:.4,roughness:.4}));t.position.y=hh+.02;g.add(t);return g;}
+/* ---------- v1.7 · acabamento do museu: pedra de verdade, luz quente, pilones e colunas papiriformes ----------
+   Texturas geradas para o projeto (media/museu, sem licença de terceiros). Tudo é material simples ou plano aditivo:
+   nenhuma luz extra, nenhum reflexo em tempo real, para manter os 72 quadros por segundo no óculos. */
+const TLD=new T.TextureLoader(),TXM={};
+function imgM(arq,cor=true,rep){const k=arq+(rep?rep.join('x'):'');if(TXM[k])return TXM[k];const t=TLD.load('media/museu/'+arq);t.wrapS=t.wrapT=T.RepeatWrapping;if(cor)t.encoding=T.sRGBEncoding;t.anisotropy=8;if(rep)t.repeat.set(rep[0],rep[1]);TXM[k]=t;return t;}
+let ENVM=null;/* reflexo quente de museu: paredes de arenito e claraboia clara */
+function envMuseu(){if(ENVM)return ENVM;const W=128;const face=(claro)=>{const c=document.createElement('canvas');c.width=c.height=W;const x=c.getContext('2d');const g=x.createLinearGradient(0,0,0,W);g.addColorStop(0,'#f6e4bc');g.addColorStop(.5,'#b8925c');g.addColorStop(1,'#5a4128');x.fillStyle=g;x.fillRect(0,0,W,W);if(claro){x.filter='blur(5px)';x.fillStyle='#fff6dc';x.fillRect(W*.3,W*.08,W*.4,W*.3);x.filter='none';}return c;};
+ const lado=face(false),luz=face(true),cima=document.createElement('canvas');cima.width=cima.height=W;const cx=cima.getContext('2d');const rg=cx.createRadialGradient(W/2,W/2,4,W/2,W/2,W*.7);rg.addColorStop(0,'#ffffff');rg.addColorStop(.4,'#ffeec8');rg.addColorStop(1,'#8a6a40');cx.fillStyle=rg;cx.fillRect(0,0,W,W);const baixo=document.createElement('canvas');baixo.width=baixo.height=W;const bx=baixo.getContext('2d');bx.fillStyle='#6a5236';bx.fillRect(0,0,W,W);
+ ENVM=new T.CubeTexture([luz,lado,cima,baixo,lado,luz]);ENVM.encoding=T.sRGBEncoding;ENVM.needsUpdate=true;return ENVM;}
+let MOURO=null;const ouroM=()=>MOURO||(MOURO=new T.MeshStandardMaterial({color:0xd8aa4c,metalness:.75,roughness:.3,envMap:envMuseu(),envMapIntensity:1.1}));
+/* funde as malhas de um grupo por material (menos chamadas de desenho no óculos). Só para peças sem clique. */
+function fundir(raiz){raiz.updateMatrixWorld(true);const inv=new T.Matrix4().copy(raiz.matrixWorld).invert(),porMat=new Map(),tirar=[];
+ raiz.traverse(o=>{if(!o.isMesh||o.userData.hit)return;const mats=Array.isArray(o.material)?o.material:[o.material];let geo=o.geometry.index?o.geometry.toNonIndexed():o.geometry.clone();
+  const mt=new T.Matrix4().multiplyMatrices(inv,o.matrixWorld);geo.applyMatrix4(mt);const grupos=Array.isArray(o.material)&&o.geometry.groups.length?o.geometry.groups:[{start:0,count:geo.attributes.position.count,materialIndex:0}];
+  grupos.forEach(gr=>{const m=mats[gr.materialIndex||0];if(!porMat.has(m))porMat.set(m,[]);porMat.get(m).push({geo,start:gr.start,count:gr.count,ro:o.renderOrder});});tirar.push(o);});
+ tirar.forEach(o=>o.parent.remove(o));
+ porMat.forEach((lista,m)=>{const at={position:[],normal:[],uv:[]};lista.forEach(({geo,start,count})=>{for(const k in at){const a=geo.attributes[k];for(let i=start;i<start+count;i++){if(k==='uv'){at.uv.push(a?a.getX(i):0,a?a.getY(i):0);}else{at[k].push(a.getX(i),a.getY(i),a.getZ(i));}}}});
+  const g=new T.BufferGeometry();g.setAttribute('position',new T.Float32BufferAttribute(at.position,3));g.setAttribute('normal',new T.Float32BufferAttribute(at.normal,3));g.setAttribute('uv',new T.Float32BufferAttribute(at.uv,2));
+  const mesh=new T.Mesh(g,m);mesh.renderOrder=lista[0].ro;mesh.userData.semEnquadre=true;raiz.add(mesh);});
+ return raiz;}
+/* caixa com as faces laterais inclinadas (talude dos pilones): base wb x db, topo wt x dt */
+function caixaTalude(wb,wt,db,dt,h){const g=new T.BoxGeometry(1,1,1);const p=g.attributes.position;for(let i=0;i<p.count;i++){const top=p.getY(i)>0;p.setXYZ(i,p.getX(i)*(top?wt:wb),p.getY(i)*h+h/2,p.getZ(i)*(top?dt:db));}g.computeVertexNormals();return g;}
+/* disco solar alado (símbolo de proteção sobre as portas dos templos) */
+function texDiscoAlado(){return texCanvas('discoAlado',1024,256,(x,W,H)=>{const cy=H*.52;
+ for(const s of[-1,1]){for(let f=0;f<4;f++){x.beginPath();const y0=cy-38+f*22,len=W*.42-f*40;x.moveTo(W/2+s*70,y0);x.quadraticCurveTo(W/2+s*(len*.6),y0-30+f*6,W/2+s*len,y0-10+f*14);x.lineTo(W/2+s*(len-10),y0+12+f*6);x.quadraticCurveTo(W/2+s*(len*.55),y0+6+f*4,W/2+s*70,y0+18);x.closePath();x.fillStyle=['#e8c050','#2a6aa8','#e8c050','#1e8a7a'][f];x.fill();x.strokeStyle='#5a3a10';x.lineWidth=3;x.stroke();}
+  x.beginPath();x.moveTo(W/2+s*52,cy+10);x.quadraticCurveTo(W/2+s*68,cy-40,W/2+s*56,cy-62);x.lineWidth=12;x.strokeStyle='#e8c050';x.stroke();}
+ x.beginPath();x.arc(W/2,cy-6,50,0,Math.PI*2);const g=x.createRadialGradient(W/2-12,cy-20,6,W/2,cy-6,50);g.addColorStop(0,'#ff9a5a');g.addColorStop(1,'#b8301c');x.fillStyle=g;x.fill();x.lineWidth=6;x.strokeStyle='#e8c050';x.stroke();});}
+/* coluna papiriforme: fuste com amarras, capitel em flor de papiro aberta e ábaco */
+function colunaPapiro(h,r=.36){const g=new T.Group();const pedra=new T.MeshStandardMaterial({map:imgM('arenito.jpg',true,[2,3]),normalMap:imgM('arenito-n.jpg',false,[2,3]),roughness:.85,envMap:envMuseu(),envMapIntensity:.3});
+ const hc=.95,hf=h-hc-.22;const base=new T.Mesh(new T.CylinderGeometry(r*1.35,r*1.4,.18,28),pedra);base.position.y=.09;g.add(base);
+ const pts=[];for(let i=0;i<=10;i++){const t=i/10;pts.push(new T.Vector2(r*(1-.18*t)*(1+.08*Math.sin(t*Math.PI)),.18+t*hf));}const f=new T.Mesh(new T.LatheGeometry(pts,28),pedra);g.add(f);
+ const azul=new T.MeshStandardMaterial({color:0x1f5a9a,roughness:.5}),verde=new T.MeshStandardMaterial({color:0x2f7a5a,roughness:.6});
+ [0,1,2,3,4].forEach(i=>{const b=new T.Mesh(new T.CylinderGeometry(r*.86,r*.86,.05,28),i%2?azul:ouroM());b.position.y=.18+hf-.06-i*.06;g.add(b);});
+ const cp=[];for(let i=0;i<=12;i++){const t=i/12;cp.push(new T.Vector2(r*.82+r*1.25*Math.pow(t,1.7),.18+hf+t*hc));}
+ const tx=texCanvas('capitelPapiro',512,256,(x,W,H)=>{x.fillStyle='#d8b878';x.fillRect(0,0,W,H);for(let i=0;i<16;i++){const x0=i*W/16;x.fillStyle=i%2?'#2f7a5a':'#3a8a9a';x.beginPath();x.moveTo(x0+W/32,H);x.quadraticCurveTo(x0,H*.4,x0+W/32,0);x.quadraticCurveTo(x0+W/16,H*.4,x0+W/32,H);x.fill();}x.fillStyle='#e8c050';x.fillRect(0,0,W,18);x.fillStyle='#1f5a9a';x.fillRect(0,18,W,10);});
+ const cap=new T.Mesh(new T.LatheGeometry(cp,28),new T.MeshStandardMaterial({map:tx,roughness:.7,side:T.DoubleSide}));g.add(cap);
+ const ab=new T.Mesh(new T.BoxGeometry(r*2.4,.22,r*2.4),pedra);ab.position.y=h-.11;g.add(ab);g.traverse(o=>{o.userData.semEnquadre=true;});return g;}
+/* pilone: duas torres em talude, lintel com cornija em gola, disco solar alado e o nome da ala em ouro.
+   Fica na passagem do átrio para a ala (z local = +L/2), com vão de 4,4 m para andar. */
+let MDISCO=null;
+function pilone(par,ala){let lt0=null;const g=new T.Group();g.position.set(0,0,MU.L/2);par.add(g);const H=MU.H,A=MU.A;
+ const rel=texParedeGlifos('paredeTemplo','#5a3a1c',[214,182,132],101).clone();rel.needsUpdate=true;rel.repeat.set(.5,1.4);
+ const pedra=new T.MeshStandardMaterial({map:rel,roughness:.85,envMap:envMuseu(),envMapIntensity:.3});const liso=new T.MeshStandardMaterial({map:imgM('arenito.jpg',true,[3,1]),normalMap:imgM('arenito-n.jpg',false,[3,1]),roughness:.85,envMap:envMuseu(),envMapIntensity:.3});
+ const vao=4.4,wt=(A-vao)/2,mFx=new T.MeshBasicMaterial({color:new T.Color(ala.cor),toneMapped:false});[-1,1].forEach(s=>{const t=new T.Mesh(caixaTalude(wt,wt*.86,.8,.62,H),[pedra,pedra,liso,liso,pedra,pedra]);t.position.x=s*(vao/2+wt/2);g.add(t);
+  const fx=new T.Mesh(new T.BoxGeometry(wt*.9,.08,.84),mFx);fx.position.set(s*(vao/2+wt/2),2.95,0);g.add(fx);});
+ const lin=new T.Mesh(new T.BoxGeometry(vao+.1,H-3.3,.66),liso);lin.position.y=(3.3+H)/2;g.add(lin);
+ const fx=new T.Mesh(new T.BoxGeometry(vao+.1,.06,.68),mFx);fx.position.y=3.33;g.add(fx);
+ const sh=new T.Shape();sh.moveTo(0,0);sh.lineTo(.04,0);sh.quadraticCurveTo(.06,.2,.24,.26);sh.lineTo(.24,.3);sh.lineTo(0,.3);sh.closePath();
+ [1,-1].forEach(s=>{const ge=new T.ExtrudeGeometry(sh,{depth:vao+.1,bevelEnabled:false});const c=new T.Mesh(ge,ouroM());c.rotation.y=-s*Math.PI/2;c.position.set(s*(vao+.1)/2,H-.32,s*.33);g.add(c);
+  const da=new T.Mesh(new T.PlaneGeometry(2.0,.5),MDISCO||(MDISCO=new T.MeshBasicMaterial({map:texDiscoAlado(),transparent:true,toneMapped:false,depthWrite:false})));da.position.set(0,H-.6,s*.335);if(s<0)da.rotation.y=Math.PI;g.add(da);
+  const lt=lt0?new T.Mesh(lt0.geometry,lt0.material):(lt0=textoPlano(ala.nome.toUpperCase(),'#f0cf80',vao-.3,.34,{k:.72}));lt.position.set(0,3.6,s*.336);if(s<0)lt.rotation.y=Math.PI;g.add(lt);});
+ fundir(g);return g;}
+/* feixes de sol da claraboia: planos aditivos cruzados, inclinados como luz da tarde */
+function feixes(H){const g=new T.Group();const tx=texCanvas('feixeSol',64,256,(x,W,Hh)=>{const gr=x.createLinearGradient(0,0,0,Hh);gr.addColorStop(0,'rgba(255,240,200,.95)');gr.addColorStop(.6,'rgba(255,226,170,.35)');gr.addColorStop(1,'rgba(255,220,160,0)');x.fillStyle=gr;x.fillRect(0,0,W,Hh);const lx=x.createLinearGradient(0,0,W,0);lx.addColorStop(0,'rgba(0,0,0,1)');lx.addColorStop(.25,'rgba(0,0,0,0)');lx.addColorStop(.75,'rgba(0,0,0,0)');lx.addColorStop(1,'rgba(0,0,0,1)');x.globalCompositeOperation='destination-out';x.fillStyle=lx;x.fillRect(0,0,W,Hh);});
+ const m=new T.MeshBasicMaterial({map:tx,transparent:true,opacity:.2,blending:T.AdditiveBlending,depthWrite:false,side:T.DoubleSide,toneMapped:false,fog:false});
+ [[-.7,0],[0,.6],[.7,1.2],[0,-.5]].forEach(([ox,ry])=>{const p=new T.Mesh(new T.PlaneGeometry(1.1,H*1.15),m);p.position.set(ox*.8+.35,H/2,-.2);p.rotation.set(-.32,ry,0,'YXZ');p.renderOrder=4;p.userData.semEnquadre=true;g.add(p);});
+ fundir(g);g.userData.semEnquadre=true;return g;}
 /* ---------- v1.2 · Museu do Egito: um átrio e quatro alas, em tamanho real ----------
    No óculos o aluno fica dentro do prédio e anda por teleporte (marcadores no chão ou qualquer ponto do piso).
    No 3D a câmera vê o prédio em corte, como casa de bonecas: paredes e teto são planos de um lado só, virados para dentro,
@@ -292,11 +349,13 @@ const EIXO_Y=V(0,1,0);
 const TIPO={real:'Escaneamento 3D de peça real',peca:'Modelo 3D de peça real',repro:'Reprodução digital',did:'Modelo didático',replica:'Réplica didática',art:'Modelo 3D artístico',sitio:'Modelo 3D de lugar real'};
 TX.piso=()=>texCanvas('pisoMuseu2',512,512,(x,W,H)=>{pixels(x,W,H,17,(u,v,nz)=>{const n=nz(u*8,v*8)*.5+nz(u*60,v*60)*.25;return [cl(70+n*30),cl(62+n*26),cl(54+n*22)];});x.strokeStyle='rgba(20,16,12,.85)';x.lineWidth=3;for(let i=0;i<=2;i++){x.beginPath();x.moveTo(i*W/2,0);x.lineTo(i*W/2,H);x.stroke();x.beginPath();x.moveTo(0,i*H/2);x.lineTo(W,i*H/2);x.stroke();}});
 TX.reboco=()=>texCanvas('rebocoMuseu',256,256,(x,W,H)=>pixels(x,W,H,23,(u,v,nz)=>{const n=nz(u*6,v*6)*.5+nz(u*40,v*40)*.3;const c=cl(170+n*50);return [c,c,c];}));
-TX.friso=()=>texParedeGlifos('frisoMuseu2','#c9a35a',[34,28,24],83);
+TX.friso=()=>texParedeGlifos('frisoMuseu3','#e2b85a',[22,44,92],83);/* v1.7: azul egípcio, como o teto */
 /* luz de museu sem custo de luz real: manchas aditivas (piso, parede) e pontos no teto */
 TX.poca=()=>texCanvas('pocaLuz',128,128,(x,W,H)=>{const g=x.createRadialGradient(W/2,H/2,0,W/2,H/2,W/2);g.addColorStop(0,'rgba(255,255,255,1)');g.addColorStop(.45,'rgba(255,255,255,.45)');g.addColorStop(1,'rgba(255,255,255,0)');x.fillStyle=g;x.fillRect(0,0,W,H);});
 let MPOCA=null;function poca(w,h,op){if(!MPOCA)MPOCA=new T.MeshBasicMaterial({map:TX.poca(),color:0xffd8a0,transparent:true,blending:T.AdditiveBlending,depthWrite:false,toneMapped:false});const m=new T.Mesh(new T.PlaneGeometry(w,h),op===undefined?MPOCA:MPOCA.clone());if(op!==undefined)m.material.opacity=op;m.userData.semEnquadre=true;m.renderOrder=2;return m;}
 const PAREDE_ALA=[0x16303c,0x4a1a14,0x221d33,0x243020];
+/* v1.7: arenito em todas as alas, com um leve tom da ala (a cor forte fica na faixa e no pilone) */
+const PAREDE_TOM=[0xf2f0e6,0xffe8dc,0xf0e8f2,0xeef2e0];
 TX.glifosParede=()=>texParedeGlifos('paredeEscrita','#3a2614',[212,188,142],97);
 function geoUV(w,h,ru,rv){const g=new T.PlaneGeometry(w,h);const uv=g.attributes.uv;for(let i=0;i<uv.count;i++)uv.setXY(i,uv.getX(i)*ru,uv.getY(i)*rv);uv.needsUpdate=true;return g;}
 /* texto nítido em placa grande (2048 px de largura): títulos, faixas e letreiros */
@@ -310,7 +369,7 @@ function placa(nome,tipo,cor,w=.56){const c=document.createElement('canvas');c.w
  const caber=(t,s0,peso,min)=>{let s=s0;x.font=peso+' '+s+'px Segoe UI,Arial';while(x.measureText(t).width>484&&s>min){s-=2;x.font=peso+' '+s+'px Segoe UI,Arial';}};
  caber(nome,58,'600',24);x.fillStyle='#f6e8c6';x.fillText(nome,256,86);caber(tipo,34,'400',16);x.fillStyle='#c4b089';x.fillText(tipo,256,152);
  const tx=new T.CanvasTexture(c);tx.encoding=T.sRGBEncoding;tx.anisotropy=8;return new T.Mesh(new T.PlaneGeometry(w,w*200/512),new T.MeshBasicMaterial({map:tx,toneMapped:false}));}
-function pedestal2(w,d,hh){const g=new T.Group();const b=new T.Mesh(new T.BoxGeometry(w,hh,d),mat(0xc9c2b4,{roughness:.8,envMapIntensity:.2}));b.position.y=hh/2;g.add(b);const t=new T.Mesh(new T.BoxGeometry(w+.02,.025,d+.02),mat(0xf4f0e8,{roughness:.6}));t.position.y=hh+.012;g.add(t);const r=new T.Mesh(new T.BoxGeometry(w-.04,.05,d-.04),mat(0x0e0c0a));r.position.y=.025;g.add(r);b.position.y=hh/2+.03;b.scale.y=(hh-.03)/hh;return g;}
+function pedestal2(w,d,hh){const g=new T.Group();const b=new T.Mesh(new T.BoxGeometry(w,hh,d),new T.MeshStandardMaterial({color:0x3a322b,roughness:.45,envMap:envMuseu(),envMapIntensity:.6}));b.position.y=hh/2;g.add(b);const t=new T.Mesh(new T.BoxGeometry(w+.02,.025,d+.02),ouroM());t.position.y=hh+.012;g.add(t);const r=new T.Mesh(new T.BoxGeometry(w-.04,.05,d-.04),mat(0x0e0c0a));r.position.y=.025;g.add(r);b.position.y=hh/2+.03;b.scale.y=(hh-.03)/hh;return g;}
 function vitrine(w,d,h){const g=new T.Group();const vid=new T.Mesh(new T.BoxGeometry(w,h,d),new T.MeshStandardMaterial({color:0xe6f4ff,transparent:true,opacity:.1,roughness:.05,metalness:0,envMap:env(),envMapIntensity:1.2,depthWrite:false}));vid.position.y=h/2;vid.renderOrder=3;g.add(vid);
  const tampa=new T.Mesh(new T.BoxGeometry(w+.02,.04,d+.02),mat(0xe6e0d4,{roughness:.7}));tampa.position.y=h+.02;g.add(tampa);const luz=new T.Mesh(new T.PlaneGeometry(w*.8,d*.8),new T.MeshBasicMaterial({color:0xfff4e0,toneMapped:false}));luz.rotation.x=Math.PI/2;luz.position.y=h-.002;g.add(luz);
  const ar=new T.LineSegments(new T.EdgesGeometry(new T.BoxGeometry(w,h,d)),new T.LineBasicMaterial({color:0xdad4c8,transparent:true,opacity:.55}));ar.position.y=h/2;g.add(ar);return g;}
@@ -321,12 +380,14 @@ function caixaHit(w,h,d,y0,data){const m=new T.Mesh(new T.BoxGeometry(w,h,d),new
 function coluna(h){const g=new T.Group();const pedra=matTex('calcarioInt',0xffffff,{roughness:.8});const f=new T.Mesh(new T.CylinderGeometry(.26,.31,h-.75,18),pedra);f.position.y=(h-.75)/2;g.add(f);
  [.9,1.05].forEach(y=>{const a=new T.Mesh(new T.CylinderGeometry(.315,.315,.06,18),mat(0x2a5a8a,{roughness:.5}));a.position.y=y;g.add(a);});
  const cap=new T.Mesh(new T.CylinderGeometry(.5,.27,.55,18),mat(0x5f8f4e,{roughness:.7}));cap.position.y=h-.48;g.add(cap);const ab=new T.Mesh(new T.BoxGeometry(.72,.2,.72),pedra);ab.position.y=h-.1;g.add(ab);return g;}
-function texMapa(){return texCanvas('mapaEgito',512,400,(x,w,h)=>{pixels(x,w,h,91,(u,v,nz)=>{const n=nz(u*8,v*8)*.5;return [cl(214+n*40),cl(184+n*36),cl(130+n*30)];});
+function texMapaAntigo(){return texCanvas('mapaEgito',512,400,(x,w,h)=>{pixels(x,w,h,91,(u,v,nz)=>{const n=nz(u*8,v*8)*.5;return [cl(214+n*40),cl(184+n*36),cl(130+n*30)];});
  x.fillStyle='#3a78a8';x.beginPath();x.moveTo(0,0);x.lineTo(w,0);x.lineTo(w,62);x.bezierCurveTo(w*.75,80,w*.62,52,w*.55,74);x.bezierCurveTo(w*.48,92,w*.4,70,w*.3,80);x.bezierCurveTo(w*.18,88,w*.08,70,0,78);x.closePath();x.fill();
  x.beginPath();x.moveTo(w*.72,120);x.lineTo(w*.78,110);x.lineTo(w,330);x.lineTo(w,400);x.lineTo(w*.92,400);x.closePath();x.fill();
  x.strokeStyle='#6aa040';x.lineWidth=18;x.lineCap='round';x.beginPath();x.moveTo(w*.5,82);x.bezierCurveTo(w*.52,170,w*.47,240,w*.56,300);x.bezierCurveTo(w*.6,340,w*.52,370,w*.55,400);x.stroke();
  x.strokeStyle='#2a6aa0';x.lineWidth=6;x.stroke();x.fillStyle='#6aa040';x.beginPath();x.moveTo(w*.42,84);x.lineTo(w*.58,84);x.lineTo(w*.51,118);x.closePath();x.fill();
  x.fillStyle='#4a2a10';x.font='bold 15px Segoe UI';x.fillText('▲ Gizé',w*.52,132);x.fillText('● Tebas (Luxor)',w*.57,262);});}
+/* v1.7: mapa ilustrado do Egito (gerado para o projeto e conferido: delta, Sinai, Mar Vermelho, Gizé, Faium, Tebas, 1ª catarata), com os nomes já aplicados */
+function texMapa(){return imgM('mapa-egito.jpg');}
 function texFarao(){return texCanvas('bandeiraFarao',256,384,(x,W,H)=>{const g=x.createLinearGradient(0,0,0,H);g.addColorStop(0,'#1d3a72');g.addColorStop(1,'#0f2246');x.fillStyle=g;x.fillRect(0,0,W,H);x.strokeStyle='#e8c048';x.lineWidth=8;x.strokeRect(10,10,W-20,H-20);
  glifo(x,'sol',W/2,70,70,'#e8c048');glifo(x,'cartucho',W/2,190,120,'#e8c048');glifo(x,'ankh',W*.27,320,60,'#e8c048');glifo(x,'olho',W*.73,320,60,'#e8c048');});}
 /* placa de parede (mapa, bandeira, parede de hieróglifos) com moldura escura */
@@ -360,7 +421,7 @@ function pecaMuseu(par,o,cor,ticks){const D=window.HISTORIA_DATA;const b=new T.G
 const ATRIO_PECAS=[{key:'quefren',x:-2.5,z:-2.35,r:.5,arq:'estatua-quefren',h:1.68,ph:.3,w:.75,d:.95,cw:.62,cd:.85,tipo:TIPO.real},{key:'estelaRamses',x:2.45,z:-2.35,r:-.5,arq:'estela-ramses',ajuste:'max',cw:1.45,cd:.4,h:1.0,w:1.55,d:.55,ph:.4,tipo:TIPO.real}];
 const ALAS_PECAS=[
  /* Vida no Nilo */
- [{key:'nilo',painel:true,x:-3.47,y:1.75,z:-.85,r:Math.PI/2,w:3.2,h:2.5,map:()=>texMapa()},
+ [{key:'nilo',painel:true,x:-3.47,y:1.8,z:-.75,r:Math.PI/2,w:3.7,h:2.08,map:()=>texMapa()},
   {key:'portadora',x:2.85,z:-1.7,r:-Math.PI/2,arq:'portadora-oferendas',h:.3,ph:1.0,vit:1,tipo:TIPO.real},
   {key:'barco',x:2.75,z:.55,r:-Math.PI/2,arq:'barco-ncma',ajuste:'max',cw:1.2,cd:.6,h:.9,w:1.4,d:.8,vit:1,ph:.75,tipo:TIPO.real}],
  /* Faraós e deuses */
@@ -392,32 +453,32 @@ const ALAS_PECAS=[
   {key:'templo',x:2.6,z:1.7,r:-Math.PI/2,arq:'templo-cgbang',ajuste:'max',cw:1.35,cd:.9,h:.6,w:1.5,d:1.0,ph:.8,tipo:TIPO.art}]
 ];
 function museuEgito(){const D=window.HISTORIA_DATA;const g=new T.Group();const ticks=[],marcas=[],portas=[];const A=MU.A,L=MU.L,H=MU.H;
- const mPiso=mat(0xffffff,{map:TX.piso(),roughness:.28,envMapIntensity:1.0}),mFriso=mat(0xffffff,{map:TX.friso(),roughness:.85}),mTeto=new T.MeshStandardMaterial({color:0x121010,roughness:.95}),mRodape=mat(0x0c0a09,{roughness:.6});let mParede=null;
+ const mPiso=new T.MeshStandardMaterial({map:imgM('piso.jpg'),normalMap:imgM('piso-n.jpg',false),normalScale:new T.Vector2(.5,.5),roughness:.2,metalness:0,envMap:envMuseu(),envMapIntensity:.85}),mFriso=mat(0xffffff,{map:TX.friso(),roughness:.85}),mTeto=new T.MeshStandardMaterial({map:imgM('teto.jpg'),roughness:.9,envMap:envMuseu(),envMapIntensity:.2}),mRodape=mat(0x3a2a1a,{roughness:.6});let mParede=null;
  const chaoHit={type:'chao'};
- const piso=(w,d,x,z)=>{const m=new T.Mesh(geoUV(w,d,w/1.8,d/1.8),mPiso);m.rotation.x=-Math.PI/2;m.position.set(x,0,z);m.userData.semEnquadre=true;g.add(m);const h=new T.Mesh(new T.PlaneGeometry(w,d),new T.MeshBasicMaterial({visible:false}));h.rotation.x=-Math.PI/2;h.position.set(x,.004,z);h.userData.hit=chaoHit;h.userData.semEnquadre=true;g.add(h);
-  const t=new T.Mesh(new T.PlaneGeometry(w,d),mTeto);t.rotation.x=Math.PI/2;t.position.set(x,H,z);t.userData.semEnquadre=true;g.add(t);};
+ const piso=(w,d,x,z)=>{const m=new T.Mesh(geoUV(w,d,w/2.4,d/2.4),mPiso);m.rotation.x=-Math.PI/2;m.position.set(x,0,z);m.userData.semEnquadre=true;g.add(m);const h=new T.Mesh(new T.PlaneGeometry(w,d),new T.MeshBasicMaterial({visible:false}));h.rotation.x=-Math.PI/2;h.position.set(x,.004,z);h.userData.hit=chaoHit;h.userData.semEnquadre=true;g.add(h);
+  const t=new T.Mesh(geoUV(w,d,w/3.5,d/3.5),mTeto);t.rotation.x=Math.PI/2;t.position.set(x,H,z);t.userData.semEnquadre=true;g.add(t);};
  /* parede com rodapé, faixa da cor da ala e friso de hieróglifos; plano virado para dentro (+z local) */
- const parede=(par,w,x,z,r,cor)=>{const p=new T.Group();p.position.set(x,0,z);p.rotation.y=r;par.add(p);const m=new T.Mesh(geoUV(w,H,w/2.5,H/2.5),mParede);m.position.y=H/2;p.add(m);
+ const parede=(par,w,x,z,r,cor)=>{const p=new T.Group();p.position.set(x,0,z);p.rotation.y=r;par.add(p);const m=new T.Mesh(geoUV(w,H,w/2.5,H/2.5),mParede);m.userData.semEnquadre=true;m.position.y=H/2;p.add(m);
   const rd=new T.Mesh(new T.PlaneGeometry(w,.28),mRodape);rd.position.set(0,.14,.006);p.add(rd);
   const fr=new T.Mesh(geoUV(w,.5,w/.5/8,.125),mFriso);fr.position.set(0,H-.55,.006);p.add(fr);
   const bl=new T.Mesh(new T.PlaneGeometry(w,H),new T.MeshBasicMaterial({visible:false}));bl.position.y=H/2;bl.userData.hit={type:'parede'};bl.userData.semEnquadre=true;p.add(bl);/* bloqueia o raio (só por dentro) */
   if(cor){const fx=new T.Mesh(new T.PlaneGeometry(w,.07),new T.MeshBasicMaterial({color:new T.Color(cor),toneMapped:false}));fx.position.set(0,H-.86,.008);p.add(fx);}return p;};
  piso(A,A,0,0);
  /* luz zenital sobre a maquete de Gizé */
- const zen=new T.Mesh(new T.PlaneGeometry(2.6,2.6),new T.MeshBasicMaterial({color:0xfff2d2,toneMapped:false}));zen.rotation.x=Math.PI/2;zen.position.y=H-.01;g.add(zen);
- [[1,1],[1,-1],[-1,1],[-1,-1]].forEach(([sx,sz])=>{const c=coluna(H);c.position.set(sx*A/2,0,sz*A/2);g.add(c);});
+ const zen=new T.Mesh(new T.PlaneGeometry(3.2,3.2),new T.MeshBasicMaterial({map:texCanvas('claraboia',256,256,(x,W,Hh)=>{x.fillStyle='#fff6de';x.fillRect(0,0,W,Hh);x.fillStyle='#8a6a3a';for(let i=0;i<=4;i++){x.fillRect(i*W/4-4,0,8,Hh);x.fillRect(0,i*Hh/4-4,W,8);}}),toneMapped:false}));zen.rotation.x=Math.PI/2;zen.position.y=H-.01;zen.userData.semEnquadre=true;g.add(zen);
+ {const mold=new T.Mesh(new T.BoxGeometry(3.5,.14,3.5),ouroM());mold.position.y=H-.05;mold.scale.set(1,1,1);const fu=new T.Mesh(new T.BoxGeometry(3.3,.15,3.3),new T.MeshBasicMaterial({color:0xfff6de,toneMapped:false}));fu.position.y=H-.04;mold.userData.semEnquadre=fu.userData.semEnquadre=true;g.add(mold);g.add(fu);}
+ const fx=feixes(H);g.add(fx);{const sol=poca(2.6,1.9,.5);sol.rotation.x=-Math.PI/2;sol.position.set(.6,.011,1.1);g.add(sol);}
+ {const cols=new T.Group();g.add(cols);[[1,1],[1,-1],[-1,1],[-1,-1]].forEach(([sx,sz])=>{const c=colunaPapiro(H);c.position.set(sx*A/2,0,sz*A/2);cols.add(c);});fundir(cols);}
  const alas=[];const pecas={};
  D.ALAS.forEach((ala,i)=>{const th=ALA_TH[i];const dir=V(-Math.sin(th),0,-Math.cos(th)),centro=dir.clone().multiplyScalar(MU.R);
-  const ga=new T.Group();ga.position.copy(centro);ga.rotation.y=th;g.add(ga);mParede=mat(PAREDE_ALA[i],{map:TX.reboco(),roughness:.92,envMapIntensity:.15});
-  {const m=new T.Mesh(geoUV(A,L,A/1.8,L/1.8),mPiso);m.rotation.x=-Math.PI/2;m.userData.semEnquadre=true;ga.add(m);const h=new T.Mesh(new T.PlaneGeometry(A,L),new T.MeshBasicMaterial({visible:false}));h.rotation.x=-Math.PI/2;h.position.y=.004;h.userData.hit=chaoHit;h.userData.semEnquadre=true;ga.add(h);
-   const t=new T.Mesh(new T.PlaneGeometry(A,L),mTeto);t.rotation.x=Math.PI/2;t.position.y=H;t.userData.semEnquadre=true;ga.add(t);}
+  const ga=new T.Group();ga.position.copy(centro);ga.rotation.y=th;g.add(ga);mParede=new T.MeshStandardMaterial({color:PAREDE_TOM[i],map:imgM('arenito.jpg'),normalMap:imgM('arenito-n.jpg',false),normalScale:new T.Vector2(.8,.8),roughness:.88,envMap:envMuseu(),envMapIntensity:.3});
+  {const m=new T.Mesh(geoUV(A,L,A/2.4,L/2.4),mPiso);m.rotation.x=-Math.PI/2;m.userData.semEnquadre=true;ga.add(m);const h=new T.Mesh(new T.PlaneGeometry(A,L),new T.MeshBasicMaterial({visible:false}));h.rotation.x=-Math.PI/2;h.position.y=.004;h.userData.hit=chaoHit;h.userData.semEnquadre=true;ga.add(h);
+   const t=new T.Mesh(geoUV(A,L,A/3.5,L/3.5),mTeto);t.rotation.x=Math.PI/2;t.position.y=H;t.userData.semEnquadre=true;ga.add(t);}
   parede(ga,A,0,-L/2,0,ala.cor);parede(ga,L,-A/2,0,Math.PI/2,ala.cor);parede(ga,L,A/2,0,-Math.PI/2,ala.cor);
   /* título no fundo e letreiro na entrada (virado para o átrio) */
   const tt=textoPlano(ala.nome.toUpperCase(),'#e9c987',5.4,.42,{k:.72});tt.position.set(0,3.3,-L/2+.02);ga.add(tt);
   const st=textoPlano(ala.sub,'#d8c8a6',4.6,.24,{k:.66,peso:'500'});st.position.set(0,2.98,-L/2+.02);ga.add(st);
-  const viga=new T.Mesh(new T.BoxGeometry(A,.5,.3),mat(0x1a1512,{roughness:.7}));viga.position.set(0,H-.25,L/2);ga.add(viga);
-  const fx=new T.Mesh(new T.BoxGeometry(A,.06,.31),new T.MeshBasicMaterial({color:new T.Color(ala.cor),toneMapped:false}));fx.position.set(0,H-.52,L/2);ga.add(fx);
-  const lt=textoPlano(ala.nome.toUpperCase(),'#e9c987',A-.4,.4,{k:.7});lt.position.set(0,H-.25,L/2+.16);ga.add(lt);
+  pilone(ga,ala);
   portas.push(portaMissao(ga,ala));
   const local=(x,z)=>V(x,0,z).applyAxisAngle(EIXO_Y,th).add(centro);
   ALAS_PECAS[i].forEach(o=>{if(o.ignorar)return;if(o.painel){painel(ga,Object.assign({},o,{map:o.map(),geo:o.geo&&o.geo()}));pecas[o.key]={pos:local(o.x+Math.sin(o.r)*.02,o.z+Math.cos(o.r)*.02),yaw:th+o.r,y:o.y,h:o.h,ala:i,painel:true};return;}
@@ -442,8 +503,9 @@ function museuEgito(){const D=window.HISTORIA_DATA;const g=new T.Group();const t
  const inicio={spot:V(0,0,2.4),theta:0};marcas.push(marcador(g,0,2.4,'Átrio',{type:'ala',index:-1},'#d8c088'));
  const boas=textoPlano('MUSEU DO EGITO ANTIGO','#c9a35a',3.4,.34,{k:.72,sombra:false});boas.rotation.x=-Math.PI/2;boas.position.set(0,.006,1.45);boas.userData.semEnquadre=true;g.add(boas);/* inscrição no piso do átrio */
  /* obstáculos para quem anda: pedestais, a mesa de Gizé e as colunas do átrio (círculos no piso) */
- const obst=Object.values(pecas).filter(p=>p.raio).map(p=>({x:p.pos.x,z:p.pos.z,r:p.raio})).concat([[1,1],[1,-1],[-1,1],[-1,-1]].map(([a,b])=>({x:a*MU.A/2,z:b*MU.A/2,r:.62})));
- g.userData={museu:true,semGiro:true,alas,pecas,inicio,obst,
+ const obst=Object.values(pecas).filter(p=>p.raio).map(p=>({x:p.pos.x,z:p.pos.z,r:p.raio})).concat([[1,1],[1,-1],[-1,1],[-1,-1]].map(([a,b])=>({x:a*MU.A/2,z:b*MU.A/2,r:.62})))
+  .concat(alas.flatMap(a=>[-1,1].flatMap(s=>[2.65,3.15].map(xx=>{const p=V(s*xx,0,MU.L/2).applyAxisAngle(EIXO_Y,a.theta).add(a.centro);return {x:p.x,z:p.z,r:.48};}))));/* v1.7: torres dos pilones */
+ g.userData={museu:true,tomQuente:true,semGiro:true,alas,pecas,inicio,obst,
   alaDe:p=>{const a=MU.A/2;if(Math.abs(p.x)<=a&&Math.abs(p.z)<=a)return -1;if(p.z<-a)return 0;if(p.x>a)return 1;if(p.x<-a)return 2;return 3;},
   tick:t=>{ticks.forEach(f=>f(t));marcas.forEach((m,i)=>{const k=1+.07*Math.sin(t*2.4+i);m.userData.anel.scale.set(k,k,1);});portas.forEach((p,i)=>p.material.color.setScalar(.82+.18*Math.sin(t*1.6+i)));}};
  return g;}

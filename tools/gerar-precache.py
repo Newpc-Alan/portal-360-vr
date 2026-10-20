@@ -20,7 +20,7 @@ def h(p):
         for b in iter(lambda:f.read(1<<20),b''):m.update(b)
     return m.hexdigest()[:10]
 pesados=[];total=0
-for pasta,ext in [('modelos','.glb'),('audio','.mp3'),('media/tex',('.jpg','.png','.webp'))]:
+for pasta,ext in [('modelos','.glb'),('audio','.mp3'),('media/tex',('.jpg','.png','.webp')),('media/museu',('.jpg','.png','.webp'))]:
     if not os.path.isdir(os.path.join(raiz,pasta)):continue
     for n in sorted(os.listdir(os.path.join(raiz,pasta))):
         if not n.endswith(ext):continue

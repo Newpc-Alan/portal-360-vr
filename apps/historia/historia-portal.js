@@ -119,7 +119,7 @@ Proto.buildXRUI=function(){
   if(this.xrAjuda&&!this.xrReport){title='Como usar os controles';body=S.view==='explorar'?AJUDA_MUSEU:AJUDA_CONTROLES;tom='neutro';}
   const menuAberto=!!this.menuAberto;
   /* v1.4: no museu, sem peça escolhida, o óculos fica limpo: só o botão Menu. O texto aparece quando o aluno escolhe uma peça */
-  const museuLimpo=S.view==='explorar'&&!Lab.inspectKey&&!this.xrReport&&!this.xrAjuda&&!menuAberto;
+  const museuLimpo=S.view==='explorar'&&!Lab.inspectKey&&!(S.cadernoAberto>=0)&&!this.xrReport&&!this.xrAjuda&&!menuAberto;
   const panel=this.textPlane(title,body,1.06,.74,tom);if(menuAberto||museuLimpo)panel.visible=false;panel.position.set(1.16,.37,-1.64);panel.rotation.y=-.6;this.ui.add(panel);
   if(!menuAberto&&!museuLimpo&&feedback&&!this.xrReport&&!(S.view==='desafio'&&Lab.quizAtual().phase===1)){const faixa=this.faixaRetorno(feedback,fbTom);faixa.position.set(1.16,-.095,-1.64);faixa.rotation.y=-.6;this.ui.add(faixa);}
   const lista=(menuAberto||museuLimpo)?[]:this.xrReport?[{label:'Voltar à atividade',cmd:'xr:reportclose'}]:this.xrAjuda?[{label:'Voltar à atividade',cmd:'xr:ajudaclose'}]:this._acoes();

@@ -80,12 +80,14 @@ window.PDERelatorio.ligar({app:'História VR',arquivo:'HistoriaVR',chave:'pde_hi
   const feito=id=>{if(c.includes(id))return true;try{if(id==='mumificacao')return !!S.mumificacao.done;if(id==='hieroglifos')return !!S.hieroglifos.done;}catch(_){}return false;};
   const secoes=(DD.temas||[]).map(t=>{
    const atividades=t.atividades.map(id=>({label:ativ(id).label,feito:feito(id),detalhe:det(id)}));
+   /* v1.6: caderno do visitante, ala por ala: reflexão (certa ou não) e a resposta escrita pelo aluno */
+   if(t.id==='egito'&&DD.ALAS)DD.ALAS.forEach(al=>{const cd=(S.caderno||{})[al.id]||{};const ok=cd.resp!==undefined;atividades.push({label:'Caderno · '+al.nome,feito:ok,detalhe:ok?((cd.certa?'reflexão correta':'reflexão incorreta')+(cd.texto?' · resposta: “'+cd.texto+'”':' · sem resposta escrita')):'não respondido'});});
    const q=(S.quizzes||{})[t.id];const Q=(t.questoes||[]).map(id=>(DD.todasQuestoes||DD.questions||[]).find(x=>x.id===id)).filter(Boolean);
    const quiz=Q.map((it,i)=>{const resp=q?q.answers[i]:undefined;return{texto:it.q,skill:SKILL[it.skill]||it.skill,respondida:resp!==undefined,correta:resp===it.correct,escolha:resp!==undefined?it.options[resp]:'',certa:it.options[it.correct]};});
    const tocado=atividades.some(a=>a.feito)||quiz.some(x=>x.respondida)||S.tema===t.id;
    return{nome:'Tema '+t.nome,sub:t.estuda,atividades,quiz,tocado};}).filter(s=>s.tocado);
   const tm=secoes.reduce((a,s)=>a+s.atividades.filter(x=>x.feito).length,0),tt=secoes.reduce((a,s)=>a+s.atividades.length,0),qa=secoes.reduce((a,s)=>a+s.quiz.filter(x=>x.correta).length,0),qt=secoes.reduce((a,s)=>a+s.quiz.length,0);
   return{inicio:S.started,versao:DD.version||L.version,
-   cards:[[tm+'/'+tt,'missões concluídas'],[qa+'/'+qt,'situações corretas no Desafio'],[String((S.visited||[]).length),'fichas investigadas'],[String(r.errors),'tentativas incorretas · '+r.hints+' pistas']],
+   cards:[[tm+'/'+tt,'etapas concluídas (museu e cadernos)'],[qa+'/'+qt,'situações corretas no Desafio'],[String((S.visited||[]).length),'fichas investigadas'],[String(r.errors),'tentativas incorretas · '+r.hints+' pistas']],
    secoes};}});
 })();

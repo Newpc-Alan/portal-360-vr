@@ -92,3 +92,23 @@ ul.pistas li{margin:3px 0}
 #lessonPanel .pair-choices.seq{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}
 #lessonPanel .pair-choices.seq button{font-size:15px;font-weight:700;line-height:1.25;padding:8px 10px;min-height:48px;overflow-wrap:anywhere;color:#1a120a}
 .stage-heading p{color:#fff6e6;text-shadow:0 1px 3px rgba(0,0,0,.65)}.stage-heading h2{text-shadow:0 2px 6px rgba(0,0,0,.45)}.stage-heading .eyebrow{text-shadow:0 1px 2px rgba(0,0,0,.6)}
+
+/* v1.6 · Museu como visita de estudo */
+.investiga{background:rgba(212,168,56,.12);border:1px solid rgba(212,168,56,.45);border-radius:10px;padding:8px 11px;margin:8px 0}
+.investiga b{color:#f0c860;display:block;font-size:12.5px;letter-spacing:.2px}
+.investiga p{margin:4px 0 0;font-size:14px;line-height:1.4}
+ul.objetivos{margin:6px 0 2px;padding-left:18px}ul.objetivos li{margin:3px 0;font-size:13px}
+.fonte-hist{background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.14);border-radius:10px;padding:8px 11px;margin:10px 0}
+.fonte-hist b{font-size:12.5px;color:#9fd8ff}
+.fonte-hist dl{display:grid;grid-template-columns:auto 1fr;gap:3px 10px;margin:6px 0 0;font-size:12.5px}
+.fonte-hist dt{opacity:.7;white-space:nowrap}.fonte-hist dd{margin:0}
+.fonte-hist dt:last-of-type,.fonte-hist dd:last-of-type{font-weight:600}
+.opcoes-cad{display:flex;flex-direction:column;gap:6px;margin:8px 0}
+.opcoes-cad button{text-align:left;font:600 13.5px/1.35 inherit;padding:9px 11px;border-radius:9px;border:1px solid rgba(255,255,255,.22);background:rgba(255,255,255,.07);color:inherit;cursor:pointer}
+.opcoes-cad button:hover{background:rgba(255,255,255,.14)}
+.opcoes-cad button.certa{background:#1a6b2a;border-color:#3fae5a;color:#fff}
+.opcoes-cad button.errada{background:#6a2020;border-color:#a04040;color:#fff}
+.opcoes-cad button[aria-disabled="true"]{cursor:default}
+.caderno-txt{display:block;margin:10px 0 4px}.caderno-txt span{display:block;font-size:13px;margin-bottom:5px;color:#f0c860}
+.caderno-txt textarea{width:100%;box-sizing:border-box;border-radius:8px;border:1px solid rgba(255,255,255,.25);background:rgba(0,0,0,.25);color:inherit;font:inherit;font-size:14px;padding:8px;resize:vertical}
+@media (max-width:640px){.fonte-hist dl{grid-template-columns:1fr}.fonte-hist dt{white-space:normal}}

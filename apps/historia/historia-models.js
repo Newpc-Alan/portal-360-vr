@@ -333,13 +333,14 @@ function texFarao(){return texCanvas('bandeiraFarao',256,384,(x,W,H)=>{const g=x
 function painel(par,o){const g=new T.Group();g.position.set(o.x,o.y,o.z);g.rotation.y=o.r;par.add(g);{const pw=poca(o.w*1.5,o.h*1.6,.35);pw.position.z=.002;g.add(pw);}const mo=new T.Mesh(new T.PlaneGeometry(o.w+.12,o.h+.12),mat(0x241a12,{roughness:.6}));mo.position.z=.005;g.add(mo);
  const m=new T.Mesh(o.geo||new T.PlaneGeometry(o.w,o.h),new T.MeshStandardMaterial({map:o.map,roughness:.85,envMap:env(),envMapIntensity:.25}));m.position.z=.012;g.add(m);if(o.key){const hit={type:'inspect',key:o.key};m.userData.hit=hit;mo.userData.hit=hit;}return g;}
 /* porta da missão no fundo de cada ala */
-function portaMissao(par,ala){const hit={type:'missao',view:ala.missao};const g=new T.Group();g.position.set(0,0,-MU.L/2+.02);par.add(g);
+/* v1.6: a porta do fundo de cada ala abre o Caderno da ala (reflexão da visita de estudo) */
+function portaMissao(par,ala){const hit={type:'caderno',ala:ala.id};const g=new T.Group();g.position.set(0,0,-MU.L/2+.02);par.add(g);
  const tx=texCanvas('porta-'+ala.id,256,512,(x,W,H)=>{const gr=x.createLinearGradient(0,0,0,H);gr.addColorStop(0,'#07090c');gr.addColorStop(.55,'#141414');gr.addColorStop(1,ala.cor);x.fillStyle=gr;x.fillRect(0,0,W,H);const rg=x.createRadialGradient(W/2,H*.62,10,W/2,H*.62,W*.8);rg.addColorStop(0,'rgba(255,236,190,.55)');rg.addColorStop(1,'rgba(255,236,190,0)');x.fillStyle=rg;x.fillRect(0,0,W,H);});
  const vao=new T.Mesh(new T.PlaneGeometry(1.6,2.6),new T.MeshBasicMaterial({map:tx,toneMapped:false}));vao.position.y=1.3;vao.userData.hit=hit;g.add(vao);
  const ouro=mat(0xc8a050,{metalness:.55,roughness:.32});[[-.88,1.36,.14,2.72],[.88,1.36,.14,2.72],[0,2.74,1.9,.18]].forEach(([x,y,w,h])=>{const b=new T.Mesh(new T.BoxGeometry(w,h,.14),ouro);b.position.set(x,y,.05);b.userData.hit=hit;g.add(b);});
- const t1=textoPlano('ENTRAR NA MISSÃO','#ffe3a8',1.4,.2,{k:.7});t1.position.set(0,1.62,.02);t1.userData.hit=hit;g.add(t1);
- const t2=textoPlano(ala.missaoNome,'#ffffff',1.46,.32,{k:.66});t2.position.set(0,1.3,.02);t2.userData.hit=hit;g.add(t2);
- const t3=textoPlano('▶','#ffffff',.4,.4,{k:.8});t3.position.set(0,.88,.02);t3.userData.hit=hit;g.add(t3);
+ const t1=textoPlano('CADERNO DA ALA','#ffe3a8',1.4,.2,{k:.7});t1.position.set(0,1.62,.02);t1.userData.hit=hit;g.add(t1);
+ const t2=textoPlano('Responda aqui','#ffffff',1.46,.32,{k:.66});t2.position.set(0,1.3,.02);t2.userData.hit=hit;g.add(t2);
+ const t3=textoPlano('✎','#ffffff',.4,.4,{k:.8});t3.position.set(0,.88,.02);t3.userData.hit=hit;g.add(t3);
  return vao;}
 /* marcador de teleporte no chão */
 function marcador(par,x,z,nome,data,cor){const g=new T.Group();g.position.set(x,0,z);par.add(g);

@@ -4,7 +4,7 @@
    Próximos temas (em breve): Grécia Antiga, Roma Antiga, Brasil Colônia, Pré-história e primeiros povos.
    Textos no tom falado das narrações (chaves = nomes dos MP3 em audio/). Datas aproximadas, como nos livros didáticos. */
 (function(){'use strict';
-const D={version:'1.5.0'};
+const D={version:'1.6.0'};
 D.temas=[
  {id:'egito',nome:'Egito Antigo',estuda:'A civilização que nasceu às margens do Nilo.',exemplos:'O rio Nilo, pirâmides, faraós, mumificação e hieróglifos',modulo:'egi',atividades:['explorar','mumificacao','piramide','hieroglifos'],questoes:['nilo','cheias','piramides','mumia','fontes','escriba','roseta','faraoDeus','tempo']},
  {id:'grecia',nome:'Grécia Antiga',estuda:'Cidades-estado, democracia e filosofia.',exemplos:'Atenas, Esparta, ágora e Olimpíadas',modulo:'gre',breve:true,atividades:[]},
@@ -15,7 +15,7 @@ D.temas=[
 D.modulos=[{id:'egi',label:'Egito Antigo',curto:'Egito',pergunta:'Como um rio no deserto fez nascer uma civilização?'}];
 D.PREF={egi:''};
 D.activities=[
- {id:'explorar',label:'Museu do Egito',title:'Um museu do Egito Antigo.',subtitle:'Quatro alas com peças reais escaneadas em 3D. Cada ala abre uma missão.',kicker:'VISITE',modulo:'egi'},
+ {id:'explorar',label:'Museu do Egito',title:'Um museu do Egito Antigo.',subtitle:'Quatro alas com peças reais escaneadas em 3D. Em cada ala, uma pergunta para investigar e um caderno no fundo da sala.',kicker:'VISITE',modulo:'egi'},
  {id:'mumificacao',label:'Mumificação',title:'Preparar para a eternidade.',subtitle:'Coloque em ordem as etapas que os embalsamadores seguiam.',kicker:'ORGANIZE',modulo:'egi'},
  {id:'piramide',label:'Dentro da pirâmide',title:'Entre na Grande Pirâmide.',subtitle:'Uma viagem em primeira pessoa, da entrada até a Câmara do Rei.',kicker:'VIAJE',modulo:'egi'},
  {id:'hieroglifos',label:'Hieróglifos',title:'Leia como um escriba.',subtitle:'Descubra o que cada sinal gravado na parede quer dizer.',kicker:'DECIFRE',modulo:'egi'},
@@ -120,7 +120,7 @@ D.questions=[
 D.todasQuestoes=D.questions;
 /* aula guiada */
 D.guide=[
- {view:'explorar',title:'Visite o Museu do Egito',goal:'Entre no museu, visite as alas e observe pelo menos três peças, ouvindo a ficha de cada uma.',check:'explorar',audio:'aula-explorar'},
+ {view:'explorar',title:'Visite o Museu do Egito',goal:'Faça a visita de estudo: em cada uma das quatro alas, leia a pergunta de investigação, observe as peças e responda o Caderno da ala no fundo da sala.',check:'explorar',audio:'aula-explorar'},
  {view:'mumificacao',title:'Prepare para a eternidade',goal:'Coloque em ordem as sete etapas da mumificação.',check:'mumificacao',audio:'aula-mumificacao'},
  {view:'piramide',title:'Entre na pirâmide',goal:'Faça a viagem completa, da entrada da Grande Pirâmide até a Câmara do Rei.',check:'piramide',audio:'aula-piramide'},
  {view:'hieroglifos',title:'Leia como um escriba',goal:'Descubra o que querem dizer os sete sinais gravados na parede do templo.',check:'hieroglifos',audio:'aula-hieroglifos'},
@@ -129,6 +129,77 @@ D.guide=[
 D.WELCOME='Bem-vindo à História VR! Hoje a gente vai voltar mais de 4 mil anos no tempo, até o Egito Antigo. Você vai visitar um museu com peças de verdade, entrar numa pirâmide, conhecer a mumificação e ler hieróglifos como um escriba. Vamos começar?';
 /* modelos 3D reais: título, autor e página no Sketchfab (CC BY 4.0, ou CC0 quando indicado; reduzidos pela NEWPC para o Quest) */
 D.CREDITOS_3D=[["Reserve head (portrait head)", "pmanuelian", "https://sketchfab.com/3d-models/reserve-head-portrait-head-ef74105f6d3942ada62c1c4992ec0c8e"], ["Coffins of Pa-di-mut, Mut-iy-y, and Ankh-Khonsu", "Harvard Museum of the Ancient Near East", "https://sketchfab.com/3d-models/coffins-of-pa-di-mut-mut-iy-y-and-ankh-khonsu-012ae83b8d9045468b30584883149035"], ["The Great Sphinx of Giza - Egypt", "Chenzoss", "https://sketchfab.com/3d-models/the-great-sphinx-of-giza-egypt-f169dbe7974648babe327179091e0ee3"], ["King Menkaure (Mycerinus) and queen", "pmanuelian", "https://sketchfab.com/3d-models/king-menkaure-mycerinus-and-queen-98b05b4e47c54bc098d923bebe59faa7"], ["Statue of Ramesses III", "Abby Gancz", "https://sketchfab.com/3d-models/statue-of-ramesses-iii-dec51e9168814cd38982e9f0d165de80"], ["Kneeling statue of Senenmut", "pmanuelian", "https://sketchfab.com/3d-models/kneeling-statue-of-senenmut-ca8f57b55ee94dcf86ef0e3d17dbefac"], ["Statue of Tanwetamani", "pmanuelian", "https://sketchfab.com/3d-models/statue-of-tanwetamani-e3badf625e254b45891cdd4f76572726"], ["Nefertiti's bust (like in the museum)", "C. Yamahata", "https://sketchfab.com/3d-models/nefertitis-bust-like-in-the-museum-ce5b14926e494558ab584375a8d63ca7"], ["The Great Pyramid of Giza Egypt", "Chenzoss", "https://sketchfab.com/3d-models/the-great-pyramid-of-giza-egypt-99bb947b9a9f4884ba249aec1be779eb"], ["Sarcophagus of Khufudjedef", "pmanuelian", "https://sketchfab.com/3d-models/sarcophagus-of-khufudjedef-26e22c22313a4a8d89be2271757a9a96"], ["Egyptian Temple", "CG BANG!", "https://sketchfab.com/3d-models/egyptian-temple-c46e7c4460ab4bea9628823a037068ed"], ["Triad of Menkaure, Hare nome", "pmanuelian", "https://sketchfab.com/3d-models/triad-of-menkaure-hare-nome-56c17979d2184f9bb83728d17c400acd"], ["Canopic Jar | NCMA Explore", "NCMA Explore | North Carolina Museum of Art", "https://sketchfab.com/3d-models/canopic-jar-ncma-explore-58768265e9a44bb78d0cab5bd66192db"], ["Statue of Mentuhotep III", "pmanuelian", "https://sketchfab.com/3d-models/statue-of-mentuhotep-iii-35f203a5ae154258901f48202bfdbd6f"], ["Sarcophagus of Hunefer", "Fitzwilliam Museum", "https://sketchfab.com/3d-models/sarcophagus-of-hunefer-21642b701f9c45d6a472214fea274f75"], ["Model of a Boat", "NCMA Explore (North Carolina Museum of Art)", "https://sketchfab.com/3d-models/model-of-a-boat-ncma-explore-v2-82e8aaff19db416dbd3daedb42031be2"], ["Canopic chest of Hetepheres I", "pmanuelian", "https://sketchfab.com/3d-models/canopic-chest-of-hetepheres-i-1e1e2b86d69742248fc9354aa890860e"], ["Tjenty as a scribe", "pmanuelian", "https://sketchfab.com/3d-models/tjenty-as-a-scribe-7ee8a197e9c44ca6b109e5d3b4a4acf4"], ["Sphinx Stela of Ramesses II (1)", "hsugita", "https://sketchfab.com/3d-models/sphinx-stela-of-ramesses-ii-1-bc2474c323424c7caa385e95aa36b71e"], ["Statue of Khafre, Egyptian Museum, Cairo", "danderson4", "https://sketchfab.com/3d-models/statue-of-khafre-egyptian-museum-cairo-071b25978c054c73bd179f89c33a5ffe"], ["Stela", "Harvard Museum of the Ancient Near East", "https://sketchfab.com/3d-models/stela-6303e29d465a448db4ba45539a9e6dfd"], ["Funerary ensemble of the lady Tairkap", "Bonn Center for Digital Humanities", "https://sketchfab.com/3d-models/funerary-ensemble-of-the-lady-tairkap-739d45b6c82a40ff9e3efd13e5c925ea"], ["1914.602 Female Offering Bearer (CC0)", "Cleveland Museum of Art", "https://sketchfab.com/3d-models/1914602-female-offering-bearer-5ae6e783d2ed40efa424deb0e2bcf4df"], ["Obelisk", "Ankledot", "https://sketchfab.com/3d-models/obelisk-0b4dc3d42d1b4ceb8a19a0001a427864"], ["Model Scribal Palette (EC2018) (CC0)", "The Egypt Centre", "https://sketchfab.com/3d-models/model-scribal-palette-ec2018-20b29a7a17404dd98f26f82b01d99c30"], ["Papyrus Scroll (New Kingdom)", "Rollins College Archaeology", "https://sketchfab.com/3d-models/papyrus-scroll-new-kingdom-dc20401e0b75486bb34de07956739c4f"]];
-D.sources=[['Smarthistory · Egito Antigo (textos de especialistas em história da arte)','https://smarthistory.org/'],['Museu Britânico · coleção egípcia e a Pedra de Roseta','https://www.britishmuseum.org/'],['AERA · Ancient Egypt Research Associates, escavações da cidade dos trabalhadores de Gizé','https://aeraweb.org/'],['BNCC · História, 6º ano: EF06HI01, EF06HI02 e EF06HI07','http://basenacionalcomum.mec.gov.br/abase/#fundamental/historia']];
+D.sources=[['Smarthistory · Egito Antigo (textos de especialistas em história da arte)','https://smarthistory.org/'],['Museu Britânico · coleção egípcia e a Pedra de Roseta','https://www.britishmuseum.org/'],['AERA · Ancient Egypt Research Associates, escavações da cidade dos trabalhadores de Gizé','https://aeraweb.org/'],['BNCC · História, 6º ano: EF06HI01, EF06HI02, EF06HI05, EF06HI07, EF06HI16 e EF06HI19','http://basenacionalcomum.mec.gov.br/abase/#fundamental/historia']];
+
+/* v1.6 · MUSEU COMO VISITA DE ESTUDO
+   Nesta versão o Egito Antigo fica só com o Museu (e o Desafio final). Mumificação, pirâmide e hieróglifos continuam no código,
+   guardados para uma próxima etapa (ATIVIDADES_GUARDADAS). Cada ala vira uma sala de estudo: pergunta de investigação,
+   objetivos, peças a observar, reflexão (funciona no óculos) e caderno do visitante (resposta escrita, vai para o relatório).
+   Cada peça ganha a "leitura de fonte histórica": tipo de registro, material e data, onde foi encontrada, onde está hoje e o que
+   ela nos conta. Os fatos vêm das próprias fichas; quando a ficha não informa, o campo fica de fora. */
+D.ATIVIDADES_GUARDADAS=['mumificacao','piramide','hieroglifos'];
+D.temas.forEach(t=>{if(t.id==='egito')t.atividades=['explorar'];});
+D.MUSEU_INTRO='Bem-vindo ao Museu do Egito. Hoje você é um investigador: em cada ala há uma pergunta para responder observando as peças. Comece pelo átrio, com a maquete de Gizé, e visite as quatro alas: Vida no Nilo, Faraós e deuses, Mumificação e Escrita. No fundo de cada ala, o Caderno da ala guarda a sua resposta.';
+D.WELCOME='Bem-vindo à História VR! Hoje a gente vai voltar mais de 4 mil anos no tempo, até o Egito Antigo, numa visita de estudo a um museu com peças de verdade. Em cada ala há uma pergunta para você investigar. Observe as peças, ouça as fichas e registre o que descobriu no caderno. Vamos começar?';
+D.ROTEIRO_VISITA='Roteiro sugerido: Átrio · Gizé → Vida no Nilo → Faraós e deuses → Mumificação e vida após a morte → Escrita e memória → Desafio final.';
+const ESTUDO={
+ nilo:{pergunta:'Como um rio no meio do deserto sustentou uma civilização?',bncc:['EF06HI05','EF06HI16'],
+  objetivos:['Explicar o que o Nilo oferecia aos egípcios: água, lama fértil, peixe e transporte.','Reconhecer, nas peças, o trabalho das pessoas comuns.'],
+  reflexao:{q:'O que tornava possível plantar no Egito, um país quase todo de deserto?',options:['As chuvas fortes de todos os meses','A lama fértil que as cheias do Nilo deixavam nas margens','As florestas que cobriam o território','A neve das montanhas egípcias'],correct:1,why:'Fora das margens do Nilo, o Egito é deserto. As cheias espalhavam uma lama escura e fértil, e era nela que os camponeses plantavam.'},
+  caderno:'Escreva duas coisas que o Nilo dava aos egípcios e cite uma peça desta ala que mostra isso.'},
+ faraos:{pergunta:'Quem governava o Egito e como a arte mostrava esse poder?',bncc:['EF06HI07','EF06HI19'],
+  objetivos:['Explicar por que o faraó era visto como rei e deus ao mesmo tempo.','Ler as estátuas como fontes: pose, coroa e quem aparece ao lado do rei.','Reconhecer mulheres no poder, como Hatshepsut e Nefertiti.'],
+  reflexao:{q:'Por que as estátuas de faraós aparecem quase sempre paradas, sérias e simétricas?',options:['Porque a arte oficial mostrava o rei como eterno e poderoso, acima das pessoas comuns','Porque os escultores não sabiam mostrar movimento','Porque as estátuas eram brinquedos de criança','Porque era proibido esculpir rostos'],correct:0,why:'A pose parada e simétrica era uma escolha: a arte oficial mostrava o faraó como eterno e imutável, ligado aos deuses.'},
+  caderno:'Escolha uma peça desta ala. O que ela mostra sobre o poder do faraó ou sobre o papel das mulheres no Egito?'},
+ morte:{pergunta:'Por que os egípcios se preparavam tanto para a vida após a morte?',bncc:['EF06HI07','EF06HI02'],
+  objetivos:['Relacionar a mumificação à crença de que a vida continuava depois da morte.','Perceber que a preparação variava conforme a riqueza: sarcófago de pedra para poucos, caixão pintado para mais pessoas.'],
+  reflexao:{q:'Na mumificação, por que o coração era deixado dentro do corpo?',options:['Porque era pequeno demais para retirar','Porque o coração virava pedra','Porque se acreditava que ali moravam os pensamentos e os sentimentos','Porque era guardado no vaso mais bonito'],correct:2,why:'Os outros órgãos iam para os vasos canópicos, mas o coração ficava no corpo: para os egípcios, era a sede dos pensamentos e sentimentos.'},
+  caderno:'Que objetos acompanhavam o morto e para que serviam? Cite pelo menos duas peças desta ala.'},
+ escrita:{pergunta:'Como sabemos o que os egípcios pensavam, mais de 3 mil anos depois?',bncc:['EF06HI02','EF06HI07'],
+  objetivos:['Explicar para que servia a escrita no Egito e quem sabia escrever.','Reconhecer a Pedra de Roseta como fonte que permitiu decifrar os hieróglifos.'],
+  reflexao:{q:'Por que a Pedra de Roseta foi tão importante para a história?',options:['Porque era feita de ouro','Porque marcava o túmulo de um faraó','Porque mostrava o mapa do Egito','Porque tinha o mesmo texto em três escritas, uma delas o grego, e assim os hieróglifos foram decifrados'],correct:3,why:'Comparando o mesmo texto em hieróglifos, em escrita egípcia do dia a dia e em grego, Champollion decifrou os hieróglifos em 1822.'},
+  caderno:'Para que servia a escrita no Egito e quem sabia escrever? Por que isso dava poder?'}};
+D.ALAS.forEach(a=>{Object.assign(a,ESTUDO[a.id]);delete a.missao;delete a.missaoNome;});
+D.ATRIO_ESTUDO={pergunta:'Quando e onde viveram os antigos egípcios?',bncc:['EF06HI01'],texto:'O átrio mostra Gizé, há cerca de 4.500 anos. Repare nas datas das fichas: o Egito Antigo durou mais de 3 mil anos, e muita coisa mudou nesse tempo.'};
+/* leitura de fonte: t = tipo de registro, m = material, d = data, a = onde foi encontrada, h = onde está hoje, c = o que ela nos conta */
+const FONTE={
+ piramide:{t:'Monumento (modelo 3D do lugar real)',m:'Blocos de pedra revestidos de calcário branco polido',d:'c. 2560 a.C.',h:'Gizé, Egito, onde foi construída',c:'O poder do faraó e a enorme organização do trabalho, com matemática e astronomia.'},
+ esfinge:{t:'Monumento (modelo 3D do lugar real)',m:'Esculpida na própria rocha',d:'Época do faraó Quéfren',h:'Gizé, Egito',c:'Como símbolos (a força do leão, a inteligência humana) mostravam o poder do faraó.'},
+ quefren:{t:'Escultura real escaneada',m:'Pedra escura e muito dura',d:'c. 2520 a.C.',a:'Templo ao lado da pirâmide de Quéfren',h:'Museu Egípcio do Cairo, Egito',c:'Que a arte oficial mostrava o rei como eterno e acima das pessoas comuns.'},
+ estelaRamses:{t:'Peça real escaneada (estela)',m:'Pedra com relevos e restos de pintura vermelha',d:'c. 1250 a.C., época de Ramsés II',c:'Que um monumento muda de sentido com o tempo: a Esfinge passou a ser adorada como um deus.'},
+ nilo:{t:'Mapa didático',c:'Por que quase toda a vida egípcia ficava numa faixa estreita de terra fértil ao longo do rio.'},
+ barco:{t:'Peça real escaneada (modelo de túmulo)',m:'Madeira pintada, cerca de 1 metro',d:'Cerca de 4 mil anos',h:'Museu de Arte da Carolina do Norte, Estados Unidos',c:'Que o Nilo era a grande estrada do Egito, para pessoas, alimentos e pedras.'},
+ portadora:{t:'Peça real escaneada (modelo de túmulo)',m:'Madeira pintada, 26 cm',d:'c. 1900 a.C. (Médio Império)',h:'Museu de Arte de Cleveland, Estados Unidos',c:'O trabalho e a alimentação das pessoas comuns, que quase não aparecem nos textos oficiais.'},
+ farao:{t:'Ilustração didática',c:'A teocracia: o faraó reunia o poder político e o religioso.'},
+ menkaure:{t:'Escultura real escaneada',m:'Pedra escura e muito dura',d:'c. 2490 a.C.',a:'Templo junto à pirâmide de Menkaure (achada em 1910)',h:'Museu de Belas Artes de Boston, Estados Unidos',c:'Como a arte mostrava o casal real, com a rainha ao lado do rei, firmes e eternos.'},
+ triade:{t:'Escultura real escaneada',d:'c. 2490 a.C.',a:'Templo do vale de Menkaure, em Gizé',c:'O faraó protegido pelos deuses e ligado às províncias (nomos) do Egito.'},
+ mentuhotep:{t:'Escultura real escaneada',d:'c. 2000 a.C. (Médio Império)',a:'Templo em Armant, sul do Egito',c:'Que reis regravavam o próprio nome em estátuas antigas: é preciso cuidado ao datar uma peça pela inscrição.'},
+ ramses:{t:'Modelo 3D de peça real',d:'c. 1180 a.C.',c:'Que documentos escritos, como o papiro da greve, mostram também a vida dos trabalhadores.'},
+ nefertiti:{t:'Reprodução digital',d:'Original c. 1345 a.C.',h:'Original num museu de Berlim, Alemanha (levado em 1913; o Egito pede a devolução)',c:'O lugar de uma rainha na corte e o debate sobre onde devem ficar as peças de um povo.'},
+ senenmut:{t:'Escultura real escaneada',d:'c. 1470 a.C.',c:'Que uma mulher, Hatshepsut, governou como faraó, e como os funcionários mostravam prestígio.'},
+ tanwetamani:{t:'Escultura real escaneada',d:'c. 660 a.C.',a:'Templo junto à montanha de Gebel Barkal, em Kush (atual Sudão)',c:'Que o Egito tinha trocas, guerras e alianças com outros reinos africanos.'},
+ obelisco:{t:'Modelo 3D artístico',m:'Original: uma única pedra',h:'Há obeliscos egípcios em Paris, Londres, Roma e Nova York',c:'O culto ao deus Sol (Rá) e a capacidade de mover pedras gigantes.'},
+ tairkap:{t:'Peças reais escaneadas',m:'Dois caixões pintados e a caixa dos órgãos',d:'c. 650 a.C.',a:'Tebas',h:'Museu Egípcio de Berlim, Alemanha (desde 1822)',c:'Como uma mulher de Tebas foi preparada para a eternidade, mais de mil anos depois das pirâmides.'},
+ sarcofago:{t:'Peça real escaneada',m:'Pedra',c:'Que proteger o corpo era essencial para a crença na vida após a morte.'},
+ hunefer:{t:'Peça real escaneada',m:'Granito',d:'c. 1225 a.C., época de Ramsés II',a:'Tebas (atual Luxor)',h:'Museu em Cambridge, Inglaterra',c:'Riqueza e prestígio: só altos funcionários e a família real podiam pagar um sarcófago de pedra.'},
+ caixoes:{t:'Peças reais escaneadas',m:'Madeira pintada',d:'Bem depois das pirâmides',h:'Museu do Antigo Oriente Próximo, Universidade Harvard, Estados Unidos',c:'Que, com o tempo, mais pessoas, e não só os reis, puderam se preparar para a eternidade.'},
+ caixaCanopica:{t:'Peça real escaneada',m:'Alabastro',d:'c. 2580 a.C.',a:'Túmulo escondido ao lado da Grande Pirâmide (achada em 1927)',c:'Uma das provas mais antigas de que os egípcios retiravam os órgãos na mumificação.'},
+ canopicos:{t:'Peça real escaneada',c:'Quais órgãos eram guardados e por que o coração ficava no corpo.'},
+ reserva:{t:'Escultura real escaneada',m:'Calcário',d:'Antigo Império, época das pirâmides',a:'Túmulo em Gizé',c:'Que a história trabalha com hipóteses: até hoje não se sabe ao certo para que servia.'},
+ hieroglifos:{t:'Parede didática',c:'Que a escrita egípcia misturava sons e ideias, e por que ficou mais de mil anos sem ser lida.'},
+ roseta:{t:'Réplica didática',h:'Original no Museu Britânico, Londres (encontrada em 1799)',c:'Como uma fonte com o mesmo texto em três escritas permitiu decifrar os hieróglifos, em 1822.'},
+ estela:{t:'Peça real escaneada (estela)',m:'Pedra esculpida',h:'Museu do Antigo Oriente Próximo, Universidade Harvard, Estados Unidos',c:'Que escrever o nome na pedra era uma forma de manter a pessoa viva na memória.'},
+ escriba:{t:'Escultura real escaneada',m:'Granito preto',a:'Túmulo em Gizé',h:'Museu de Belas Artes de Boston, Estados Unidos',c:'O prestígio de quem sabia escrever e o uso da escrita para cobrar impostos.'},
+ paleta:{t:'Peça real escaneada (modelo em miniatura)',h:'Egypt Centre, Universidade de Swansea, País de Gales',c:'As ferramentas da escrita: tinta preta de carvão, vermelha de ocre e pincéis de junco.'},
+ papiro:{t:'Peça real escaneada',m:'Papiro, feito do caule da planta do Nilo',d:'Novo Império',c:'Como se fazia um dos primeiros papéis e o que se registrava nele.'},
+ templo:{t:'Modelo 3D artístico',c:'Que os templos eram a casa dos deuses e também grandes centros econômicos.'}};
+Object.keys(FONTE).forEach(k=>{if(D.info[k])D.info[k].fonte=FONTE[k];});
+/* BNCC do museu (6º ano) */
+D.BNCC_MUSEU={EF06HI01:'Identificar diferentes formas de compreensão da noção de tempo e de periodização dos processos históricos (continuidades e rupturas).',
+ EF06HI02:'Identificar a gênese da produção do saber histórico e analisar o significado das fontes que originaram determinadas formas de registro em sociedades e épocas distintas.',
+ EF06HI05:'Descrever modificações da natureza e da paisagem realizadas por diferentes tipos de sociedade.',
+ EF06HI07:'Identificar aspectos e formas de registro das sociedades antigas na África, no Oriente Médio e nas Américas, distinguindo alguns significados presentes na cultura material e na tradição oral dessas sociedades.',
+ EF06HI16:'Caracterizar e comparar as dinâmicas de abastecimento e as formas de organização do trabalho e da vida social em diferentes sociedades e períodos.',
+ EF06HI19:'Descrever e analisar os diferentes papéis sociais das mulheres no mundo antigo e nas sociedades medievais.'};
 window.HISTORIA_DATA=D;
 })();

@@ -5,16 +5,16 @@
 <script>/* Sala: escuta a concessão de VR do Quest (navegação WebXR) o mais cedo possível */try{navigator.xr&&navigator.xr.addEventListener("sessiongranted",function(){window.__xrConcedido=true;});}catch(e){}</script>
 <meta name="theme-color" content="#08192c"><meta name="description" content="História VR · Egito Antigo: às margens do Nilo, com construções, pessoas e objetos clicáveis e fichas narradas, a mumificação em ordem, uma caminhada em tamanho real pelo interior da Grande Pirâmide e a leitura de hieróglifos. Narração em português, 3D e VR.">
 <title>História VR · Laboratório de aprendizagem | Portal do Educador</title>
-<link rel="icon" href="assets/logo.png"><link rel="stylesheet" href="historia-lab.css?v=1.0.0"><link rel="stylesheet" href="historia-portal.css?v=1.0.0">
+<link rel="icon" href="assets/logo.png"><link rel="stylesheet" href="historia-lab.css?v=1.6.0"><link rel="stylesheet" href="historia-portal.css?v=1.0.0">
 <script defer src="vendor/three.r128.min.js"></script>
 <script defer src="vendor/GLTFLoader.r128.js?v=r128"></script>
-<script defer src="historia-data.js?v=1.5.0"></script>
-<script defer src="historia-models.js?v=1.5.0"></script>
+<script defer src="historia-data.js?v=1.6.0"></script>
+<script defer src="historia-models.js?v=1.6.0"></script>
 <script defer src="historia-audio.js?v=1.0.0"></script>
-<script defer src="historia-app.js?v=1.5.0"></script>
+<script defer src="historia-app.js?v=1.6.0"></script>
 <script defer src="portal-entrada.js?v=1.5.0"></script>
 <script defer src="sala-cliente.js?v=1.9.0"></script>
-<script defer src="historia-portal.js?v=1.5.0"></script><script defer src="historia-museu.js?v=1.5.0"></script><script defer src="pde-vr-padrao.js?v=1.0.0"></script>
+<script defer src="historia-portal.js?v=1.6.0"></script><script defer src="historia-museu.js?v=1.5.0"></script><script defer src="pde-vr-padrao.js?v=1.0.0"></script>
 <link rel="stylesheet" href="pde-3d-padrao.css?v=1.0.1">
 </head>
 <body>
@@ -47,7 +47,7 @@
   <div class="side-note" id="modelNote">Maquetes fora de escala; datas aproximadas.</div>
  </aside>
 </div>
-<footer><span><b>Portal do Educador</b> · NEWPC · História VR v1.5</span><span id="sessionStatus">Aprenda fazendo, no seu ritmo.</span><span id="offlineStatus" class="offline" title="Depois da primeira abertura, as narrações ficam guardados neste dispositivo e a aplicação funciona sem internet."></span><button id="sourcesBtn" data-action="sources">Fontes e limites do modelo</button></footer>
+<footer><span><b>Portal do Educador</b> · NEWPC · História VR v1.6</span><span id="sessionStatus">Aprenda fazendo, no seu ritmo.</span><span id="offlineStatus" class="offline" title="Depois da primeira abertura, as narrações ficam guardados neste dispositivo e a aplicação funciona sem internet."></span><button id="sourcesBtn" data-action="sources">Fontes e limites do modelo</button></footer>
 </div>
 <dialog id="welcomeDialog" class="welcome" aria-labelledby="welcomeTitle"><img src="assets/logo.png" alt=""><span class="eyebrow">PORTAL 360º VR</span><h2 id="welcomeTitle">Bem-vindo à História VR</h2><p>Hoje você viaja ao Egito Antigo: vai visitar um museu com peças de verdade, preparar uma múmia na ordem certa, entrar na Grande Pirâmide em tamanho real e ler hieróglifos como um escriba.</p><div class="button-row"><button data-action="welcomeStart" class="primary">▶ Começar com a narração</button><button data-action="welcomeSkip">Entrar sem narração</button></div></dialog>
 <dialog id="settingsDialog"><form method="dialog"><div class="dialog-head"><h2>Ajustes da experiência</h2><button aria-label="Fechar ajustes" class="icon">✕</button></div></form>
@@ -68,5 +68,5 @@
 <dialog id="summaryDialog"><div class="dialog-head"><h2>Resumo da experiência</h2><button id="closeSummary" data-action="closeSummary" class="icon" aria-label="Fechar resumo">✕</button></div><div id="summaryContent"></div><details><summary>Exportar registros brutos</summary><div class="button-row"><button id="downloadJSON" data-action="downloadJSON">Exportar JSON</button><button id="downloadCSV" data-action="downloadCSV">Exportar CSV</button></div></details><p class="fine">Registros desta aba; a identificação do aluno ou grupo é opcional e fica apenas neste dispositivo. O resumo descreve ações e tentativas; não é um diagnóstico de aprendizagem.</p></dialog>
 <dialog id="sourcesDialog"><form method="dialog"><div class="dialog-head"><h2>Fontes e limites</h2><button class="icon" aria-label="Fechar fontes">✕</button></div></form><div id="sourcesContent"></div></dialog>
 <script>window.addEventListener('error',function(e){console.error('História VR:',e.message);});</script>
-<script defer src="historia-relatorio.js?v=1.1.0.m"></script>
+<script defer src="historia-relatorio.js?v=1.6.0"></script>
 </body></html>

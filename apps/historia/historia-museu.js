@@ -72,10 +72,19 @@ function abrirCopia(v,key){fecharCopia(v);const g=M.copiaPeca(key);if(!g)return;
  const luz=M.poca(alvo*1.6,alvo*1.6,.55);luz.position.z=-alvo*.7;luz.renderOrder=2;c.add(luz);
  c.position.copy(v.model.worldToLocal(pos.p.clone()));encaraOlho(v,c,pos.olho);
  v.model.add(c);v._copia=c;if(v.refreshHits)v.refreshHits();}
-function sincronizarCopia(v){const k=Lab.inspectKey&&Lab.state.view==='explorar'?Lab.inspectKey:null;if(!k){fecharCopia(v);return;}if(v._copia&&v._copia.userData.chave===k&&v._copia.parent)return;abrirCopia(v,k);}
+function sincronizarCopia(v){const k=Lab.inspectKey&&Lab.state.view==='explorar'?Lab.inspectKey:null;if(!k){v._copiaFechada=null;fecharCopia(v);return;}if(v._copiaFechada===k){fecharCopia(v);return;}if(v._copia&&v._copia.userData.chave===k&&v._copia.parent)return;abrirCopia(v,k);}
 function animarCopia(v,dt){const c=v._copia;if(!c||!c.parent)return;const t=Math.min(1,(performance.now()-c.userData.t0)/320),e=1-Math.pow(1-t,3);const s=Lab.state.reducedMotion?1:.55+.45*e;c.scale.setScalar(s);
  const gi=c.userData.giro;if(!gi.userData.held&&gi.parent===c&&!(v.drag&&v.drag.group===gi&&v.drag.moved)&&!Lab.state.reducedMotion)gi.rotation.y+=dt*.35;
  if(!v.xr){const pos=posicaoCopia(v);if(pos){c.position.copy(v.model.worldToLocal(pos.p.clone()));const r=c.rotation.y;encaraOlho(v,c,pos.olho);}}}
+/* v1.7.2: como no Sistema Solar: clicar de novo na peça (ou na cópia) fecha a cópia e para a voz; ao fim da narração
+   a cópia fecha sozinha. A ficha (leitura de fonte) continua aberta na lateral; clicar outra vez traz a cópia e a voz de volta. */
+const activateAnt=Proto.activate;
+Proto.activate=function(data){if(data&&data.type==='inspect'&&Lab.state.view==='explorar'&&ehMuseu(this)&&Lab.inspectKey===data.key){
+  if(this._copia&&this._copia.userData.chave===data.key){this._copiaFechada=data.key;Lab.narrator.stop();fecharCopia(this);if(this.xr&&this.buildXRUI)this.buildXRUI();return;}
+  this._copiaFechada=null;}
+ return activateAnt.call(this,data);};
+{const n=Lab.narrator,notAnt=n.notify;n.notify=function(o){notAnt.call(n,o);if(o&&o.state==='ended'&&o.key&&!n.next&&o.key===Lab.inspectKey&&Lab.state.view==='explorar'){const v=Lab.view,k=o.key;
+ setTimeout(()=>{if(v&&Lab.inspectKey===k&&v._copia&&v._copia.userData.chave===k&&!n.busy){v._copiaFechada=k;fecharCopia(v);if(v.xr&&v.buildXRUI)v.buildXRUI();}},1400);}};}
 const showAnt=Proto.show;
 Proto.show=function(){const S=Lab.state;
  if(S.view==='explorar'&&ehMuseu(this)&&this.lastView==='explorar'&&this._museuXR===this.xr){atualizar(this,false);return;}

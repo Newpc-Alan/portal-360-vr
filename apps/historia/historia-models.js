@@ -400,9 +400,15 @@ function portaMissao(par,ala){const hit={type:'caderno',ala:ala.id};const g=new 
  const VW=1.45,VH=2.25,JW=.4,JD=.32,LH=.3;
  const tx=texCanvas('porta2-'+ala.id,256,512,(x,W,H)=>{const gr=x.createLinearGradient(0,0,0,H);gr.addColorStop(0,'#05070a');gr.addColorStop(.5,'#16110c');gr.addColorStop(1,ala.cor);x.fillStyle=gr;x.fillRect(0,0,W,H);const rg=x.createRadialGradient(W/2,H*.6,10,W/2,H*.6,W*.85);rg.addColorStop(0,'rgba(255,226,160,.6)');rg.addColorStop(1,'rgba(255,226,160,0)');x.fillStyle=rg;x.fillRect(0,0,W,H);
   x.strokeStyle='rgba(232,192,80,.85)';x.lineWidth=5;x.strokeRect(14,14,W-28,H-28);x.lineWidth=2;x.strokeRect(24,24,W-48,H-48);glifo(x,'ankh',W/2,H*.16,56,'rgba(232,192,80,.9)');});
+ /* v1.7.2: porta de madeira antiga (cedro, como as portas dos templos), com painel entalhado para o texto */
+ if(!tx._madeira){tx._madeira=true;const im=new Image();im.onload=()=>{const c=tx.image,x=c.getContext('2d'),W=c.width,H=c.height;x.drawImage(im,0,0,W,H);
+  const vg=x.createRadialGradient(W/2,H*.5,W*.2,W/2,H*.5,W*.95);vg.addColorStop(0,'rgba(0,0,0,0)');vg.addColorStop(1,'rgba(0,0,0,.5)');x.fillStyle=vg;x.fillRect(0,0,W,H);
+  const px=W*.13,py=H*.28,pw=W*.74,ph=H*.44;x.fillStyle='rgba(18,10,4,.55)';x.fillRect(px,py,pw,ph);x.strokeStyle='rgba(20,10,2,.9)';x.lineWidth=6;x.strokeRect(px,py,pw,ph);x.strokeStyle='rgba(214,170,80,.9)';x.lineWidth=3;x.strokeRect(px+6,py+6,pw-12,ph-12);
+  const rg=x.createRadialGradient(W/2,H*.5,4,W/2,H*.5,W*.4);rg.addColorStop(0,'rgba(255,214,140,.22)');rg.addColorStop(1,'rgba(255,214,140,0)');x.fillStyle=rg;x.fillRect(px,py,pw,ph);
+  x.fillStyle=ala.cor;x.fillRect(0,H-10,W,10);x.strokeStyle='rgba(232,192,80,.85)';x.lineWidth=5;x.strokeRect(6,6,W-12,H-12);glifo(x,'ankh',W/2,H*.19,60,'rgba(236,198,96,.95)');tx.needsUpdate=true;};im.src='media/museu/porta-madeira.jpg';}
  const vao=new T.Mesh(new T.PlaneGeometry(VW,VH),new T.MeshBasicMaterial({map:tx,toneMapped:false}));vao.position.y=VH/2;vao.userData.hit=hit;g.add(vao);
  const deco=new T.Group();g.add(deco);
- {const halo=poca(VW*2.6,VH*1.7,.55);halo.position.set(0,VH*.6,.004);g.add(halo);}
+ {const halo=poca(VW*2.8,VH*1.8,.6);halo.position.set(0,VH*.6,-.012);halo.renderOrder=0;g.add(halo);}/* atrás da porta: ilumina a parede em volta, não a madeira */
  const rel=texParedeGlifos('paredeTemplo','#5a3a1c',[214,182,132],101).clone();rel.needsUpdate=true;rel.repeat.set(.3,1.1);
  const pedra=new T.MeshStandardMaterial({map:rel,roughness:.85,envMap:envMuseu(),envMapIntensity:.35}),liso=new T.MeshStandardMaterial({map:imgM('arenito.jpg',true,[1,.4]),normalMap:imgM('arenito-n.jpg',false,[1,.4]),roughness:.85,envMap:envMuseu(),envMapIntensity:.35});
  const mFx=new T.MeshBasicMaterial({color:new T.Color(ala.cor),toneMapped:false});

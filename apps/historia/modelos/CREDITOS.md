@@ -35,3 +35,4 @@ Todos sob licença Creative Commons Atribuição 4.0 ou CC0 (domínio público, 
 - `media/museu/arenito*.jpg`, `piso*.jpg`, `teto.jpg`: texturas geradas por código para o projeto (NEWPC), sem material de terceiros. O teto azul com estrelas douradas segue o padrão dos tetos de tumbas e templos egípcios.
 - `media/museu/mapa-egito.jpg`: mapa ilustrado gerado por IA (ChatGPT) a pedido da NEWPC; geografia conferida (delta, Sinai, Mar Vermelho, Gizé, Faium, Tebas, 1ª catarata) e nomes aplicados pela equipe. Representação didática, sem escala.
 - Pilones, colunas papiriformes e disco solar alado: modelados por código, inspirados na arquitetura dos templos do Novo Império (Karnak, Luxor, Edfu).
+- `media/museu/porta-madeira.jpg`: textura de madeira (cedro com faixas e cravos de bronze) gerada por código para o projeto.

@@ -46,6 +46,8 @@ constGrupo.visible=mostrarConst;
 /* troca o fundo antigo pelo céu real */
 try{if(starfield&&starfield.parent)starfield.parent.remove(starfield);}catch(_){}
 scene.add(grupo);try{starfield=grupo;}catch(_){}
+/* as 'nebulosas' antigas (esferas coloridas translúcidas e gigantes) viravam discos chapados e não existem no céu real: saem */
+{const fora=[];scene.traverse(m=>{if(m.isMesh&&m.material&&m.material.isMeshBasicMaterial&&m.material.transparent&&m.material.opacity<.15&&m.geometry&&m.geometry.type==='SphereGeometry'&&m.geometry.parameters.radius>=400)fora.push(m);});fora.forEach(m=>m.parent&&m.parent.remove(m));}
 /* no óculos a tela tem mais pixels: estrelas um pouco maiores para não sumirem */
 let xrAntes=null;(function ajustar(){const xr=!!(renderer.xr&&renderer.xr.isPresenting);if(xr!==xrAntes){xrAntes=xr;materiaisEstrela.forEach(m=>{m.size=m.userData.px*(xr?1.7:1);});}setTimeout(ajustar,500);})();
 /* liga e desliga as constelações (painel Exibir) */

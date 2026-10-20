@@ -327,7 +327,7 @@ function pilone(par,ala){let lt0=null;const g=new T.Group();g.position.set(0,0,M
  const vao=4.4,wt=(A-vao)/2+.1,mFx=new T.MeshBasicMaterial({color:new T.Color(ala.cor),toneMapped:false});[-1,1].forEach(s=>{const t=new T.Mesh(caixaTalude(wt,wt*.84,.8,.62,H),[pedra,pedra,liso,liso,pedra,pedra]);t.position.x=s*(vao/2+wt/2);/* a base entra na parede da ala (não coincide com ela) */g.add(t);
   const fx=new T.Mesh(new T.BoxGeometry(wt*.97,.08,.86),mFx);fx.position.set(s*(vao/2+wt/2),2.95,0);g.add(fx);});
  const lin=new T.Mesh(new T.BoxGeometry(vao+.1,H-3.3,.66),liso);lin.position.y=(3.3+H)/2;g.add(lin);
- const fx=new T.Mesh(new T.BoxGeometry(vao+.1,.07,.7),mFx);fx.position.y=3.285;/* desce abaixo do lintel: sem face no mesmo plano (piscava) */g.add(fx);
+ [-1,1].forEach(sz=>{const fx=new T.Mesh(new T.BoxGeometry(vao+.1,.07,.03),mFx);fx.position.set(0,3.37,sz*.345);g.add(fx);});/* v1.7.4: frisos só na frente e atrás do lintel (a caixa inteira pintava a face de baixo e piscava) */
  const sh=new T.Shape();sh.moveTo(0,0);sh.lineTo(.04,0);sh.quadraticCurveTo(.06,.2,.24,.26);sh.lineTo(.24,.3);sh.lineTo(0,.3);sh.closePath();
  [1,-1].forEach(s=>{const ge=new T.ExtrudeGeometry(sh,{depth:vao+.1,bevelEnabled:false});const c=new T.Mesh(ge,ouroM());c.rotation.y=-s*Math.PI/2;c.position.set(s*(vao+.1)/2,H-.32,s*.33);g.add(c);
   const da=new T.Mesh(new T.PlaneGeometry(2.0,.5),MDISCO||(MDISCO=new T.MeshBasicMaterial({map:texDiscoAlado(),transparent:true,toneMapped:false,depthWrite:false})));da.position.set(0,H-.6,s*.335);if(s<0)da.rotation.y=Math.PI;g.add(da);

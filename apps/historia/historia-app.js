@@ -18,6 +18,7 @@ function save(){try{sessionStorage.setItem('pde_historia_v1',JSON.stringify(S));
 function log(event,skill,value={}){S.events.push({event,skill,...value,at:new Date().toISOString()});if(S.events.length>600)S.events.shift();save();updateStatus();}
 function mark(key){if(!S.completed.includes(key))S.completed.push(key);save();}
 function fb(text,type='ok'){feedbackText=text;const e=$('feedback');e.hidden=!text;e.className='feedback'+(type==='ok'?'':' '+type);e.textContent=text;if(view&&view.xr)view.buildXRUI();}
+function falaCaderno(al){return 'Caderno da ala '+al.nome+'. '+al.reflexao.q+' Escolha a resposta que você acha certa.';}
 function setInstruction(text,key){instruction=text;instructionKey=key;const c=$('captionText');c.textContent=text;c.hidden=true;}
 const listaDe=v=>(D.CATALOGO[v]||[]).flatMap(g=>g[1]);const vistosDe=v=>listaDe(v).filter(k=>S.visited.includes(k)).length;
 /* v1.6: o museu está concluído quando o aluno responde a reflexão das quatro alas */
@@ -92,9 +93,10 @@ function handle(cmd){const [kind,op,a]=cmd.split(':');
  if(kind==='tema'){const t=D.temas.find(x=>x.id===op);if(!t||t.breve)return;if(op!==S.tema&&S.guided){S.guided=false;S.gstep=0;}S.tema=op;S.modulo=t.modulo;const first=atividadesDe(op)[0];if(first)switchView(first.id);return;}
  if(kind==='ala'){const n=Number(op);S.ala=D.ALAS[n]?n:-1;S.cadernoAberto=-1;inspectKey=null;if(S.tour&&S.tour.ativo)S.tour.ativo=false;log('ala','explorar',{value:S.ala});if(view)view._forcarFoco=true;if(S.view!=='explorar'){switchView('explorar');return;}render();if(S.autoVoice)narrator.say(instruction,instructionKey);return;}
  if(kind==='cad'){const n=op==='resp'||op==='fechar'?S.cadernoAberto:(isNaN(Number(a))?D.ALAS.findIndex(x=>x.id===a):Number(a));const al=D.ALAS[n];
-  if(op==='abrir'&&al){S.ala=n;S.cadernoAberto=n;inspectKey=null;narrator.stop();log('caderno','explorar',{value:al.id});if(S.view!=='explorar'){switchView('explorar');return;}render();return;}
+  if(op==='abrir'&&al){S.ala=n;S.cadernoAberto=n;inspectKey=null;narrator.stop();log('caderno','explorar',{value:al.id});if(S.view!=='explorar'){switchView('explorar');return;}render();
+   /* v1.7.4: o Caderno também é narrado (cad-<ala>.mp3; sem o MP3, voz do navegador) */if(S.autoVoice){const c=S.caderno[al.id]||{};if(c.resp===undefined)narrator.say(falaCaderno(al),'cad-'+al.id);else narrator.say(al.reflexao.why,'cad-'+al.id+'-exp');}return;}
   if(op==='fechar'){S.cadernoAberto=-1;render();save();return;}
-  if(op==='resp'&&al){const c=S.caderno[al.id]=S.caderno[al.id]||{};if(c.resp!==undefined)return;const k=Number(a),R=al.reflexao;c.resp=k;c.certa=k===R.correct;log('avaliacao','caderno-'+al.id,{choice:k,correct:c.certa});mark('ala:'+al.id);if(museuCompleto())mark('explorar');render();save();fb((c.certa?'Isso! ':'Não é bem assim. ')+R.why,c.certa?'ok':'warning');return;}
+  if(op==='resp'&&al){const c=S.caderno[al.id]=S.caderno[al.id]||{};if(c.resp!==undefined)return;const k=Number(a),R=al.reflexao;c.resp=k;c.certa=k===R.correct;log('avaliacao','caderno-'+al.id,{choice:k,correct:c.certa});mark('ala:'+al.id);if(museuCompleto())mark('explorar');render();save();fb((c.certa?'Isso! ':'Não é bem assim. ')+R.why,c.certa?'ok':'warning');if(S.autoVoice)narrator.say(R.why,'cad-'+al.id+'-exp');return;}
   if(op==='salvar'&&al){const t=document.getElementById('cadTexto');const c=S.caderno[al.id]=S.caderno[al.id]||{};c.texto=t?t.value.trim():'';log('caderno-texto','explorar',{value:al.id});save();fb('Resposta guardada no caderno. Ela aparece no relatório do professor.','ok');return;}
   return;}
  if(kind==='inspect'){if(op==='close'){inspectKey=null;if(S.tour&&S.tour.ativo)S.tour.ativo=false;render();narrator.stop();}else if(op==='listen'){const i=D.info[inspectKey]||D.info.nilo;narrator.say(i.text,inspectKey||'nilo');}else inspect(op);return;}

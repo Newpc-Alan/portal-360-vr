@@ -3,7 +3,7 @@
 Rodar a cada publicação: python3 tools/gerar-precache.py [app=corpo-humano] [arquivo-de-dados=corpo-data.js]
 Ex.: python3 tools/gerar-precache.py terra terra-data.js
 - casca: index.html, css/js com a versão lida do index.html, vendor e assets
-- pesados: modelos/*.glb e audio/*.mp3 com hash (md5 curto) para atualizar só o que mudou"""
+- pesados: modelos/*.glb, audio/*.mp3 e media/tex/* (texturas grandes) com hash (md5 curto) para atualizar só o que mudou"""
 import hashlib,json,os,re,sys
 APP=sys.argv[1] if len(sys.argv)>1 else 'corpo-humano';DADOS=sys.argv[2] if len(sys.argv)>2 else 'corpo-data.js'
 raiz=os.path.join(os.path.dirname(os.path.abspath(__file__)),'..','apps',APP);raiz=os.path.normpath(raiz)
@@ -20,7 +20,7 @@ def h(p):
         for b in iter(lambda:f.read(1<<20),b''):m.update(b)
     return m.hexdigest()[:10]
 pesados=[];total=0
-for pasta,ext in [('modelos','.glb'),('audio','.mp3')]:
+for pasta,ext in [('modelos','.glb'),('audio','.mp3'),('media/tex',('.jpg','.png','.webp'))]:
     if not os.path.isdir(os.path.join(raiz,pasta)):continue
     for n in sorted(os.listdir(os.path.join(raiz,pasta))):
         if not n.endswith(ext):continue

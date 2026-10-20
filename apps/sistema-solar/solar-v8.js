@@ -250,7 +250,16 @@ function clearXRUI(){limparBotoesVR();fecharPainelVR();limparLabelsVR();for(cons
 function xrAnchor(){const p=new T.Vector3(),q=new T.Quaternion();let cam=camera;try{if(renderer.xr.isPresenting)cam=renderer.xr.getCamera(camera);}catch(e){cam=camera;}cam.getWorldPosition(p);cam.getWorldQuaternion(q);const forward=new T.Vector3(0,0,-1).applyQuaternion(q);forward.y=0;if(forward.lengthSq()<.01)forward.set(0,0,-1);forward.normalize();return{p,f:forward,r:new T.Vector3(-forward.z,0,forward.x),yaw:Math.atan2(-forward.x,-forward.z)};}
 function atAnchor(x,y,z){if(!S.xrAnchor)S.xrAnchor=xrAnchor();/* v9.2: nunca chamar sem âncora (erro 228:44 no Quest) */return S.xrAnchor.p.clone().addScaledVector(S.xrAnchor.r,x).addScaledVector(S.xrAnchor.f,z).add(new T.Vector3(0,y,0));}
 function xrButton(text,action,x,y,z=1.45){const b=criarBotaoVR(text,action);b.position.copy(atAnchor(x,y,z));scene.add(b);return b;}
-function setupXRActivity(){clearXRUI();if(!S.xrAnchor)S.xrAnchor=xrAnchor();const v=estado.vista;const scales={sistema:.017,desafio:.017,planeta: .3/(CORPOS[estado.sel].raio||1),comparar:.062,diaNoite:.068,fases:.049,estacoes:.023,eclipse:.028};root.scale.setScalar(scales[v]);root.rotation.set(v==='sistema'||v==='estacoes'?.25:0,S.xrAnchor.yaw,0);root.position.copy(atAnchor(0,-.45,1.85));if(v==='planeta'){root.position.copy(atAnchor(0,.02,1.0));root.scale.multiplyScalar(1.22);}root.traverse(o=>{if(o.isPoints){if(o.userData.baseSize===undefined)o.userData.baseSize=o.material.size;o.material.size=o.userData.baseSize*root.scale.x;}if(o.isPointLight)o.decay=0;});
+/* v9.19: no layout imersivo o aluno fica na altura do cinturão de asteroides; as rochas (exageradas para aparecer na maquete
+   compacta) encolhem para cerca de 1/3 enquanto ele estiver dentro, e voltam ao tamanho original fora do óculos */
+function ajustarCinturaoVR(){if(!cinturao)return;const inst=cinturao.children.find(o=>o.isInstancedMesh);if(!inst)return;
+ const quer=!!(estado.vr&&(estado.vista==='sistema'||estado.vista==='desafio')&&!estado.escala),tem=!!inst.userData.encolhido;
+ if(quer!==tem){const f=quer?.35:1/.35;inst.geometry.scale(f,f,f);inst.geometry.computeBoundingSphere();inst.userData.encolhido=quer;}}
+function setupXRActivity(){clearXRUI();if(!S.xrAnchor)S.xrAnchor=xrAnchor();const v=estado.vista;const scales={sistema:.017,desafio:.017,planeta: .3/(CORPOS[estado.sel].raio||1),comparar:.062,diaNoite:.068,fases:.049,estacoes:.023,eclipse:.028};root.scale.setScalar(scales[v]);root.rotation.set(v==='sistema'||v==='estacoes'?.25:0,S.xrAnchor.yaw,0);root.position.copy(atAnchor(0,-.45,1.85));
+ /* v9.19: no Sistema Solar o aluno fica DENTRO da maquete (cerca de 3x maior, proporções iguais): Sol 1,5 m à frente, plano das
+    órbitas na horizontal, 65 cm abaixo dos olhos; a Terra (10 cm) passa a meio metro e os planetas externos giram em volta e atrás.
+    Com 'distâncias proporcionais' ligado a maquete seria larga demais (Netuno a 11 m): fica o layout compacto antigo. */
+ if((v==='sistema'||v==='desafio')&&!estado.escala){root.scale.setScalar(.05);root.rotation.set(0,S.xrAnchor.yaw,0);root.position.copy(atAnchor(0,-.65,1.5));}if(v==='planeta'){root.position.copy(atAnchor(0,.02,1.0));root.scale.multiplyScalar(1.22);}root.traverse(o=>{if(o.isPoints){if(o.userData.baseSize===undefined)o.userData.baseSize=o.material.size;o.material.size=o.userData.baseSize*root.scale.x;}if(o.isPointLight)o.decay=0;});
  xrContexto();
  // Etiquetas existentes reaproveitam as posições dos modelos, sem alterar escala.
  for(const l of labelsMap){const sp=criarLabelVR(l.el.textContent);sp.scale.set(.20,.05,1);scene.add(sp);S.xrLabels.push({sp,mesh:l.mesh});}
@@ -318,7 +327,7 @@ function montarCeuReal(){const g=$v('grpTempo');if(!g||$v('ceuHoje'))return;cons
  $v('ceuReal').addEventListener('change',e=>{S.ceuReal=e.target.checked;if(S.ceuReal)aplicarCeuReal();});}
 let _ultData='';function atualizarData(forca){const t=rotuloData();if(!forca&&t===_ultData)return;_ultData=t;const d=$v('ceuData');if(d)d.textContent=t;}
 setTimeout(()=>{montarCeuReal();if(S.ceuReal)aplicarCeuReal();},0);
-animate=function(){const now=performance.now(),dt=Math.min(.05,Math.max(0,(now-vvLast)/1000));vvLast=now;S.dt=dt;resize();_frames++;const v=estado.playing?estado.vel:0,step=dt*v;S.simTime+=step;
+animate=function(){const now=performance.now(),dt=Math.min(.05,Math.max(0,(now-vvLast)/1000));vvLast=now;S.dt=dt;resize();ajustarCinturaoVR();_frames++;const v=estado.playing?estado.vel:0,step=dt*v;S.simTime+=step;
  if(estado.vista==='sistema'||estado.vista==='desafio'){S.dia+=step*5.4*365.25/(365*TAU);atualizarData();for(const s of sis){const lr=S.ceuReal?longitude(s.k,S.dia):null;if(lr!==null)s.pivot.rotation.y=lr;else s.pivot.rotation.y+=s.revSpeed*step*5.4;s.mesh.rotation.y+=s.spinSpeed*step*1.8;if(s.mesh.userData.luaPivot)s.mesh.userData.luaPivot.rotation.y+=step*2.7;}if(cinturao)cinturao.rotation.y+=step*.14;for(const c of cometas)cometStep(c,step);}
  if(estado.vista==='planeta'&&focoMesh&&!S.manual)focoMesh.mesh.rotation.y+=focoMesh.spin*step*1.8;
  if(estado.vista==='diaNoite'&&terraDia){if(v){S.dayAngle=(S.dayAngle+step)%TAU;terraDia.mesh.rotation.y=S.dayAngle;}updateDayStatus();}
@@ -585,6 +594,6 @@ sairVRFinal=function(){if(S.pontosVR){for(const pt of S.pontosVR.values())releas
  canvas3d.addEventListener('click',e=>{if(Math.hypot(e.clientX-dx,e.clientY-dy)<6&&performance.now()-dt<600&&alvoFechar(e.clientX,e.clientY)){e.stopImmediatePropagation();pararEFechar();}},true);
  let tx=0,ty=0,tt=0;canvas3d.addEventListener('touchstart',e=>{tx=e.touches[0].clientX;ty=e.touches[0].clientY;tt=performance.now();},{capture:true,passive:true});
  canvas3d.addEventListener('touchend',e=>{const c=e.changedTouches&&e.changedTouches[0];if(c&&Math.hypot(c.clientX-tx,c.clientY-ty)<10&&performance.now()-tt<500&&alvoFechar(c.clientX,c.clientY)){e.stopImmediatePropagation();pararEFechar();}},true);}
-window.PortalSolarV8={version:'9.18',state:S,seasons,daylight,setDay,beginMission,checkMission,finishMission,enterView:entrarVista,exportSummary,setupXRActivity,resetStudent,menuVRAlternar,resumo:()=>({vistas:[...(S.activities||[])],missao:!!S.complete,tentativasErradas:Math.max(0,(S.attempts||0)-(S.complete?1:0)),acertos:(S.qr&&S.qr.acertos)||0,respondidas:S.qr?((S.qr.acertos||0)+(S.qr.erros||0)):0,total:(S.qr&&S.qr.n)||0,quizFim:!!(S.qr&&S.qr.fim)})};
+window.PortalSolarV8={version:'9.19',state:S,seasons,daylight,setDay,beginMission,checkMission,finishMission,enterView:entrarVista,exportSummary,setupXRActivity,resetStudent,menuVRAlternar,resumo:()=>({vistas:[...(S.activities||[])],missao:!!S.complete,tentativasErradas:Math.max(0,(S.attempts||0)-(S.complete?1:0)),acertos:(S.qr&&S.qr.acertos)||0,respondidas:S.qr?((S.qr.acertos||0)+(S.qr.erros||0)):0,total:(S.qr&&S.qr.n)||0,quizFim:!!(S.qr&&S.qr.fim)})};
 entrarVista(S.views.includes(estado.vista)?estado.vista:'sistema');renderer.setAnimationLoop(animate);
 })();

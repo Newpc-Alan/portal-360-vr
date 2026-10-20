@@ -56,7 +56,7 @@ function modelo(arq,opt={}){
     const inst=src.clone(true);const meshes={},remover=[];
     inst.traverse(o=>{if(!o.isMesh)return;const parte=(/^mesh_\d+$/.test(o.name)||!o.name)?((o.parent&&o.parent.name)||''):o.name;o.userData.parte=parte;o.userData.arq=arq;
       if(opt.partes&&!opt.partes.includes(parte)){remover.push(o);return;}
-      o.material=material(arq,parte,opt);const h=opt.hit?opt.hit(parte):null;if(h)o.userData.hit=h;meshes[parte]=o;});
+      o.material=material(arq,parte,opt);const h=opt.hit?opt.hit(parte):null;if(h)o.userData.hit=h;meshes[parte]=o;if(window.CORPO_TECIDOS&&window.CORPO_TECIDOS.cavidade)window.CORPO_TECIDOS.cavidade(o);});
     remover.forEach(o=>{if(o.parent)o.parent.remove(o);});
     const inner=new T.Group();inner.scale.setScalar(ESC);inst.position.set(0,-OY,0);inner.add(inst);g.add(inner);
     if(opt.centrar){const box=new T.Box3();const v=new T.Vector3();Object.values(meshes).forEach(o=>{o.updateMatrixWorld(true);if(!o.geometry.boundingBox)o.geometry.computeBoundingBox();const bb=o.geometry.boundingBox;for(let i=0;i<8;i++){v.set(i&1?bb.max.x:bb.min.x,i&2?bb.max.y:bb.min.y,i&4?bb.max.z:bb.min.z).applyMatrix4(o.matrixWorld);box.expandByPoint(v);}});

@@ -11,7 +11,7 @@ const CENTROS={pulmoes:[-0.001,1.299,0.01],traqueia:[0,1.433,0.006],bronquios:[0
  /* v4.3 · urinário e endócrino */rins:[0.0014,1.1034,-0.0124],ureteres:[0.0024,0.9903,-0.0071],bexiga:[0.0004,0.8128,0.0231],adrenais:[0.0065,1.1517,-0.0154],tireoide:[0,1.4717,0.0162],hipofise:[0,1.6015,0.0169],pineal:[0,1.616,-0.0229]};
 const PARTES_POS={rins:{rim_d:[-0.059,1.0938,-0.0099],rim_e:[0.0616,1.1122,-0.0183],pelve_renal_d:[-0.0512,1.0945,-0.0082],pelve_renal_e:[0.0578,1.1101,-0.0186]},ureteres:{ureter_d:[-0.0254,0.9812,-0.0047],ureter_e:[0.0344,0.9918,-0.0071]},bexiga:{bexiga:[0.0004,0.8549,0.0001],uretra:[0,0.7878,0.0349]},adrenais:{adrenal_d:[-0.0466,1.1414,-0.0094],adrenal_e:[0.0514,1.1606,-0.0249]},tireoide:{tireoide:[0,1.4717,0.0162],paratireoides:[0,1.4702,-0.0019]}};
 const CORACAO_PARTES={atrioD:[-0.0145,1.2955,0.0291],atrioE:[0.021,1.3005,0.0113],ventD:[0.0197,1.2852,0.0477],ventE:[0.0424,1.2815,0.0281],aorta:[0.0112,1.3525,0.0006],pulmonar:[0.0259,1.3135,0.0117],cavas:[-0.0145,1.2042,0.0172],veiasPulm:[0.0053,1.3131,-0.0129]};
-const CORES={pulmoes:0xd98585,traqueia:0x9ed6ef,bronquios:0xbfe3f4,faringe:0xaad8ef,esofago:0xe9a070,estomago:0xe08a50,figado:0x9e4d40,intestino_delgado:0xf0c07a,intestino_grosso:0xc99a6b,diafragma:0xb48ae8,costelas:0xe9e4d6,silhueta:0x8fc3dd,cabeca:0x8fc3dd,aorta:0xe8484f,pancreas:0xf2d39b,duodeno:0xe8b065,apendice:0xc99a6b,ureteres:0xf0d08a,adrenais:0xf2c46a,hipofise:0xe0a0a8,pineal:0xd8b0d0};
+const CORES={pulmoes:0xd98585,traqueia:0x9ed6ef,bronquios:0xbfe3f4,faringe:0xaad8ef,esofago:0xe39a86,estomago:0xe0907e,figado:0x9e4d40,intestino_delgado:0xeba98f,intestino_grosso:0xd8957a,diafragma:0xb48ae8,costelas:0xe9e4d6,silhueta:0x8fc3dd,cabeca:0x8fc3dd,aorta:0xe8484f,pancreas:0xf2d39b,duodeno:0xe8a48a,apendice:0xd8957a,ureteres:0xf0d08a,adrenais:0xf2c46a,hipofise:0xe0a0a8,pineal:0xd8b0d0};
 const CORES_PARTES={laringe:{tireoide:0xd8ecf3,cricoide:0xcfe3ee,aritenoide:0xc4dbe8,hioide:0xe9e4d6,epiglote:0xe7a0a0,laringofaringe:0xaad8ef},nariz:{cartilagens:0xd8ecf3,ossos:0xe9e4d6,conchas:0xe3b7b0,mucosa:0xe39a9a},faringe:{nasofaringe:0x9ed6ef,orofaringe:0xaad8ef,laringofaringe:0xbfe3f4},boca:{lingua:0xd96b73,palato:0xe8a39c,uvula:0xe08a90},vesicula:{vesicula:0x6f9f52,ducto_biliar:0x9ccf7a},salivares:{parotida:0xf0b8b0,submandibular:0xe9a8a0,sublingual:0xf4c8c0,ductos:0xf7e0d8},rins:{rim_d:0xa0433f,rim_e:0xa0433f,pelve_renal_d:0xf0d08a,pelve_renal_e:0xf0d08a},bexiga:{bexiga:0xe9c27a,uretra:0xe9c27a},tireoide:{tireoide:0xc96a6a,paratireoides:0xf0d0a0}};
 /* v4.10 · coração realista (padrão) ou com cores didáticas (vermelho = arterial, azul = venoso); escolha do professor, guardada no aparelho */
 const CORES_CORACAO_REAL={atrioD:0x7a2a31,atrioE:0x8a2f34,ventD:0x8e3230,ventE:0x993532,aorta:0xe3c2b6,pulmonar:0xd9b0a6,cavas:0x4f3a5c,veiasPulm:0x8c3a44,coronarias:0xa8222c};
@@ -35,6 +35,9 @@ function material(key,parte){
   const op=OPAC_PARTES[key]&&OPAC_PARTES[key][parte];if(op!==undefined){m.transparent=true;m.opacity=op;m.depthWrite=false;}
   if(window.CORPO_TECIDOS){const t=window.CORPO_TECIDOS.tecidoDe(key,parte);if(t)window.CORPO_TECIDOS.aplicar(m,t);}
   if(real){m.color.convertSRGBToLinear();if(ENV){m.envMap=ENV;m.envMapIntensity=.9;}m.userData.coracaoReal=true;}
+  /* v4.14 · acabamento de apresentação: as cores da tabela são sRGB; convertidas para linear ficam saturadas e profundas
+     (antes ficavam lavadas, puxando para o pastel). Reflexo de estúdio suave dá o brilho úmido dos órgãos. */
+  else if(window.CORPO_ACABAMENTO!==false&&key!=='silhueta'&&key!=='cabeca'){m.color.convertSRGBToLinear();if(ENV){m.envMap=ENV;m.envMapIntensity=.55;}m.userData.acabamento=true;}
   return m;
 }
 function carregar(key,cb){
@@ -52,7 +55,7 @@ function orgao(key,reserva,hitFn,opt={}){
   carregar(key,src=>{
     if(!src){if(reserva){const r=reserva();r.traverse(o=>{if(o.isMesh){const h=hitDe(o.name);if(h)o.userData.hit=h;}});g.add(r);}g.userData.pronto=true;window.dispatchEvent(new CustomEvent('corpo:modelo',{detail:{key,group:g,reserva:true}}));return;}
     const inst=src.clone(true);const meshes={};
-    inst.traverse(o=>{if(o.isMesh){const parte=o.name||(o.parent&&o.parent.name)||'';o.material=material(key,parte);if(opt.opacidade!==undefined){o.material.transparent=true;o.material.opacity=opt.opacidade;o.material.depthWrite=false;}const h=hitDe(parte);if(h)o.userData.hit=h;o.userData.parte=parte;meshes[parte]=o;}});
+    inst.traverse(o=>{if(o.isMesh){const parte=o.name||(o.parent&&o.parent.name)||'';o.material=material(key,parte);if(opt.opacidade!==undefined){o.material.transparent=true;o.material.opacity=opt.opacidade;o.material.depthWrite=false;}const h=hitDe(parte);if(h)o.userData.hit=h;o.userData.parte=parte;meshes[parte]=o;if(key!=='silhueta'&&key!=='cabeca'&&window.CORPO_TECIDOS&&window.CORPO_TECIDOS.cavidade)window.CORPO_TECIDOS.cavidade(o);}});
     if(opt.aoCarregar)opt.aoCarregar(inst,meshes,g);
     const inner=new T.Group();inner.scale.setScalar(ESC);const c=CENTROS[key];inst.position.set(-c[0],-c[1],-c[2]);inner.add(inst);g.add(inner);
     g.userData.pronto=true;window.dispatchEvent(new CustomEvent('corpo:modelo',{detail:{key,group:g}}));

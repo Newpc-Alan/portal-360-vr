@@ -46,12 +46,12 @@ const GERA={
 function textura(tipo){if(cache[tipo])return cache[tipo];const g=GERA[tipo];if(!g)return null;const tx=new T.CanvasTexture(g());tx.wrapS=tx.wrapT=T.RepeatWrapping;tx.encoding=T.sRGBEncoding;tx.minFilter=T.LinearMipmapLinearFilter;tx.magFilter=T.LinearFilter;tx.generateMipmaps=true;tx.anisotropy=4;cache[tipo]=tx;return tx;}
 /* ---------- parâmetros por tecido ---------- */
 const TEC={
- pulmao:{tex:'pulmao',escala:9,relevo:.8,rug:[.4,.78],rim:0xffb9b0,rimF:.55,tinta:.7},
+ pulmao:{tex:'pulmao',escala:9,relevo:1.15,rug:[.4,.78],rim:0xffb9b0,rimF:.55,tinta:.7},
  coracao:{tex:'coracao',escala:14,relevo:1.0,rug:[.26,.62],rim:0xff8a80,rimF:.65,tinta:.6,pulso:true},
  musculo:{tex:'musculo',escala:8,relevo:.6,rug:[.45,.7],rim:0xff9a8a,rimF:.45,tinta:.55},
  osso:{tex:'osso',escala:7,relevo:.7,rug:[.6,.92],rim:0xfff2cf,rimF:.35,tinta:.5},
  vaso:{tex:'vaso',escala:14,relevo:.3,rug:[.25,.45],rim:0xffffff,rimF:.5,tinta:.25},
- viscera:{tex:'viscera',escala:9,relevo:.7,rug:[.3,.62],rim:0xffd0c0,rimF:.5,tinta:.5},
+ viscera:{tex:'viscera',escala:9,relevo:1.0,rug:[.3,.62],rim:0xffd0c0,rimF:.5,tinta:.5},
  cartilagem:{tex:'cartilagem',escala:25,relevo:.4,rug:[.5,.75],rim:0xe0f4ff,rimF:.45,tinta:.3},
  encefalo:{tex:'encefalo',escala:16,relevo:.9,rug:[.3,.6],rim:0xffc9c0,rimF:.5,tinta:.55},
  nervo:{tex:'nervo',escala:12,relevo:.5,rug:[.35,.7],rim:0xfff3c8,rimF:.55,tinta:.45},
@@ -92,5 +92,40 @@ function aplicar(m,tipo){
  m.needsUpdate=true;return m;
 }
 function pulsar(t){PULSO.value=Math.max(0,Math.sin(t*5.2));}
-window.CORPO_TECIDOS={aplicar,tecidoDe,textura,pulsar,PULSO,TEC};
+/* ---------- v4.14 · sombra de cavidade (oclusão ambiente aproximada) ----------
+   Os modelos Z-Anatomy não trazem textura nem sombreamento. Aqui, uma vez por malha (no carregamento), cada vértice
+   recebe um tom pela curvatura local: sulcos, dobras e encaixes ficam mais escuros, e bordas e saliências um pouco mais
+   claras. É o que dá profundidade de ilustração anatômica (giros do cérebro, lobos do pulmão, vasos do coração) sem
+   textura baixada nem custo por quadro: vira cor de vértice, multiplicada pela cor do tecido. */
+function cavidade(mesh){if(!mesh||!mesh.isMesh||!mesh.geometry)return;const geo=mesh.geometry;
+ if(!geo.userData.cavidade){try{calcularCavidade(geo);}catch(e){geo.userData.cavidade='erro';}}
+ if(geo.userData.cavidade===true){const ms=[].concat(mesh.material||[]);ms.forEach(m=>{if(m&&!m.vertexColors){m.vertexColors=true;m.needsUpdate=true;}});}}
+function calcularCavidade(geo){const pos=geo.attributes.position;if(!pos||pos.count<12){geo.userData.cavidade='pequena';return;}
+ if(!geo.attributes.normal)geo.computeVertexNormals();const nor=geo.attributes.normal,n=pos.count;
+ /* solda por posição (as emendas de UV/normal duplicam vértices) */
+ const chave=new Map(),id=new Int32Array(n);let u=0;const P=pos.array,N=nor.array;
+ for(let i=0;i<n;i++){const k=Math.round(P[i*3]*1e4)+','+Math.round(P[i*3+1]*1e4)+','+Math.round(P[i*3+2]*1e4);let x=chave.get(k);if(x===undefined){x=u++;chave.set(k,x);}id[i]=x;}
+ const px=new Float32Array(u*3),nx=new Float32Array(u*3),cnt=new Float32Array(u);
+ for(let i=0;i<n;i++){const j=id[i];px[j*3]=P[i*3];px[j*3+1]=P[i*3+1];px[j*3+2]=P[i*3+2];nx[j*3]+=N[i*3];nx[j*3+1]+=N[i*3+1];nx[j*3+2]+=N[i*3+2];}
+ for(let j=0;j<u;j++){const l=Math.hypot(nx[j*3],nx[j*3+1],nx[j*3+2])||1;nx[j*3]/=l;nx[j*3+1]/=l;nx[j*3+2]/=l;}
+ const idx=geo.index?geo.index.array:null,tri=idx?idx.length:n;const soma=new Float32Array(u),peso=new Float32Array(u);
+ const aresta=(a,b)=>{const dx=px[b*3]-px[a*3],dy=px[b*3+1]-px[a*3+1],dz=px[b*3+2]-px[a*3+2],l=Math.hypot(dx,dy,dz);if(l<1e-9)return;
+  soma[a]+=(dx*nx[a*3]+dy*nx[a*3+1]+dz*nx[a*3+2])/l;peso[a]+=1;soma[b]-=(dx*nx[b*3]+dy*nx[b*3+1]+dz*nx[b*3+2])/l;peso[b]+=1;};
+ for(let t=0;t<tri;t+=3){const a=id[idx?idx[t]:t],b=id[idx?idx[t+1]:t+1],c=id[idx?idx[t+2]:t+2];aresta(a,b);aresta(b,c);aresta(c,a);}
+ let cur=new Float32Array(u);for(let j=0;j<u;j++)cur[j]=peso[j]?soma[j]/peso[j]:0;
+ /* vizinhança (para suavizar e alargar o efeito: sulcos largos também escurecem) */
+ const viz=[];for(let j=0;j<u;j++)viz.push([]);for(let t=0;t<tri;t+=3){const a=id[idx?idx[t]:t],b=id[idx?idx[t+1]:t+1],c=id[idx?idx[t+2]:t+2];viz[a].push(b,c);viz[b].push(a,c);viz[c].push(a,b);}
+const suaviza=(arr,vezes)=>{let c=arr;for(let it=0;it<vezes;it++){const nv=new Float32Array(u);for(let j=0;j<u;j++){const v=viz[j];let s=c[j]*2;for(let q=0;q<v.length;q++)s+=c[v[q]];nv[j]=s/(v.length+2);}c=nv;}return c;};
+ const norm=arr=>{const abs=Array.from(arr,Math.abs).sort((a,b)=>a-b),ref=abs[Math.floor(abs.length*.92)]||1;return arr.map(x=>Math.max(-1.5,Math.min(1.5,x/ref)));};
+ /* duas escalas: fina (dobras, giros) e larga (fissuras entre lobos, encaixes entre câmaras) */
+ const fina=norm(suaviza(cur,2)),larga=norm(suaviza(cur,14));
+ /* gradiente suave de cima para baixo (a parte de baixo recebe menos luz no corpo) */
+ let ymin=1e9,ymax=-1e9;for(let j=0;j<u;j++){ymin=Math.min(ymin,px[j*3+1]);ymax=Math.max(ymax,px[j*3+1]);}const yr=Math.max(1e-6,ymax-ymin);
+ const cor=new Float32Array(n*3);
+ for(let i=0;i<n;i++){const j=id[i],cf=fina[j],cl=larga[j];/* c>0 côncavo (sulco), c<0 convexo (saliência) */
+  let k=1;if(cf>0)k-=.3*Math.min(1,cf);else k+=.08*Math.min(1,-cf);if(cl>0)k-=.4*Math.min(1,cl);else k+=.05*Math.min(1,-cl);
+  k*=.84+.16*((px[j*3+1]-ymin)/yr);k=Math.max(.3,Math.min(1.15,k));if(k<1)k=k*k;/* a cor de vértice multiplica em espaço linear: ao quadrado, o escuro aparece na tela */const fundo=Math.max(0,1-k);
+  cor[i*3]=k;cor[i*3+1]=k*(1-.12*fundo);cor[i*3+2]=k*(1-.1*fundo);}
+ geo.setAttribute('color',new T.BufferAttribute(cor,3));geo.userData.cavidade=true;}
+window.CORPO_TECIDOS={aplicar,tecidoDe,textura,pulsar,PULSO,TEC,cavidade};
 })();

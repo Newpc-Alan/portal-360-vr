@@ -99,15 +99,24 @@ INFOS.comparar='Aqui os diâmetros usam uma escala comum. A separação entre os
 // Materiais: atmosfera por ângulo de visão, nuvens em camada independente e relevo sutil.
 let clouds=null,water=null;
 const loader=new T.TextureLoader();
-clouds=loader.load('media/terra-nuvens.png');water=loader.load('media/terra-oceanos.png');sharedTextures.add(clouds);sharedTextures.add(water);
+clouds=loader.load('media/tex/terra-nuvens.jpg?v=9.15.0');water=loader.load('media/terra-oceanos.png');sharedTextures.add(clouds);sharedTextures.add(water);
+/* v9.15: luzes das cidades no lado noturno (mapa noturno do Solar System Scope). O brilho é apagado onde a luz direta do Sol chega,
+   então funciona em qualquer vista e com qualquer posição do Sol, sem calcular direção. */
+const noite=loader.load('media/tex/terra-noite.jpg?v=9.15.0');noite.encoding=T.sRGBEncoding;sharedTextures.add(noite);
+/* nuvens: a luz ambiente fraca vira um véu cinza no lado noturno; aqui ela pesa só 15% */
+function nuvemNoturna(mat){mat.onBeforeCompile=sh=>{sh.fragmentShader=sh.fragmentShader.replace('vec3 outgoingLight = reflectedLight.directDiffuse + reflectedLight.indirectDiffuse +','vec3 outgoingLight = reflectedLight.directDiffuse + reflectedLight.indirectDiffuse*.15 +');};mat.customProgramCacheKey=()=>'pde-nuvem';return mat;}
+function luzesNoturnas(mat){mat.emissive=new T.Color(0xffd8a0);mat.emissiveMap=noite;mat.emissiveIntensity=2.6;
+ mat.onBeforeCompile=sh=>{sh.fragmentShader=sh.fragmentShader.replace('vec3 outgoingLight = reflectedLight.directDiffuse + reflectedLight.indirectDiffuse + reflectedLight.directSpecular + reflectedLight.indirectSpecular + totalEmissiveRadiance;',
+  'float pdeDia=dot(reflectedLight.directDiffuse,vec3(.299,.587,.114));float pdeNoite=1.0-smoothstep(.015,.14,pdeDia);vec3 outgoingLight = reflectedLight.directDiffuse + reflectedLight.indirectDiffuse*mix(1.0,.4,pdeNoite) + reflectedLight.directSpecular + reflectedLight.indirectSpecular + totalEmissiveRadiance*pdeNoite;');};
+ mat.customProgramCacheKey=()=>'pde-terra-noite';return mat;}
 function atmosphere(radius,color){const m=new T.ShaderMaterial({transparent:true,depthWrite:false,side:T.BackSide,blending:T.AdditiveBlending,uniforms:{tint:{value:new T.Color(color)}},vertexShader:'varying vec3 n;varying vec3 v;void main(){vec4 p=modelViewMatrix*vec4(position,1.);n=normalize(normalMatrix*normal);v=normalize(-p.xyz);gl_Position=projectionMatrix*p;}',fragmentShader:'uniform vec3 tint;varying vec3 n;varying vec3 v;void main(){float f=pow(1.-abs(dot(normalize(n),normalize(v))),3.);gl_FragColor=vec4(tint,f*.36);}'});return new T.Mesh(new T.SphereGeometry(radius,48,32),m);}
 esfera=function(r,color,emissive,key){let m;const map=key?TEX[key]:null;const segments=S.quality==='economico'?32:64;
- if(key==='terra'){m=new T.MeshPhongMaterial({map:map,color:0xffffff,specularMap:water,specular:0x314855,shininess:16});}
+ if(key==='terra'){m=luzesNoturnas(new T.MeshPhongMaterial({map:map,color:0xffffff,specularMap:water,specular:0x314855,shininess:16}));}
  else if(emissive)m=new T.MeshBasicMaterial({map:map||null,color:map?0xffffff:color});
  else m=new T.MeshStandardMaterial({map:map||null,color:map?0xffffff:color,roughness:.97,metalness:0,bumpMap:['lua','mercurio','marte'].includes(key)?map:null,bumpScale:r*.012});
  const mesh=new T.Mesh(new T.SphereGeometry(r,segments,segments/2),m);
  if(key){mesh.userData.corpoKey=key;mesh.userData.vrInterativo=true;mesh.userData.radius=r;}
- if(key==='terra'){const c=new T.Mesh(new T.SphereGeometry(r*1.009,48,32),new T.MeshPhongMaterial({map:clouds,transparent:true,opacity:.48,depthWrite:false,shininess:0}));c.userData.cloud=true;mesh.add(c);mesh.add(atmosphere(r*1.035,0x4a9dff));}
+ if(key==='terra'){const c=new T.Mesh(new T.SphereGeometry(r*1.009,48,32),nuvemNoturna(new T.MeshPhongMaterial({color:0xffffff,alphaMap:clouds,transparent:true,opacity:.85,depthWrite:false,shininess:0})));c.userData.cloud=true;mesh.add(c);mesh.add(atmosphere(r*1.035,0x4a9dff));}
  if(['venus','urano','netuno'].includes(key))mesh.add(atmosphere(r*1.025,key==='venus'?0xd5b36f:0x58add3));
  if(key==='sol')mesh.add(atmosphere(r*1.06,0xffa82b));
  return mesh;
@@ -553,6 +562,6 @@ const _sairV94=sairVRFinal;
 sairVRFinal=function(){if(S.pontosVR){for(const pt of S.pontosVR.values())release(pt);S.pontosVR=null;}if(S.btnMenuCena){const i=vrBotoes.indexOf(S.btnMenuCena);if(i>=0)vrBotoes.splice(i,1);release(S.btnMenuCena);S.btnMenuCena=null;}_sairV94();};
 
 /* v9.9: volta ao comportamento do VR validado na 8.14 (distâncias e botões originais); mantém o resumo para o Relatório da turma */
-window.PortalSolarV8={version:'9.14',state:S,seasons,daylight,setDay,beginMission,checkMission,finishMission,enterView:entrarVista,exportSummary,setupXRActivity,resetStudent,menuVRAlternar,resumo:()=>({vistas:[...(S.activities||[])],missao:!!S.complete,tentativasErradas:Math.max(0,(S.attempts||0)-(S.complete?1:0)),acertos:(S.qr&&S.qr.acertos)||0,respondidas:S.qr?((S.qr.acertos||0)+(S.qr.erros||0)):0,total:(S.qr&&S.qr.n)||0,quizFim:!!(S.qr&&S.qr.fim)})};
+window.PortalSolarV8={version:'9.15',state:S,seasons,daylight,setDay,beginMission,checkMission,finishMission,enterView:entrarVista,exportSummary,setupXRActivity,resetStudent,menuVRAlternar,resumo:()=>({vistas:[...(S.activities||[])],missao:!!S.complete,tentativasErradas:Math.max(0,(S.attempts||0)-(S.complete?1:0)),acertos:(S.qr&&S.qr.acertos)||0,respondidas:S.qr?((S.qr.acertos||0)+(S.qr.erros||0)):0,total:(S.qr&&S.qr.n)||0,quizFim:!!(S.qr&&S.qr.fim)})};
 entrarVista(S.views.includes(estado.vista)?estado.vista:'sistema');renderer.setAnimationLoop(animate);
 })();

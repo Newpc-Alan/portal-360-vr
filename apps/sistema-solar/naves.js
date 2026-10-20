@@ -1,4 +1,4 @@
-/* Sistema Solar VR · Naves e telescópios (v9.12)
+/* Sistema Solar VR · Naves e telescópios (v9.12; acabamento de reflexo na v9.16)
    Quatro marcos da exploração espacial, do mais perto ao mais longe:
    ISS e Hubble em órbita da Terra, James Webb no ponto L2 (do lado oposto ao Sol, além da Lua) e Voyager 1 já fora do
    Sistema Solar, na direção real em que ela viaja (constelação de Ofiúco/Hércules).
@@ -35,9 +35,30 @@ let mostrar=true;try{mostrar=localStorage.getItem('pde_solar_naves')!=='0';}catc
 /* modelos: carregados uma vez, centralizados e normalizados para medir 1 unidade no maior lado */
 const MOLDE={};let carregados=0;
 const loader=new T.GLTFLoader();
-Object.keys(NAVES).forEach(k=>{loader.load('modelos/'+NAVES[k].arq+'.glb?v=9.12.0',g=>{const o=g.scene;const b=new T.Box3().setFromObject(o),sz=b.getSize(new T.Vector3()),c=b.getCenter(new T.Vector3());
+/* v9.16: acabamento de reflexo (espelho dourado do Webb, prata do Hubble, antena e bronze da Voyager, painéis cor de cobre da ISS).
+   Um mapa de ambiente gerado aqui (céu escuro com um Sol forte) dá às superfícies metálicas o brilho que muda quando a nave gira. */
+let ENV=null;
+/* mapa cúbico 6 × 64 px desenhado aqui (céu escuro, horizonte azulado, Sol forte): sem PMREM, funciona em qualquer GPU */
+function ambiente(){if(ENV)return ENV;const N=64,sol=new T.Vector3(.73,.44,.52).normalize(),faces=[];
+ const dirFace=[(u,v)=>[1,-v,-u],(u,v)=>[-1,-v,u],(u,v)=>[u,1,v],(u,v)=>[u,-1,-v],(u,v)=>[u,-v,1],(u,v)=>[-u,-v,-1]];
+ for(let f=0;f<6;f++){const c=document.createElement('canvas');c.width=c.height=N;const g=c.getContext('2d'),img=g.createImageData(N,N),d=new T.Vector3();
+  for(let y=0;y<N;y++)for(let x=0;x<N;x++){const u=(x+.5)/N*2-1,v=(y+.5)/N*2-1;d.set(...dirFace[f](u,v)).normalize();
+   const t=Math.min(1,Math.max(0,(d.y+.2)/1.1)),b=Math.min(1,Math.max(0,-d.y/.8));let r=.02+.28*t+.10*b,gg=.025+.31*t+.08*b,bb=.04+.38*t+.06*b;
+   const s=Math.max(0,d.dot(sol)),k=Math.pow(s,180)*3+Math.pow(s,12)*.35;r+=k;gg+=k*.95;bb+=k*.85;
+   const o=(y*N+x)*4;img.data[o]=Math.min(255,r*255);img.data[o+1]=Math.min(255,gg*255);img.data[o+2]=Math.min(255,bb*255);img.data[o+3]=255;}
+  g.putImageData(img,0,0);faces.push(c);}
+ ENV=new T.CubeTexture(faces);ENV.encoding=T.sRGBEncoding;ENV.needsUpdate=true;return ENV;}
+/* metais viram Phong com reflexo do mapa e brilho especular da luz do Sol; o resto fica como veio */
+function metal(mt,refl,esp,brilho,cor){const m=new T.MeshPhongMaterial({name:mt.name,color:cor?new T.Color(cor[0],cor[1],cor[2]):mt.color.clone(),map:mt.map||null,specular:new T.Color(esp),shininess:brilho,envMap:ambiente(),combine:T.MixOperation,reflectivity:refl,side:mt.side});mt.dispose();return m;}
+function acabamento(k,mt){if(!mt||!mt.isMeshStandardMaterial)return mt;const n=(mt.name||'').toLowerCase();
+ if(k==='webb'){if(/mirror/.test(n))return metal(mt,.5,0xffd27a,90,[.86,.64,.24]);if(/gold|topreflector|bronze/.test(n))return metal(mt,.42,0xffcf70,60);if(/foillayer1/.test(n))return metal(mt,.3,0xd8cce0,45,[.58,.55,.63]);if(/silver/.test(n))return metal(mt,.35,0xe0e0e0,50);if(/purpley/.test(n))return metal(mt,.22,0xc8a8c0,40);}
+ else if(k==='voyager'){if(/dishgold|bronze/.test(n))return metal(mt,.42,0xffcf70,60);if(/silver|ring/.test(n))return metal(mt,.35,0xe0e0e0,50);}
+ else if(k==='hubble'){return metal(mt,.28,0xd8d8d8,45);}
+ else if(k==='iss'){if(mt.metalness>.55)return metal(mt,.3,mt.metalness>.65?0xffc890:0xd8d8d8,55);}
+ return mt;}
+Object.keys(NAVES).forEach(k=>{loader.load('modelos/'+NAVES[k].arq+'.glb?v=9.16.0',g=>{const o=g.scene;const b=new T.Box3().setFromObject(o),sz=b.getSize(new T.Vector3()),c=b.getCenter(new T.Vector3());
   const piv=new T.Group();o.position.sub(c);piv.add(o);piv.scale.setScalar(1/Math.max(sz.x,sz.y,sz.z));
-  o.traverse(m=>{if(m.isMesh){m.userData.corpoKey=null;m.userData.vrInterativo=false;const ms=Array.isArray(m.material)?m.material:[m.material];ms.forEach(mt=>{if(mt&&mt.metalness>.6)mt.metalness=.6;});}});
+  o.traverse(m=>{if(m.isMesh){m.userData.corpoKey=null;m.userData.vrInterativo=false;m.material=Array.isArray(m.material)?m.material.map(mt=>acabamento(k,mt)):acabamento(k,m.material);}});
   MOLDE[k]=piv;carregados++;if(estado.vista==='sistema')montar();},undefined,()=>{carregados++;});});
 function copia(k){const m=MOLDE[k];if(!m)return null;const c=m.clone(true);c.traverse(o=>{if(o.isMesh)o.material=Array.isArray(o.material)?o.material.map(x=>x.clone()):o.material.clone();});return c;}
 /* corpo clicável: esfera invisível (fácil de acertar com o mouse ou o laser) com o modelo dentro */

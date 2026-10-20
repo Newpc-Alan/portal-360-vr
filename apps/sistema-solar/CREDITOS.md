@@ -15,5 +15,6 @@
 - Otimização (redução de polígonos e quantização): NEWPC Tecnologia.
 - O uso dos modelos não implica endosso da NASA. O logotipo da NASA não é usado.
 
-## Posições dos planetas ("céu de hoje")
+## Posições dos planetas ("céu de hoje" e "Céu da cidade")
 - Elementos orbitais aproximados do JPL/NASA (Standish), válidos de 1800 a 2050.
+- Lua: fórmula simplificada (erro de cerca de 1 grau); hora sideral de Greenwich (IAU). Validação: posição da estrela Acrux conferida com a fórmula clássica (diferença menor que 0,01 grau).

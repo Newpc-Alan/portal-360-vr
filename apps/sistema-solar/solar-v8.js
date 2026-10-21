@@ -604,6 +604,19 @@ const _sairV94=sairVRFinal;
 sairVRFinal=function(){if(S.pontosVR){for(const pt of S.pontosVR.values())release(pt);S.pontosVR=null;}if(S.btnMenuCena){const i=vrBotoes.indexOf(S.btnMenuCena);if(i>=0)vrBotoes.splice(i,1);release(S.btnMenuCena);S.btnMenuCena=null;}_sairV94();};
 
 /* v9.9: volta ao comportamento do VR validado na 8.14 (distâncias e botões originais); mantém o resumo para o Relatório da turma */
+/* v9.21.4 · lousas e telas de toque.
+   1) Depois de cada toque o navegador dispara um "clique" automático (~300 ms). O toque já foi tratado (touchend), então
+      esse clique repetido abria e fechava o planeta na hora e ligava/desligava a narração. Ele é descartado na fase de
+      captura da janela, antes de qualquer outro ouvinte. Clique de mouse de verdade não é afetado.
+   2) Pinça com dois dedos aproxima e afasta (antes a lousa ampliava a página inteira). */
+{let ultToque=0;window.addEventListener('touchend',()=>{ultToque=performance.now();},{capture:true,passive:true});
+ const sint=e=>{if(e.target===canvas3d&&performance.now()-ultToque<800){e.stopPropagation();if(e.cancelable)e.preventDefault();}};
+ window.addEventListener('click',sint,true);window.addEventListener('mousedown',sint,true);
+ canvas3d.style.touchAction='none';
+ let d0=0,c0=0;const dist=t=>Math.hypot(t[0].clientX-t[1].clientX,t[0].clientY-t[1].clientY);
+ canvas3d.addEventListener('touchstart',e=>{if(e.touches.length>=2){d0=dist(e.touches);c0=camDist;e.stopImmediatePropagation();}},{capture:true,passive:true});
+ canvas3d.addEventListener('touchmove',e=>{if(e.touches.length>=2&&d0>0){e.stopImmediatePropagation();if(estado.vr)return;camDist=Math.max(8,Math.min(900,c0*d0/Math.max(1,dist(e.touches))));atualizarCamera();}},{capture:true,passive:true});
+ canvas3d.addEventListener('touchend',e=>{if(e.touches.length<2)d0=0;},{capture:true,passive:true});}
 /* 3D: clique de novo no mesmo corpo, ou na cópia ampliada, fecha a cópia e para a narração.
    Roda antes do clique original (fase de captura) e só o interrompe quando fecha. */
 {const ray=new T.Raycaster(),ndc=new T.Vector2();let dx=0,dy=0,dt=0;
@@ -613,6 +626,6 @@ sairVRFinal=function(){if(S.pontosVR){for(const pt of S.pontosVR.values())releas
  canvas3d.addEventListener('click',e=>{if(Math.hypot(e.clientX-dx,e.clientY-dy)<6&&performance.now()-dt<600&&alvoFechar(e.clientX,e.clientY)){e.stopImmediatePropagation();pararEFechar();}},true);
  let tx=0,ty=0,tt=0;canvas3d.addEventListener('touchstart',e=>{tx=e.touches[0].clientX;ty=e.touches[0].clientY;tt=performance.now();},{capture:true,passive:true});
  canvas3d.addEventListener('touchend',e=>{const c=e.changedTouches&&e.changedTouches[0];if(c&&Math.hypot(c.clientX-tx,c.clientY-ty)<10&&performance.now()-tt<500&&alvoFechar(c.clientX,c.clientY)){e.stopImmediatePropagation();pararEFechar();}},true);}
-window.PortalSolarV8={version:'9.21',state:S,seasons,daylight,setDay,beginMission,checkMission,finishMission,enterView:entrarVista,exportSummary,setupXRActivity,resetStudent,menuVRAlternar,resumo:()=>({vistas:[...(S.activities||[])],missao:!!S.complete,tentativasErradas:Math.max(0,(S.attempts||0)-(S.complete?1:0)),acertos:(S.qr&&S.qr.acertos)||0,respondidas:S.qr?((S.qr.acertos||0)+(S.qr.erros||0)):0,total:(S.qr&&S.qr.n)||0,quizFim:!!(S.qr&&S.qr.fim)})};
+window.PortalSolarV8={version:'9.21.4',state:S,seasons,daylight,setDay,beginMission,checkMission,finishMission,enterView:entrarVista,exportSummary,setupXRActivity,resetStudent,menuVRAlternar,resumo:()=>({vistas:[...(S.activities||[])],missao:!!S.complete,tentativasErradas:Math.max(0,(S.attempts||0)-(S.complete?1:0)),acertos:(S.qr&&S.qr.acertos)||0,respondidas:S.qr?((S.qr.acertos||0)+(S.qr.erros||0)):0,total:(S.qr&&S.qr.n)||0,quizFim:!!(S.qr&&S.qr.fim)})};
 entrarVista(S.views.includes(estado.vista)?estado.vista:'sistema');renderer.setAnimationLoop(animate);
 })();

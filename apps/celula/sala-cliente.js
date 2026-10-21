@@ -1,4 +1,5 @@
-/* Sala do professor · cliente dos óculos (Portal Maestro VR · Portal 360º VR · Portal do Educador) v1.7.0 (out/2026)
+/* Sala do professor · cliente dos óculos (Portal Maestro VR · Portal 360º VR · Portal do Educador) v1.10.0 (out/2026)
+   v1.10.0: o painel vê o que o aluno vê (olhar: para onde olha, raio, menu) e pode apontar um alvo ou repetir os Primeiros passos.
    v1.8.0: resultados detalhados por óculos (missões, Desafio, erros e pistas) para o Relatório da turma do painel.
    v1.7.0: pausa com mensagem motivacional, mão levantada (gesto real ou botão do analógico) e pesquisa rápida no VR.
    Roda no catálogo e em cada app. O óculos entra numa sala (código de 4 dígitos), informa a cada poucos segundos
@@ -9,7 +10,7 @@
    Arquivo-mestre: assets/sala/sala-cliente.js (cópia idêntica em cada apps/<app>/). Regra 9: sem onclick inline. */
 (function(){'use strict';
 if(window.Portal360Sala)return;
-const VERSAO='1.9.0';
+const VERSAO='1.10.0';
 /* endereço do banco: preenchido quando o projeto Firebase da sala for criado (sem barra no fim) */
 const DB_PADRAO='https://portal360-sala-default-rtdb.firebaseio.com';
 const q=new URLSearchParams(location.search);
@@ -61,7 +62,9 @@ let bateria=null;try{if(navigator.getBattery)navigator.getBattery().then(b=>{con
 let ultimoEnvio='',hb=0,es=null,poll=0,ligado=false;
 function pacote(){let e={};try{if(A.ok())e=A.estado();}catch(_){e={};}
   const chave=APP+'/'+(e.secId||'')+'/'+(e.view||'');if(chave!==ENG.chave){ENG.chave=chave;ENG.interacoes=0;ENG.novaMissao=true;if(!tocando())MID.el=null;}
-  return Object.assign({rotulo:sala.rotulo,app:APP,appNome:APPS[APP],emVR:emVR(),bateria,saindo:false,versao:VERSAO,atividade:ENG.status,atencao:atencao(),interacoes:ENG.interacoes,midia:midia(),diagVR},e);}
+  return Object.assign({rotulo:sala.rotulo,app:APP,appNome:APPS[APP],emVR:emVR(),bateria,saindo:false,versao:VERSAO,atividade:ENG.status,atencao:atencao(),interacoes:ENG.interacoes,midia:midia(),diagVR,olhar:olharVR()},e);}
+/* v1.10: o que o aluno está vendo no óculos (para o professor orientar sem precisar ver): para onde olha, onde está o raio, menu aberto */
+function olharVR(){try{return emVR()&&window.Portal360Passos&&Portal360Passos.olhar?Portal360Passos.olhar():null;}catch(_){return null;}}
 async function enviar(forcar){if(!sala)return;const p=pacote();const sig=JSON.stringify(p);if(!forcar&&sig===ultimoEnvio&&Date.now()-hb<5000)return;ultimoEnvio=sig;hb=Date.now();p.visto={'.sv':'timestamp'};enviarResultado();
   /* marcos com a hora do servidor: desde quando está neste status e nesta missão */
   if(ENG.novoStatus){p.statusDesde={'.sv':'timestamp'};ENG.novoStatus=false;}if(ENG.novaMissao){p.missaoDesde={'.sv':'timestamp'};ENG.novaMissao=false;}
@@ -169,6 +172,9 @@ function executar(c){
   if(c.tipo==='pesquisa'){abrirPesquisa(c.pid,c.pergunta);return;}
   if(c.tipo==='pesquisa-fim'){fecharPesquisa();return;}
   if(c.tipo==='retomar'){fecharAviso();if(telao)tocarVideo();return;}
+  /* v1.10: o professor aponta um alvo (Menu, painel, peça, Caderno) ou repete os Primeiros passos neste óculos */
+  if(c.tipo==='apontar'){fecharAviso();try{if(window.Portal360Passos&&Portal360Passos.apontar(c.oque))return;}catch(_){}if(!emVR())recado('O professor quer mostrar algo: entre no VR',4000);return;}
+  if(c.tipo==='passos'){fecharAviso();try{if(window.Portal360Passos&&emVR()){Portal360Passos.iniciar();return;}}catch(_){}recado('Entre no VR para fazer os Primeiros passos',4000);return;}
   if(c.tipo==='chamar'){aviso(sala.rotulo.toUpperCase(),'O professor está procurando este óculos.',false,5000);return;}
   if(c.tipo==='encerrar'){fecharAviso();fecharPesquisa();MAO.ativa=false;aviso('Aula encerrada','Obrigado! Pode tirar o óculos.',false,6000);sair(true);return;}
   if(c.tipo==='ir'){fecharAviso();fecharVideo();

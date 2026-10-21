@@ -79,6 +79,13 @@ select{background:#fff;color:var(--texto);border:1px solid var(--borda);border-r
 .card h3{margin:0;font-size:19px;display:flex;align-items:center;gap:8px;font-weight:800}
 .card .app{font-size:13px;color:var(--azul3);font-weight:700}
 .card .missao{font-size:15px;line-height:1.35;min-height:40px}
+/* v1.10: o que o aluno está vendo e o atalho para apontar um alvo no óculos dele */
+.card .olhar{font-size:12.5px;line-height:1.4;background:#e9f8f0;border:1px solid #9ad9b8;border-radius:10px;padding:6px 9px;margin:6px 0;color:#16402c}
+.card .olhar b{color:#0b7a45;font-weight:700}
+.card .mostrar{display:flex;flex-wrap:wrap;gap:5px;align-items:center;margin:6px 0 2px}
+.card .mostrar>span{font-size:11px;opacity:.75;margin-right:2px}
+.card .mostrar button{font:inherit;font-size:11.5px;font-weight:600;padding:5px 9px;border-radius:999px;border:1px solid #e0b84a;background:#fff5d6;color:#6b4e00;cursor:pointer}
+.card .mostrar button:hover{background:#ffe9a8}
 .card .meta{display:flex;gap:6px;flex-wrap:wrap}
 .tag{font-size:11px;font-weight:800;letter-spacing:.04em;padding:3px 8px;border-radius:999px;background:#e6ebf0;color:var(--suave)}
 .tag.vr{background:#eef5dc;color:var(--lima-esc)}.tag.bat{background:#fff3d6;color:#8a6100}.tag.bat.baixa{background:#fde7e5;color:var(--vermelho)}.tag.rep{background:#fde7e5;color:var(--vermelho)}
@@ -201,13 +208,20 @@ function desenhar(){const g=$('grade');if(!g)return;const lista=Object.entries(s
   const html=lista.map(([id,o])=>{const ok=online(o),rep=ok&&cont[String(o.rotulo||'')]>1,pct=o.total?Math.round(100*(o.feitas||0)/o.total):0,b=o.bateria,d=o.desafio||{};
     const resp=respostaPesq(id);
     return '<article class="card'+(ok?'':' off')+(ok&&o.emVR?' vr':'')+(rep?' rep':'')+(ok&&o.mao?' mao':'')+(ok&&o.atividade&&o.atividade!=='ativo'&&o.atividade!=='assistindo'?' atn':'')+'"><h3><span class="ponto'+(ok?'':' off')+'"></span>'+esc(o.rotulo||'Óculos')+'</h3>'+
-     status(o,ok)+'<div class="app">'+esc(o.appNome||'')+(o.secao&&o.secao!==o.appNome?' · '+esc(o.secao):'')+'</div><div class="missao">'+esc(ok?(o.viewNome||'—'):'Desconectado'+(o.visto?' há '+tempo(agora()-o.visto):''))+'</div>'+
+     status(o,ok)+'<div class="app">'+esc(o.appNome||'')+(o.secao&&o.secao!==o.appNome?' · '+esc(o.secao):'')+'</div><div class="missao">'+esc(ok?(o.viewNome||'—'):'Desconectado'+(o.visto?' há '+tempo(agora()-o.visto):''))+'</div>'+olharCard(id,o,ok)+
      '<div class="meta">'+(rep?'<span class="tag rep" title="Dois óculos usam o mesmo número. Use 🔔 Chamar para achar este e peça para sair e entrar com outro número.">NÚMERO REPETIDO</span>':'')+(ok&&o.atividade==='tirou'?'':ok&&o.emVR?'<span class="tag vr">NO VR</span>':ok?'<span class="tag">FORA DO VR</span>':'')+(ok&&o.diagVR?'<span class="tag" title="Como este óculos entrou no VR depois que você trocou o app (diagnóstico de teste)">'+({auto:'VR: ENTROU SOZINHO','toque-sem-concessao':'VR: QUEST PEDIU TOQUE','toque-vinha-2d':'VR: VEIO DO CATÁLOGO'}[o.diagVR]||'')+'</span>':'')+(b?'<span class="tag bat'+(b.nivel<=20&&!b.carregando?' baixa':'')+'">🔋 '+b.nivel+'%'+(b.carregando?' ⚡':'')+'</span>':'')+(d.respondidas?'<span class="tag">DESAFIO '+d.acertos+'/'+d.respondidas+'</span>':'')+(resp?'<span class="tag p-'+resp+'">'+({verde:'ENTENDEU',amarelo:'MAIS OU MENOS',vermelho:'NÃO ENTENDEU'}[resp]||'')+'</span>':'')+'</div>'+
      (ok&&o.mao?'<div class="mao-card"><span class="mao-ani">✋</span>Mão levantada<button data-action="atender" data-id="'+esc(id)+'">Atender</button></div>':'')+
      engaj(o,ok)+(o.total?'<div class="prog"><i style="width:'+pct+'%"></i></div><div class="num"><span>Missões do sistema</span><span>'+(o.feitas||0)+' / '+o.total+'</span></div>':'')+
      '<div class="acoes"><button class="btn" data-action="ir-um" data-id="'+esc(id)+'">➜ Levar</button><button class="btn" data-action="chamar" data-id="'+esc(id)+'">🔔 Chamar</button><button class="btn" data-action="remover" data-id="'+esc(id)+'" title="Tirar da lista">✕</button></div></article>';}).join('');
   if(html!==ultimaGrade){ultimaGrade=html;g.innerHTML=html;}}
 let ultimaGrade='';
+/* v1.10: "ver pelos olhos do aluno" e "mostrar" (aponta o alvo no óculos daquele aluno) */
+function olharCard(id,o,ok){if(!ok||!o.emVR)return '';const v=o.olhar||{};const partes=[];
+  if(v.passo)partes.push('<b>Primeiros passos</b> '+esc(v.passo));if(v.olha)partes.push('<b>olhando:</b> '+esc(v.olha));if(v.raio)partes.push('<b>raio em:</b> '+esc(v.raio));if(v.menu)partes.push('<b>menu aberto</b>');
+  const lin=partes.length?'<div class="olhar">👁 '+partes.join(' · ')+'</div>':'<div class="olhar">👁 olhando para o ambiente</div>';
+  const bt=(oque,rot)=>'<button data-action="apontar" data-oque="'+oque+'" data-id="'+esc(id)+'">'+rot+'</button>';
+  return lin+'<div class="mostrar"><span>Mostrar:</span>'+bt('menu','☰ Menu')+bt('painel','📋 Texto')+bt('peca','🎯 Peça')+(o.app==='historia'?bt('caderno','✎ Caderno'):'')+'<button data-action="passos" data-id="'+esc(id)+'">🎓 Primeiros passos</button></div>';}
+const NOME_MOSTRAR={menu:'o botão Menu',painel:'o painel de texto',peca:'a peça escolhida',caderno:'a porta do Caderno'};
 /* ---------- Portal Maestro VR: mãos levantadas ---------- */
 let maosVistas={},carregou=false;
 function maos(lista){const ativas=lista.filter(([,o])=>online(o)&&o.mao).sort((a,b)=>a[1].mao-b[1].mao);let nova=false;
@@ -290,6 +304,8 @@ document.addEventListener('click',async e=>{const b=e.target.closest('[data-acti
     await rede('PUT','salas/'+codigo+'/pesquisa',{pid,pergunta,ativa:true});if(await comando({tipo:'pesquisa',pid,pergunta})!==null){$('modalPesq').hidden=true;toast('Pesquisa enviada para os óculos.');}}
   else if(ac==='pesquisa-fim'){const p=pesqAtual();await rede('PATCH','salas/'+codigo+'/pesquisa',{ativa:false});await comando({tipo:'pesquisa-fim',pid:p?p.pid:''});toast('Pesquisa encerrada.');}
   else if(ac==='retomar'){if(await comando({tipo:'retomar'})!==null)toast('Atividade retomada.');}
+  else if(ac==='apontar'){const oque=b.dataset.oque;if(await comando({tipo:'apontar',alvo:id,oque})!==null)toast('Mostrando '+(NOME_MOSTRAR[oque]||oque)+' no '+((sala.oculos||{})[id]||{}).rotulo+' (pisca por 10 s).');}
+  else if(ac==='passos'){if(await comando({tipo:'passos',alvo:id})!==null)toast('Primeiros passos reiniciados no '+((sala.oculos||{})[id]||{}).rotulo+'.');}
   else if(ac==='chamar'){await comando({tipo:'chamar',alvo:id});toast('Chamando '+(sala.oculos[id]||{}).rotulo+'.');}
   else if(ac==='chamar-todos'){await comando({tipo:'chamar'});toast('Cada óculos mostra o próprio número por 5 segundos.');}
   else if(ac==='remover'){await rede('DELETE','salas/'+codigo+'/oculos/'+id);toast('Óculos removido da lista.');}

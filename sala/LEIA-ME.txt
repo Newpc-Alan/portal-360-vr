@@ -47,3 +47,9 @@ Relatório da turma (painel 2.1 · cliente 1.8.0, out/2026):
   mesmo depois de encerrar a sala.
 - Peça: sala/relatorio-turma.js. Regras do Firebase inalteradas (tudo dentro de salas/<código>).
 - Limite: só conta o que aconteceu com o óculos dentro da sala; uso fora da sala não entra no relatório.
+
+v1.10 (out/2026) · Ver pelos olhos do aluno e Mostrar
+- Cada card de óculos no VR mostra, ao vivo: para onde o aluno está olhando, onde está o raio do controle e se o menu está aberto.
+- Botões "Mostrar": ☰ Menu, 📋 Texto, 🎯 Peça, ✎ Caderno (História). No óculos daquele aluno o alvo pisca por 10 s com um anel dourado; se estiver fora da visão, uma seta mostra para que lado virar e o aviso diz "vire para a direita/esquerda".
+- 🎓 Primeiros passos: repete o tutorial de 1 minuto no óculos daquele aluno.
+- Primeiros passos (todos os apps): na primeira vez no VR, o aluno aprende fazendo (olhar, raio e gatilho, botões, andar no museu, Menu). Narração: assets/passos/passo-<id>.mp3 (roteiro em assets/passos/ROTEIRO-PRIMEIROS-PASSOS.csv); sem MP3, voz do navegador. Repetir: ?tutorial=1 no endereço.

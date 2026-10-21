@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <script>/* Sala: escuta a concessão de VR do Quest (navegação WebXR) o mais cedo possível */try{navigator.xr&&navigator.xr.addEventListener("sessiongranted",function(){window.__xrConcedido=true;});}catch(e){}</script>
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="viewport" content="width=device-width, initial-scale=1.0"><style>/* lousas e tablets: pinça com dois dedos não amplia a página inteira (a cena 3D tem zoom próprio); rolagem continua normal */html{touch-action:pan-x pan-y}</style>
 <title>Sistema Solar v8.4 | Portal do Educador</title>
 <link rel="icon" type="image/png" href="media/logo.png">
 <!-- Bibliotecas locais (funcionam sem internet / com CDN bloqueado na escola); CDN só como reserva -->

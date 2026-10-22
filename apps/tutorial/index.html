@@ -65,6 +65,7 @@ footer{text-align:center;color:#6f8ea5;font-size:12px;padding:10px}
 <footer>Portal 360º VR · Portal do Educador · NEWPC</footer>
 
 <script src="vendor/three.r128.min.js"></script>
+<script src="vendor/GLTFLoader.r128.js"></script>
 <script>
 /* Primeiros passos no óculos (página própria, out/2026)
    Ambiente calmo para o treino. O roteiro dos passos, a voz e o realce vêm de primeiros-passos.js (o mesmo módulo dos apps).
@@ -101,10 +102,57 @@ const formas=[];
 function botao(texto,cor){const c=document.createElement('canvas');c.width=512;c.height=128;const x=c.getContext('2d');x.fillStyle=cor;x.beginPath();if(x.roundRect)x.roundRect(6,6,500,116,58);else x.rect(6,6,500,116);x.fill();x.strokeStyle='rgba(255,255,255,.7)';x.lineWidth=5;x.stroke();
  x.fillStyle='#fff';let fs=54;x.font='800 '+fs+'px system-ui,Segoe UI,Arial';while(x.measureText(texto).width>460&&fs>22){fs-=2;x.font='800 '+fs+'px system-ui,Segoe UI,Arial';}x.textAlign='center';x.textBaseline='middle';x.fillText(texto,256,68);const tx=new T.CanvasTexture(c);tx.encoding=T.sRGBEncoding;
  return new T.Mesh(new T.PlaneGeometry(.4,.1),new T.MeshBasicMaterial({map:tx,transparent:true}));}
-const menu=botao('☰ Menu','#1b4f78');menu.material.depthTest=false;menu.renderOrder=9989;menu.userData.vrBotao='menu';menu.position.set(-.7,1.05,-1.55);menu.rotation.y=.35;rig.add(menu);
+const menu=botao('☰ Menu','#1b4f78');menu.material.depthTest=false;menu.renderOrder=9989;menu.userData.vrBotao='menu';menu.position.set(-.7,1.05,-1.55);menu.rotation.y=.35;menu.visible=false;rig.add(menu);/* aparece no passo do Menu */
 /* raios dos controles */
 const raios=[];for(let i=0;i<2;i++){const ctl=renderer.xr.getController(i);const g=new T.BufferGeometry().setFromPoints([new T.Vector3(0,0,0),new T.Vector3(0,0,-1)]);const l=new T.Line(g,new T.LineBasicMaterial({color:0x9fe8ff}));l.scale.z=4;ctl.add(l);rig.add(ctl);raios.push(l);
  const ponta=new T.Mesh(new T.SphereGeometry(.012,12,8),new T.MeshBasicMaterial({color:0xffffff}));ponta.position.z=-.05;ctl.add(ponta);}
+/* ---------- controles 3D reais (Meta Quest Touch Plus, @webxr-input-profiles/assets, MIT) ----------
+   1) na mão: o aluno vê o próprio controle, e o botão do passo acende em amarelo;
+   2) vitrine: cópia ampliada ao lado do painel, com etiquetas apontando cada botão. */
+window.P360_CONTROLES_3D=true;
+const MODELOS={};const carregar=lado=>new Promise(res=>new T.GLTFLoader().load('modelos/'+lado+'.glb',g=>{MODELOS[lado]=g.scene;res(g.scene);},undefined,()=>res(null)));
+const prontos=Promise.all([carregar('left'),carregar('right')]);
+const PECAS={gatilho:['trigger'],aperto:['squeeze'],analogico:['thumbstick'],abxy:['a_button','b_button','x_button','y_button'],meta:[],menuf:[]};
+function clonar(lado){const m=MODELOS[lado].clone(true);m.traverse(o=>{if(o.isMesh){o.material=o.material.clone();o.userData.cor0=o.material.emissive?o.material.emissive.getHex():0;}});return m;}
+function centro(m,n){const o=m.getObjectByName(n);if(!o)return null;m.updateMatrixWorld(true);const b=new T.Box3().setFromObject(o);return m.worldToLocal(b.getCenter(new T.Vector3()));}
+/* botão Meta (direito) fica ao lado do A, do lado oposto ao B; o ☰ (esquerdo) ao lado do X, oposto ao Y */
+function pontoSistema(m,lado){const a=centro(m,lado==='right'?'a_button':'x_button'),b=centro(m,lado==='right'?'b_button':'y_button');return a&&b?a.clone().add(a.clone().sub(b)):null;}
+function acender(m,nomes,t){const alvo=new Set();nomes.forEach(n=>{const o=m.getObjectByName(n);if(o)o.traverse(q=>{if(q.isMesh)alvo.add(q);});});
+ const k=.55+.45*Math.sin(t/160);m.traverse(o=>{if(!o.isMesh||!o.material.emissive)return;if(alvo.has(o)){o.material.emissive.setHex(0xffb000);o.material.emissiveIntensity=k;}else{o.material.emissive.setHex(o.userData.cor0||0);o.material.emissiveIntensity=1;}});}
+/* na mão */
+const naMao={};
+for(let i=0;i<2;i++){const grip=renderer.xr.getControllerGrip(i);rig.add(grip);
+ grip.addEventListener('connected',async e=>{const lado=e.data&&e.data.handedness;if(lado!=='left'&&lado!=='right')return;await prontos;if(!MODELOS[lado])return;if(grip.userData.modelo)grip.remove(grip.userData.modelo);const m=clonar(lado);grip.add(m);grip.userData.modelo=m;naMao[lado]=m;});
+ grip.addEventListener('disconnected',()=>{if(grip.userData.modelo){grip.remove(grip.userData.modelo);grip.userData.modelo=null;}});}
+/* vitrine */
+function etiqueta(texto){const c=document.createElement('canvas');c.width=512;c.height=96;const x=c.getContext('2d');let fs=40;x.font='800 '+fs+'px system-ui,Segoe UI,Arial';while(x.measureText(texto).width>470&&fs>20){fs-=2;x.font='800 '+fs+'px system-ui,Segoe UI,Arial';}
+ const w=Math.min(500,x.measureText(texto).width+40);x.fillStyle='rgba(255,214,90,.97)';x.beginPath();if(x.roundRect)x.roundRect((512-w)/2,8,w,80,40);else x.rect((512-w)/2,8,w,80);x.fill();x.fillStyle='#1b1300';x.textAlign='center';x.textBaseline='middle';x.fillText(texto,256,50);
+ const tx=new T.CanvasTexture(c);tx.encoding=T.sRGBEncoding;const m=new T.Mesh(new T.PlaneGeometry(.38,.071),new T.MeshBasicMaterial({map:tx,transparent:true,depthTest:false,depthWrite:false}));m.renderOrder=9995;return m;}
+const VITRINE={
+ controle:{lados:['left','right'],rx:1.25,partes:[],rotulos:{left:[['analogico','Analógico'],['abxy','X  Y'],['menuf','Botão ☰'],['aperto','Aperto']],right:[['analogico','Analógico'],['abxy','A  B'],['meta','Botão Meta'],['aperto','Aperto']]}},
+ esfera:{lados:['right'],rx:.15,ry:-1.25,partes:['gatilho'],rotulos:{right:[['gatilho','GATILHO (indicador)']]}},
+ aperto:{lados:['right'],rx:.9,ry:-.75,partes:['aperto'],rotulos:{right:[['aperto','APERTO (dedo médio)']]}},
+ abxy:{lados:['left','right'],rx:1.25,partes:['abxy'],rotulos:{left:[['abxy','X e Y']],right:[['abxy','A e B']]}},
+ analogico:{lados:['left','right'],rx:1.25,partes:['analogico'],rotulos:{left:[['analogico','Analógico']],right:[['analogico','Analógico']]}},
+ meta:{lados:['right'],rx:1.25,partes:['meta'],rotulos:{right:[['meta','Botão Meta ∞']]}}};
+let vit=null;
+function tirarVitrine(){if(!vit)return;if(vit.g.parent)vit.g.parent.remove(vit.g);vit=null;}
+async function mostrarVitrine(id){tirarVitrine();const cfg=VITRINE[id];if(!cfg)return;await prontos;if(!MODELOS.left||!MODELOS.right)return;
+ const pai=scene.getObjectByName('p360-passos');if(!pai)return;const g=new T.Group();g.position.set(0,.02,-1.38);pai.add(g);const v={g,itens:[],cfg};vit=v;
+ const ESC=3.8,n=cfg.lados.length;
+ cfg.lados.forEach((lado,k)=>{const piv=new T.Group();piv.position.x=n===2?(k?.25:-.25):-.08;g.add(piv);const m=clonar(lado);m.scale.setScalar(ESC);m.rotation.set(cfg.rx||0,(cfg.ry||0)*(lado==='left'?-1:1),0);piv.add(m);
+  /* centraliza o controle no pivô */
+  m.updateMatrixWorld(true);const bb=new T.Box3().setFromObject(m);const cc=piv.worldToLocal(bb.getCenter(new T.Vector3()));m.position.sub(cc);m.updateMatrixWorld(true);
+  const it={m,lado,piv,marcas:[]};v.itens.push(it);
+  (cfg.rotulos[lado]||[]).forEach(([parte,txt],j)=>{let p=null;if(parte==='meta'||parte==='menuf'){const ps=pontoSistema(m,lado);if(ps){m.updateMatrixWorld(true);p=piv.worldToLocal(m.localToWorld(ps.clone()));const anel=new T.Mesh(new T.RingGeometry(.022,.03,32),new T.MeshBasicMaterial({color:0xffd65a,depthTest:false,depthWrite:false,side:T.DoubleSide}));anel.renderOrder=9994;anel.position.copy(p);anel.position.z+=.02;piv.add(anel);it.marcas.push(anel);}}
+   else{const nomes=PECAS[parte]||[];const pts=nomes.map(nm=>{const c=centro(m,nm);return c?piv.worldToLocal(m.localToWorld(c.clone())):null;}).filter(Boolean);if(pts.length){p=pts.reduce((a,b)=>a.add(b),new T.Vector3()).multiplyScalar(1/pts.length);}}
+   if(!p)return;const lab=etiqueta(txt);const lado2=n===2?(lado==='left'?-1:1):1;const off=new T.Vector3(lado2*(.24+.02*j),.12-j*.085,.05);if(id==='esfera'||id==='aperto')off.set(.33,.06,.05);if(id==='meta')off.set(.36,-.02,.05);lab.position.copy(p).add(off);piv.add(lab);
+   const ln=new T.Line(new T.BufferGeometry().setFromPoints([p.clone(),lab.position.clone()]),new T.LineBasicMaterial({color:0xffd65a,depthTest:false,transparent:true}));ln.renderOrder=9994;piv.add(ln);});});}
+window.addEventListener('p360-passo',e=>{const id=e.detail&&e.detail.id;formas.forEach(f=>f.visible=!VITRINE[id]);/* as formas do fundo saem enquanto a vitrine está aberta */if(VITRINE[id])mostrarVitrine(id);else tirarVitrine();});
+window.addEventListener('p360-passos',()=>{tirarVitrine();formas.forEach(f=>f.visible=true);});
+function animarControles(t){const id=window.Portal360Passos&&Portal360Passos.ativo?Portal360Passos.passo:null;const cfg=VITRINE[id];const partes=cfg?cfg.partes.flatMap(p=>PECAS[p]||[]):[];
+ Object.values(naMao).forEach(m=>acender(m,partes,t));
+ if(vit){vit.itens.forEach(it=>{acender(it.m,partes,t);it.piv.rotation.y=.18*Math.sin(t/1400);it.marcas.forEach(a=>{const k=1+.25*Math.sin(t/150);a.scale.set(k,k,k);});});}}
 /* fim do treino: escolher uma experiência ou repetir */
 let fimUI=null;
 function mostrarFim(){if(fimUI)return;const cam=renderer.xr.getCamera(camera);const p=new T.Vector3(),q=new T.Quaternion(),s=new T.Vector3();cam.matrixWorld.decompose(p,q,s);const f=new T.Vector3(0,0,-1).applyQuaternion(q);f.y=0;f.normalize();
@@ -115,7 +163,7 @@ function mostrarFim(){if(fimUI)return;const cam=renderer.xr.getCamera(camera);co
 function tirarFim(){if(!fimUI)return;scene.remove(fimUI.g);fimUI=null;}
 window.addEventListener('p360-passos',()=>{setTimeout(mostrarFim,400);});
 /* no passo do Menu, o botão de treino aparece à frente do aluno (embaixo, à esquerda), onde ele está olhando agora */
-window.addEventListener('p360-passo',e=>{if(!e.detail||e.detail.id!=='menu'||!renderer.xr.isPresenting)return;const cam=renderer.xr.getCamera(camera);const p=new T.Vector3(),q=new T.Quaternion(),s=new T.Vector3();cam.matrixWorld.decompose(p,q,s);
+window.addEventListener('p360-passo',e=>{if(e.detail&&['olhar','controle','esfera','aperto','abxy','botao','analogico','meta','fim'].includes(e.detail.id))menu.visible=false;if(!e.detail||e.detail.id!=='menu'||!renderer.xr.isPresenting)return;menu.visible=true;const cam=renderer.xr.getCamera(camera);const p=new T.Vector3(),q=new T.Quaternion(),s=new T.Vector3();cam.matrixWorld.decompose(p,q,s);
  const f=new T.Vector3(0,0,-1).applyQuaternion(q);f.y=0;if(f.lengthSq()<1e-4)f.set(0,0,-1);f.normalize();const esq=new T.Vector3(f.z,0,-f.x);/* esquerda no plano do chão */
  const w=p.clone().addScaledVector(f,1.35).addScaledVector(esq,.5);w.y=p.y-.45;rig.updateMatrixWorld(true);menu.position.copy(rig.worldToLocal(w.clone()));
  const olho=rig.worldToLocal(p.clone());menu.lookAt(rig.localToWorld(olho.clone()));});
@@ -143,11 +191,11 @@ function tamanho(){if(renderer.xr.isPresenting)return;const w=innerWidth,h=inner
 addEventListener('resize',tamanho);tamanho();
 let t0=performance.now();
 renderer.setAnimationLoop(t=>{const dt=Math.min(.05,(t-t0)/1000);t0=t;formas.forEach((m,i)=>{m.rotation.y+=dt*(.4+i*.1);m.rotation.x+=dt*.15;m.position.y=1.7+.08*Math.sin(t/900+i);});
- if(renderer.xr.isPresenting)andar(dt);else{camera.position.set(Math.sin(t/9000)*.6,1.6,Math.cos(t/9000)*.6);camera.lookAt(0,1.5,-6);}
+ if(renderer.xr.isPresenting){andar(dt);animarControles(t);}else{camera.position.set(Math.sin(t/9000)*.6,1.6,Math.cos(t/9000)*.6);camera.lookAt(0,1.5,-6);}
  if(fimUI){const a=acertou(fimUI.alvos);fimUI.alvos.forEach(b=>{const k=b===a?1.08:1;b.scale.x=(b.userData.acao==='catalogo'?1.6:1.2)*k;b.scale.y=b.scale.x;});}
  renderer.render(scene,camera);});
 })();
 </script>
-<script defer src="primeiros-passos.js?v=1.3.0"></script>
+<script defer src="primeiros-passos.js?v=1.4.0"></script>
 </body>
 </html>

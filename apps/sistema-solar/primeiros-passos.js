@@ -9,7 +9,7 @@
    Fonte única: tools/primeiros-passos.js (copiado para cada app). Regra 9: sem onclick inline. */
 (function(){'use strict';
 if(window.Portal360Passos)return;
-const VERSAO='1.3.0',CHAVE='p360_passos_ok';
+const VERSAO='1.4.0',CHAVE='p360_passos_ok';
 const LS={get:k=>{try{return localStorage.getItem(k);}catch(_){return null;}},set:(k,v)=>{try{localStorage.setItem(k,v);}catch(_){}},del:k=>{try{localStorage.removeItem(k);}catch(_){}}};
 const q=new URLSearchParams(location.search);const FORCAR=q.get('tutorial')==='1';if(FORCAR)LS.del(CHAVE);
 const APP=(location.pathname.match(/\/apps\/([^/]+)/)||[])[1]||'';
@@ -103,12 +103,14 @@ function alvoRaio(){const T=window.THREE;if(!st||!T)return null;const o=new T.Ve
 function limparPasso(){if(!st)return;st.dispor.forEach(fn=>{try{fn();}catch(_){}});st.dispor=[];st.alvos=[];st.anel=null;st.menuAlvo=null;}
 function add(m,x,y,z){m.position.set(x,y,z);st.g.add(m);st.dispor.push(()=>{st.g.remove(m);m.geometry.dispose();if(m.material.map)m.material.map.dispose();m.material.dispose();});return m;}
 function mostrar(i){const T=window.THREE;limparPasso();st.i=i;const P=PASSOS[i];st.passoT=performance.now();st.yawAcum=0;st.yawAnt=null;st.analog=0;
- const comDiag=TUTORIAL&&(P.id in DIAGRAMA)&&P.id!=='esfera';
- add(plano(T,canvasPainel(P,i,PASSOS.length),1.2,.6,9991),0,comDiag?.44:.22,-1.5);
- if(comDiag)add(plano(T,canvasControles(DIAGRAMA[P.id]),1.08,.36,9991),0,-.03,-1.49);
- const dica=add(plano(T,canvasDica(P.dica),.9,.11,9992),0,comDiag?-.27:-.14,-1.48);st.dica=dica;st.comDiag=comDiag;
+ /* v1.4: na página do tutorial, os controles 3D reais (vitrine) ocupam o espaço do desenho; a página os mostra pelo evento p360-passo */
+ const c3d=!!window.P360_CONTROLES_3D,vitrine=c3d&&TUTORIAL&&['controle','esfera','aperto','abxy','analogico','meta'].includes(P.id);
+ const comDiag=vitrine||(!c3d&&TUTORIAL&&(P.id in DIAGRAMA)&&P.id!=='esfera');
+ add(plano(T,canvasPainel(P,i,PASSOS.length),1.2,.6,9991),0,vitrine?.52:comDiag?.44:.22,-1.5);
+ if(comDiag&&!vitrine)add(plano(T,canvasControles(DIAGRAMA[P.id]),1.08,.36,9991),0,-.03,-1.49);
+ const dica=add(plano(T,canvasDica(P.dica),.9,.11,9992),0,vitrine?-.34:comDiag?-.27:-.14,-1.48);st.dica=dica;st.comDiag=comDiag;st.vitrine=vitrine;
  if(P.id==='esfera'){const b=new T.Mesh(new T.SphereGeometry(.09,32,20),new T.MeshBasicMaterial({color:0x3fd48a,transparent:true,opacity:.95,depthTest:false,depthWrite:false}));b.renderOrder=9993;b.userData.p360='esfera';add(b,.42,-.36,-1.3);st.alvos.push(b);st.bola=b;}
- if(P.id==='botao'||P.id==='menu'||P.id==='fim'||P.id==='controle'||P.id==='meta'){const rot=P.id==='botao'?'Próximo ►':P.id==='fim'?'Começar ►':'Entendi ✓';const b=plano(T,canvasBotao(rot,['#22d68f','#0b8f5c']),.42,.118,9993);b.userData.p360='avancar';if(P.id==='menu')add(b,.4,-.3,-1.46);else add(b,0,st.comDiag?-.42:-.34,-1.46);/* no passo do Menu o botão vai para o lado, longe do Menu real que está piscando */st.alvos.push(b);st.btn=b;}
+ if(P.id==='botao'||P.id==='menu'||P.id==='fim'||P.id==='controle'||P.id==='meta'){const rot=P.id==='botao'?'Próximo ►':P.id==='fim'?'Começar ►':'Entendi ✓';const b=plano(T,canvasBotao(rot,['#22d68f','#0b8f5c']),.42,.118,9993);b.userData.p360='avancar';if(P.id==='menu')add(b,.4,-.3,-1.46);else add(b,0,st.vitrine?-.48:st.comDiag?-.42:-.34,-1.46);/* no passo do Menu o botão vai para o lado, longe do Menu real que está piscando */st.alvos.push(b);st.btn=b;}
  if(i>0){const pul=plano(T,canvasBotao('Pular',['#36536b','#22374a'],'#cfe3f1'),.2,.056,9993);pul.userData.p360='pular';add(pul,.5,-.07,-1.47);st.alvos.push(pul);}
  if(P.id==='menu'){const anel=new T.Mesh(new T.RingGeometry(.2,.24,48),new T.MeshBasicMaterial({color:0xffd65a,transparent:true,depthTest:false,depthWrite:false,side:T.DoubleSide}));anel.renderOrder=9994;st.scene.add(anel);st.anel=anel;st.dispor.push(()=>{if(anel.parent)anel.parent.remove(anel);anel.geometry.dispose();anel.material.dispose();});}
  falar(P.id,P.titulo.replace(/[!.]$/,'')+'. '+P.texto);

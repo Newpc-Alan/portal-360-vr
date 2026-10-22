@@ -36,3 +36,4 @@ Todos sob licença Creative Commons Atribuição 4.0 ou CC0 (domínio público, 
 - `media/museu/mapa-egito.jpg`: mapa ilustrado gerado por IA (ChatGPT) a pedido da NEWPC; geografia conferida (delta, Sinai, Mar Vermelho, Gizé, Faium, Tebas, 1ª catarata) e nomes aplicados pela equipe. Representação didática, sem escala.
 - Pilones, colunas papiriformes e disco solar alado: modelados por código, inspirados na arquitetura dos templos do Novo Império (Karnak, Luxor, Edfu).
 - `media/museu/porta-madeira.jpg`: textura de madeira (cedro com faixas e cravos de bronze) gerada por código para o projeto.
+- `audio/museu-fundo.mp3` (trilha ambiente do museu): composta com ferramenta de música por IA pelo Prof. Leonardo Gomes (NEWPC), a pedido da NEWPC. Volume ajustado para fundo (-20 LUFS) com entrada e saída suaves. Pendente registrar: ferramenta e plano usados (uso comercial).

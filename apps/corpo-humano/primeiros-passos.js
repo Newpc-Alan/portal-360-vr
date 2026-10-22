@@ -9,12 +9,15 @@
    Fonte única: tools/primeiros-passos.js (copiado para cada app). Regra 9: sem onclick inline. */
 (function(){'use strict';
 if(window.Portal360Passos)return;
-const VERSAO='1.1.1',CHAVE='p360_passos_ok';
+const VERSAO='1.2.0',CHAVE='p360_passos_ok';
 const LS={get:k=>{try{return localStorage.getItem(k);}catch(_){return null;}},set:(k,v)=>{try{localStorage.setItem(k,v);}catch(_){}},del:k=>{try{localStorage.removeItem(k);}catch(_){}}};
-const q=new URLSearchParams(location.search);if(q.get('tutorial')==='1')LS.del(CHAVE);
+const q=new URLSearchParams(location.search);const FORCAR=q.get('tutorial')==='1';if(FORCAR)LS.del(CHAVE);
 const APP=(location.pathname.match(/\/apps\/([^/]+)/)||[])[1]||'';
 const BASE=(()=>{const m=location.pathname.match(/^(.*?)\/apps\/[^/]+\/?/);return m?m[1]+'/':location.pathname.replace(/[^/]*$/,'');})();
-const ANDA=APP==='historia';/* só o museu tem caminhada pelo analógico */
+const TUTORIAL=APP==='tutorial';/* v1.2: a página própria do tutorial (botão no catálogo) */
+const ANDA=APP==='historia'||TUTORIAL;/* museu e página do tutorial têm caminhada pelo analógico */
+/* v1.2: dentro dos apps o tutorial não abre sozinho; abre na página do tutorial, com ?tutorial=1 ou pelo painel da Sala */
+const AUTO=TUTORIAL||FORCAR;
 function ctx(){try{const c=window.PortalEntrada&&window.PortalEntrada.contexto&&window.PortalEntrada.contexto();return c&&c.renderer&&c.scene&&c.camera?c:null;}catch(_){return null;}}
 const PASSOS=[
  {id:'olhar',titulo:'Olhe ao seu redor',texto:'Vire a cabeça devagar para os lados. Tudo à sua volta faz parte da aula.',dica:'Vire a cabeça para a esquerda e para a direita'},
@@ -58,7 +61,7 @@ function segurarControles(renderer,on){for(let i=0;i<2;i++){let c=null;try{c=ren
  else if(!on&&c.__p360d){c.dispatchEvent=c.__p360d;delete c.__p360d;}}}
 
 /* ---------- o tutorial ---------- */
-function iniciar(forcar){const c=ctx();const T=window.THREE;if(!c||!T||!c.renderer.xr||!c.renderer.xr.isPresenting)return false;if(st)return true;if(!forcar&&LS.get(CHAVE))return false;
+function iniciar(forcar){const c=ctx();const T=window.THREE;if(!c||!T||!c.renderer.xr||!c.renderer.xr.isPresenting)return false;if(st)return true;if(!forcar&&(LS.get(CHAVE)||!AUTO))return false;
  const {renderer,scene,camera}=c;const sess=renderer.xr.getSession();const g=new T.Group();g.name='p360-passos';scene.add(g);
  st={i:-1,g,renderer,scene,camera,sess,vivo:true,yawAcum:0,yawAnt:null,alvos:[],dispor:[],t0:performance.now(),analog:0,anel:null};
  segurarControles(renderer,true);
@@ -175,8 +178,8 @@ function apontar(oque){const c=ctx();const T=window.THREE;if(!c||!T||!c.renderer
  sess.requestAnimationFrame(loop);const fimS=()=>pararApontar();sess.addEventListener('end',fimS);fim.push(()=>sess.removeEventListener('end',fimS));return !!alvo0;}
 /* ---------- quando o aluno entra no VR ---------- */
 let ligado=null;
-function vigiar(){const c=ctx();if(c&&c.renderer&&c.renderer.xr&&ligado!==c.renderer){ligado=c.renderer;c.renderer.xr.addEventListener('sessionstart',()=>{setTimeout(()=>iniciar(false),2500);});
- if(c.renderer.xr.isPresenting)setTimeout(()=>iniciar(false),2500);}
+function vigiar(){const c=ctx();if(c&&c.renderer&&c.renderer.xr&&ligado!==c.renderer){ligado=c.renderer;c.renderer.xr.addEventListener('sessionstart',()=>{setTimeout(()=>iniciar(TUTORIAL),TUTORIAL?1200:2500);});
+ if(c.renderer.xr.isPresenting)setTimeout(()=>iniciar(TUTORIAL),2500);}
  setTimeout(vigiar,1500);}
 vigiar();
 window.Portal360Passos={versao:VERSAO,iniciar:()=>iniciar(true),olhar,apontar,get ativo(){return !!st;},get passo(){return st?PASSOS[st.i].id:null;},esquecer:()=>LS.del(CHAVE),

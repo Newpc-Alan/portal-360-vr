@@ -1,0 +1,148 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<style>html{touch-action:pan-x pan-y}</style>
+<title>Primeiros passos no óculos · Portal 360º VR</title>
+<meta name="description" content="Treino de 1 minuto para usar o óculos de realidade virtual: olhar, apontar, apertar o gatilho, usar botões, andar e achar o Menu.">
+<link rel="icon" href="../../assets/logo-portal-educador.png">
+<style>
+:root{--bg:#06111f;--card:#0d2238;--linha:#24435e;--txt:#eaf6ff;--sub:#a9c4d8;--ciano:#3ea8ce;--verde:#19c96a;--verde2:#0f9861;--amarelo:#ffd65a}
+*{box-sizing:border-box}
+body{margin:0;min-height:100dvh;background:radial-gradient(ellipse at 50% 0%,#12385a 0,#06111f 62%);color:var(--txt);font-family:Inter,system-ui,Segoe UI,Arial,sans-serif;display:flex;flex-direction:column}
+a{color:var(--ciano)}
+header{display:flex;align-items:center;gap:12px;padding:16px 22px}
+header img{width:40px;height:40px;object-fit:contain}
+header b{font-size:17px}header small{display:block;color:var(--sub);font-size:12px}
+header .voltar{margin-left:auto;color:var(--sub);text-decoration:none;font-size:14px;border:1px solid var(--linha);padding:8px 14px;border-radius:999px}
+main{flex:1;display:flex;align-items:center;justify-content:center;padding:12px 16px 28px}
+.card{width:min(860px,100%);background:linear-gradient(160deg,rgba(18,52,84,.92),rgba(9,26,44,.95));border:1px solid var(--linha);border-radius:24px;padding:28px 28px 26px;box-shadow:0 30px 80px rgba(0,0,0,.45)}
+.kicker{color:#7ddfb0;font-weight:800;font-size:12px;letter-spacing:.14em;text-transform:uppercase}
+h1{font-size:clamp(28px,4.4vw,42px);line-height:1.1;margin:10px 0 10px;letter-spacing:-.02em}
+.lead{color:var(--sub);font-size:17px;line-height:1.55;margin:0 0 20px;max-width:640px}
+ol.passos{list-style:none;padding:0;margin:0 0 24px;display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:10px}
+ol.passos li{background:rgba(255,255,255,.04);border:1px solid var(--linha);border-radius:14px;padding:12px 14px;font-size:14px;line-height:1.4;color:#d7e9f5}
+ol.passos li b{display:block;font-size:22px;margin-bottom:4px}
+.acoes{display:flex;flex-wrap:wrap;gap:12px;align-items:center}
+.vr{border:2px solid #7CFFB8;background:linear-gradient(135deg,var(--verde),var(--verde2));color:#fff;font:800 18px/1 Inter,system-ui,Arial;padding:16px 26px;border-radius:999px;cursor:pointer;box-shadow:0 10px 26px rgba(15,152,97,.45);animation:pulso 2.2s ease-out infinite}
+.vr:disabled{opacity:.55;cursor:not-allowed;animation:none}
+@keyframes pulso{0%{box-shadow:0 0 0 0 rgba(34,224,120,.6),0 10px 26px rgba(15,152,97,.45)}70%{box-shadow:0 0 0 16px rgba(34,224,120,0),0 10px 26px rgba(15,152,97,.45)}100%{box-shadow:0 0 0 0 rgba(34,224,120,0),0 10px 26px rgba(15,152,97,.45)}}
+@media (prefers-reduced-motion:reduce){.vr{animation:none}}
+.aviso{font-size:14px;color:#ffe7a3;background:rgba(255,214,90,.1);border:1px solid rgba(255,214,90,.4);border-radius:12px;padding:10px 14px;line-height:1.45}
+.aviso[hidden]{display:none}
+.dica{color:var(--sub);font-size:13px;margin-top:16px;line-height:1.5}
+#cena{position:fixed;inset:0;width:100%;height:100%;display:block;z-index:-1;opacity:.55}
+footer{text-align:center;color:#6f8ea5;font-size:12px;padding:10px}
+</style>
+</head>
+<body data-app="tutorial">
+<canvas id="cena" aria-hidden="true"></canvas>
+<header>
+  <img src="../../assets/logo-portal-educador.png" alt="">
+  <div><b>Portal 360º VR</b><small>Primeiros passos no óculos</small></div>
+  <a class="voltar" href="../../?catalog=1">← Catálogo</a>
+</header>
+<main>
+  <section class="card">
+    <div class="kicker">🎓 Antes da primeira aula</div>
+    <h1>Primeiros passos no óculos</h1>
+    <p class="lead">Um treino de 1 minuto, com voz, para aprender a usar o óculos fazendo. Cada passo só avança quando você faz o gesto. Depois é só escolher uma experiência.</p>
+    <ol class="passos">
+      <li><b>👀</b>Olhar ao redor</li>
+      <li><b>🎯</b>Apontar o raio e apertar o gatilho</li>
+      <li><b>🔘</b>Usar os botões flutuantes</li>
+      <li><b>🕹️</b>Andar com o analógico</li>
+      <li><b>☰</b>Achar o botão Menu</li>
+    </ol>
+    <div class="acoes">
+      <button type="button" class="vr" data-action="entrar-vr" id="btnVR">🥽 Começar no óculos</button>
+      <div class="aviso" id="semVR" hidden>Este aparelho não abre realidade virtual. Abra este endereço no <b>navegador do óculos</b> (Meta Quest) e toque em <b>Começar no óculos</b>.</div>
+    </div>
+    <p class="dica">Professor: no painel da Sala, o botão <b>🎓 Primeiros passos</b> repete o treino no óculos de um aluno, e o card mostra em que passo ele está.</p>
+  </section>
+</main>
+<footer>Portal 360º VR · Portal do Educador · NEWPC</footer>
+
+<script src="vendor/three.r128.min.js"></script>
+<script>
+/* Primeiros passos no óculos (página própria, out/2026)
+   Ambiente calmo para o treino. O roteiro dos passos, a voz e o realce vêm de primeiros-passos.js (o mesmo módulo dos apps).
+   Aqui só existe a cena: céu, piso, formas para olhar, um botão Menu de treino, raios dos controles e caminhada pelo analógico.
+   Regra 9: sem onclick inline (data-action + delegação). */
+(function(){'use strict';
+const T=THREE,$=id=>document.getElementById(id);
+const canvas=$('cena');
+const renderer=new T.WebGLRenderer({canvas,antialias:true,alpha:false});renderer.setPixelRatio(Math.min(2,devicePixelRatio||1));renderer.outputEncoding=T.sRGBEncoding;renderer.xr.enabled=true;
+const scene=new T.Scene();scene.background=new T.Color(0x06111f);scene.fog=new T.Fog(0x06111f,14,40);
+const camera=new T.PerspectiveCamera(70,1,.05,200);camera.position.set(0,1.6,0);
+const rig=new T.Group();rig.add(camera);scene.add(rig);/* o "carrinho" que anda com o analógico */
+window.PortalEntrada={contexto:()=>({renderer,scene,camera})};
+
+/* céu em degradê e estrelas */
+{const c=document.createElement('canvas');c.width=16;c.height=256;const x=c.getContext('2d');const g=x.createLinearGradient(0,0,0,256);g.addColorStop(0,'#0a2a4a');g.addColorStop(.55,'#123e63');g.addColorStop(.75,'#1d5a7a');g.addColorStop(1,'#06111f');x.fillStyle=g;x.fillRect(0,0,16,256);
+ const tx=new T.CanvasTexture(c);tx.encoding=T.sRGBEncoding;const ceu=new T.Mesh(new T.SphereGeometry(60,32,20),new T.MeshBasicMaterial({map:tx,side:T.BackSide,fog:false}));scene.add(ceu);
+ const n=600,pos=new Float32Array(n*3);for(let i=0;i<n;i++){const u=Math.random()*2*Math.PI,v=Math.acos(Math.random()*.9+.1),r=55;pos[i*3]=r*Math.sin(v)*Math.cos(u);pos[i*3+1]=r*Math.cos(v);pos[i*3+2]=r*Math.sin(v)*Math.sin(u);}
+ const gs=new T.BufferGeometry();gs.setAttribute('position',new T.BufferAttribute(pos,3));scene.add(new T.Points(gs,new T.PointsMaterial({color:0xcfe9ff,size:.18,fog:false})));}
+/* piso: plataforma circular com anéis, para dar noção de chão e de distância */
+{const c=document.createElement('canvas');c.width=c.height=1024;const x=c.getContext('2d');const g=x.createRadialGradient(512,512,0,512,512,512);g.addColorStop(0,'#1d4566');g.addColorStop(.7,'#12304a');g.addColorStop(1,'#0a1d30');x.fillStyle=g;x.fillRect(0,0,1024,1024);
+ x.strokeStyle='rgba(62,168,206,.45)';x.lineWidth=3;for(let r=60;r<512;r+=64){x.beginPath();x.arc(512,512,r,0,Math.PI*2);x.stroke();}
+ x.strokeStyle='rgba(62,168,206,.2)';for(let k=0;k<16;k++){const a=k*Math.PI/8;x.beginPath();x.moveTo(512,512);x.lineTo(512+500*Math.cos(a),512+500*Math.sin(a));x.stroke();}
+ const tx=new T.CanvasTexture(c);tx.encoding=T.sRGBEncoding;tx.anisotropy=8;const piso=new T.Mesh(new T.CircleGeometry(9,64),new T.MeshBasicMaterial({map:tx}));piso.rotation.x=-Math.PI/2;scene.add(piso);
+ const borda=new T.Mesh(new T.RingGeometry(8.9,9.05,96),new T.MeshBasicMaterial({color:0x3ea8ce,side:T.DoubleSide}));borda.rotation.x=-Math.PI/2;borda.position.y=.005;scene.add(borda);}
+scene.add(new T.HemisphereLight(0xdff3ff,0x0a1d30,.9));{const d=new T.DirectionalLight(0xffffff,.7);d.position.set(3,6,2);scene.add(d);}
+/* formas para olhar ao redor: uma em cada direção, girando devagar */
+const formas=[];
+[[0,-6,0x19c96a,'ico'],[6,0,0x3ea8ce,'tor'],[0,6,0xffd65a,'oct'],[-6,0,0xe5675a,'box']].forEach(([x,z,cor,tipo])=>{
+ const geo=tipo==='ico'?new T.IcosahedronGeometry(.7,0):tipo==='tor'?new T.TorusKnotGeometry(.45,.16,96,12):tipo==='oct'?new T.OctahedronGeometry(.75,0):new T.BoxGeometry(.9,.9,.9);
+ const m=new T.Mesh(geo,new T.MeshStandardMaterial({color:cor,roughness:.35,metalness:.15,emissive:cor,emissiveIntensity:.18}));m.position.set(x,1.7,z);scene.add(m);formas.push(m);
+ const base=new T.Mesh(new T.CylinderGeometry(.45,.55,.9,32),new T.MeshStandardMaterial({color:0x163a58,roughness:.6}));base.position.set(x,.45,z);scene.add(base);});
+/* botão Menu de treino (o tutorial o encontra e faz piscar, como nos apps) */
+function botao(texto,cor){const c=document.createElement('canvas');c.width=512;c.height=128;const x=c.getContext('2d');x.fillStyle=cor;x.beginPath();if(x.roundRect)x.roundRect(6,6,500,116,58);else x.rect(6,6,500,116);x.fill();x.strokeStyle='rgba(255,255,255,.7)';x.lineWidth=5;x.stroke();
+ x.fillStyle='#fff';let fs=54;x.font='800 '+fs+'px system-ui,Segoe UI,Arial';while(x.measureText(texto).width>460&&fs>22){fs-=2;x.font='800 '+fs+'px system-ui,Segoe UI,Arial';}x.textAlign='center';x.textBaseline='middle';x.fillText(texto,256,68);const tx=new T.CanvasTexture(c);tx.encoding=T.sRGBEncoding;
+ return new T.Mesh(new T.PlaneGeometry(.4,.1),new T.MeshBasicMaterial({map:tx,transparent:true}));}
+const menu=botao('☰ Menu','#1b4f78');menu.userData.vrBotao='menu';menu.position.set(-.7,1.05,-1.55);menu.rotation.y=.35;rig.add(menu);
+/* raios dos controles */
+const raios=[];for(let i=0;i<2;i++){const ctl=renderer.xr.getController(i);const g=new T.BufferGeometry().setFromPoints([new T.Vector3(0,0,0),new T.Vector3(0,0,-1)]);const l=new T.Line(g,new T.LineBasicMaterial({color:0x9fe8ff}));l.scale.z=4;ctl.add(l);rig.add(ctl);raios.push(l);
+ const ponta=new T.Mesh(new T.SphereGeometry(.012,12,8),new T.MeshBasicMaterial({color:0xffffff}));ponta.position.z=-.05;ctl.add(ponta);}
+/* fim do treino: escolher uma experiência ou repetir */
+let fimUI=null;
+function mostrarFim(){if(fimUI)return;const cam=renderer.xr.getCamera(camera);const p=new T.Vector3(),q=new T.Quaternion(),s=new T.Vector3();cam.matrixWorld.decompose(p,q,s);const f=new T.Vector3(0,0,-1).applyQuaternion(q);f.y=0;f.normalize();
+ const g=new T.Group();g.position.copy(p).addScaledVector(f,1.5);g.position.y=p.y-.15;g.lookAt(p.x,g.position.y,p.z);
+ const ir=botao('Escolher uma experiência ►','#0f9861');ir.scale.set(1.6,1.6,1);ir.position.set(0,.05,0);ir.userData.acao='catalogo';g.add(ir);
+ const rep=botao('↻ Repetir o treino','#1b4f78');rep.scale.set(1.2,1.2,1);rep.position.set(0,-.17,0);rep.userData.acao='repetir';g.add(rep);
+ scene.add(g);fimUI={g,alvos:[ir,rep]};}
+function tirarFim(){if(!fimUI)return;scene.remove(fimUI.g);fimUI=null;}
+window.addEventListener('p360-passos',()=>{setTimeout(mostrarFim,400);});
+const ray=new T.Raycaster(),o=new T.Vector3(),dq=new T.Quaternion(),ds=new T.Vector3();
+function acertou(alvos){for(let i=0;i<2;i++){const ctl=renderer.xr.getController(i);ctl.matrixWorld.decompose(o,dq,ds);if(o.lengthSq()<1e-6)continue;ray.set(o,new T.Vector3(0,0,-1).applyQuaternion(dq));const h=ray.intersectObjects(alvos,false)[0];if(h)return h.object;}return null;}
+function aoSelecionar(){if(window.Portal360Passos&&Portal360Passos.ativo)return;
+ if(fimUI){const a=acertou(fimUI.alvos);if(a&&a.userData.acao==='catalogo'){const s=renderer.xr.getSession();if(s)s.end().catch(()=>{});location.href='../../?catalog=1';}
+  else if(a&&a.userData.acao==='repetir'){tirarFim();Portal360Passos.iniciar();}}}
+/* entrar no VR */
+let sessao=null;
+async function entrar(){if(!navigator.xr){$('semVR').hidden=false;return;}
+ try{const s=await navigator.xr.requestSession('immersive-vr',{optionalFeatures:['local-floor','bounded-floor','hand-tracking']});sessao=s;renderer.xr.setReferenceSpaceType('local-floor');await renderer.xr.setSession(s);
+  s.addEventListener('select',aoSelecionar);s.addEventListener('end',()=>{sessao=null;tirarFim();rig.position.set(0,0,0);rig.rotation.set(0,0,0);});}
+ catch(e){$('semVR').hidden=false;$('semVR').textContent='Não foi possível abrir o VR neste aparelho ('+(e&&e.message||e)+'). Abra no navegador do óculos.';}}
+document.addEventListener('click',e=>{const b=e.target.closest('[data-action]');if(!b)return;if(b.dataset.action==='entrar-vr')entrar();});
+if(navigator.xr&&navigator.xr.isSessionSupported)navigator.xr.isSessionSupported('immersive-vr').then(ok=>{if(!ok){$('semVR').hidden=false;}}).catch(()=>{});else $('semVR').hidden=false;
+/* caminhar: analógico para frente/trás anda na direção do olhar; para os lados gira 30° por vez */
+let giroPronto=true;const fw=new T.Vector3();
+function andar(dt){const s=renderer.xr.getSession();if(!s)return;let ax=0,ay=0;for(const src of s.inputSources){const a=src.gamepad&&src.gamepad.axes;if(!a)continue;const x=a.length>=4?a[2]:a[0]||0,y=a.length>=4?a[3]:a[1]||0;if(Math.abs(y)>Math.abs(ay))ay=y;if(Math.abs(x)>Math.abs(ax))ax=x;}
+ if(Math.abs(ay)>.2){const cam=renderer.xr.getCamera(camera);cam.getWorldDirection(fw);fw.y=0;if(fw.lengthSq()>1e-4){fw.normalize();rig.position.addScaledVector(fw,-ay*1.4*dt);const r=Math.hypot(rig.position.x,rig.position.z);if(r>8){rig.position.x*=8/r;rig.position.z*=8/r;}}}
+ if(Math.abs(ax)>.75&&giroPronto){giroPronto=false;const cam=renderer.xr.getCamera(camera);const pc=new T.Vector3();cam.getWorldPosition(pc);const ang=-Math.sign(ax)*Math.PI/6;rig.position.sub(pc).applyAxisAngle(new T.Vector3(0,1,0),ang).add(pc);rig.rotation.y+=ang;}
+ if(Math.abs(ax)<.3)giroPronto=true;}
+/* desenho */
+function tamanho(){if(renderer.xr.isPresenting)return;const w=innerWidth,h=innerHeight;renderer.setSize(w,h,false);camera.aspect=w/h;camera.updateProjectionMatrix();}
+addEventListener('resize',tamanho);tamanho();
+let t0=performance.now();
+renderer.setAnimationLoop(t=>{const dt=Math.min(.05,(t-t0)/1000);t0=t;formas.forEach((m,i)=>{m.rotation.y+=dt*(.4+i*.1);m.rotation.x+=dt*.15;m.position.y=1.7+.08*Math.sin(t/900+i);});
+ if(renderer.xr.isPresenting)andar(dt);else{camera.position.set(Math.sin(t/9000)*.6,1.6,Math.cos(t/9000)*.6);camera.lookAt(0,1.5,-6);}
+ if(fimUI){const a=acertou(fimUI.alvos);fimUI.alvos.forEach(b=>{const k=b===a?1.08:1;b.scale.x=(b.userData.acao==='catalogo'?1.6:1.2)*k;b.scale.y=b.scale.x;});}
+ renderer.render(scene,camera);});
+})();
+</script>
+<script defer src="primeiros-passos.js?v=1.2.0"></script>
+</body>
+</html>

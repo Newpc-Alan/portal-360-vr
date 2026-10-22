@@ -9,7 +9,7 @@
    Fonte única: tools/primeiros-passos.js (copiado para cada app). Regra 9: sem onclick inline. */
 (function(){'use strict';
 if(window.Portal360Passos)return;
-const VERSAO='1.1.0',CHAVE='p360_passos_ok';
+const VERSAO='1.1.1',CHAVE='p360_passos_ok';
 const LS={get:k=>{try{return localStorage.getItem(k);}catch(_){return null;}},set:(k,v)=>{try{localStorage.setItem(k,v);}catch(_){}},del:k=>{try{localStorage.removeItem(k);}catch(_){}}};
 const q=new URLSearchParams(location.search);if(q.get('tutorial')==='1')LS.del(CHAVE);
 const APP=(location.pathname.match(/\/apps\/([^/]+)/)||[])[1]||'';
@@ -97,7 +97,8 @@ function quadro(){const T=window.THREE;if(!st||!T)return;const P=PASSOS[st.i];if
  const cam=st.renderer.xr.getCamera(st.camera);const qq=new T.Quaternion(),pp=new T.Vector3(),ss=new T.Vector3();cam.matrixWorld.decompose(pp,qq,ss);const fw=new T.Vector3(0,0,-1).applyQuaternion(qq);const yaw=Math.atan2(-fw.x,-fw.z);
  /* painel segue de leve: se o aluno virar mais de 55°, o painel volta para a frente dele (menos no passo de olhar) */
  let dif=yaw-st.g.rotation.y;while(dif>Math.PI)dif-=2*Math.PI;while(dif<-Math.PI)dif+=2*Math.PI;
- if(P.id!=='olhar'&&Math.abs(dif)>.96){st.ancorar();}
+ const longe=Math.hypot(pp.x-st.g.position.x,pp.z-st.g.position.z)>.6||Math.abs(pp.y-.1-st.g.position.y)>.5;/* o app pode reposicionar o aluno (museu, teleporte) ou ele anda: a placa vem junto */
+ if(longe||(P.id!=='olhar'&&Math.abs(dif)>.96)){st.ancorar();}
  if(P.id==='olhar'&&!st.esperando){if(st.yawAnt!==null){let d=yaw-st.yawAnt;while(d>Math.PI)d-=2*Math.PI;while(d<-Math.PI)d+=2*Math.PI;st.yawAcum+=Math.abs(d);}st.yawAnt=yaw;
   if(st.yawAcum>1.9&&t-st.passoT>2500){st.ancorar();concluir();}}
  if(P.id==='analogico'&&!st.esperando){try{for(const src of st.sess.inputSources){const a=src.gamepad&&src.gamepad.axes;if(a&&Math.hypot(a[2]||0,a[3]||0)>.55)st.analog+=1;}}catch(_){}if(st.analog>25)concluir();}

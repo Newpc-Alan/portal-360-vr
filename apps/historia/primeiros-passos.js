@@ -9,7 +9,7 @@
    Fonte única: tools/primeiros-passos.js (copiado para cada app). Regra 9: sem onclick inline. */
 (function(){'use strict';
 if(window.Portal360Passos)return;
-const VERSAO='1.2.0',CHAVE='p360_passos_ok';
+const VERSAO='1.3.0',CHAVE='p360_passos_ok';
 const LS={get:k=>{try{return localStorage.getItem(k);}catch(_){return null;}},set:(k,v)=>{try{localStorage.setItem(k,v);}catch(_){}},del:k=>{try{localStorage.removeItem(k);}catch(_){}}};
 const q=new URLSearchParams(location.search);const FORCAR=q.get('tutorial')==='1';if(FORCAR)LS.del(CHAVE);
 const APP=(location.pathname.match(/\/apps\/([^/]+)/)||[])[1]||'';
@@ -21,10 +21,14 @@ const AUTO=TUTORIAL||FORCAR;
 function ctx(){try{const c=window.PortalEntrada&&window.PortalEntrada.contexto&&window.PortalEntrada.contexto();return c&&c.renderer&&c.scene&&c.camera?c:null;}catch(_){return null;}}
 const PASSOS=[
  {id:'olhar',titulo:'Olhe ao seu redor',texto:'Vire a cabeça devagar para os lados. Tudo à sua volta faz parte da aula.',dica:'Vire a cabeça para a esquerda e para a direita'},
+ TUTORIAL?{id:'controle',titulo:'Conheça o seu controle',texto:'Cada mão tem um controle. Veja abaixo onde fica cada botão. Nos próximos passos você vai usar os principais.',dica:'Olhe o desenho e aperte o gatilho em "Entendi"'}:null,
  {id:'esfera',titulo:'Aponte e aperte o gatilho',texto:'Do controle sai um raio. Aponte o raio para a bola verde e aperte o GATILHO, o botão do dedo indicador.',dica:'Aponte para a bola verde e aperte o gatilho'},
+ TUTORIAL?{id:'aperto',titulo:'O botão de APERTO',texto:'Na lateral do controle, embaixo do dedo médio, fica o botão de aperto. Ele serve para segurar e girar peças. Aperte agora.',dica:'Aperte o botão do dedo médio, na lateral',fisico:1}:null,
+ TUTORIAL?{id:'abxy',titulo:'Botões A, B, X e Y',texto:'No controle direito ficam A e B; no esquerdo, X e Y. Em algumas experiências são atalhos, e o painel avisa quando houver. Aperte qualquer um.',dica:'Aperte A, B, X ou Y com o polegar',fisico:1}:null,
  {id:'botao',titulo:'Botões flutuantes',texto:'Os botões funcionam do mesmo jeito: aponte o raio e aperte o gatilho. Experimente no botão Próximo.',dica:'Aponte para "Próximo" e aperte o gatilho'},
  ANDA?{id:'analogico',titulo:'Para andar',texto:'Empurre a alavanca do controle, o analógico, para frente para andar. Para os lados, você vira.',dica:'Empurre o analógico para andar'}:null,
  {id:'menu',titulo:'O botão Menu',texto:'O botão Menu, que está piscando, leva para as atividades e as opções. Use quando quiser trocar de atividade.',dica:'Aperte o gatilho em "Entendi"'},
+ TUTORIAL?{id:'meta',titulo:'O botão Meta: socorro',texto:'No controle direito, o botão com o símbolo da Meta abre o menu do óculos. Se a imagem ficar torta ou atrás de você, SEGURE esse botão por alguns segundos: a visão volta para a sua frente.',dica:'Lembre: segure o botão Meta para recentralizar'}:null,
  {id:'fim',titulo:'Pronto!',texto:'Você já sabe usar o óculos. Se precisar de ajuda, levante a mão bem alto e chame o professor. Boa aula!',dica:'Aperte o gatilho em "Começar"'}
 ].filter(Boolean);
 let st=null;/* estado do tutorial em andamento */
@@ -47,6 +51,26 @@ function canvasBotao(txt,cor,txtCor){const c=document.createElement('canvas');c.
 function canvasDica(t){const c=document.createElement('canvas');c.width=900;c.height=110;const x=c.getContext('2d');x.fillStyle='rgba(255,214,90,.96)';rr(x,4,4,892,102,50);x.fill();
  x.fillStyle='#1b1300';let fs=44;x.font='800 '+fs+'px system-ui,Segoe UI,Arial';while(x.measureText('👉 '+t).width>850&&fs>24){fs-=2;x.font='800 '+fs+'px system-ui,Segoe UI,Arial';}x.textAlign='center';x.textBaseline='middle';x.fillText('👉 '+t,450,58);return c;}
 
+/* v1.3: desenho dos dois controles (Touch Plus) com cada botão; o botão do passo atual fica em amarelo */
+function canvasControles(dest){const c=document.createElement('canvas');c.width=1200;c.height=400;const x=c.getContext('2d');
+ x.fillStyle='rgba(10,30,52,.97)';rr(x,6,6,1188,388,40);x.fill();x.strokeStyle='#3ea8ce';x.lineWidth=5;x.stroke();
+ const on=k=>!dest||dest.includes(k),cor=k=>dest&&dest.includes(k)?'#ffd65a':'#9fd2ea',fundo=k=>dest&&dest.includes(k)?'rgba(255,214,90,.25)':'rgba(255,255,255,.06)';
+ const rot=(t,X,Y,k,al)=>{x.font='700 26px system-ui,Segoe UI,Arial';x.textAlign=al||'left';x.fillStyle=cor(k);x.globalAlpha=on(k)?1:.55;x.fillText(t,X,Y);x.globalAlpha=1;};
+ const linha=(a,b,c2,d,k)=>{x.strokeStyle=cor(k);x.globalAlpha=on(k)?1:.45;x.lineWidth=3;x.beginPath();x.moveTo(a,b);x.lineTo(c2,d);x.stroke();x.globalAlpha=1;};
+ const bot=(X,Y,r,txt,k)=>{x.beginPath();x.arc(X,Y,r,0,Math.PI*2);x.fillStyle=fundo(k);x.fill();x.lineWidth=4;x.strokeStyle=cor(k);x.globalAlpha=on(k)?1:.55;x.stroke();x.fillStyle=cor(k);x.font='800 '+Math.round(r*1.05)+'px system-ui,Segoe UI,Arial';x.textAlign='center';x.textBaseline='middle';x.fillText(txt,X,Y+2);x.textBaseline='alphabetic';x.globalAlpha=1;};
+ const controle=(cx,lado)=>{const d=lado==='dir';
+  x.beginPath();x.ellipse(cx,170,150,118,0,0,Math.PI*2);x.fillStyle='rgba(255,255,255,.05)';x.fill();x.lineWidth=5;x.strokeStyle='#5f87a3';x.stroke();
+  x.beginPath();x.moveTo(cx-60,265);x.quadraticCurveTo(cx,330,cx+60,265);x.lineTo(cx+40,375);x.lineTo(cx-40,375);x.closePath();x.fillStyle='rgba(255,255,255,.04)';x.fill();x.stroke();
+  x.font='800 22px system-ui,Segoe UI,Arial';x.textAlign='center';x.fillStyle='#7ddfb0';x.fillText(d?'DIREITO':'ESQUERDO',cx,40);
+  const sx=d?-1:1;bot(cx+sx*55,150,34,'🕹','analogico');bot(cx-sx*45,120,30,d?'B':'Y','abxy');bot(cx-sx*60,195,30,d?'A':'X','abxy');bot(cx+sx*10,235,20,d?'⦿':'☰',d?'meta':'menuf');};
+ controle(300,'esq');controle(900,'dir');
+ linha(470,95,560,95,'analogico');rot('Analógico: andar',575,104,'analogico');
+ linha(420,195,560,150,'abxy');linha(780,195,700,150,'abxy');rot('A B X Y: atalhos',600,160,'abxy','left');
+ linha(910,235,1010,300,'meta');rot('Botão Meta',1015,300,'meta');rot('(segure: recentraliza)',1015,330,'meta');
+ linha(310,235,190,300,'menuf');rot('Botão ☰',95,300,'menuf');
+ rot('Embaixo do indicador: GATILHO (escolher)',600,250,'gatilho','center');rot('Na lateral, dedo médio: APERTO (segurar)',600,290,'aperto','center');
+ return c;}
+const DIAGRAMA={controle:null,aperto:['aperto'],abxy:['abxy'],meta:['meta'],esfera:['gatilho']};
 /* ---------- voz ---------- */
 let audio=null;
 function falar(id,texto){try{if(audio){audio.pause();audio=null;}if(window.speechSynthesis)speechSynthesis.cancel();}catch(_){}
@@ -79,17 +103,22 @@ function alvoRaio(){const T=window.THREE;if(!st||!T)return null;const o=new T.Ve
 function limparPasso(){if(!st)return;st.dispor.forEach(fn=>{try{fn();}catch(_){}});st.dispor=[];st.alvos=[];st.anel=null;st.menuAlvo=null;}
 function add(m,x,y,z){m.position.set(x,y,z);st.g.add(m);st.dispor.push(()=>{st.g.remove(m);m.geometry.dispose();if(m.material.map)m.material.map.dispose();m.material.dispose();});return m;}
 function mostrar(i){const T=window.THREE;limparPasso();st.i=i;const P=PASSOS[i];st.passoT=performance.now();st.yawAcum=0;st.yawAnt=null;st.analog=0;
- add(plano(T,canvasPainel(P,i,PASSOS.length),1.2,.6,9991),0,.22,-1.5);
- const dica=add(plano(T,canvasDica(P.dica),.9,.11,9992),0,-.14,-1.48);st.dica=dica;
+ const comDiag=TUTORIAL&&(P.id in DIAGRAMA)&&P.id!=='esfera';
+ add(plano(T,canvasPainel(P,i,PASSOS.length),1.2,.6,9991),0,comDiag?.44:.22,-1.5);
+ if(comDiag)add(plano(T,canvasControles(DIAGRAMA[P.id]),1.08,.36,9991),0,-.03,-1.49);
+ const dica=add(plano(T,canvasDica(P.dica),.9,.11,9992),0,comDiag?-.27:-.14,-1.48);st.dica=dica;st.comDiag=comDiag;
  if(P.id==='esfera'){const b=new T.Mesh(new T.SphereGeometry(.09,32,20),new T.MeshBasicMaterial({color:0x3fd48a,transparent:true,opacity:.95,depthTest:false,depthWrite:false}));b.renderOrder=9993;b.userData.p360='esfera';add(b,.42,-.36,-1.3);st.alvos.push(b);st.bola=b;}
- if(P.id==='botao'||P.id==='menu'||P.id==='fim'){const rot=P.id==='botao'?'Próximo ►':P.id==='menu'?'Entendi ✓':'Começar ►';const b=plano(T,canvasBotao(rot,['#22d68f','#0b8f5c']),.42,.118,9993);b.userData.p360='avancar';if(P.id==='menu')add(b,.4,-.3,-1.46);else add(b,0,-.34,-1.46);/* no passo do Menu o botão vai para o lado, longe do Menu real que está piscando */st.alvos.push(b);st.btn=b;}
+ if(P.id==='botao'||P.id==='menu'||P.id==='fim'||P.id==='controle'||P.id==='meta'){const rot=P.id==='botao'?'Próximo ►':P.id==='fim'?'Começar ►':'Entendi ✓';const b=plano(T,canvasBotao(rot,['#22d68f','#0b8f5c']),.42,.118,9993);b.userData.p360='avancar';if(P.id==='menu')add(b,.4,-.3,-1.46);else add(b,0,st.comDiag?-.42:-.34,-1.46);/* no passo do Menu o botão vai para o lado, longe do Menu real que está piscando */st.alvos.push(b);st.btn=b;}
  if(i>0){const pul=plano(T,canvasBotao('Pular',['#36536b','#22374a'],'#cfe3f1'),.2,.056,9993);pul.userData.p360='pular';add(pul,.5,-.07,-1.47);st.alvos.push(pul);}
  if(P.id==='menu'){const anel=new T.Mesh(new T.RingGeometry(.2,.24,48),new T.MeshBasicMaterial({color:0xffd65a,transparent:true,depthTest:false,depthWrite:false,side:T.DoubleSide}));anel.renderOrder=9994;st.scene.add(anel);st.anel=anel;st.dispor.push(()=>{if(anel.parent)anel.parent.remove(anel);anel.geometry.dispose();anel.material.dispose();});}
- falar(P.id,P.titulo.replace(/[!.]$/,'')+'. '+P.texto);}
+ falar(P.id,P.titulo.replace(/[!.]$/,'')+'. '+P.texto);
+ try{window.dispatchEvent(new CustomEvent('p360-passo',{detail:{id:P.id,i}}));}catch(_){}
+ if(P.fisico&&!temControle())setTimeout(()=>{if(st&&PASSOS[st.i]===P)concluir();},2500);/* mãos sem controle: passos de botão físico seguem sozinhos */}
+function temControle(){try{for(const s of st.sess.inputSources){if(s.gamepad&&s.gamepad.buttons&&s.gamepad.buttons.length>4)return true;}}catch(_){}return false;}
 function acionar(o){if(!st)return;const P=PASSOS[st.i];
  if(o==='pular'){encerrar(true);return;}
  if(o==='esfera'&&P.id==='esfera'){concluir();return;}
- if(o==='avancar'&&(P.id==='botao'||P.id==='menu'||P.id==='fim')){concluir();}}
+ if(o==='avancar'&&(P.id==='botao'||P.id==='menu'||P.id==='fim'||P.id==='controle'||P.id==='meta')){concluir();}}
 function canvasOk(){const c=document.createElement('canvas');c.width=900;c.height=110;const x=c.getContext('2d');x.fillStyle='rgba(63,212,138,.97)';rr(x,4,4,892,102,50);x.fill();x.fillStyle='#04210f';x.font='800 50px system-ui,Segoe UI,Arial';x.textAlign='center';x.textBaseline='middle';x.fillText('✓ Muito bem!',450,58);return c;}
 function concluir(){if(!st||st.esperando)return;const T=window.THREE;const ok=plano(T,canvasOk(),.9,.11,9995);
  if(st.dica)st.dica.visible=false;add(ok,0,-.14,-1.47);st.alvos.forEach(a=>a.visible=false);const prox=st.i+1;st.esperando=true;
@@ -104,6 +133,7 @@ function quadro(){const T=window.THREE;if(!st||!T)return;const P=PASSOS[st.i];if
  if(longe||(P.id!=='olhar'&&Math.abs(dif)>.96)){st.ancorar();}
  if(P.id==='olhar'&&!st.esperando){if(st.yawAnt!==null){let d=yaw-st.yawAnt;while(d>Math.PI)d-=2*Math.PI;while(d<-Math.PI)d+=2*Math.PI;st.yawAcum+=Math.abs(d);}st.yawAnt=yaw;
   if(st.yawAcum>1.9&&t-st.passoT>2500){st.ancorar();concluir();}}
+ if((P.id==='aperto'||P.id==='abxy')&&!st.esperando){try{for(const src of st.sess.inputSources){const b=src.gamepad&&src.gamepad.buttons;if(!b)continue;if(P.id==='aperto'&&b[1]&&b[1].pressed){concluir();break;}if(P.id==='abxy'&&((b[4]&&b[4].pressed)||(b[5]&&b[5].pressed))){concluir();break;}}}catch(_){}}
  if(P.id==='analogico'&&!st.esperando){try{for(const src of st.sess.inputSources){const a=src.gamepad&&src.gamepad.axes;if(a&&Math.hypot(a[2]||0,a[3]||0)>.55)st.analog+=1;}}catch(_){}if(st.analog>25)concluir();}
  /* realce do alvo apontado e pulsar */
  const a=alvoRaio();st.alvos.forEach(m=>{const k=(m===a?1.12:1)*(m===st.bola?1+.08*Math.sin(t/180):1);m.scale.set(k,k,k);});

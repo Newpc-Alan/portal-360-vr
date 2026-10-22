@@ -112,3 +112,11 @@ ul.objetivos{margin:6px 0 2px;padding-left:18px}ul.objetivos li{margin:3px 0;fon
 .caderno-txt{display:block;margin:10px 0 4px}.caderno-txt span{display:block;font-size:13px;margin-bottom:5px;color:#f0c860}
 .caderno-txt textarea{width:100%;box-sizing:border-box;border-radius:8px;border:1px solid rgba(255,255,255,.25);background:rgba(0,0,0,.25);color:inherit;font:inherit;font-size:14px;padding:8px;resize:vertical}
 @media (max-width:640px){.fonte-hist dl{grid-template-columns:1fr}.fonte-hist dt{white-space:normal}}
+
+/* v1.7.6 lousa e notebook (801 a 1120px): coluna de temas mais larga e missões com número em cima, sem cortar o nome */
+@media(min-width:801px) and (max-width:1120px){
+ .workspace{grid-template-columns:90px minmax(200px,1fr) 300px}
+ .activity-nav .nav-missoes{margin-left:0;padding-left:4px;border-left-width:2px}
+ .activity-nav button.nav-missao{flex-direction:column;align-items:center;text-align:center;gap:2px;padding:6px 3px;font-size:10px;line-height:1.15;overflow-wrap:anywhere;hyphens:auto}
+ .activity-nav button.nav-missao .nav-num{font-size:11px}
+}

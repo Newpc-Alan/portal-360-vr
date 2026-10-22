@@ -88,3 +88,11 @@ ul.pistas li{margin:3px 0}
 #lessonPanel button.correct{background:linear-gradient(180deg,#1f7a57,#155c41);border-color:#7CFFB8}
 #lessonPanel button.incorrect{background:linear-gradient(180deg,#7a2b3a,#5a1f2b);border-color:#ff9aa6}
 #lessonPanel button.selected{background:linear-gradient(180deg,#2a6a66,#1f4f4c);border-color:#7fe3c8;box-shadow:0 0 0 3px #7fe3c855}
+
+/* v1.7.6 lousa e notebook (801 a 1120px): coluna de temas mais larga e missões com número em cima, sem cortar o nome */
+@media(min-width:801px) and (max-width:1120px){
+ .workspace{grid-template-columns:90px minmax(200px,1fr) 300px}
+ .activity-nav .nav-missoes{margin-left:0;padding-left:4px;border-left-width:2px}
+ .activity-nav button.nav-missao{flex-direction:column;align-items:center;text-align:center;gap:2px;padding:6px 3px;font-size:10px;line-height:1.15;overflow-wrap:anywhere;hyphens:auto}
+ .activity-nav button.nav-missao .nav-num{font-size:11px}
+}

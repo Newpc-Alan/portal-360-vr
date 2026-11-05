@@ -1,0 +1,94 @@
+<!DOCTYPE html><html lang="pt-BR"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Guia do professor · Química VR · Portal 360º VR</title><style>
+:root{--verde:#1a6b2a;--azul:#0f2c4a;--cinza:#5b6b7a;--linha:#d7e4da;--fundo:#f3f7f4;--texto:#17202a}
+*{box-sizing:border-box}
+body{margin:0;font:14px/1.6 "Segoe UI",Roboto,Arial,sans-serif;color:var(--texto);background:#e9edf0}
+.folha{max-width:210mm;margin:0 auto;background:#fff;padding:16mm 16mm 20mm;box-shadow:0 8px 40px #0002}
+.cab{display:flex;align-items:center;gap:16px;border-bottom:3px solid var(--verde);padding-bottom:12px;margin-bottom:18px}
+.cab img{width:56px;height:56px;object-fit:contain}.cab .k{font-size:10px;letter-spacing:2.4px;color:var(--verde);font-weight:700}
+.cab h1{margin:2px 0 0;font-size:26px;color:var(--azul);letter-spacing:-.5px}.cab small{display:block;color:var(--cinza);font-size:11px}
+.barra{display:flex;gap:8px;justify-content:flex-end;margin:0 0 14px}.barra a,.barra button{font:inherit;font-size:12px;padding:7px 12px;border-radius:8px;border:1px solid var(--linha);background:#fff;color:var(--azul);cursor:pointer;text-decoration:none}.barra .pri{background:var(--verde);border-color:var(--verde);color:#fff;font-weight:600}
+h2{font-size:18px;color:var(--azul);border-left:4px solid var(--verde);padding-left:10px;margin:28px 0 10px}
+h3{font-size:14px;color:var(--azul);margin:18px 0 6px}
+p{margin:8px 0}.sub{color:var(--cinza);font-size:12px}
+table{width:100%;border-collapse:collapse;margin:10px 0 14px;font-size:12px}
+th{background:var(--azul);color:#fff;text-align:left;padding:7px 8px;font-weight:600;font-size:11px}
+td{padding:7px 8px;border-bottom:1px solid #e3e9ee;vertical-align:top}
+.cod{font-family:ui-monospace,Consolas,monospace;font-size:11px;color:var(--verde);font-weight:700;white-space:nowrap}
+.caixa{background:var(--fundo);border:1px solid var(--linha);border-radius:10px;padding:12px 14px;margin:12px 0}
+.caixa b{color:var(--azul)}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.plano{break-inside:avoid;border:1px solid var(--linha);border-radius:12px;padding:14px 16px;margin:14px 0}
+.plano h3{margin-top:0;font-size:16px}.plano .meta{display:flex;flex-wrap:wrap;gap:6px 16px;font-size:11px;color:var(--cinza);margin-bottom:8px}
+.plano .meta b{color:var(--azul)}
+ol,ul{padding-left:20px;margin:6px 0}li{margin:4px 0}
+.tempo{display:inline-block;min-width:52px;font-weight:700;color:var(--verde)}
+.nota{font-size:11px;color:var(--cinza)}
+.rod{margin-top:24px;padding-top:10px;border-top:1px solid var(--linha);font-size:10px;color:#6b7a88;line-height:1.5}
+@media print{@page{size:A4;margin:14mm}body{background:#fff}.folha{box-shadow:none;padding:0;max-width:none}.barra{display:none}h2{break-after:avoid}.plano,table,.caixa{break-inside:avoid}}
+@media (max-width:640px){.folha{padding:18px 14px}.grid2{grid-template-columns:1fr}}
+</style></head>
+<body>
+<div class="folha">
+<header class="cab"><img src="assets/logo.png" alt=""><div><div class="k">PORTAL 360º VR · QUÍMICA VR</div><h1>Guia do professor</h1><small>Mapeamento BNCC, planos de aula e sequência didática · Portal do Educador · NEWPC Tecnologia</small></div></header>
+<div class="barra"><a href="./">← Abrir a aplicação</a><button class="pri" data-action="imprimir">Imprimir / salvar em PDF</button></div>
+<h2>1. O que é e como usar em sala</h2>
+<p>A Química VR junta dois temas: a <b>tabela periódica em 3D</b>, com os 118 elementos e o átomo em camadas de cada um, e o <b>teste de chama</b>, feito numa bancada de laboratório virtual com bico de Bunsen, alça, ácido e sete sais. São <b>9 missões</b>, <b>134 fichas</b> e dois níveis de profundidade (Introdutório e Ensino Médio, em Ajustes). O ponto alto é a <b>Viagem ao átomo</b>: o aluno encolhe e atravessa as camadas M, L e K de um átomo de sódio até o núcleo, e depois assiste ao salto do elétron que deixa a chama amarela.</p>
+<table><thead><tr><th>Formato</th><th>Como fica a aula</th><th>Equipamento</th></tr></thead><tbody>
+<tr><td><b>Lousa ou projetor</b> (professor conduz)</td><td>O professor toca nos elementos, abre o átomo de cada um e leva os sais à chama; a turma prevê a cor antes. Ideal para o Contexto e para o Desafio como quiz coletivo.</td><td>Lousa digital, TV ou projetor + um computador</td></tr>
+<tr><td><b>Chromebook em duplas</b></td><td>Cada dupla faz a Aula guiada no próprio ritmo; o relatório do professor sai por dupla.</td><td>1 Chromebook a cada 2 alunos; fone opcional</td></tr>
+<tr><td><b>Estação VR com rodízio</b></td><td>No óculos, a tabela vira uma parede de mais de três metros e a bancada fica na frente do aluno. A Viagem ao átomo é a experiência mais marcante. Ver seção 5.</td><td>Óculos VR autônomo (navegador do óculos, link HTTPS)</td></tr>
+</tbody></table>
+<div class="caixa"><b>Segurança como argumento pedagógico.</b> O teste de chama real usa chama aberta, ácido clorídrico e sais tóxicos (como os de bário), e a maioria das escolas não tem laboratório para fazê-lo. No VR, todo aluno executa o procedimento completo, na ordem certa, sem risco e sem gastar reagente. Onde houver laboratório, a versão virtual serve de preparação antes da prática real.</div>
+<div class="caixa"><b>Funciona sem internet.</b> Depois da primeira abertura, a aplicação fica guardada no dispositivo. Um selo indica "Pronto para uso sem internet".</div>
+<h2>2. Mapeamento BNCC</h2>
+<table><thead><tr><th>Missão</th><th>Habilidades BNCC</th><th>O que o aluno evidencia</th></tr></thead><tbody>
+<tr><td><b>Contexto</b> (gota → molécula → átomo → tabela)</td><td><span class="cod">EF09CI01</span> modelo de constituição submicroscópica da matéria</td><td>Reconhece que a matéria é formada por átomos e moléculas e que cada elemento é definido pelo número de prótons.</td></tr>
+<tr><td><b>Explorar</b> e <b>Viagem ao átomo</b></td><td><span class="cod">EF09CI03</span> modelos de estrutura da matéria (constituição do átomo)</td><td>Descreve núcleo (prótons e nêutrons) e eletrosfera em camadas; relaciona período ao número de camadas e família aos elétrons da última camada.</td></tr>
+<tr><td><b>Metal, ametal ou gás nobre</b></td><td><span class="cod">EF09CI03</span></td><td>Localiza elementos na tabela e classifica pela posição e pelas propriedades.</td></tr>
+<tr><td><b>Contexto da chama</b> e <b>Bancada</b></td><td><span class="cod">EF09CI03</span> · <span class="cod">EM13CNT301</span> (aprofundamento)</td><td>Explica a cor da chama pelo salto e retorno do elétron; interpreta o resultado de um experimento.</td></tr>
+<tr><td><b>Passo a passo</b></td><td><span class="cod">EM13CNT301</span> · <span class="cod">EM13CNT306</span></td><td>Ordena o procedimento e justifica cada etapa, incluindo a limpeza da alça e os cuidados de segurança.</td></tr>
+</tbody></table>
+<p class="nota">EF09CI01: investigar as mudanças de estado físico da matéria e explicar essas transformações com base no modelo de constituição submicroscópica. EF09CI03: identificar modelos que descrevem a estrutura da matéria (constituição do átomo e composição de moléculas simples) e reconhecer sua evolução histórica. EM13CNT301: construir questões, elaborar hipóteses e interpretar modelos e resultados experimentais. EM13CNT306: avaliar riscos e justificar comportamentos de segurança. Confirme com o currículo da rede.</p>
+<h2>3. Planos de aula (50 minutos)</h2>
+<div class="plano"><h3>Aula 1 · Do que tudo é feito?</h3>
+<div class="meta"><span><b>Ano:</b> 9º</span><span><b>BNCC:</b> EF09CI01 · EF09CI03</span><span><b>Missões:</b> Contexto, Explorar, Metal ou ametal?</span></div>
+<ol><li><span class="tempo">5 min</span>Pergunte: "O que existe de igual entre a água, o ar e o seu corpo?" Anote as hipóteses.</li>
+<li><span class="tempo">8 min</span>Lousa: Contexto, da gota de água ao átomo de oxigênio e à tabela.</li>
+<li><span class="tempo">15 min</span>Duplas: Explorar, escolher cinco elementos (um de cada família) e anotar número atômico, camadas e uso no cotidiano.</li>
+<li><span class="tempo">12 min</span>Metal, ametal ou gás nobre: classificar os oito elementos.</li>
+<li><span class="tempo">10 min</span>Fechamento: o que a posição na tabela diz sobre o átomo (período = camadas; família = elétrons da última camada).</li></ol>
+<p><b>Avaliação:</b> tabela com os cinco elementos; acertos na classificação.</p></div>
+<div class="plano"><h3>Aula 2 · Por que cada elemento tem uma cor?</h3>
+<div class="meta"><span><b>Ano:</b> 9º ou 1ª série</span><span><b>BNCC:</b> EF09CI03 · EM13CNT301 · EM13CNT306</span><span><b>Missões:</b> Contexto da chama, Bancada, Passo a passo, Desafio</span></div>
+<ol><li><span class="tempo">5 min</span>Mostre os fogos do Contexto e pergunte: "De onde vem o vermelho? E o verde?"</li>
+<li><span class="tempo">8 min</span>Lousa: o salto do elétron em câmera lenta e as sete cores.</li>
+<li><span class="tempo">15 min</span>Bancada: antes de levar cada sal à chama, a turma registra a previsão; depois, confere a cor no quadro de referência.</li>
+<li><span class="tempo">10 min</span>Passo a passo: montar o procedimento e justificar por que se limpa a alça.</li>
+<li><span class="tempo">12 min</span>Desafio e volta às hipóteses do início.</li></ol>
+<p><b>Avaliação:</b> quadro previsão × resultado; explicação escrita do salto do elétron.</p></div>
+<h2>4. Sequência didática · "O átomo e a luz" (3 aulas)</h2>
+<table><thead><tr><th>Aula</th><th>Tema e pergunta</th><th>Na aplicação</th><th>Produto do aluno</th></tr></thead><tbody>
+<tr><td>1</td><td><b>Elementos</b> · Do que tudo é feito?</td><td>Contexto, Explorar, Metal ou ametal?</td><td>Ficha de cinco elementos</td></tr>
+<tr><td>2</td><td><b>Imersão</b> · Como é o átomo por dentro?</td><td>Viagem ao átomo (VR em rodízio), Desafio da tabela.</td><td>Desenho do átomo de sódio em camadas, com legenda</td></tr>
+<tr><td>3</td><td><b>Experimento</b> · Por que cada elemento tem uma cor?</td><td>Tema Teste de chama completo, Relatório do professor.</td><td>Relatório de experimento (hipótese, procedimento, resultado, conclusão)</td></tr>
+</tbody></table>
+<h2>5. Rodízio na estação VR</h2>
+<div class="caixa"><b>Turma de 30 alunos, 8 óculos, 50 minutos</b><br>4 grupos de 7 a 8 alunos, 10 minutos nos óculos cada. No VR, a tabela periódica fica como uma parede à frente do aluno; ele aponta o controle para um elemento e puxa o gatilho para abrir o átomo, que pode segurar com o grip. Na Viagem ao átomo, o analógico direito avança e recua. Na bancada, cada sal levado à chama aparece ampliado à frente do aluno. Use a Sala do professor para ver para onde cada aluno está olhando e o botão Mostrar para apontar o elemento certo.</div>
+<h2>6. Avaliação com o relatório do professor</h2>
+<p>Ao final, <b>Resumo → Relatório do professor</b> gera uma página com escola, turma, aluno ou grupo, missões concluídas, tentativas e o resultado dos Desafios. Pode ser impresso, salvo em PDF ou arquivado em HTML. Os dados ficam só no dispositivo.</p>
+<table><thead><tr><th>O que ler</th><th>Como interpretar</th></tr></thead><tbody>
+<tr><td>Elementos investigados</td><td>Mostram o percurso no Explorar; poucas fichas com Desafio fraco pedem retomada de período e família.</td></tr>
+<tr><td>Metal, ametal ou gás nobre</td><td>Erro comum: chamar o cloro de gás nobre por estar ao lado da última coluna. Vale retomar a ideia de camada completa.</td></tr>
+<tr><td>Passo a passo do teste</td><td>Quem pula a limpeza da alça ainda não entendeu que a cor identifica o metal: restos de outro sal mudam o resultado.</td></tr>
+</tbody></table>
+<h2>7. Limites do modelo (para comentar com a turma)</h2>
+<ul><li>O <b>modelo de camadas (Bohr)</b> é uma simplificação histórica: os elétrons não andam em órbitas fixas, ficam em regiões de probabilidade (orbitais). Ele é o modelo indicado para o 9º ano e serve de ponte para o modelo atual no Ensino Médio.</li>
+<li>O átomo da viagem está <b>fora de escala</b>: com o núcleo do tamanho mostrado, o átomo inteiro teria centenas de metros.</li>
+<li>As <b>cores das chamas</b> são aproximações; a cor real muda com a concentração do sal, a temperatura da chama e a câmera ou tela usada.</li></ul>
+<footer class="rod">Química VR · Portal 360º VR · Portal do Educador · NEWPC Tecnologia. Modelos procedurais da NEWPC; conteúdo de referência OpenStax Chemistry 2e (CC BY 4.0) e tabela periódica da IUPAC; dados numéricos dos elementos do projeto Periodic-Table-JSON (CC BY-SA). Códigos da BNCC conforme a Base Nacional Comum Curricular.</footer>
+</div>
+<script>
+document.body.addEventListener('click',function(e){var b=e.target.closest('[data-action="imprimir"]');if(b)window.print();});
+</script>
+</body>
+</html>

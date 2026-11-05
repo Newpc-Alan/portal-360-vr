@@ -1,0 +1,93 @@
+/* Padrão 3D do catálogo · Portal 360º VR · Portal do Educador (v1.0.0, out/2026)
+   Camada carregada por último em todos os laboratórios (DNA, Corpo Humano, Terra, Célula, História).
+   Objetivo: textos legíveis na lousa, no notebook e no Chromebook, e layout que não se sobrepõe no tablet e no celular.
+   Fonte única em tools/; tools/copiar-vr-padrao.sh copia para cada app. Só CSS: não muda nenhuma missão. */
+
+/* ---------- 1. Tipografia da lateral (onde o aluno lê) ---------- */
+.sidebar{scrollbar-width:thin;scrollbar-color:#2c4b61 transparent}
+.lesson-panel .eyebrow,.voice-head span{font-size:10.5px;letter-spacing:1.6px}
+.lesson-panel h2{font-size:clamp(20px,1.55vw,26px);line-height:1.22;margin:8px 0 12px;text-wrap:balance}
+.lesson-panel h3{font-size:15px;line-height:1.35;margin:18px 0 8px}
+.lesson-panel p,.lesson-panel li{font-size:clamp(14px,1.02vw,16px);line-height:1.62;color:#c4d9e6}
+.lesson-panel p{margin:9px 0}
+.lesson-panel .fine,.lesson-panel p.fine{font-size:12.5px;line-height:1.55;color:#a3bccc}
+.lesson-panel details>summary{font-size:13.5px;padding:6px 0;cursor:pointer}
+.lesson-panel details[open]>summary{margin-bottom:4px}
+.lesson-panel .info-card,.lesson-panel .info-card p{font-size:14px;line-height:1.55}
+.metric-row{font-size:13px}
+.voice-panel p,#captionText{font-size:13.5px;line-height:1.6}
+.side-note{font-size:11.5px;line-height:1.55}
+/* botões da lateral: texto quebra em linha inteira, nunca letra por letra */
+.lesson-panel button,.sidebar button{overflow-wrap:normal;word-break:normal;hyphens:manual;line-height:1.25}
+.button-row{gap:8px}
+.button-row button{min-height:42px;font-size:14px;white-space:nowrap}
+.lesson-panel .answer-list button{font-size:14.5px;line-height:1.4;text-align:left;padding:11px 14px}
+
+/* missões na coluna da esquerda: rótulos legíveis */
+.activity-nav button{font-size:11.5px;line-height:1.25}
+
+/* ---------- 2. Título da cena: legível sobre qualquer fundo ---------- */
+.stage-heading{max-width:min(560px,calc(100% - 40px))}
+.stage-heading .eyebrow{font-size:10.5px}
+.stage-heading h2{text-shadow:0 2px 10px rgba(0,0,0,.55);text-wrap:balance}
+.stage-heading p{font-size:13.5px;color:#d6e6f0;text-shadow:0 1px 6px rgba(0,0,0,.7)}
+.scene-legend{font-size:11.5px;text-shadow:0 1px 4px rgba(0,0,0,.8)}
+.stage-hint{font-size:11px;color:#9fbccd;text-shadow:0 1px 4px rgba(0,0,0,.8)}
+.stage-tools button{font-size:12.5px;padding:8px 11px;white-space:nowrap;flex:0 0 auto}
+
+/* ---------- 3. Barra superior e rodapé ---------- */
+.top-actions button{font-size:13px}
+.brand small{font-size:9px}
+footer{font-size:11px;padding-left:178px}
+/* botão "Entrar na sala": vira um selo pequeno dentro do rodapé, sem cobrir textos */
+body .p360s-chip{bottom:4px;left:10px;padding:4px 12px;font-size:12px;box-shadow:none}
+body .p360s-chip i{width:8px;height:8px}
+
+/* ---------- 4. Menu de temas/sistemas ---------- */
+.menu-sistemas p{font-size:15px;line-height:1.6}
+
+/* ---------- 5. Telas grandes (lousa, TV 1080p) ---------- */
+@media (min-width:1600px){
+  .lesson-panel p,.lesson-panel li{font-size:17px}
+  .lesson-panel h2{font-size:28px}
+  .stage-heading p{font-size:15px}
+  .button-row button{font-size:15px}
+}
+
+/* ---------- 6. Notebook e Chromebook (até 1280 px) ---------- */
+@media (max-width:1280px){
+  .lesson-panel p,.lesson-panel li{font-size:14px}
+  .top-actions button{font-size:12px;padding:8px 10px}
+}
+
+/* ---------- 7. Tablet em pé e celular (até 800 px): uma coluna, nada por cima do modelo ---------- */
+@media (max-width:800px){
+  .topbar{flex-wrap:wrap;row-gap:8px}
+  .top-actions{width:100%;justify-content:flex-start;flex-wrap:nowrap;overflow-x:auto;scrollbar-width:none}
+  .top-actions::-webkit-scrollbar{display:none}
+  .top-actions button{flex:0 0 auto;font-size:13px}
+  .stage{min-height:56vh}
+  /* o título vira uma faixa no topo do palco, com fundo, para não brigar com o modelo */
+  .stage-heading{left:0;right:0;top:0;max-width:none;padding:12px 16px 26px;background:linear-gradient(#0b1c2cf0 55%,#0b1c2c00)}
+  .stage-heading h2{font-size:19px;margin:4px 0 3px}
+  .stage-heading p{font-size:12.5px;line-height:1.4}
+  .scene-legend{left:12px;max-width:calc(100% - 24px);font-size:11px;gap:4px 8px}
+  .stage-tools{bottom:12px;gap:4px;flex-wrap:nowrap;overflow-x:auto;scrollbar-width:none;justify-content:flex-start;left:8px;right:8px;transform:none;max-width:none;width:auto}
+  .stage-tools::-webkit-scrollbar{display:none}
+  .scene-legend{bottom:56px}
+  .stage-tools button{font-size:12px;padding:8px 9px}
+  .stage-hint{display:none}
+  .sidebar{padding:20px 16px 90px}
+  .lesson-panel p,.lesson-panel li{font-size:15.5px}
+  .lesson-panel h2{font-size:22px}
+  .button-row button{font-size:15px;min-height:46px}
+  footer{padding:8px 12px 46px;font-size:11px;flex-direction:column;align-items:flex-start;gap:4px}
+  body .p360s-chip{left:auto;right:12px;bottom:12px;padding:7px 13px;font-size:13px;box-shadow:0 6px 18px rgba(0,0,0,.4)}
+}
+@media (max-width:430px){
+  .brand small{display:none}
+  .stage-heading p{display:none}
+  .stage-heading .eyebrow{display:none}
+  .stage{min-height:50vh}
+  .stage-tools button{font-size:11.5px;padding:7px 8px}
+}

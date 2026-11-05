@@ -330,13 +330,18 @@ body.intro-fullscreen #btnSkipIntro{cursor:pointer}
         </div>
       </article>
 
-      <article class="card experience-card" data-keywords="quimica atomos moleculas ligacoes experimentos" data-tema="quimica" data-serie="efii em" data-status="embreve" style="--bgimg:linear-gradient(135deg,#11233e,#0b1b31)">
+      <article class="card available experience-card" data-keywords="quimica tabela periodica elementos atomo atomos eletron eletrons protons neutrons nucleo camadas bohr familias periodos metais ametais gases nobres teste de chama chama cores fogos de artificio sodio cobre estroncio laboratorio experimento bunsen vr 3d" data-tema="quimica" data-serie="efii em" data-status="disponivel" style="--bgimg:url('assets/capa-quimica-card.webp?v=1')">
         <div class="media"></div><div class="glow"></div>
         <div class="card-content">
-          <span class="tag soon">Em breve</span>
-          <h3>Química VR</h3>
-          <p>Moléculas, átomos, ligações e experimentos interativos em escala imersiva.</p>
-          <div class="meta"><span>Química</span><span>Fundamental II e Médio</span></div>
+          <span class="tag">Novo · Disponível</span>
+          <h3>Química VR · Tabela periódica e teste de chama</h3>
+          <p>Os 118 elementos numa tabela 3D com o átomo de cada um, uma viagem por dentro do átomo de sódio e o teste de chama numa bancada de laboratório, sem nenhum risco.</p>
+          <div class="meta"><span>Química · Ciências</span><span>9º ano e Ensino Médio</span><span>2 temas · 9 missões · 118 elementos · 7 sais</span><span>VR + 3D</span></div>
+          <div class="card-actions">
+            <button type="button" class="aula-btn breve" disabled title="Videoaula em produção"><span class="passo">1</span><svg class="play" viewBox="0 0 24 24" aria-hidden="true"><path d="M8 5v14l11-7z" fill="currentColor"/></svg>Aula em breve</button>
+            <a href="apps/quimica/" class="primary-btn"><span class="passo">2</span>Explorar em 3D</a>
+            <a href="apps/quimica/?vr=1" class="vr-btn" data-vr-app="quimica"><span class="passo">3</span>🥽 Entrar em VR</a>
+          </div>
         </div>
       </article>
       <div class="empty" id="emptyMsg">Nenhuma experiência encontrada com esses filtros.</div>
@@ -596,6 +601,6 @@ function applyFilters(){
 fBusca.addEventListener('input',applyFilters);
 
 </script>
-<script defer src="assets/sala/sala-cliente.js?v=1.10.0"></script>
+<script defer src="assets/sala/sala-cliente.js?v=1.11.0"></script>
 </body>
 </html>

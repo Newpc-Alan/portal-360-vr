@@ -5,9 +5,9 @@
    Textos no tom falado das narrações (chaves = nomes dos MP3 em audio/; o tema da chama usa o prefixo chama-).
    Dados numéricos dos elementos: Periodic-Table-JSON (Bowserinator), derivado da Wikipedia (CC BY-SA). Nomes em português: IUPAC/SBQ. */
 (function(){'use strict';
-const D={version:'1.0.0'};
+const D={version:'1.1.0'};
 D.temas=[
- {id:'animal',nome:'Tabela periódica',estuda:'Os 118 elementos e o átomo por dentro.',exemplos:'Famílias, períodos, camadas de elétrons e uma viagem dentro do átomo de sódio',modulo:'ani',atividades:['contexto','explorar','viagem','comparar'],questoes:['numeroAtomico','familia','periodo','gasNobre','metal','sodio']},
+ {id:'animal',nome:'Tabela periódica',estuda:'Os 118 elementos e o átomo por dentro.',exemplos:'Famílias, períodos, monte o seu átomo e uma viagem dentro do átomo de sódio',modulo:'ani',atividades:['contexto','explorar','montar','viagem','comparar'],questoes:['numeroAtomico','familia','periodo','gasNobre','metal','sodio']},
  {id:'vegetal',nome:'Teste de chama',estuda:'Cada elemento acende uma cor.',exemplos:'Bancada de laboratório com sete sais, o salto do elétron e os fogos de artifício',modulo:'veg',atividades:['vegContexto','vegetalExp','fabrica'],questoes:['porqueCor','cobre','limpar','fogos','sodioAmarelo','identidade']}
 ];
 D.modulos=[{id:'ani',label:'Tabela periódica',curto:'Tabela',pergunta:'Do que tudo é feito?'},{id:'veg',label:'Teste de chama',curto:'Chama',pergunta:'Por que cada elemento tem uma cor?'}];
@@ -15,6 +15,7 @@ D.PREF={ani:'',veg:'chama-'};
 D.activities=[
  {id:'contexto',label:'Contexto',title:'Do que tudo é feito?',subtitle:'Da gota de água ao átomo, e do átomo à tabela periódica.',kicker:'LOCALIZE',modulo:'ani'},
  {id:'explorar',label:'Explorar',title:'A tabela periódica em 3D.',subtitle:'Toque em qualquer elemento para ver a ficha, o átomo e ouvir a explicação.',kicker:'EXPLORE',modulo:'ani'},
+ {id:'montar',label:'Monte o átomo',title:'Monte um átomo, partícula por partícula.',subtitle:'Coloque prótons, nêutrons e elétrons e veja o elemento mudar na hora.',kicker:'CONSTRUA',modulo:'ani'},
  {id:'viagem',label:'Viagem ao átomo',title:'Encolha e entre num átomo de sódio.',subtitle:'Uma viagem em primeira pessoa, da nuvem de elétrons até o núcleo, em seis trechos.',kicker:'VIAJE',modulo:'ani'},
  {id:'comparar',label:'Metal ou ametal?',title:'Metal, ametal ou gás nobre?',subtitle:'Encontre o elemento na tabela e classifique.',kicker:'CLASSIFIQUE',modulo:'ani'},
  {id:'desafio',label:'Desafio',title:'Agora, explique o que descobriu.',subtitle:'Situações para aplicar o que você viu.',kicker:'APLIQUE',modulo:'ani'},
@@ -159,6 +160,16 @@ D.viagem=[
  {titulo:'O salto do elétron',onde:'Camada M',tam:'Luz de 589 nanômetros',alvo:'el-11',dur:14,text:'Agora veja o elétron de fora receber energia. Ele salta para uma órbita mais distante, mas logo volta e solta um pacotinho de luz amarela. É exatamente isso que acontece milhões de vezes por segundo quando o sal cai na chama do fogão.',audio:'viagem-5'}
 ];
 D.VIAGEM_FIM={text:'Viagem completa. O átomo de sódio tem onze prótons no núcleo e onze elétrons em três camadas: dois, oito e um. O elétron solitário da última camada é o que reage e o que acende a chama de amarelo.',audio:'viagem-fim'};
+/* monte o átomo: metas (p prótons, n nêutrons, e elétrons) */
+D.MONTAR=[
+ {p:1,n:0,e:1,titulo:'Hidrogênio',texto:'Monte um átomo de hidrogênio neutro: um próton no núcleo e um elétron em volta.',feito:'Isso! Um próton faz o hidrogênio, o elemento mais simples e mais abundante do Universo. Com um elétron, as cargas se equilibram e o átomo fica neutro.'},
+ {p:2,n:2,e:2,titulo:'Hélio',texto:'Agora monte o hélio, o gás dos balões: dois prótons, dois nêutrons e dois elétrons.',feito:'Hélio montado. Repare que o elemento mudou quando você colocou o segundo próton: é o número de prótons que decide o elemento.'},
+ {p:6,n:6,e:6,titulo:'Carbono-12',texto:'Monte o carbono-12, a base da vida: seis prótons, seis nêutrons e seis elétrons. Veja os elétrons se dividirem em duas camadas.',feito:'Carbono-12 pronto. Os seis elétrons ficam dois na camada K e quatro na camada L. O 12 do nome é a soma de prótons e nêutrons, o número de massa.'},
+ {p:8,n:8,e:8,titulo:'Oxigênio',texto:'Monte o oxigênio, o mesmo átomo que você viu na molécula de água: oito prótons, oito nêutrons e oito elétrons.',feito:'Oxigênio montado: dois elétrons na camada K e seis na L. Faltam dois para completar a camada, por isso o oxigênio reage com tanta coisa.'},
+ {p:11,n:12,e:10,titulo:'Íon sódio (Na⁺)',texto:'Agora um íon: monte o sódio com onze prótons e doze nêutrons, mas com só dez elétrons. É o sódio que está no sal de cozinha.',feito:'Íon sódio formado. Com onze cargas positivas e só dez negativas, sobra uma carga positiva: Na mais. O sódio perdeu justamente o elétron solitário da camada M.'},
+ {p:18,n:22,e:18,titulo:'Desafio',texto:'Desafio: monte o gás nobre do terceiro período, neutro e com vinte e dois nêutrons. Procure na tabela quantos prótons ele tem.',feito:'É o argônio! Dezoito prótons, e os dezoito elétrons fecham as camadas com dois, oito e oito. Com a última camada completa, ele quase não reage.'}
+];
+D.MONTAR_FIM={text:'Você montou todas as metas. O número de prótons define o elemento, prótons mais nêutrons dão o número de massa, e a diferença entre prótons e elétrons define se o átomo é neutro ou um íon.',audio:'montar-concluido'};
 /* metal, ametal ou gás nobre (as chaves internas animal/vegetal/ambas vêm da casca) */
 D.COMPARAR=[
  {key:'el-26',q:'Ferro: metal, ametal ou gás nobre?',resp:'animal',why:'O ferro é um metal de transição: brilha, conduz eletricidade e calor e pode ser moldado. Está no aço de prédios e carros.'},
@@ -193,6 +204,7 @@ D.questions.forEach(q=>{if(['porqueCor','cobre','limpar','fogos','sodioAmarelo',
 D.guide=[
  {view:'contexto',title:'Localize-se',goal:'Amplie uma gota de água até a molécula, olhe um átomo de perto e conheça a tabela.',check:'contexto',audio:'aula-contexto'},
  {view:'explorar',title:'Investigue a tabela',goal:'Toque em pelo menos três elementos da tabela e ouça o que cada um tem de especial.',check:'explorar',audio:'aula-explorar'},
+ {view:'montar',title:'Monte o átomo',goal:'Cumpra as seis metas: monte átomos e íons colocando prótons, nêutrons e elétrons.',check:'montar',audio:'aula-montar'},
  {view:'viagem',title:'Entre no átomo',goal:'Faça a viagem completa pelo átomo de sódio, da camada de fora até o núcleo.',check:'viagem',audio:'aula-viagem'},
  {view:'comparar',title:'Classifique',goal:'Encontre oito elementos na tabela e diga se cada um é metal, ametal ou gás nobre.',check:'comparar',audio:'aula-comparar'},
  {view:'desafio',title:'Mostre o que entendeu',goal:'Hora de mostrar o que você entendeu. Responda às situações e, no final, confira o seu resumo.',check:'desafio',audio:'aula-desafio'},

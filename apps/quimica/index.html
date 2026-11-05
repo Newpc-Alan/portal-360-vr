@@ -5,15 +5,15 @@
 <script>/* Sala: escuta a concessão de VR do Quest (navegação WebXR) o mais cedo possível */try{navigator.xr&&navigator.xr.addEventListener("sessiongranted",function(){window.__xrConcedido=true;});}catch(e){}</script>
 <meta name="theme-color" content="#08192c"><meta name="description" content="Química VR: a tabela periódica em 3D com os 118 elementos, o átomo em camadas, uma viagem por dentro do átomo de sódio e o teste de chama numa bancada de laboratório, sem risco. Narração em português, 3D e VR.">
 <title>Química VR · Tabela periódica e teste de chama | Portal do Educador</title>
-<link rel="icon" href="assets/logo.png"><link rel="stylesheet" href="quimica-lab.css?v=1.0.0"><link rel="stylesheet" href="quimica-portal.css?v=1.0.0">
+<link rel="icon" href="assets/logo.png"><link rel="stylesheet" href="quimica-lab.css?v=1.1.0"><link rel="stylesheet" href="quimica-portal.css?v=1.0.0">
 <script defer src="vendor/three.r128.min.js"></script>
-<script defer src="quimica-data.js?v=1.0.0"></script>
-<script defer src="quimica-models.js?v=1.0.0"></script>
+<script defer src="quimica-data.js?v=1.1.0"></script>
+<script defer src="quimica-models.js?v=1.1.0"></script>
 <script defer src="quimica-audio.js?v=1.0.0"></script>
-<script defer src="quimica-app.js?v=1.0.0"></script>
+<script defer src="quimica-app.js?v=1.1.0"></script>
 <script defer src="portal-entrada.js?v=1.2.1"></script>
 <script defer src="sala-cliente.js?v=1.11.0"></script><script defer src="primeiros-passos.js?v=1.4.0"></script><script defer src="acessibilidade.js?v=1.0.0"></script>
-<script defer src="quimica-portal.js?v=1.0.0"></script><script defer src="pde-vr-padrao.js?v=1.0.0"></script>
+<script defer src="quimica-portal.js?v=1.1.0"></script><script defer src="pde-vr-padrao.js?v=1.0.0"></script>
 <link rel="stylesheet" href="pde-3d-padrao.css?v=1.0.1">
 </head>
 <body>
@@ -46,7 +46,7 @@
   <div class="side-note" id="modelNote">Modelos procedurais; cores e tamanhos didáticos.</div>
  </aside>
 </div>
-<footer><span><b>Portal do Educador</b> · NEWPC · Química VR v1.0</span><span id="sessionStatus">Aprenda fazendo, no seu ritmo.</span><span id="offlineStatus" class="offline" title="Depois da primeira abertura, as narrações ficam guardadas neste dispositivo e a aplicação funciona sem internet."></span><button id="sourcesBtn" data-action="sources">Fontes e limites do modelo</button></footer>
+<footer><span><b>Portal do Educador</b> · NEWPC · Química VR v1.1</span><span id="sessionStatus">Aprenda fazendo, no seu ritmo.</span><span id="offlineStatus" class="offline" title="Depois da primeira abertura, as narrações ficam guardadas neste dispositivo e a aplicação funciona sem internet."></span><button id="sourcesBtn" data-action="sources">Fontes e limites do modelo</button></footer>
 </div>
 <dialog id="welcomeDialog" class="welcome" aria-labelledby="welcomeTitle"><img src="assets/logo.png" alt=""><span class="eyebrow">PORTAL 360º VR</span><h2 id="welcomeTitle">Bem-vindo à Química VR</h2><p>Aqui você vai explorar a tabela periódica em 3D, encolher até entrar num átomo de sódio e fazer o teste de chama numa bancada de laboratório, sem nenhum risco.</p><div class="button-row"><button data-action="welcomeStart" class="primary">▶ Começar com a narração</button><button data-action="welcomeSkip">Entrar sem narração</button></div></dialog>
 <dialog id="settingsDialog"><form method="dialog"><div class="dialog-head"><h2>Ajustes da experiência</h2><button aria-label="Fechar ajustes" class="icon">✕</button></div></form>
@@ -67,5 +67,5 @@
 <dialog id="summaryDialog"><div class="dialog-head"><h2>Resumo da experiência</h2><button id="closeSummary" data-action="closeSummary" class="icon" aria-label="Fechar resumo">✕</button></div><div id="summaryContent"></div><details><summary>Exportar registros brutos</summary><div class="button-row"><button id="downloadJSON" data-action="downloadJSON">Exportar JSON</button><button id="downloadCSV" data-action="downloadCSV">Exportar CSV</button></div></details><p class="fine">Registros desta aba; a identificação do aluno ou grupo é opcional e fica apenas neste dispositivo. O resumo descreve ações e tentativas; não é um diagnóstico de aprendizagem.</p></dialog>
 <dialog id="sourcesDialog"><form method="dialog"><div class="dialog-head"><h2>Fontes e limites</h2><button class="icon" aria-label="Fechar fontes">✕</button></div></form><div id="sourcesContent"></div></dialog>
 <script>window.addEventListener('error',function(e){console.error('Química VR:',e.message);});</script>
-<script defer src="quimica-relatorio.js?v=1.0.0"></script>
+<script defer src="quimica-relatorio.js?v=1.1.0"></script>
 </body></html>

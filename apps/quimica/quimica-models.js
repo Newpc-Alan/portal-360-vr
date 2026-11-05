@@ -4,7 +4,7 @@
    as chamas coloridas (cones aditivos com cintilação) e o átomo de sódio gigante da viagem.
    Cada peça clicável leva userData.hit = {type:'inspect', key}. Mesma API da Célula 3D VR. */
 (function(){'use strict';
-const T=THREE,D=window.QUIMICA_DATA,V=(x=0,y=0,z=0)=>new T.Vector3(x,y,z);
+const T=THREE,D=window.QUIMICA_DATA,V=(x=0,y=0,z=0)=>new T.Vector3(x,y,z);const API={modoVR:false};
 let ENV=null;
 function env(){if(ENV)return ENV;const W=128;const face=(topo,baixo,caixa)=>{const c=document.createElement('canvas');c.width=c.height=W;const x=c.getContext('2d');const g=x.createLinearGradient(0,0,0,W);g.addColorStop(0,topo);g.addColorStop(.55,'#4c5866');g.addColorStop(1,baixo);x.fillStyle=g;x.fillRect(0,0,W,W);if(caixa){x.filter='blur(6px)';x.fillStyle=caixa;x.fillRect(W*.22,W*.12,W*.56,W*.4);x.filter='none';}return c;};
  const lado=face('#cfd8e6','#1e2430'),luz=face('#eef3fa','#1e2430','#ffffff');const cima=document.createElement('canvas');cima.width=cima.height=W;const cx=cima.getContext('2d');const rg=cx.createRadialGradient(W/2,W/2,4,W/2,W/2,W*.7);rg.addColorStop(0,'#ffffff');rg.addColorStop(1,'#a8b6c8');cx.fillStyle=rg;cx.fillRect(0,0,W,W);const baixo=document.createElement('canvas');baixo.width=baixo.height=W;const bx=baixo.getContext('2d');bx.fillStyle='#1a1e26';bx.fillRect(0,0,W,W);
@@ -41,19 +41,35 @@ const posTab=e=>{const extra=e.lin>7?.45:0;return V((e.col-9.5)*1.0,(4.5-e.lin)*
 /* um ladrilho (corpo + face). O material do corpo é próprio, para o destaque ao apontar não acender a família toda */
 function ladrilho(z,opt={}){const e=D.EL[z],g=new T.Group();const corpo=new T.Mesh(new T.BoxGeometry(.94,.94,.16),mat(COR(e.fam).multiplyScalar(.55),{roughness:.4,envMapIntensity:.6}));g.add(corpo);const face=new T.Mesh(faceGeo(z),faceMat());face.position.z=.1;g.add(face);
  const f2=face.clone();f2.rotation.y=Math.PI;f2.position.z=-.1;g.add(f2);if(opt.hit!==false)tag(g,opt.hit||ins('el-'+z));return g;}
-/* tabela inteira. opt.destaque: chave 'el-Z' em evidência; opt.hit: função z→dados do clique */
-function tabela(opt={}){const g=new T.Group();const alvo=opt.destaque?Number(String(opt.destaque).slice(3)):0;
- for(let z=1;z<=118;z++){const e=D.EL[z];const t=ladrilho(z,{hit:opt.hit?opt.hit(z):undefined});t.position.copy(posTab(e));if(alvo){if(z===alvo){t.position.z=.7;t.scale.setScalar(1.35);}else t.position.z=-.05;}g.add(t);
-  if(alvo&&z===alvo){const moldura=new T.Mesh(new T.TorusGeometry(.78,.035,8,4),new T.MeshBasicMaterial({color:0xffd27a,toneMapped:false}));moldura.rotation.z=Math.PI/4;moldura.position.copy(t.position).add(V(0,0,.12));g.add(moldura);const b=brilho(0xffd27a,2.6);b.position.copy(t.position).add(V(0,0,-.1));g.add(b);g.userData.pulso=moldura;}}
+/* tabela inteira. opt.destaque: chave 'el-Z' em evidência; opt.hit: função z→dados do clique; opt.filtro: família em destaque;
+   opt.curva: raio (em ladrilhos) para a versão do óculos, uma parede curva em volta do aluno (padrão: API.modoVR) */
+let VEU=null;const veuMat=()=>VEU||(VEU=new T.MeshBasicMaterial({color:0x061220,transparent:true,opacity:.72,depthWrite:false,toneMapped:false}));
+function tabela(opt={}){const g=new T.Group();const alvo=opt.destaque?Number(String(opt.destaque).slice(3)):0;const R=opt.curva!==undefined?opt.curva:(API.modoVR?9.6:0);
+ /* coloca um objeto na posição (x,y) da tabela, com recuo zOff em direção ao aluno */
+ const put=(o,x,y,zOff=0)=>{if(R){const ang=x/R,r=R-zOff;o.position.set(r*Math.sin(ang),y,-r*Math.cos(ang));o.rotation.y=-ang;}else o.position.set(x,y,zOff);return o;};
+ const ladr={};
+ for(let z=1;z<=118;z++){const e=D.EL[z];const t=ladrilho(z,{hit:opt.hit?opt.hit(z):undefined});const p=posTab(e);let zo=0;
+  const fora=opt.filtro&&e.fam!==opt.filtro;
+  if(alvo){if(z===alvo){zo=.7;t.scale.setScalar(1.35);}else zo=-.05;}
+  if(opt.filtro&&!fora){zo=.35;t.scale.setScalar(1.08);}
+  if(fora){zo=-.15;t.scale.setScalar(.9);const v=new T.Mesh(new T.PlaneGeometry(.94,.94),veuMat());v.position.z=.11;v.userData.semEnquadre=true;t.add(v);}
+  put(t,p.x,p.y,zo);g.add(t);ladr[z]=t;
+  if(alvo&&z===alvo){const moldura=new T.Mesh(new T.TorusGeometry(.78,.035,8,4),new T.MeshBasicMaterial({color:0xffd27a,toneMapped:false}));moldura.rotation.z=Math.PI/4;const hm=new T.Group();hm.add(moldura);put(hm,p.x,p.y,zo+.12);g.add(hm);const b=brilho(0xffd27a,2.6);put(b,p.x,p.y,zo-.1);g.add(b);g.userData.pulso=moldura;}}
  /* lacunas dos lantanídeos e actinídeos */
- [[6,'57–71','#c9a8ff'],[7,'89–103','#e5a0e8']].forEach(([lin,txt,cor])=>{const p=V((3-9.5),(4.5-lin),0);const m=new T.Mesh(new T.BoxGeometry(.94,.94,.08),mat(new T.Color(cor).multiplyScalar(.3),{transparent:true,opacity:.7}));m.position.copy(p);g.add(m);textFixo(g,txt,p.x,p.y,.06,.9,cor);});
- for(let c=1;c<=18;c++){const m=rotuloFixo(String(c),'#7fa6bd',.9,110);m.position.set(c-9.5,4.15,0);g.add(m);}
- for(let l=1;l<=7;l++){const m=rotuloFixo(String(l),'#7fa6bd',.9,110);m.position.set(-10.3,4.5-l,0);g.add(m);}
- textFixo(g,'GRUPO (FAMÍLIA)',0,4.85,0,3.6,'#9cc4d8');textFixo(g,'PERÍODO',-11.05,1,0,2.4,'#9cc4d8').rotation.z=Math.PI/2;
- textFixo(g,'Lantanídeos',-9.5+.1,(4.5-9)-.45,0,2.1,'#c9a8ff');textFixo(g,'Actinídeos',-9.5+.1,(4.5-10)-.45,0,2.1,'#e5a0e8');
- g.userData.semGiro=true;g.userData.frontal=true;
+ [[6,'57–71','#c9a8ff'],[7,'89–103','#e5a0e8']].forEach(([lin,txt,cor])=>{const x=3-9.5,y=4.5-lin;const m=new T.Mesh(new T.BoxGeometry(.94,.94,.08),mat(new T.Color(cor).multiplyScalar(.3),{transparent:true,opacity:.7}));put(m,x,y);g.add(m);const l=rotuloFixo(txt,cor,.9);put(l,x,y,.06);g.add(l);});
+ for(let c=1;c<=18;c++){const m=rotuloFixo(String(c),'#7fa6bd',.9,110);put(m,c-9.5,4.15);g.add(m);}
+ for(let l=1;l<=7;l++){const m=rotuloFixo(String(l),'#7fa6bd',.9,110);put(m,-10.3,4.5-l);g.add(m);}
+ const gt=rotuloFixo('GRUPO (FAMÍLIA)','#9cc4d8',3.6);put(gt,0,4.85);g.add(gt);
+ const pr=rotuloFixo('PERÍODO','#9cc4d8',2.4);put(pr,-11.05,1);pr.rotateZ(Math.PI/2);g.add(pr);
+ const la=rotuloFixo('Lantanídeos','#c9a8ff',2.1);put(la,-9.4,(4.5-9)-.45);g.add(la);const ac=rotuloFixo('Actinídeos','#e5a0e8',2.1);put(ac,-9.4,(4.5-10)-.45);g.add(ac);
+ if(opt.filtro){const F=D.FAMILIAS[opt.filtro];const ft=rotuloFixo('Destaque: '+F.nome,F.cor,5.5);put(ft,1,5.55);g.add(ft);}
+ /* lupa: o elemento apontado salta da tabela, bem maior, para dar leitura no óculos e na lousa */
+ let lupa=null,lupaZ=0;
+ g.userData.lupa=key=>{const z=key&&/^el-\d+$/.test(key)?Number(key.slice(3)):0;if(z===lupaZ)return;lupaZ=z;if(lupa){g.remove(lupa);lupa.traverse(o=>{if(o.geometry)o.geometry.dispose();if(o.material&&o.material!==FACE_MAT&&o.material!==VEU)o.material.dispose();});lupa=null;}
+  if(!z||(ladr[z]&&!ladr[z].visible))return;const e=D.EL[z],p=posTab(e);lupa=ladrilho(z,{hit:false});lupa.scale.setScalar(R?2.3:2.1);lupa.traverse(o=>{o.userData.semEnquadre=true;});put(lupa,p.x,Math.max(-5.2,p.y+.2),R?2.6:1.6);const b=brilho(new T.Color(D.FAMILIAS[e.fam].cor),1.9);b.material.opacity=.55;b.position.z=-.2;lupa.add(b);g.add(lupa);};
+ g.userData.ocultar=(z,sim)=>{if(ladr[z])ladr[z].visible=!sim;if(sim&&z===lupaZ)g.userData.lupa(null);};
+ g.userData.semGiro=true;g.userData.frontal=true;g.userData.tabela=true;g.userData.curva=R;
  g.userData.tick=t=>{if(g.userData.pulso)g.userData.pulso.scale.setScalar(1+.06*Math.sin(t*4));};return g;}
-
 /* ---------- átomo no modelo de camadas ---------- */
 const COR_P=0xe0533d,COR_N=0x9aa3ad,COR_E=0x63c8ff;
 function nucleo(z,n,raio){const g=new T.Group();const total=Math.min(z+n,60),pz=Math.max(1,Math.round(total*z/(z+n)));const r=raio||.12;const R0=r*Math.cbrt(total)*.95;
@@ -133,7 +149,7 @@ function contexto(level){const g=new T.Group();
   const seta=new T.ArrowHelper(V(1,0,0),V(-1.2,.2,0),1.2,0xffd27a,.25,.16);g.add(seta);tag(g,{type:'context'});g.userData.tick=a.userData.tick;}
  else{const tb=tabela();g.add(tb);g.userData.tick=tb.userData.tick;g.userData.semGiro=true;g.userData.frontal=true;}
  return g;}
-function explorar(){return tabela();}
+function explorar(filtro){return tabela({filtro});}
 
 /* ---------- contexto da chama: fogos → salto do elétron → sete cores ---------- */
 function fogos(){const g=new T.Group();const cores=['#ff1f1f','#8fe04a','#ffb300','#1fe0b0','#b27cff','#ff2d55'];const estouros=[];
@@ -212,12 +228,39 @@ function viagemCena(state){const g=new T.Group();const i=Math.min(state.trecho||
    const ang=o.a+t*o.w;e.position.set(Math.cos(ang)*r,Math.sin(ang)*Math.sin(o.inc)*r*.3,Math.sin(ang)*r*Math.cos(o.inc*.3));});nuc.rotation.y=t*.1;};
  g.userData.tick(0);g.userData.semGiro=true;return g;}
 
+/* ---------- monte o átomo ---------- */
+const camadasDe=e=>{const cap=[2,8,8,2],out=[];let r=e;for(const c of cap){if(r<=0)break;out.push(Math.min(c,r));r-=c;}return out;};
+function bandeja(cor,rot,op,y,g){const prato=new T.Mesh(new T.CylinderGeometry(.62,.5,.14,32),mat(0x22384c,{roughness:.5}));prato.position.set(-4.3,y,0);prato.rotation.x=.5;tag(prato,{type:'montar',op:op+'+'});g.add(prato);
+ let s=op.charCodeAt(0);const rnd=()=>{s=(s*9301+49297)%233280;return s/233280;};const geo=new T.SphereGeometry(.12,16,12),m=mat(cor,{roughness:.3,emissive:op==='e'?0x1d6a9a:0});for(let i=0;i<9;i++){const b=new T.Mesh(geo,m);b.position.set(-4.3+(rnd()-.5)*.7,y+.12+rnd()*.12,(rnd()-.5)*.5);tag(b,{type:'montar',op:op+'+'});g.add(b);}
+ const mais=rotuloFixo('+ '+rot,'#e7f6ff',1.7,70);mais.position.set(-4.3,y-.52,.3);tag(mais,{type:'montar',op:op+'+'});g.add(mais);
+ const menos=new T.Mesh(new T.CylinderGeometry(.22,.22,.08,24),mat(0x8a2e2e,{roughness:.4}));menos.rotation.x=Math.PI/2;menos.position.set(-3.05,y,0);tag(menos,{type:'montar',op:op+'-'});g.add(menos);
+ const tm=rotuloFixo('−','#ffffff',1.1,120);tm.position.set(-3.05,y,.1);tag(tm,{type:'montar',op:op+'-'});g.add(tm);}
+function montarCena(st,meta){const g=new T.Group();const p=st.p,n=st.n,e=st.e;
+ bandeja(COR_P,'Próton','p',1.5,g);bandeja(COR_N,'Nêutron','n',0,g);bandeja(COR_E,'Elétron','e',-1.5,g);
+ const at=new T.Group();g.add(at);at.position.set(.3,0,0);
+ if(p>0){const nuc=nucleo(p,n,.13);at.add(nuc);}
+ const cam=camadasDe(e);const eletrons=[];const rn=p>0?.13*Math.cbrt(p+n)*.95+.13:.2;const matAnel=new T.MeshBasicMaterial({color:0x5c8fb0,transparent:true,opacity:.55,toneMapped:false});
+ [0,1,2,3].forEach(k=>{const r=rn+.45+k*.42;const anel=new T.Mesh(new T.TorusGeometry(r,.01,6,120),k<cam.length?matAnel:new T.MeshBasicMaterial({color:0x2c4256,transparent:true,opacity:.35,toneMapped:false}));anel.rotation.x=Math.PI/2;at.add(anel);
+  const q=cam[k]||0;for(let i=0;i<q;i++){const el=ball(.075,COR_E,null,{emissive:0x1d6a9a,roughness:.25},14);el.userData.orb={r,a:i/q*Math.PI*2,w:(.9-k*.12)*(k%2?-1:1)};at.add(el);eletrons.push(el);const b=brilho(COR_E,.34);el.add(b);}
+  const l=label('KLMN'[k]+(q?' · '+q:''),k<cam.length?'#8fc6e6':'#4d6a80',.6);l.position.set(r+.05,.14,0);at.add(l);});
+ at.rotation.x=.38;at.scale.setScalar(1.3);
+ /* identidade do átomo */
+ if(p>0){const t=ladrilho(p,{hit:false});t.scale.setScalar(1.7);t.position.set(4.1,.9,0);g.add(t);const E=D.EL[p];
+  const carga=p-e,txtC=carga===0?'neutro':(carga>0?'íon positivo '+carga+'+':'íon negativo '+(-carga)+'−');
+  const l1=rotuloFixo(E.nome,'#ffffff',2.6,80);l1.position.set(4.1,-.35,0);g.add(l1);
+  const l2=rotuloFixo('Número de massa: '+(p+n),'#cfe6f2',2.6,60);l2.position.set(4.1,-.8,0);g.add(l2);
+  const l3=rotuloFixo('Carga: '+txtC,carga===0?'#9fe6b8':'#ffd27a',2.6,60);l3.position.set(4.1,-1.2,0);g.add(l3);
+  const l4=rotuloFixo(p+' p · '+n+' n · '+e+' e','#9cc4d8',2.6,60);l4.position.set(4.1,-1.6,0);g.add(l4);}
+ else{const l=rotuloFixo('Sem prótons, não há elemento','#ffd27a',3,60);l.position.set(4.1,0,0);g.add(l);}
+ if(meta){const ok=meta.p===p&&meta.n===n&&meta.e===e;const m=rotuloFixo((ok?'✓ ':'Meta: ')+meta.titulo+' ('+meta.p+' p · '+meta.n+' n · '+meta.e+' e)',ok?'#7dffb0':'#ffe3a8',6,64);m.position.set(.3,2.75,0);g.add(m);if(ok){const b=brilho(0x7dffb0,4.5);b.position.set(.3,0,-.4);g.add(b);}}
+ g.userData.tick=t=>{eletrons.forEach(el=>{const o=el.userData.orb;const a=o.a+t*o.w;el.position.set(Math.cos(a)*o.r,0,Math.sin(a)*o.r);});};g.userData.tick(0);
+ g.userData.semGiro=true;g.userData.frontal=true;return g;}
 /* ---------- metal, ametal ou gás nobre ---------- */
 function compararCena(state){const g=new T.Group();const rod=D.COMPARAR[Math.min(state.rodada,D.COMPARAR.length-1)];const alvo=state.done?null:rod.key;
  const tb=tabela({destaque:alvo,hit:()=>({type:'cmpCel'})});g.add(tb);
- if(alvo)textAt(g,'Procure: '+D.info[alvo].name,0,5.7,.5,6,'#ffe3a8');
+ if(alvo){const R=tb.userData.curva||0;textAt(g,'Procure: '+D.info[alvo].name,0,5.7,R?-(R-.6):.5,6,'#ffe3a8');}
  g.userData.tick=tb.userData.tick;g.userData.semGiro=true;g.userData.frontal=true;return g;}
 function desafio(modulo){return modulo==='veg'?vegetalExp():tabela();}
-function dispose(g){if(!g)return;const geos=new Set(),mats=new Set(),tex=new Set();const fixos=new Set([ATLAS,GLOW,ENV]);g.traverse(o=>{if(o.geometry&&!o.isSprite)geos.add(o.geometry);for(const m of [].concat(o.material||[])){if(!m||m===FACE_MAT)continue;mats.add(m);for(const t of [m.map,m.emissiveMap,m.normalMap,m.bumpMap]){if(t&&!fixos.has(t))tex.add(t);}}});geos.forEach(x=>x.dispose());mats.forEach(x=>x.dispose());tex.forEach(x=>x.dispose());if(g.parent)g.parent.remove(g);}
-window.QUIMICA_MODELS={V,mat,ball,label,rotuloFixo,textFixo,textAt,tag,tabela,atomo,bico,chama,contexto,vegContexto,explorar,vegetalExp,inspection,sequencia,viagemCena,compararCena,desafio,dispose,ESCALA_VR,TRECHOS};
+function dispose(g){if(!g)return;const geos=new Set(),mats=new Set(),tex=new Set();const fixos=new Set([ATLAS,GLOW,ENV]);g.traverse(o=>{if(o.geometry&&!o.isSprite)geos.add(o.geometry);for(const m of [].concat(o.material||[])){if(!m||m===FACE_MAT||m===VEU)continue;mats.add(m);for(const t of [m.map,m.emissiveMap,m.normalMap,m.bumpMap]){if(t&&!fixos.has(t))tex.add(t);}}});geos.forEach(x=>x.dispose());mats.forEach(x=>x.dispose());tex.forEach(x=>x.dispose());if(g.parent)g.parent.remove(g);}
+const API_LIST={montarCena,camadasDe,V,mat,ball,label,rotuloFixo,textFixo,textAt,tag,tabela,atomo,bico,chama,contexto,vegContexto,explorar,vegetalExp,inspection,sequencia,viagemCena,compararCena,desafio,dispose,ESCALA_VR,TRECHOS};Object.assign(API,API_LIST);window.QUIMICA_MODELS=API;
 })();

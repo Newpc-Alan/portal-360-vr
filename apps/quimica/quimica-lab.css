@@ -102,3 +102,9 @@ ul.pistas li{margin:3px 0}
 .pair-choices.seq:not(details .pair-choices) button{font-size:14px;font-weight:700;line-height:1.2;padding:8px 6px;overflow-wrap:anywhere}
 .menu-card .thumb{display:block;margin:-12px -12px 4px;height:120px;background:#0a1626 center/cover no-repeat;border-bottom:1px solid #2b4659}
 .menu-grid{grid-template-columns:repeat(auto-fill,minmax(260px,1fr))}
+/* Química VR v1.1: fichinhas de família no Explorar */
+.filtros{margin:10px 0 12px}
+.filtros .chips{display:flex;flex-wrap:wrap;gap:6px;margin:6px 0 8px}
+.filtros .chip{font-size:12px;font-weight:700;padding:6px 10px;min-height:32px;border-radius:999px;color:#0f2233;background:var(--base);border:2px solid transparent;opacity:.82}
+.filtros .chip.on{opacity:1;border-color:#fff;box-shadow:0 0 0 3px #ffffff33}
+#lessonPanel .filtros .chip{background:var(--base);color:#0f2233}

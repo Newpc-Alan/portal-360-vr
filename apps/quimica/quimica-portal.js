@@ -165,7 +165,7 @@ Proto.buildXRUI=function(){
 const AJUDA_CONTROLES='Gatilho: escolhe e abre a ficha. Grip (lateral): segura o átomo ou a chama na mão; gire o pulso para ver em volta. Duas mãos: afaste para aumentar. Analógicos para os lados: giram o modelo. Analógico direito para cima ou para baixo: inclina. Analógico esquerdo para cima ou para baixo: sobe e desce. A: centraliza. B: abre e fecha o menu. X: aproxima tudo. Y: afasta tudo (10 distâncias, o óculos lembra a escolhida).';
 Proto.alternarMenuVR=function(forca){this.menuAberto=forca===undefined?!this.menuAberto:!!forca;this.uiPage=0;if(this.menuAberto)this.xrAjuda=false;this.buildXRUI();};
 /* lista de ações da lateral (o dna-app monta os botões com data-act; lemos de lá para não depender de variáveis internas) */
-Proto._acoes=function(){const out=[];const lab=false;document.querySelectorAll('#lessonPanel [data-act]').forEach(b=>{if(/^seq:target:/.test(b.dataset.act))return;if(b.closest('details')&&(!b.closest('details').open||lab))return;if(lab&&(b.closest('.v4-small')||/^v4:(turn|align|cutStep|axis)/.test(b.dataset.act)))return;const label=(b.title&&b.textContent.trim().length<=1?b.textContent.trim()+' · '+b.title:b.textContent.trim());out.push({label,cmd:b.dataset.act,disabled:b.disabled});});return out;};
+Proto._acoes=function(){const out=[];const lab=false;document.querySelectorAll('#lessonPanel [data-act]').forEach(b=>{if(/^seq:target:/.test(b.dataset.act)||b.dataset.noxr!==undefined)return;if(b.closest('details')&&(!b.closest('details').open||lab))return;if(lab&&(b.closest('.v4-small')||/^v4:(turn|align|cutStep|axis)/.test(b.dataset.act)))return;const label=(b.title&&b.textContent.trim().length<=1?b.textContent.trim()+' · '+b.title:b.textContent.trim());out.push({label,cmd:b.dataset.act,disabled:b.disabled});});return out;};
 
 /* gatilho no vazio: para a narração (mesmo comportamento do Sistema Solar) */
 const xrSelectOriginal=Proto.xrSelect;
@@ -314,7 +314,7 @@ function placeInterno(){
   if(this.copy&&!this.copy.userData.held){
     /* a camada projetada vem bem à frente do aluno (0,72 m), em tamanho de "segurar nas mãos" (~0,55 m); a Terra fica ao fundo */
     const a=this.anchor,copy=this.copy;this.animatedInspect=null;this.root.updateMatrixWorld(true);
-    if(this.obj){const bo=this.boxDe(this.obj);if(!bo.isEmpty()){const so=bo.getSize(new T.Vector3()),mo=Math.max(so.x,so.y,so.z);if(mo>1e-4){this.root.scale.multiplyScalar(1.05/mo);this.root.updateMatrixWorld(true);const co=this.boxDe(this.obj).getCenter(new T.Vector3());const alvoC=a.p.clone().addScaledVector(a.f,2.3);alvoC.y=a.p.y-.15;const lado=new T.Vector3(-a.f.z,0,a.f.x);alvoC.addScaledVector(lado,-.35);this.root.position.add(alvoC.sub(co));this.root.updateMatrixWorld(true);}}}
+    if(this.obj&&!this.obj.userData.curva){const bo=this.boxDe(this.obj);if(!bo.isEmpty()){const so=bo.getSize(new T.Vector3()),mo=Math.max(so.x,so.y,so.z);if(mo>1e-4){this.root.scale.multiplyScalar(1.05/mo);this.root.updateMatrixWorld(true);const co=this.boxDe(this.obj).getCenter(new T.Vector3());const alvoC=a.p.clone().addScaledVector(a.f,2.3);alvoC.y=a.p.y-.15;const lado=new T.Vector3(-a.f.z,0,a.f.x);alvoC.addScaledVector(lado,-.35);this.root.position.add(alvoC.sub(co));this.root.updateMatrixWorld(true);}}}
     const b=this.boxDe(copy);if(!b.isEmpty()){const size=b.getSize(new T.Vector3()),maior=Math.max(size.x,size.y,size.z);
       if(maior>1e-4){const alvoTam=.55,k=alvoTam/maior;copy.scale.multiplyScalar(k);this.root.updateMatrixWorld(true);
         const b2=this.boxDe(copy),c=b2.getCenter(new T.Vector3());

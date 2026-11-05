@@ -76,6 +76,7 @@ window.PDERelatorio.ligar({app:'Química VR',arquivo:'QuimicaVR',chave:'pde_quim
   const det=id=>{try{if(id==='explorar'||id==='vegetalExp')return vistos(id)+' de '+lista(id).length+(id==='vegetalExp'?' itens da bancada':' elementos da lista');
    if(id==='fabrica')return S.fabrica.colocados.filter(Boolean).length+' de '+DD.sequencias.fabrica.ordem.length+' etapas'+(S.fabrica.erros?' · '+S.fabrica.erros+' erros':'');
    if(id==='viagem')return c.includes('viagem')?DD.viagem.length+' trechos':'trecho '+(S.viagem.trecho+1)+' de '+DD.viagem.length;
+   if(id==='montar')return ((S.montar&&S.montar.feitas)||[]).length+' de '+DD.MONTAR.length+' metas';
    if(id==='comparar')return S.comparar.done?S.comparar.acertos+' de '+DD.COMPARAR.length+' na primeira tentativa':'elemento '+(S.comparar.rodada+1)+' de '+DD.COMPARAR.length;}catch(_){}return '';};
   const feito=id=>{if(c.includes(id))return true;try{if(id==='fabrica')return !!S.fabrica.done;if(id==='comparar')return !!S.comparar.done;}catch(_){}return false;};
   const secoes=(DD.temas||[]).map(t=>{

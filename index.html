@@ -603,5 +603,51 @@ fBusca.addEventListener('input',applyFilters);
 
 </script>
 <script defer src="assets/sala/sala-cliente.js?v=1.11.0"></script>
+<!-- Rolagem para o óculos (v1.0): o navegador do Quest não entrega o analógico à página fora do VR,
+     então o catálogo ganha botões grandes de rolar, acionados com o gatilho. Só aparecem no Quest
+     (ou com ?rolagem=1 para testar); na lousa e no computador ficam escondidos. -->
+<style>
+#rolagemQuest{position:fixed;right:18px;top:50%;transform:translateY(-50%);z-index:900;display:none;flex-direction:column;gap:12px}
+#rolagemQuest.on{display:flex}
+#rolagemQuest button{width:78px;height:78px;border-radius:50%;border:2px solid rgba(87,212,255,.55);background:rgba(6,20,36,.88);color:#e7f6ff;font-size:30px;font-weight:800;line-height:1;cursor:pointer;box-shadow:0 10px 30px rgba(0,0,0,.45);backdrop-filter:blur(6px);display:grid;place-items:center;touch-action:manipulation}
+#rolagemQuest button:hover,#rolagemQuest button:focus-visible{background:#0f6b3a;border-color:#7dffb0;outline:none}
+#rolagemQuest button[data-rolar="topo"]{width:62px;height:62px;font-size:15px;align-self:center}
+#rolagemQuest button[disabled]{opacity:.35;cursor:default}
+body.intro-fullscreen #rolagemQuest{display:none!important}
+</style>
+<div id="rolagemQuest" aria-label="Rolar o catálogo">
+  <button type="button" data-rolar="topo" title="Voltar ao topo" aria-label="Voltar ao topo">TOPO</button>
+  <button type="button" data-rolar="cima" title="Subir" aria-label="Subir a página">▲</button>
+  <button type="button" data-rolar="baixo" title="Descer" aria-label="Descer a página">▼</button>
+</div>
+<script>
+(function(){'use strict';
+ var box=document.getElementById('rolagemQuest');if(!box)return;
+ var q=new URLSearchParams(location.search);
+ var quest=/OculusBrowser|Quest|Pacific|MetaQuest/i.test(navigator.userAgent);
+ if(q.get('rolagem')==='0')quest=false;if(q.get('rolagem')==='1')quest=true;
+ if(!quest)return;
+ box.classList.add('on');
+ var alvo=function(){return document.scrollingElement||document.documentElement;};
+ var passo=function(){return Math.round(window.innerHeight*.7);};
+ function estado(){var el=alvo(),max=el.scrollHeight-window.innerHeight;
+   box.querySelector('[data-rolar="cima"]').disabled=el.scrollTop<=2;
+   box.querySelector('[data-rolar="topo"]').disabled=el.scrollTop<=2;
+   box.querySelector('[data-rolar="baixo"]').disabled=el.scrollTop>=max-2;}
+ function rolar(dir){if(dir==='topo'){window.scrollTo({top:0,behavior:'smooth'});return;}window.scrollBy({top:dir==='baixo'?passo():-passo(),behavior:'smooth'});}
+ /* segurar o gatilho continua rolando, como manter o analógico empurrado */
+ var timer=null,repete=null;
+ function parar(){clearTimeout(timer);clearInterval(repete);timer=repete=null;}
+ box.addEventListener('pointerdown',function(e){var b=e.target.closest('[data-rolar]');if(!b||b.disabled)return;e.preventDefault();var d=b.dataset.rolar;rolar(d);if(d==='topo')return;parar();timer=setTimeout(function(){repete=setInterval(function(){window.scrollBy({top:d==='baixo'?90:-90});},60);},450);});
+ ['pointerup','pointerleave','pointercancel','blur'].forEach(function(ev){box.addEventListener(ev,parar);});
+ window.addEventListener('blur',parar);
+ window.addEventListener('scroll',estado,{passive:true});window.addEventListener('resize',estado);
+ /* acionamento pelo teclado (Enter/Espaço) chega como clique sem ponteiro */
+ box.addEventListener('click',function(e){if(e.detail!==0)return;var b=e.target.closest('[data-rolar]');if(b&&!b.disabled)rolar(b.dataset.rolar);});
+ /* o catálogo aparece depois da abertura e os cards mudam com os filtros: recalcula quando a página muda de altura */
+ try{new ResizeObserver(estado).observe(document.body);}catch(e){setInterval(estado,1500);}
+ estado();
+})();
+</script>
 </body>
 </html>

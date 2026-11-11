@@ -50,6 +50,7 @@ h1.slogan{font-size:clamp(28px,3.8vw,52px);text-transform:uppercase;letter-spaci
 .primary-btn,.secondary-btn{border-radius:999px;padding:11px 18px;font-weight:700;border:1px solid rgba(255,255,255,.14);text-decoration:none;display:inline-flex;align-items:center;gap:8px}
 .primary-btn{background:linear-gradient(135deg,var(--cyan),#1c83bc);color:#fff;border-color:transparent}
 .secondary-btn{background:rgba(255,255,255,.06);color:#fff}
+.voltar-portal{background:#8DC63F;border-color:#8DC63F;color:#0b1d33}
 .vr-btn{border-radius:999px;padding:12px 22px;font-weight:800;font-size:16px;letter-spacing:.01em;text-decoration:none;display:inline-flex;align-items:center;gap:8px;color:#fff;border:2px solid #7CFFB8;background:linear-gradient(135deg,#19c96a,#0F9861);box-shadow:0 0 0 0 rgba(34,224,120,.7),0 10px 26px rgba(15,152,97,.45);animation:vrPulse 2.2s ease-out infinite}
 .vr-btn:hover{transform:translateY(-1px);filter:brightness(1.08)}
 @keyframes vrPulse{0%{box-shadow:0 0 0 0 rgba(34,224,120,.75),0 10px 26px rgba(15,152,97,.45)}70%{box-shadow:0 0 0 14px rgba(34,224,120,0),0 10px 26px rgba(15,152,97,.45)}100%{box-shadow:0 0 0 0 rgba(34,224,120,0),0 10px 26px rgba(15,152,97,.45)}}
@@ -107,7 +108,7 @@ main{padding:22px clamp(18px,4vw,48px) 80px}
 footer{padding:24px clamp(18px,4vw,48px);border-top:1px solid var(--border);color:#8396a8;font-size:13px}
 .hide{display:none !important}
 @media(max-width:1100px){.filters{grid-template-columns:repeat(2,minmax(0,1fr))}.grid{grid-template-columns:1fr 1fr}}
-@media(max-width:760px){.topnav .navright{display:none}.filters{grid-template-columns:1fr}.grid{grid-template-columns:1fr}.card{min-height:auto}.card.available{min-height:250px}.card-actions{gap:8px}.card-actions a,.card-actions button{flex:1 1 100%;justify-content:center;min-height:46px}header.hero{min-height:380px}h1{max-width:500px}}
+@media(max-width:760px){.topnav .navright #replayIntro{display:none}.voltar-portal{padding:9px 14px;font-size:.88rem}.filters{grid-template-columns:1fr}.grid{grid-template-columns:1fr}.card{min-height:auto}.card.available{min-height:250px}.card-actions{gap:8px}.card-actions a,.card-actions button{flex:1 1 100%;justify-content:center;min-height:46px}header.hero{min-height:380px}h1{max-width:500px}}
 
 html.intro-fullscreen, body.intro-fullscreen{
   width:100%;height:100%;overflow:hidden;background:#000;
@@ -196,7 +197,7 @@ body.intro-fullscreen #btnSkipIntro{cursor:pointer}
         <img class="brand-mark" src="assets/marca/p360-assinatura-horizontal.svg?v=2" alt="Portal 360º VR">
         <div class="brand-endosso"><img src="assets/logo-portal-educador.png" alt="Portal do Educador"><span>uma experiência<br>Portal do Educador</span></div>
       </div>
-      <div class="navright"><button class="secondary-btn" id="replayIntro">▶ Rever apresentação</button></div>
+      <div class="navright"><a class="secondary-btn voltar-portal" href="https://www.portaldoeducador.com.br/entrar/" target="_top">← Voltar ao Portal</a><button class="secondary-btn" id="replayIntro">▶ Rever apresentação</button></div>
     </div>
     <div class="hero-inner">
       <div class="kicker">Experiências educacionais imersivas</div>

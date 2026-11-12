@@ -193,7 +193,7 @@ function apontar(oque){const c=ctx();const T=window.THREE;if(!c||!T||!c.renderer
  const alvo0=alvoApontar(oque);const msg=alvo0?'👀 Olhe para '+NOME_ALVO[oque]+', que está piscando':'👀 Olhe para '+(NOME_ALVO[oque]||'a frente');const placa=placaTxt(T,msg);scene.add(placa);
  const trocarPlaca=t=>{const nova=placaTxt(T,t);placa.material.map.dispose();placa.material.map=nova.material.map;placa.material.needsUpdate=true;nova.geometry.dispose();};
  fim.push(()=>{[anel,seta,placa].forEach(m=>{if(m.parent)m.parent.remove(m);m.geometry.dispose();if(m.material.map)m.material.map.dispose();m.material.dispose();});});
- try{if(window.speechSynthesis){speechSynthesis.cancel();const u=new SpeechSynthesisUtterance(msg.replace('👀 ',''));u.lang='pt-BR';speechSynthesis.speak(u);}}catch(_){}
+ try{const ARQ={menu:'olhe-menu',painel:'olhe-painel',caderno:'olhe-caderno'};const txt=msg.replace('👀 ','');const tts=()=>{try{if(window.speechSynthesis){speechSynthesis.cancel();const u=new SpeechSynthesisUtterance(txt);u.lang='pt-BR';speechSynthesis.speak(u);}}catch(_){}};if(alvo0&&ARQ[oque]){calar();const au=new Audio(BASE+'assets/passos/'+ARQ[oque]+'.mp3');audio=au;let foi=false;const c=()=>{if(foi||audio!==au)return;foi=true;tts();};au.onerror=c;au.play().catch(c);}else tts();}catch(_){}
  const cp=new T.Vector3(),cq=new T.Quaternion(),cs=new T.Vector3(),wp=new T.Vector3(),bx=new T.Box3(),sz=new T.Vector3();
  const loop=()=>{if(!a.vivo)return;try{passoApontar();}catch(e){console.warn('Portal360Passos.apontar:',e);}sess.requestAnimationFrame(loop);};
  const passoApontar=()=>{const t=performance.now();if(t-a.t0>(+window.__p360dur||10000)){pararApontar();return;}

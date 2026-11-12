@@ -2,665 +2,177 @@
 <html lang="pt-BR">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0"><style>/* lousas e tablets: pinça com dois dedos não amplia a página inteira (a cena 3D tem zoom próprio); rolagem continua normal */html{touch-action:pan-x pan-y}</style>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="robots" content="noindex">
 <title>Portal 360º VR | Portal do Educador</title>
+<meta name="description" content="Portal 360º VR: experiências educacionais imersivas em 3D e realidade virtual para a lousa, o computador e os óculos VR. Uma experiência Portal do Educador.">
 <meta name="theme-color" content="#050b18">
 <link rel="icon" type="image/svg+xml" href="assets/marca/p360-favicon.svg">
 <link rel="icon" type="image/png" sizes="32x32" href="assets/marca/p360-favicon-32.png">
 <link rel="apple-touch-icon" href="assets/marca/p360-icone-180.png">
 <style>
-:root{--bg:#050b18;--bg2:#071426;--card:#0b1b31;--card2:#0e233f;--cyan:#37B1DA;--cyan2:#57d4ff;--green:#0F9861;--text:#f7fbff;--muted:#a9bbcc;--border:rgba(255,255,255,.12);}
-*{box-sizing:border-box} html{scroll-behavior:smooth} html,body{margin:0;min-height:100%;background:var(--bg);color:var(--text);font-family:Inter,Segoe UI,Arial,sans-serif} body{overflow-x:hidden} button,a,select{font:inherit} button{cursor:pointer} .hidden{display:none!important}
-
-#intro{position:fixed;inset:0;z-index:1000;background:#000;display:flex;align-items:center;justify-content:center;overflow:hidden}
-#intro::after{content:"";position:absolute;inset:0;pointer-events:none;background:linear-gradient(to bottom,rgba(0,0,0,.08),rgba(0,0,0,.12) 55%,rgba(0,0,0,.66))}
-#videoWrap{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;background:#000}
-#videoWrap video{width:100%;height:100%;object-fit:contain;background:#000}
-.intro-ui{position:absolute;inset:0;z-index:4;display:flex;flex-direction:column;justify-content:space-between;padding:22px 26px;pointer-events:none}
-.brand{display:flex;align-items:center;gap:14px;font-weight:800;letter-spacing:.02em;text-shadow:0 4px 18px rgba(0,0,0,.55)}
-.brand-badge{width:58px;height:58px;border-radius:50%;overflow:hidden;flex:0 0 58px;border:2px solid rgba(87,212,255,.45);display:grid;place-items:center;box-shadow:0 0 26px rgba(55,177,218,.35), inset 0 0 18px rgba(255,255,255,.14);background:rgba(3,10,20,.6)}
-.brand-badge img{width:100%;height:100%;object-fit:cover;display:block}
-.brand small{display:block;color:var(--cyan2);font-size:11px;letter-spacing:.16em;margin-top:2px}
-/* assinatura Portal 360º VR (símbolo Órbita) + endosso Portal do Educador */
-.brand{gap:18px;flex-wrap:wrap}
-.brand-mark{height:56px;width:auto;display:block;filter:drop-shadow(0 4px 18px rgba(0,0,0,.55))}
-.brand-endosso{display:flex;align-items:center;gap:8px;padding-left:16px;border-left:1px solid rgba(255,255,255,.18);color:#a9bbcc;font-size:10px;font-weight:700;letter-spacing:.16em;text-transform:uppercase;line-height:1.35}
-.brand-endosso img{width:34px;height:34px;display:block}
-@media(max-width:760px){.brand-mark{height:38px}.brand-endosso{display:none}}
-#startFallback{position:absolute;inset:0;z-index:6;display:none;align-items:center;justify-content:center;background:rgba(0,0,0,.38);backdrop-filter:blur(3px);pointer-events:auto}
-#startFallback button{border:1px solid rgba(255,255,255,.22);border-radius:999px;padding:14px 22px;background:rgba(5,14,26,.82);color:#fff;font-weight:800;font-size:16px;box-shadow:0 12px 32px rgba(0,0,0,.35)}
-#startFallback button:hover{border-color:rgba(87,212,255,.55)}
-
-#catalog{min-height:100vh;background:radial-gradient(circle at 75% 10%,rgba(55,177,218,.15),transparent 32%),radial-gradient(circle at 12% 35%,rgba(15,152,97,.10),transparent 28%),linear-gradient(180deg,#06101e 0%,#050b18 68%)}
-header.hero{position:relative;padding:24px clamp(18px,4vw,48px) 34px;overflow:hidden;border-bottom:1px solid rgba(255,255,255,.05);min-height:350px}
-header.hero::before{content:"";position:absolute;inset:0;z-index:1;background:linear-gradient(90deg,rgba(5,11,24,.93) 0%,rgba(5,11,24,.84) 34%,rgba(5,11,24,.42) 62%,rgba(5,11,24,.58) 100%), radial-gradient(circle at 72% 42%,rgba(55,177,218,.12),transparent 28%)}
-.hero-bg{position:absolute;inset:0;background:#02060d url('assets/capa-sistema-solar-hero.webp') center/cover no-repeat;opacity:.72;filter:saturate(1.05);overflow:hidden}
-.hero-video-bg video{opacity:0;transition:opacity 1.2s ease;object-fit:cover}
-.hero-video-bg video.ready{opacity:.95}
-.hero-video-bg video{position:absolute;top:50%;left:50%;width:100vw;height:56.25vw;min-width:177.78vh;min-height:100vh;transform:translate(-50%,-50%);border:0;pointer-events:none;filter:saturate(1.02) contrast(1.02)}
-.stars{position:absolute;inset:0;opacity:.5;background-image:radial-gradient(#fff 1px,transparent 1px),radial-gradient(#9bdfff 1px,transparent 1px);background-size:80px 80px,130px 130px;background-position:0 0,40px 30px}
-.topnav{position:relative;z-index:5;display:flex;align-items:center;justify-content:space-between;gap:16px;flex-wrap:wrap}
-.topnav .navright{display:flex;gap:10px;align-items:center}
-.hero-inner{position:relative;z-index:2;max-width:760px;margin-top:20px}
-.kicker{color:var(--cyan2);font-size:12px;font-weight:800;letter-spacing:.16em;text-transform:uppercase;margin-bottom:10px}
-h1{font-size:clamp(34px,5vw,68px);line-height:.96;margin:8px 0 14px;letter-spacing:-.04em;max-width:680px}
-h1.slogan{font-size:clamp(28px,3.8vw,52px);text-transform:uppercase;letter-spacing:-.01em;line-height:1}
-.hero-inner p{max-width:700px;color:#d0deea;font-size:clamp(15px,1.6vw,19px);line-height:1.5;margin:0}
-.hero-actions{display:flex;gap:10px;flex-wrap:wrap;margin-top:20px}
-.primary-btn,.secondary-btn{border-radius:999px;padding:11px 18px;font-weight:700;border:1px solid rgba(255,255,255,.14);text-decoration:none;display:inline-flex;align-items:center;gap:8px}
-.primary-btn{background:linear-gradient(135deg,var(--cyan),#1c83bc);color:#fff;border-color:transparent}
-.secondary-btn{background:rgba(255,255,255,.06);color:#fff}
-.voltar-portal{background:#8DC63F;border-color:#8DC63F;color:#0b1d33}
-.vr-btn{border-radius:999px;padding:12px 22px;font-weight:800;font-size:16px;letter-spacing:.01em;text-decoration:none;display:inline-flex;align-items:center;gap:8px;color:#fff;border:2px solid #7CFFB8;background:linear-gradient(135deg,#19c96a,#0F9861);box-shadow:0 0 0 0 rgba(34,224,120,.7),0 10px 26px rgba(15,152,97,.45);animation:vrPulse 2.2s ease-out infinite}
-.vr-btn:hover{transform:translateY(-1px);filter:brightness(1.08)}
-@keyframes vrPulse{0%{box-shadow:0 0 0 0 rgba(34,224,120,.75),0 10px 26px rgba(15,152,97,.45)}70%{box-shadow:0 0 0 14px rgba(34,224,120,0),0 10px 26px rgba(15,152,97,.45)}100%{box-shadow:0 0 0 0 rgba(34,224,120,0),0 10px 26px rgba(15,152,97,.45)}}
-@media(prefers-reduced-motion:reduce){.vr-btn{animation:none}}
-.primary-btn:hover,.secondary-btn:hover{transform:translateY(-1px)}
-
-main{padding:22px clamp(18px,4vw,48px) 80px}
-.section-title{display:flex;align-items:end;justify-content:space-between;gap:20px;margin:2px 0 14px;flex-wrap:wrap}
-.section-title h2{font-size:28px;margin:0} .section-title p{color:var(--muted);margin:0;font-size:14px}
-.filters{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:12px;margin:16px 0 20px}
-.filter-box{background:rgba(255,255,255,.05);border:1px solid var(--border);border-radius:14px;padding:10px 12px}
-.filter-box label{display:block;font-size:12px;color:#92abc0;margin-bottom:6px;font-weight:700;letter-spacing:.04em;text-transform:uppercase}
-.filter-box select,.filter-box input{width:100%;background:transparent;color:#fff;border:none;outline:none}
-.filter-box input::placeholder{color:#7f95a8}
-.empty{display:none;grid-column:1/-1;padding:40px;text-align:center;color:var(--muted);border:1px dashed var(--border);border-radius:18px}
-.empty.show{display:block}
-.filter-box option{color:#000}
-.grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:14px;align-items:stretch}
-.card{position:relative;min-height:260px;border:1px solid var(--border);border-radius:22px;overflow:hidden;background:linear-gradient(160deg,var(--card2),var(--card));box-shadow:0 18px 42px rgba(0,0,0,.18)}
-.card.available{min-height:260px}
-.card .media{position:absolute;inset:0;background:linear-gradient(180deg,rgba(7,18,34,.1),rgba(7,18,34,.75) 60%,rgba(7,18,34,.94) 100%), var(--bgimg) var(--bgpos,center)/cover no-repeat;}
-.card .glow{position:absolute;inset:0;background:radial-gradient(circle at 80% 30%,rgba(87,212,255,.18),transparent 24%),radial-gradient(circle at 25% 75%,rgba(255,255,255,.05),transparent 28%)}
-.card-content{position:relative;z-index:2;padding:18px 18px 16px;height:100%;display:flex;flex-direction:column}
-.tag{display:inline-flex;align-self:flex-start;padding:6px 9px;border-radius:999px;font-size:11px;font-weight:800;letter-spacing:.08em;text-transform:uppercase;border:1px solid rgba(87,212,255,.35);color:var(--cyan2);background:rgba(5,11,24,.4)}
-.tag.soon{color:#c2cfdb;border-color:rgba(255,255,255,.16)}
-.meta{display:flex;gap:8px;flex-wrap:wrap;margin-top:10px}
-.meta span{font-size:11px;color:#d8e4ef;padding:5px 8px;border-radius:999px;background:rgba(5,11,24,.48);border:1px solid rgba(255,255,255,.08)}
-.card h3{font-size:22px;margin:14px 0 8px;max-width:460px}
-.card p{color:#c8d6e3;line-height:1.46;margin:0;max-width:560px;font-size:14px}
-.card-actions{margin-top:auto;display:flex;gap:10px;flex-wrap:wrap;padding-top:16px}
-.card-actions a{text-decoration:none}
-.aula-btn{cursor:pointer;font:inherit;font-weight:800;font-size:16px;color:#fff;border:2px solid #ff6b6b;border-radius:999px;padding:12px 22px;display:inline-flex;align-items:center;gap:8px;background:linear-gradient(135deg,#ff2a2a,#c40000);box-shadow:0 10px 26px rgba(200,0,0,.35)}
-.aula-btn:hover{transform:translateY(-1px);filter:brightness(1.08)}
-.aula-btn .play{width:20px;height:20px;flex:none}
-.aula-btn.breve{cursor:default;background:linear-gradient(135deg,#6b2a2a,#4a1414);border-color:rgba(255,120,120,.45);box-shadow:none;opacity:.85}
-.aula-btn.breve:hover{transform:none;filter:none}
-.aula-btn small{font-size:11px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;background:rgba(255,255,255,.16);border-radius:999px;padding:2px 7px;margin-left:2px}
-.card-actions .aula-btn,.card-actions .primary-btn,.card-actions .vr-btn{padding:10px 15px;font-size:15px}
-.card-actions .passo{display:inline-grid;place-items:center;width:20px;height:20px;border-radius:50%;background:rgba(255,255,255,.22);font-size:12px;font-weight:800;margin-right:2px}
-#aulaModal{position:fixed;inset:0;z-index:60;display:none;align-items:center;justify-content:center;background:rgba(3,10,20,.88);padding:18px}
-#aulaModal.open{display:flex}
-#aulaModal .box{width:min(1100px,100%);background:#061421;border:1px solid rgba(255,255,255,.14);border-radius:18px;overflow:hidden;box-shadow:0 30px 80px rgba(0,0,0,.5)}
-#aulaModal .head{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:12px 16px;border-bottom:1px solid rgba(255,255,255,.1)}
-#aulaModal .head b{font-size:15px}
-#aulaModal .head button{cursor:pointer;font:inherit;color:#fff;background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.2);border-radius:999px;padding:7px 14px}
-#aulaModal .frame{position:relative;aspect-ratio:16/9;background:#000}
-#aulaModal .frame iframe{position:absolute;inset:0;width:100%;height:100%;border:0}
-#aulaModal .foot{display:flex;flex-wrap:wrap;gap:10px;align-items:center;justify-content:space-between;padding:12px 16px;font-size:13px;color:var(--muted)}
-#aulaModal .foot a{color:#9ff3ff}
-#aulaModal:fullscreen{padding:0;background:#000}
-#aulaModal:fullscreen .box{width:100%;height:100%;border:0;border-radius:0;display:flex;flex-direction:column}
-#aulaModal:fullscreen .frame{flex:1;aspect-ratio:auto}
-#aulaModal:fullscreen .head{background:#000}
-#aulaModal:fullscreen .foot{background:#000}
-footer{padding:24px clamp(18px,4vw,48px);border-top:1px solid var(--border);color:#8396a8;font-size:13px}
-.hide{display:none !important}
-@media(max-width:1100px){.filters{grid-template-columns:repeat(2,minmax(0,1fr))}.grid{grid-template-columns:1fr 1fr}}
-@media(max-width:760px){.topnav .navright #replayIntro{display:none}.voltar-portal{padding:9px 14px;font-size:.88rem}.filters{grid-template-columns:1fr}.grid{grid-template-columns:1fr}.card{min-height:auto}.card.available{min-height:250px}.card-actions{gap:8px}.card-actions a,.card-actions button{flex:1 1 100%;justify-content:center;min-height:46px}header.hero{min-height:380px}h1{max-width:500px}}
-
-html.intro-fullscreen, body.intro-fullscreen{
-  width:100%;height:100%;overflow:hidden;background:#000;
-}
-body.intro-fullscreen{cursor:none}
-body.intro-fullscreen #intro{cursor:none}
-body.intro-fullscreen #btnSkipIntro{cursor:pointer}
-#startFallback{
-  background:#000 !important;
-}
-#startFallback::before{
-  content:"";
-  position:absolute;inset:0;
-  background:
-    radial-gradient(circle at 50% 40%,rgba(55,177,218,.12),transparent 28%),
-    #000;
-}
-#startFallback .start-shell{
-  position:relative;z-index:2;
-  display:flex;flex-direction:column;align-items:center;gap:22px;
-}
-#startFallback .start-logo{
-  width:150px;height:150px;
-  filter:drop-shadow(0 0 28px rgba(55,177,218,.35));
-}
-#startFallback .start-title{
-  margin:0;line-height:0;
-}
-/* assinatura oficial: Portal (branco) · 360º (gradiente azul → lima) · selo VR, abaixo do globo animado */
-#startFallback .start-title img{
-  display:block;width:clamp(260px,32vw,460px);height:auto;
-  filter:drop-shadow(0 4px 22px rgba(55,177,218,.22));
-}
-#startFallback .start-sub{
-  color:#8fdfff;font-size:13px;letter-spacing:.16em;text-transform:uppercase;
-}
-#startFallback button{
-  margin-top:10px;
-  min-width:240px;
-  padding:16px 26px !important;
-  font-size:17px !important;
-}
-#btnSkipIntro{position:absolute;right:26px;bottom:26px;z-index:7;pointer-events:auto;opacity:0;transition:opacity .5s;border:1px solid rgba(255,255,255,.28);border-radius:999px;padding:10px 18px;background:rgba(5,14,26,.72);color:#fff;font-weight:700;font-size:14px;backdrop-filter:blur(3px)}
-#btnSkipIntro.show{opacity:.85}
-#btnSkipIntro:hover{opacity:1;border-color:rgba(87,212,255,.6)}
-body.intro-fullscreen #btnSkipIntro{cursor:pointer}
-#introNote{position:absolute;left:50%;bottom:26px;transform:translateX(-50%);z-index:7;color:#9fb6c9;font-size:13px;opacity:0;transition:opacity .5s;pointer-events:none}
-#introNote.show{opacity:1}
-.appFrame{position:fixed;inset:0;width:100vw;height:100vh;border:0;z-index:5000;opacity:0;pointer-events:none;background:#000}
-.appFrame.show{opacity:1;pointer-events:auto}
-.vr-btn.carregando{opacity:.75;animation:none}.vr-btn.carregando::after{content:' · carregando…';font-weight:600}
-#intro:fullscreen,
-#intro:-webkit-full-screen{
-  width:100vw;height:100vh;background:#000;
-}
-
+/* Protótipo da nova tela inicial do Portal 360º (Fase 1). Identidade NEWPC: azul #0f2c4a, verde #1a6b2a. */
+:root{--azul:#0f2c4a;--verde:#1a6b2a;--verde2:#2fd16b;--fundo:#050d18;--texto:#f2f7fb;--suave:#a9bfd0;--r:22px;--tile:300px}
+*{box-sizing:border-box}html,body{margin:0;background:var(--fundo);color:var(--texto);font-family:"Segoe UI",system-ui,-apple-system,Arial,sans-serif}
+html{touch-action:pan-x pan-y}
+button{font:inherit;cursor:pointer}a{color:inherit}
+body.quest{font-size:118%}
+.barra{position:sticky;top:0;z-index:20;display:flex;align-items:center;gap:12px;padding:12px clamp(14px,3vw,36px);background:linear-gradient(180deg,rgba(5,13,24,.96),rgba(5,13,24,.8));backdrop-filter:blur(10px);border-bottom:1px solid #16314b}
+.barra img{height:42px}
+.chip{display:inline-flex;align-items:center;gap:8px;border-radius:999px;border:2px solid #2b5679;background:#0c2136;color:var(--texto);padding:10px 16px;font-weight:700;min-height:48px}
+.chip:hover,.chip:focus-visible{border-color:var(--verde2);outline:none}
+.chip[hidden]{display:none}.chip.som[aria-pressed="true"]{background:#14472a;border-color:var(--verde2)}
+.direita{margin-left:auto;display:flex;gap:10px;flex-wrap:wrap}
+/* ---------- vitrine: todos os apps de cara ---------- */
+.vitrine{max-width:1500px;margin:0 auto;padding:clamp(18px,3vw,40px) clamp(14px,3vw,40px) 70px}
+.topo-v{display:flex;align-items:flex-end;justify-content:space-between;gap:16px;flex-wrap:wrap;margin-bottom:18px}
+.topo-v h1{font-size:clamp(28px,3.6vw,48px);margin:0;line-height:1.05}
+.topo-v h1 span{background:linear-gradient(90deg,#7dffb0,#7cc7ff);-webkit-background-clip:text;background-clip:text;color:transparent}
+.topo-v p{margin:6px 0 0;color:var(--suave);font-size:clamp(15px,1.4vw,18px)}
+.filtros{display:flex;gap:8px;flex-wrap:wrap}
+.filtro{border-radius:999px;border:1.5px solid #284d6c;background:#0b1d30;color:#cfe0ec;padding:9px 16px;font-weight:700;font-size:15px;min-height:44px}
+.filtro[aria-pressed="true"]{background:var(--verde);border-color:var(--verde2);color:#fff}
+.filtro:hover,.filtro:focus-visible{border-color:var(--verde2);outline:none}
+.grade{display:grid;grid-template-columns:repeat(auto-fill,minmax(270px,1fr));gap:clamp(14px,1.6vw,24px)}
+.quest .grade{grid-template-columns:repeat(auto-fill,minmax(360px,1fr))}
+.cel{position:relative;animation:entra .4s ease both}
+.card{position:relative;display:flex;height:100%;text-decoration:none;flex-direction:column;border:1px solid #1d3a55;border-radius:24px;overflow:hidden;background:linear-gradient(180deg,#0d2238,#091827);color:#fff;text-align:left;padding:0;outline:none;box-shadow:0 14px 34px rgba(0,0,0,.38);transition:transform .2s ease,box-shadow .2s ease,border-color .2s ease}
+@keyframes entra{from{opacity:0;transform:translateY(14px)}to{opacity:1;transform:none}}
+.card .foto{position:relative;aspect-ratio:16/10;overflow:hidden}
+.card .foto i{position:absolute;inset:0;background:#0c2136 center/cover no-repeat;transition:transform .5s ease}
+.card .foto::after{content:"";position:absolute;inset:0;background:linear-gradient(180deg,rgba(0,0,0,0) 55%,rgba(9,24,39,.95) 100%)}
+.card:hover,.card:focus-visible{transform:translateY(-6px);border-color:var(--verde2);box-shadow:0 0 0 3px rgba(47,209,107,.55),0 24px 50px rgba(0,0,0,.5)}
+.card:hover .foto i,.card:focus-visible .foto i{transform:scale(1.07)}
+.card .corpo{padding:4px 18px 18px;margin-top:-26px;position:relative;z-index:2;display:flex;flex-direction:column;gap:6px;flex:1}
+.card b{font-size:clamp(20px,1.6vw,24px);line-height:1.1}
+.card .d{color:#b9cfe0;font-size:15px;line-height:1.4;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+.quest .card b{font-size:28px}.quest .card .d{font-size:17px}
+.tags{display:flex;gap:6px;flex-wrap:wrap;margin-top:auto;padding-top:6px}
+.tag{font-size:12.5px;font-weight:700;border-radius:999px;padding:4px 10px;background:#13304a;color:#bcd6ea}
+.tag.vr{background:#11391f;color:#bff5d3;border:1px solid #2fd16b}
+.selo{position:absolute;left:12px;top:12px;z-index:3;font-weight:800;font-size:12.5px;letter-spacing:.04em;border-radius:999px;padding:5px 11px;background:#1a6b2a;color:#fff;box-shadow:0 4px 12px rgba(0,0,0,.4)}
+.selo.cont{background:#0f2c4a;border:1px solid #4b7fa8}
+.cta{display:inline-flex;align-items:center;gap:6px;align-self:flex-start;margin-top:8px;border-radius:12px;padding:9px 14px;font-weight:800;font-size:15px;background:#123552;color:#fff;border:1.5px solid #2f6a96}
+.card.trava{cursor:default}
+.card.trava .foto i,.card.trava .foto img.capa{filter:grayscale(.2) brightness(.82)}
+.card.trava:hover{transform:none;border-color:#2b4d6b;box-shadow:0 14px 34px rgba(0,0,0,.38)}
+.card .foto .prov{position:absolute;inset:0;display:grid;place-items:center}
+.card .foto .prov em{font-style:normal;font-size:clamp(64px,6vw,96px);filter:drop-shadow(0 8px 18px rgba(0,0,0,.5));opacity:.9}
+.card .foto img.capa{position:absolute;inset:0;width:100%;height:100%;object-fit:cover}
+.selo.breve{background:rgba(5,13,24,.9);border:1.5px solid #f2c14e;color:#ffe3a8}
+.cta.off{background:#1b2a38;border-color:#3b4f62;color:#9fb3c4}
+.cta.vr{background:linear-gradient(160deg,#1a6b2a,#0f4a1f);border-color:#2fd16b}
+.card:hover .cta,.card:focus-visible .cta{border-color:#7dffb0}
+.quest .cta{font-size:19px;padding:12px 18px}
+.mini{position:absolute;right:12px;top:12px;z-index:4;border-radius:999px;border:1.5px solid #4b7fa8;background:rgba(5,13,24,.85);color:#fff;font-weight:800;font-size:13px;padding:7px 12px;min-height:38px}
+.mini:hover,.mini:focus-visible{background:var(--verde);border-color:var(--verde2);outline:none}
+.modo{display:inline-flex;align-items:center;gap:6px;margin-top:10px;font-size:14px;color:#cfe0ec;background:#0c2136;border:1px solid #284d6c;border-radius:999px;padding:6px 12px}
+.modo a{color:#7dffb0;font-weight:700}
+.fechar{position:absolute;right:22px;top:18px;z-index:3;width:64px;height:64px;border-radius:50%;border:2px solid #4b7fa8;background:rgba(5,13,24,.85);color:#fff;font-size:30px}
+.fechar:hover,.fechar:focus-visible{border-color:var(--verde2);outline:none}
+.video{position:fixed;inset:0;z-index:60;display:none;background:rgba(0,0,0,.92);place-items:center;padding:20px}.video.aberto{display:grid}
+.video iframe{width:min(1100px,100%);aspect-ratio:16/9;border:0;border-radius:16px;background:#000}
+.dica-quest{margin:0 0 16px;padding:14px 18px;border-radius:16px;background:#0c2a1a;border:1px solid #2c7a4a;color:#d7f5e2;font-size:16px;display:none}
+.quest .dica-quest{display:block}
+@media(max-width:900px){}
+@media(max-width:600px){.grade{grid-template-columns:1fr 1fr;gap:12px}.card .corpo{padding:2px 12px 12px}.card b{font-size:17px}.card .d{display:none}.filtros{flex-wrap:nowrap;overflow-x:auto;scrollbar-width:none;margin:0 -14px;padding:0 14px;width:calc(100% + 28px)}.filtros::-webkit-scrollbar{display:none}.filtro{flex:0 0 auto}.tag{font-size:11px;padding:3px 8px}}
+@media(max-width:600px){.barra img{height:30px}.barra{gap:8px;padding:10px 12px}.direita{gap:6px;flex-wrap:nowrap}.chip{padding:8px 10px;min-height:44px}.chip .rot{display:none}.barra img{height:24px}.chip{padding:6px 8px;min-height:40px;gap:0}.direita{gap:4px}}
+@media(prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
 </style>
 </head>
 <body>
-<section id="intro">
-  <div id="startFallback" style="display:flex">
-    <div class="start-shell">
-      <img class="start-logo" src="assets/marca/p360-simbolo-animado.svg" alt="">
-      <h1 class="start-title"><img src="assets/marca/p360-palavra.svg?v=3" alt="Portal 360º VR"></h1>
-      <div class="start-sub">Uma experiência Portal do Educador</div>
-      <button id="btnStartIntro">▶ Iniciar experiência</button>
-    </div>
-    <div id="introNote"></div>
+<header class="barra">
+  <img src="assets/marca/p360-assinatura-horizontal-branca.png" alt="Portal 360º VR">
+  <div class="direita">
+    <a class="chip" href="https://www.portaldoeducador.com.br/entrar/" target="_top" aria-label="Voltar ao Portal do Educador">← <span class="rot">Portal</span></a>
+    <a class="chip" href="sala/" aria-label="Sala do professor">👩‍🏫 <span class="rot">Sala do professor</span></a>
+    <button type="button" class="chip som" data-action="voz" id="chipVoz" aria-pressed="false" aria-label="Voz">🔊 <span class="rot">Voz</span></button>
+    <a class="chip" href="apps/tutorial/" aria-label="Primeiros passos no óculos">🎓 <span class="rot">Primeiros passos no óculos</span></a>
+    <a class="chip" href="catalogo/" aria-label="Catálogo completo e guias do professor">📚 <span class="rot">Catálogo e guias</span></a>
   </div>
-  <button id="btnSkipIntro" type="button">Pular ▸</button>
-  <div id="videoWrap"><video id="introVideo" playsinline preload="auto" poster="assets/abertura-poster-v2.jpg" src="assets/abertura-v2.mp4"></video></div>
-  <div class="intro-ui">
-    <div class="brand">
-      <img class="brand-mark" src="assets/marca/p360-assinatura-horizontal.svg?v=2" alt="Portal 360º VR">
-      <div class="brand-endosso"><img src="assets/logo-portal-educador.png" alt="Portal do Educador"><span>uma experiência<br>Portal do Educador</span></div>
-    </div>
-  </div>
-</section>
+</header>
 
-<section id="catalog" class="hidden">
-  <header class="hero">
-    <div class="hero-bg hero-video-bg" id="heroBg"></div>
-    <div class="stars"></div>
-    <div class="topnav">
-      <div class="brand">
-        <img class="brand-mark" src="assets/marca/p360-assinatura-horizontal.svg?v=2" alt="Portal 360º VR">
-        <div class="brand-endosso"><img src="assets/logo-portal-educador.png" alt="Portal do Educador"><span>uma experiência<br>Portal do Educador</span></div>
-      </div>
-      <div class="navright"><a class="secondary-btn voltar-portal" href="https://www.portaldoeducador.com.br/entrar/" target="_top">← Voltar ao Portal</a><button class="secondary-btn" id="replayIntro">▶ Rever apresentação</button></div>
-    </div>
-    <div class="hero-inner">
-      <div class="kicker">Experiências educacionais imersivas</div>
-      <h1 class="slogan">Entre na aula.</h1>
-      <p>Uma biblioteca de experiências 3D e realidade virtual para transformar conteúdos escolares em exploração, descoberta e aprendizagem ativa.</p>
-      <div class="hero-actions">
-        <a href="#experiencias" class="primary-btn" id="btnVerExperiencias">Ver experiências ↓</a>
-        <button class="secondary-btn" id="btnIntro2">▶ Ver apresentação</button>
-        <a href="apps/tutorial/" class="vr-btn" id="btnTutorial" title="Treino de 1 minuto para usar o óculos: olhar, apontar, gatilho, botões, andar e Menu">🎓 Primeiros passos no óculos</a>
-      </div>
-    </div>
-  </header>
+<main id="principal"></main>
 
-  <main>
-    <div class="section-title" id="experiencias">
-      <div>
-        <h2>Experiências</h2>
-        <p>Escolha um universo para explorar.</p>
-      </div>
-      <p>Portal 360º VR • catálogo inicial</p>
-    </div>
+<div class="video" id="video"><button type="button" class="fechar" data-action="fechar-video" aria-label="Fechar vídeo">✕</button><div id="videoQuadro"></div></div>
 
-    <div class="filters">
-      <div class="filter-box">
-        <label for="fBusca">Busca</label>
-        <input id="fBusca" type="search" placeholder="Digite um tema, planeta, assunto…" autocomplete="off">
-      </div>
-      <div class="filter-box">
-        <label for="fTema">Tema</label>
-        <select id="fTema"><option value="">Todos os temas</option><option value="astronomia">Astronomia</option><option value="biologia">Biologia</option><option value="geociencias">Geociências</option><option value="historia">História</option><option value="fisica">Física</option><option value="quimica">Química</option></select>
-      </div>
-      <div class="filter-box">
-        <label for="fSerie">Série</label>
-        <select id="fSerie"><option value="">Todas as séries</option><option value="efi">Fundamental I</option><option value="efii">Fundamental II</option><option value="em">Ensino Médio</option></select>
-      </div>
-      <div class="filter-box">
-        <label for="fStatus">Status</label>
-        <select id="fStatus"><option value="">Todos</option><option value="disponivel">Disponível</option><option value="embreve">Em breve</option></select>
-      </div>
-    </div>
-
-    <div class="grid" id="gridCards">
-      <article class="card available experience-card" data-keywords="sistema solar planetas astronomia lua sol orbitas eclipses estacoes fases terra marte jupiter saturno vr 3d" data-tema="astronomia" data-serie="efi efii em" data-status="disponivel" style="--bgimg:url('assets/capa-sistema-solar-card.webp')">
-        <div class="media"></div><div class="glow"></div>
-        <div class="card-content">
-          <span class="tag">Disponível agora</span>
-          <h3>Sistema Solar VR</h3>
-          <p>Explore os planetas, órbitas, fases da Lua, estações, eclipses, cometas e missões educativas em um ambiente 3D preparado para desktop, lousa e realidade virtual.</p>
-          <div class="meta"><span>Astronomia</span><span>Fundamental I ao Médio</span><span>VR + 3D + realidade mista</span></div>
-          <div class="card-actions">
-            <button type="button" class="aula-btn" data-action="aula" data-yt="ZtPpHocvT7A" data-titulo="Sistema Solar · aula"><span class="passo">1</span><svg class="play" viewBox="0 0 24 24" aria-hidden="true"><path d="M8 5v14l11-7z" fill="currentColor"/></svg>Assistir aula</button>
-            <a href="apps/sistema-solar/" class="primary-btn"><span class="passo">2</span>Explorar em 3D</a>
-            <a href="apps/sistema-solar/?vr=1" class="vr-btn" data-vr-app="sistema-solar"><span class="passo">3</span>🥽 Entrar em VR</a>
-          </div>
-        </div>
-      </article>
-
-      <article class="card available experience-card" data-keywords="dna dupla helice genetica biologia bases nitrogenadas adenina timina citosina guanina pareamento cromossomo vr 3d" data-tema="biologia" data-serie="efii em" data-status="disponivel" style="--bgimg:url('assets/capa-dna-card.webp')">
-        <div class="media"></div><div class="glow"></div>
-        <div class="card-content">
-          <span class="tag">Disponível agora</span>
-          <h3>DNA Imersivo</h3>
-          <p>Entre na dupla hélice: bases nitrogenadas, fitas de açúcar-fosfato, ligações de hidrogênio e o jogo "complete a fita", com narração em áudio, em 3D e realidade virtual.</p>
-          <div class="meta"><span>Biologia</span><span>Fundamental II e Médio</span><span>VR + 3D + realidade mista</span></div>
-          <div class="card-actions">
-            <button type="button" class="aula-btn breve" disabled title="Videoaula em produção"><span class="passo">1</span><svg class="play" viewBox="0 0 24 24" aria-hidden="true"><path d="M8 5v14l11-7z" fill="currentColor"/></svg>Aula em breve</button>
-            <a href="apps/dna/" class="primary-btn"><span class="passo">2</span>Explorar em 3D</a>
-            <a href="apps/dna/?vr=1" class="vr-btn" data-vr-app="dna"><span class="passo">3</span>🥽 Entrar em VR</a>
-          </div>
-        </div>
-      </article>
-
-      <article class="card available experience-card" data-keywords="corpo humano biologia orgaos sistemas anatomia olho visao orelha audicao sentidos lentes miopia rins bexiga hormonios glandulas tireoide coracao pulmoes respiracao circulacao digestao sangue diafragma alveolos oxigenio esqueleto ossos musculos articulacoes movimento coluna nervoso cerebro encefalo medula nervos reflexo vr 3d" data-tema="biologia" data-serie="efi efii em" data-status="disponivel" style="--bgimg:url('assets/capa-corpo-humano-card.webp?v=3')">
-        <div class="media"></div><div class="glow"></div>
-        <div class="card-content">
-          <span class="tag">Disponível agora</span>
-          <h3>Corpo Humano Imersivo</h3>
-          <p>Oito sistemas do corpo para explorar por dentro, com missões, fichas narradas e relatório do professor, em 3D e realidade virtual.</p>
-          <div class="meta"><span>Biologia</span><span>Fundamental I ao Médio</span><span>58 missões · 12 sistemas · 150 fichas</span><span>VR + 3D + realidade mista</span></div>
-          <div class="card-actions">
-            <button type="button" class="aula-btn" data-action="aula" data-yt="TlR7TouWP5o" data-titulo="Corpo Humano · aula"><span class="passo">1</span><svg class="play" viewBox="0 0 24 24" aria-hidden="true"><path d="M8 5v14l11-7z" fill="currentColor"/></svg>Assistir aula</button>
-            <a href="apps/corpo-humano/" class="primary-btn"><span class="passo">2</span>Explorar em 3D</a>
-            <a href="apps/corpo-humano/?vr=1" class="vr-btn" data-vr-app="corpo-humano"><span class="passo">3</span>🥽 Entrar em VR</a>
-          </div>
-        </div>
-      </article>
-
-      <article class="card available experience-card" data-keywords="terra geologia geociencias crosta manto nucleo camadas vulcoes terremotos placas tectonicas interior do planeta viagem ao centro kola ondas sismicas campo magnetico lava magma erupcao cratera vesuvio etna kilauea rochas minerais granito basalto ciclo das rochas vr 3d" data-tema="geociencias" data-serie="efii em" data-status="disponivel" style="--bgimg:url('assets/capa-terra-card.webp?v=3');--bgpos:70% center">
-        <div class="media"></div><div class="glow"></div>
-        <div class="card-content">
-          <span class="tag">Disponível agora</span>
-          <h3>Terra por Dentro</h3>
-          <p>A Terra aberta ao meio: camadas, viagem ao centro, placas tectônicas, vulcões e rochas, com fichas narradas, em 3D e realidade virtual.</p>
-          <div class="meta"><span>Geociências</span><span>Fundamental II e Médio</span><span>4 temas · 20 missões · 55 fichas</span><span>VR + 3D + realidade mista</span></div>
-          <div class="card-actions">
-            <button type="button" class="aula-btn breve" disabled title="Videoaula em produção"><span class="passo">1</span><svg class="play" viewBox="0 0 24 24" aria-hidden="true"><path d="M8 5v14l11-7z" fill="currentColor"/></svg>Aula em breve</button>
-            <a href="apps/terra/" class="primary-btn"><span class="passo">2</span>Explorar em 3D</a>
-            <a href="apps/terra/?vr=1" class="vr-btn" data-vr-app="terra"><span class="passo">3</span>🥽 Entrar em VR</a>
-          </div>
-        </div>
-      </article>
-
-      <article class="card available experience-card" data-keywords="celula biologia organelas microscopio membrana nucleo mitocondria ribossomo reticulo golgi lisossomo citoplasma celula animal celula vegetal cloroplasto parede celular vacuolo fotossintese proteina vr 3d" data-tema="biologia" data-serie="efii em" data-status="disponivel" style="--bgimg:url('assets/capa-celula-card.webp?v=1')">
-        <div class="media"></div><div class="glow"></div>
-        <div class="card-content">
-          <span class="tag">Disponível agora</span>
-          <h3>Célula 3D VR</h3>
-          <p>A célula animal e a vegetal abertas ao meio, o caminho de uma proteína e uma viagem por dentro da célula, em 3D e realidade virtual.</p>
-          <div class="meta"><span>Biologia</span><span>Fundamental II e Médio</span><span>2 temas · 9 missões · 21 fichas</span><span>VR + 3D + realidade mista</span></div>
-          <div class="card-actions">
-            <button type="button" class="aula-btn breve" disabled title="Videoaula em produção"><span class="passo">1</span><svg class="play" viewBox="0 0 24 24" aria-hidden="true"><path d="M8 5v14l11-7z" fill="currentColor"/></svg>Aula em breve</button>
-            <a href="apps/celula/" class="primary-btn"><span class="passo">2</span>Explorar em 3D</a>
-            <a href="apps/celula/?vr=1" class="vr-btn" data-vr-app="celula"><span class="passo">3</span>🥽 Entrar em VR</a>
-          </div>
-        </div>
-      </article>
-
-
-      <article class="card available experience-card" data-keywords="historia egito antigo museu nefertiti menkaure kush nubia nilo piramide gize farao mumia mumificacao hieroglifos escriba pedra de roseta esfinge templo civilizacoes antiguidade africa vr 3d" data-tema="historia" data-serie="efii" data-status="disponivel" style="--bgimg:url('assets/capa-historia-card.webp?v=3')">
-        <div class="media"></div><div class="glow"></div>
-        <div class="card-content">
-          <span class="tag">Novo · Disponível</span>
-          <h3>História VR · Egito Antigo</h3>
-          <p>Uma visita de estudo a um museu do Egito em tamanho real: em cada ala, uma pergunta para investigar, peças reais escaneadas com leitura de fonte histórica e um caderno de respostas, em 3D e realidade virtual.</p>
-          <div class="meta"><span>História</span><span>Fundamental II · 6º ano</span><span>Visita de estudo · 4 alas · 30 peças · 21 escaneamentos reais</span><span>VR + 3D</span></div>
-          <div class="card-actions">
-            <button type="button" class="aula-btn breve" disabled title="Videoaula em produção"><span class="passo">1</span><svg class="play" viewBox="0 0 24 24" aria-hidden="true"><path d="M8 5v14l11-7z" fill="currentColor"/></svg>Aula em breve</button>
-            <a href="apps/historia/" class="primary-btn"><span class="passo">2</span>Explorar em 3D</a>
-            <a href="apps/historia/?vr=1" class="vr-btn" data-vr-app="historia"><span class="passo">3</span>🥽 Entrar em VR</a>
-          </div>
-        </div>
-      </article>
-
-      <article class="card available experience-card" data-keywords="portal lab 3d laboratorio virtual fisica hidrostatica empuxo arquimedes densidade pressao hidrostatica vasos comunicantes dinamometro proveta experimento bancada" data-tema="fisica" data-serie="efii em" data-status="disponivel" style="--bgimg:url('assets/capa-lab3d-card.webp?v=1')">
-        <div class="media"></div><div class="glow"></div>
-        <div class="card-content">
-          <span class="tag">Novo · Portal Lab 3D</span>
-          <h3>Portal Lab 3D · Laboratório virtual</h3>
-          <p>Experimentos de verdade em 3D: o aluno pendura o cilindro no dinamômetro, mergulha, mede o líquido na proveta e calcula o empuxo. Física calculada em tempo real, tabela, gráfico e relatório.</p>
-          <div class="meta"><span>Física · Ciências</span><span>9º ano e Ensino Médio</span><span>Bancada 04 · Hidrostática · 4 experimentos</span><span>3D · lousa e Chromebook</span></div>
-          <div class="card-actions">
-            <a href="apps/lab/" class="primary-btn"><span class="passo">1</span>Ver as 13 bancadas</a>
-            <a href="apps/lab/hidrostatica/" class="vr-btn"><span class="passo">2</span>🧪 Abrir a Bancada 04</a>
-          </div>
-        </div>
-      </article>
-      <article class="card available experience-card" data-keywords="quimica monte o atomo isotopo ion tabela periodica elementos atomo atomos eletron eletrons protons neutrons nucleo camadas bohr familias periodos metais ametais gases nobres teste de chama chama cores fogos de artificio sodio cobre estroncio laboratorio experimento bunsen vr 3d" data-tema="quimica" data-serie="efii em" data-status="disponivel" style="--bgimg:url('assets/capa-quimica-card.webp?v=1')">
-        <div class="media"></div><div class="glow"></div>
-        <div class="card-content">
-          <span class="tag">Novo · Disponível</span>
-          <h3>Química VR · Tabela periódica e teste de chama</h3>
-          <p>Os 118 elementos numa tabela 3D que envolve o aluno no óculos, um átomo para montar partícula por partícula, uma viagem por dentro do átomo de sódio e o teste de chama numa bancada de laboratório, sem nenhum risco.</p>
-          <div class="meta"><span>Química · Ciências</span><span>9º ano e Ensino Médio</span><span>2 temas · 10 missões · 118 elementos · 7 sais</span><span>VR + 3D</span></div>
-          <div class="card-actions">
-            <button type="button" class="aula-btn breve" disabled title="Videoaula em produção"><span class="passo">1</span><svg class="play" viewBox="0 0 24 24" aria-hidden="true"><path d="M8 5v14l11-7z" fill="currentColor"/></svg>Aula em breve</button>
-            <a href="apps/quimica/" class="primary-btn"><span class="passo">2</span>Explorar em 3D</a>
-            <a href="apps/quimica/?vr=1" class="vr-btn" data-vr-app="quimica"><span class="passo">3</span>🥽 Entrar em VR</a>
-          </div>
-        </div>
-      </article>
-      <div class="empty" id="emptyMsg">Nenhuma experiência encontrada com esses filtros.</div>
-    </div>
-  </main>
-  <div id="aulaModal" role="dialog" aria-modal="true" aria-labelledby="aulaTitulo">
-    <div class="box">
-      <div class="head"><b id="aulaTitulo">Aula de abertura</b><button type="button" data-action="aula-fechar">✕ Fechar</button></div>
-      <div class="frame" id="aulaFrame"></div>
-      <div class="foot"><span>Assista com a turma antes de explorar. Se o vídeo não carregar, a rede da escola pode estar bloqueando o YouTube (teste; a versão final usa vídeo local).</span><span><a id="aulaLink" href="#" target="_blank" rel="noopener">Abrir no YouTube ↗</a> · <a href="#" data-action="aula-explorar" id="aulaExplorar">Explorar em 3D →</a></span></div>
-    </div>
-  </div>
-  <footer>Portal 360º VR • Portal do Educador • NEWPC Tecnologia</footer>
-</section>
-
-<script>
-/* Vídeo de abertura local (assets/abertura.mp4, out/2026: nova abertura 1920×960, 33 s): funciona na rede da escola, sem YouTube, e entra no cache do navegador.
-   O fundo do herói usa a versão 720p sem áudio (assets/abertura-fundo.mp4), em loop e sem som. */
-const SKIP_AFTER_MS=2000;      // "Pular" aparece depois disso
-const PLAY_TIMEOUT_MS=6000;    // se o vídeo não começar a tocar nesse prazo (rede lenta ou bloqueio), entra no catálogo
-let catalogShown=false,introStarted=false,watchdog=null;
-const introVideo=document.getElementById('introVideo');
-function showSkip(){const b=document.getElementById('btnSkipIntro');if(b)b.classList.add('show');}
-function hideSkip(){const b=document.getElementById('btnSkipIntro');if(b)b.classList.remove('show');}
-function mountHeroVideo(){
-  const bg=document.getElementById('heroBg');if(!bg||bg.querySelector('video'))return;
-  if(window.matchMedia&&window.matchMedia('(prefers-reduced-motion: reduce)').matches)return;
-  if(window.innerWidth<760||(navigator.connection&&navigator.connection.saveData))return; // celular ou economia de dados: fica a imagem de capa
-  const v=document.createElement('video');
-  v.src='assets/abertura-fundo-v2.mp4';v.muted=true;v.loop=true;v.autoplay=true;v.playsInline=true;v.setAttribute('playsinline','');v.setAttribute('muted','');
-  v.preload='auto';v.setAttribute('aria-hidden','true');v.title='Vídeo de abertura em loop';
-  v.addEventListener('playing',function(){ v.classList.add('ready'); },{once:true});
-  v.addEventListener('error',function(){ v.remove(); },{once:true});
-  bg.appendChild(v);
-  const p=v.play();if(p&&p.catch)p.catch(function(){ v.remove(); });
-}
-
-function fullscreenElement(){
-  return document.fullscreenElement || document.webkitFullscreenElement || document.msFullscreenElement;
-}
-async function enterTrueFullscreen(){
-  if(fullscreenElement()) return true;
-  const el=document.documentElement;
-  const fn=el.requestFullscreen || el.webkitRequestFullscreen || el.msRequestFullscreen;
-  if(!fn) return false;
-  try{
-    await fn.call(el, {navigationUI:'hide'});
-    return true;
-  }catch(e){
-    try{ await fn.call(el); return true; }catch(e2){ return false; }
-  }
-}
-function setImmersiveMode(on){
-  document.documentElement.classList.toggle('intro-fullscreen',on);
-  document.body.classList.toggle('intro-fullscreen',on);
-}
-function showCatalog(){
-  if(catalogShown)return;
-  try{sessionStorage.setItem('portal360_intro_done','1');}catch(e){}
-  catalogShown=true;
-  document.getElementById('intro').classList.add('hidden');
-  document.getElementById('catalog').classList.remove('hidden');
-  setImmersiveMode(false);
-  document.body.style.cursor='';
-  hideSkip();
-  if(watchdog){clearTimeout(watchdog);watchdog=null;}
-  try{ if(introVideo){introVideo.pause();introVideo.currentTime=0;} }catch(e){}
-  mountHeroVideo();
-}
-function hideFallback(){
-  const f=document.getElementById('startFallback');
-  if(f)f.style.display='none';
-}
-function showFallback(){
-  const f=document.getElementById('startFallback');
-  if(f)f.style.display='flex';
-}
-async function startImmersiveIntro(){
-  if(!introVideo){ showCatalog(); return; }
-  await enterTrueFullscreen();
-  setImmersiveMode(true);
-  hideFallback();
-  const n=document.getElementById('introNote');if(n)n.classList.remove('show');
-  setTimeout(showSkip,SKIP_AFTER_MS);
-  // Se o vídeo não começar a tocar dentro do prazo, entra no catálogo
-  watchdog=setTimeout(function(){ if(!introStarted) showCatalog(); },PLAY_TIMEOUT_MS);
-  try{
-    introVideo.currentTime=0;
-    introVideo.muted=false;
-    introVideo.volume=1;
-    const p=introVideo.play();
-    if(p&&p.catch)p.catch(function(){ showCatalog(); });
-  }catch(e){
-    showCatalog();
-  }
-}
-function showIntro(){
-  try{sessionStorage.removeItem('portal360_intro_done');}catch(e){}
-  catalogShown=false;introStarted=false;hideSkip();
-  document.getElementById('catalog').classList.add('hidden');
-  document.getElementById('intro').classList.remove('hidden');
-  showFallback();
-}
-if(introVideo){
-  introVideo.addEventListener('playing',function(){
-    introStarted=true;
-    if(watchdog){clearTimeout(watchdog);watchdog=null;}
-    hideFallback();
-    setImmersiveMode(true);
-  });
-  introVideo.addEventListener('ended',showCatalog);
-  introVideo.addEventListener('error',function(){
-    const emAbertura=!catalogShown && document.getElementById('startFallback').style.display==='none';
-    if(emAbertura){ showCatalog(); return; }
-    const n=document.getElementById('introNote');
-    if(n){n.textContent='Apresentação indisponível nesta rede. Você pode entrar direto no catálogo.';n.classList.add('show');}
-    showSkip();
-  });
-}
-
-function shouldOpenCatalogDirect(){
-  try{
-    const q=new URLSearchParams(location.search);
-    return q.get('catalog')==='1';/* out/2026: ao recarregar a página a apresentação volta a aparecer; quem volta de uma aplicação vem com ?catalog=1 */
-  }catch(e){ return false; }
-}
-if(shouldOpenCatalogDirect()){
-  document.addEventListener('DOMContentLoaded',function(){
-    catalogShown=true;
-    const intro=document.getElementById('intro');
-    const catalog=document.getElementById('catalog');
-    if(intro)intro.classList.add('hidden');
-    if(catalog)catalog.classList.remove('hidden');
-    setImmersiveMode(false);
-    document.body.style.cursor='';
-    mountHeroVideo();
-  });
-}
-
-document.getElementById('btnStartIntro').addEventListener('click',startImmersiveIntro);
-document.getElementById('btnSkipIntro').addEventListener('click',function(){
-  try{ if(fullscreenElement()&&document.exitFullscreen) document.exitFullscreen().catch(function(){}); }catch(e){}
-  showCatalog();
-});
-document.addEventListener('keydown',function(e){
-  if(e.key==='Escape' && !catalogShown && document.getElementById('startFallback').style.display==='none') showCatalog();
-});
-/* Aula de abertura (teste com YouTube; produção usará MP4 local) */
-(function(){var modal=document.getElementById('aulaModal'),frame=document.getElementById('aulaFrame'),titulo=document.getElementById('aulaTitulo'),link=document.getElementById('aulaLink'),explorar=document.getElementById('aulaExplorar');
- function abrir(btn){var id=btn.getAttribute('data-yt');titulo.textContent=btn.getAttribute('data-titulo')||'Aula de abertura';link.href='https://www.youtube.com/watch?v='+id;var card=btn.closest('.card');var ex=card&&card.querySelector('.primary-btn');explorar.href=ex?ex.getAttribute('href'):'#';
-  frame.innerHTML='<iframe id="aulaYT" src="https://www.youtube-nocookie.com/embed/'+id+'?autoplay=1&rel=0&modestbranding=1&hl=pt-BR&playsinline=1&enablejsapi=1&origin='+encodeURIComponent(location.origin)+'" title="Aula de abertura" allow="autoplay; fullscreen; picture-in-picture" allowfullscreen referrerpolicy="strict-origin-when-cross-origin"></iframe>';modal.classList.add('open');document.body.style.overflow='hidden';/* tela cheia nativa (precisa do gesto do clique; o modal fica como reserva se o navegador recusar) */try{var rf=modal.requestFullscreen||modal.webkitRequestFullscreen;if(rf){var pr=rf.call(modal);if(pr&&pr.catch)pr.catch(function(){});}}catch(_){}
-  acompanhar(btn.getAttribute('data-titulo')||'Aula de abertura');}
- /* Sala do professor: acompanha a aula pelo player do YouTube (play, minuto, duração, fim). Sem a API, o vídeo toca normalmente. */
- var player=null,ytFim=false;
- function api(cb){if(window.YT&&YT.Player)return cb();var antes=window.onYouTubeIframeAPIReady;window.onYouTubeIframeAPIReady=function(){if(antes)try{antes();}catch(_){}cb();};
-  if(!document.getElementById('ytApi')){var s=document.createElement('script');s.id='ytApi';s.src='https://www.youtube.com/iframe_api';document.head.appendChild(s);}}
- function acompanhar(nome){ytFim=false;player=null;if(!window.Portal360Sala||!Portal360Sala.sala)return;
-  api(function(){var el=document.getElementById('aulaYT');if(!el)return;try{player=new YT.Player(el,{events:{onStateChange:function(e){if(e.data===0)ytFim=true;}}});}catch(_){player=null;return;}
-   Portal360Sala.midiaExterna({tipo:'video',nome:nome,estado:function(){if(!player||!player.getPlayerState)return null;var st=player.getPlayerState();return{tocando:st===1||st===3,pos:player.getCurrentTime(),dur:player.getDuration(),fim:ytFim||st===0};}});});}
- function fechar(){if(player&&window.Portal360Sala&&Portal360Sala.midiaExterna){var ult=null;try{ult={tocando:false,pos:player.getCurrentTime(),dur:player.getDuration(),fim:ytFim||player.getPlayerState()===0};}catch(_){}var nome=titulo.textContent;Portal360Sala.midiaExterna(ult&&ult.dur?{tipo:'video',nome:nome,estado:function(){return ult;}}:null);}player=null;
-  modal.classList.remove('open');frame.innerHTML='';document.body.style.overflow='';var fs=document.fullscreenElement||document.webkitFullscreenElement;if(fs===modal){try{(document.exitFullscreen||document.webkitExitFullscreen).call(document);}catch(_){}}}
- document.addEventListener('fullscreenchange',function(){if(!document.fullscreenElement&&modal.classList.contains('open'))fechar();});document.addEventListener('webkitfullscreenchange',function(){if(!document.webkitFullscreenElement&&modal.classList.contains('open'))fechar();});
- document.addEventListener('click',function(e){var b=e.target.closest('[data-action="aula"]');if(b){e.preventDefault();abrir(b);return;}if(e.target.closest('[data-action="aula-fechar"]')){fechar();return;}if(e.target.closest('[data-action="aula-explorar"]')){fechar();return;}if(e.target===modal)fechar();});
- document.addEventListener('keydown',function(e){if(e.key==='Escape'&&modal.classList.contains('open'))fechar();});})();
-document.getElementById('replayIntro').addEventListener('click',showIntro);
-document.getElementById('btnIntro2').addEventListener('click',showIntro);
-
-document.addEventListener('fullscreenchange',function(){
-  // Se o usuário sair da tela cheia durante a abertura, mantemos o vídeo tocando,
-  // mas não mostramos controles nem botão de pular.
-  if(document.getElementById('intro') && !document.getElementById('intro').classList.contains('hidden')){
-    setImmersiveMode(!!fullscreenElement());
-  }
-});
-document.addEventListener('webkitfullscreenchange',function(){
-  if(document.getElementById('intro') && !document.getElementById('intro').classList.contains('hidden')){
-    setImmersiveMode(!!fullscreenElement());
-  }
-});
-
-/* ===== Entrar em VR direto do catálogo =====
-   O app fica pré-carregado num iframe invisível (mesma origem). O clique aqui conta como gesto
-   do usuário para o iframe, então a sessão WebXR abre na hora, sem segundo toque. */
-/* BUILD muda a cada publicação: força o navegador do óculos a buscar o index.html novo dos apps (o GitHub Pages ignora a query) */
-const BUILD='20261016a';
-const appFrames={};
-/* os links dos cartões também levam a versão, para abrir direto sem cache antigo */
-document.querySelectorAll('.card-actions a[href^="apps/"]').forEach(a=>{const u=new URL(a.getAttribute('href'),location.href);u.searchParams.set('v',BUILD);a.setAttribute('href',u.pathname+u.search);});
-/* v2 (out/2026): pré-carrega UM app por vez, só quando o ponteiro chega ao botão do cartão. Três cenas WebGL
-   simultâneas (Solar + DNA + Corpo) estouravam o limite de contextos no navegador do óculos e o app abria sem 3D. */
-function prepararApp(apenas){
-  document.querySelectorAll('[data-vr-app]').forEach(a=>{
-    const app=a.dataset.vrApp;if(appFrames[app]||(apenas&&app!==apenas))return;
-    for(const k of Object.keys(appFrames)){if(k!==app){try{appFrames[k].remove();}catch(_){}delete appFrames[k];}}
-    const f=document.createElement('iframe');f.className='appFrame';f.id='appFrame-'+app;
-    f.setAttribute('allow','xr-spatial-tracking; fullscreen; autoplay; accelerometer; gyroscope');
-    f.src='apps/'+app+'/?quiosque=0&embed=1&v='+BUILD;
-    document.body.appendChild(f);appFrames[app]=f;
-  });
-}
-/* v3 (out/2026): 1) o iframe começa a carregar quando o ponteiro chega ao CARTÃO (não só ao botão), ganhando segundos;
-   2) se o clique chega com o app ainda carregando, espera até 3,5 s (o gesto do usuário vale ~5 s) e abre o VR;
-   3) se mesmo assim o óculos não abrir a sessão, cobre o app com uma tela "toque em qualquer lugar", que entra no VR
-      com um único gatilho, sem precisar achar botão. */
-function appPronto(fr){let w=null;try{w=fr&&fr.contentWindow;}catch(err){}if(!w)return null;
-  let sem3d=false;try{sem3d=!!(w.document&&w.document.querySelector('.stage.error,#stage.error'));}catch(err){}
-  return(!sem3d&&typeof w.alternarVR==='function'&&w.navigator&&w.navigator.xr)?w:null;}
-function vigiarSessao(w){try{const xr=w.navigator.xr;if(xr.__pdeVigia)return;const orig=xr.requestSession.bind(xr);
-  xr.requestSession=function(){const p=orig.apply(null,arguments);p.then(s=>{w.__pdeSessaoXR=true;s.addEventListener('end',()=>{w.__pdeSessaoXR=false;});},()=>{});return p;};xr.__pdeVigia=true;}catch(err){}}
-function toqueParaVR(w){try{const d=w.document;if(d.getElementById('pdeToqueVR'))return;const o=d.createElement('div');o.id='pdeToqueVR';
-  o.setAttribute('style','position:fixed;inset:0;z-index:2147483600;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:18px;background:rgba(3,12,24,.86);color:#fff;font:700 34px Segoe UI,Arial,sans-serif;text-align:center;cursor:pointer');
-  o.innerHTML='<div style="font-size:84px">🥽</div><div>Aperte o gatilho para entrar no VR</div><div style="font:500 20px Segoe UI,Arial;opacity:.8">em qualquer lugar da tela</div>';
-  o.addEventListener('click',()=>{o.remove();try{w.alternarVR('vr');}catch(err){}});d.body.appendChild(o);}catch(err){}}
-function abrirNoFrame(fr,w){fr.classList.add('show');try{if(player&&player.stopVideo)player.stopVideo();}catch(err){}
-  vigiarSessao(w);try{w.alternarVR('vr');}catch(err){}
-  setTimeout(()=>{if(!w.__pdeSessaoXR)toqueParaVR(w);},2500);}
-function entrarVRdireto(e){
-  const a=e.target.closest('[data-vr-app]');if(!a)return;
-  const app=a.dataset.vrApp;if(!navigator.xr)return; // sem WebXR: segue o link normal (tela de entrada do app)
-  e.preventDefault();prepararApp(app);const fr=appFrames[app];const w=appPronto(fr);
-  if(w){abrirNoFrame(fr,w);return;}
-  const t0=performance.now();a.classList.add('carregando');
-  const espera=setInterval(()=>{const w2=appPronto(fr);
-    if(w2){clearInterval(espera);a.classList.remove('carregando');abrirNoFrame(fr,w2);}
-    else if(performance.now()-t0>3500){clearInterval(espera);a.classList.remove('carregando');
-      fr.classList.add('show');const fim=setInterval(()=>{const w3=appPronto(fr);if(w3){clearInterval(fim);vigiarSessao(w3);toqueParaVR(w3);}},250);setTimeout(()=>clearInterval(fim),30000);}
-  },120);
-}
-document.getElementById('gridCards').addEventListener('click',entrarVRdireto);
-// pré-carrega quando o catálogo aparece (não durante a abertura em vídeo)
-document.getElementById('gridCards').addEventListener('pointerenter',e=>{const c=e.target.closest&&(e.target.closest('[data-vr-app]')||e.target.closest('.card'));const a=c&&(c.matches('[data-vr-app]')?c:c.querySelector('[data-vr-app]'));if(a)prepararApp(a.dataset.vrApp);},true);
-const _obsCat=new MutationObserver(()=>{ if(!document.getElementById('catalog').classList.contains('hidden')){_obsCat.disconnect();} });
-_obsCat.observe(document.getElementById('catalog'),{attributes:true,attributeFilter:['class']});
-
-
-const fBusca=document.getElementById('fBusca');
-const fTema=document.getElementById('fTema');
-const fSerie=document.getElementById('fSerie');
-const fStatus=document.getElementById('fStatus');
-const cards=[...document.querySelectorAll('.experience-card')];
-const normalizar=s=>(s||'').toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g,'');
-function applyFilters(){
- const busca=normalizar(fBusca.value).trim();
- const tema=fTema.value; const serie=fSerie.value; const status=fStatus.value;
- cards.forEach(card=>{
-   const texto=normalizar(card.dataset.keywords+' '+(card.querySelector('h3')||{}).textContent+' '+(card.querySelector('p')||{}).textContent);
-   const okBusca=!busca || busca.split(/\s+/).every(t=>texto.includes(t));
-   const okTema=!tema || card.dataset.tema===tema;
-   const okSerie=!serie || (card.dataset.serie||'').split(' ').includes(serie);
-   const okStatus=!status || card.dataset.status===status;
-   card.classList.toggle('hide', !(okBusca && okTema && okSerie && okStatus));
- });
- const vis=cards.some(c=>!c.classList.contains('hide'));
- document.getElementById('emptyMsg').classList.toggle('show',!vis);
-}
-[fTema,fSerie,fStatus].forEach(el=>el.addEventListener('change',applyFilters));
-fBusca.addEventListener('input',applyFilters);
-
-</script>
-<script defer src="assets/sala/sala-cliente.js?v=1.11.0"></script>
-<!-- Rolagem para o óculos (v1.0): o navegador do Quest não entrega o analógico à página fora do VR,
-     então o catálogo ganha botões grandes de rolar, acionados com o gatilho. Só aparecem no Quest
-     (ou com ?rolagem=1 para testar); na lousa e no computador ficam escondidos. -->
-<style>
-#rolagemQuest{position:fixed;right:18px;top:50%;transform:translateY(-50%);z-index:900;display:none;flex-direction:column;gap:12px}
-#rolagemQuest.on{display:flex}
-#rolagemQuest button{width:78px;height:78px;border-radius:50%;border:2px solid rgba(87,212,255,.55);background:rgba(6,20,36,.88);color:#e7f6ff;font-size:30px;font-weight:800;line-height:1;cursor:pointer;box-shadow:0 10px 30px rgba(0,0,0,.45);backdrop-filter:blur(6px);display:grid;place-items:center;touch-action:manipulation}
-#rolagemQuest button:hover,#rolagemQuest button:focus-visible{background:#0f6b3a;border-color:#7dffb0;outline:none}
-#rolagemQuest button[data-rolar="topo"]{width:62px;height:62px;font-size:15px;align-self:center}
-#rolagemQuest button[disabled]{opacity:.35;cursor:default}
-body.intro-fullscreen #rolagemQuest{display:none!important}
-</style>
-<div id="rolagemQuest" aria-label="Rolar o catálogo">
-  <button type="button" data-rolar="topo" title="Voltar ao topo" aria-label="Voltar ao topo">TOPO</button>
-  <button type="button" data-rolar="cima" title="Subir" aria-label="Subir a página">▲</button>
-  <button type="button" data-rolar="baixo" title="Descer" aria-label="Descer a página">▼</button>
-</div>
 <script>
 (function(){'use strict';
- var box=document.getElementById('rolagemQuest');if(!box)return;
- var q=new URLSearchParams(location.search);
- var quest=/OculusBrowser|Quest|Pacific|MetaQuest/i.test(navigator.userAgent);
- if(q.get('rolagem')==='0')quest=false;if(q.get('rolagem')==='1')quest=true;
- if(!quest)return;
- box.classList.add('on');
- var alvo=function(){return document.scrollingElement||document.documentElement;};
- var passo=function(){return Math.round(window.innerHeight*.7);};
- function estado(){var el=alvo(),max=el.scrollHeight-window.innerHeight;
-   box.querySelector('[data-rolar="cima"]').disabled=el.scrollTop<=2;
-   box.querySelector('[data-rolar="topo"]').disabled=el.scrollTop<=2;
-   box.querySelector('[data-rolar="baixo"]').disabled=el.scrollTop>=max-2;}
- function rolar(dir){if(dir==='topo'){window.scrollTo({top:0,behavior:'smooth'});return;}window.scrollBy({top:dir==='baixo'?passo():-passo(),behavior:'smooth'});}
- /* segurar o gatilho continua rolando, como manter o analógico empurrado */
- var timer=null,repete=null;
- function parar(){clearTimeout(timer);clearInterval(repete);timer=repete=null;}
- box.addEventListener('pointerdown',function(e){var b=e.target.closest('[data-rolar]');if(!b||b.disabled)return;e.preventDefault();var d=b.dataset.rolar;rolar(d);if(d==='topo')return;parar();timer=setTimeout(function(){repete=setInterval(function(){window.scrollBy({top:d==='baixo'?90:-90});},60);},450);});
- ['pointerup','pointerleave','pointercancel','blur'].forEach(function(ev){box.addEventListener(ev,parar);});
- window.addEventListener('blur',parar);
- window.addEventListener('scroll',estado,{passive:true});window.addEventListener('resize',estado);
- /* acionamento pelo teclado (Enter/Espaço) chega como clique sem ponteiro */
- box.addEventListener('click',function(e){if(e.detail!==0)return;var b=e.target.closest('[data-rolar]');if(b&&!b.disabled)rolar(b.dataset.rolar);});
- /* o catálogo aparece depois da abertura e os cards mudam com os filtros: recalcula quando a página muda de altura */
- try{new ResizeObserver(estado).observe(document.body);}catch(e){setInterval(estado,1500);}
- estado();
+/* ---------- conteúdo (mesmos apps, capas e links do catálogo atual) ---------- */
+var APPS=[
+ {id:'sistema-solar',nome:'Sistema Solar',curto:'Sistema Solar',img:'capa-sistema-solar-card.webp',tema:'espaco',serie:['pequenos','maiores'],yt:'ZtPpHocvT7A',texto:'Os planetas, as órbitas, as fases da Lua, as estações e os eclipses. Dá para voar pelo espaço no óculos.'},
+ {id:'corpo-humano',nome:'Corpo Humano',curto:'Corpo Humano',img:'capa-corpo-humano-card.webp?v=3',tema:'vida',serie:['pequenos','maiores'],yt:'TlR7TouWP5o',texto:'Oito sistemas do corpo para explorar por dentro: o coração batendo, os pulmões, o caminho da comida.'},
+ {id:'celula',nome:'Célula 3D',curto:'Célula',img:'capa-celula-card.webp?v=1',tema:'vida',serie:['maiores'],texto:'A célula animal e a vegetal abertas ao meio, e uma viagem por dentro da célula.'},
+ {id:'dna',nome:'DNA Imersivo',curto:'DNA',img:'capa-dna-card.webp',tema:'vida',serie:['maiores'],texto:'Entre na dupla hélice e complete a fita de DNA.'},
+ {id:'terra',nome:'Terra por Dentro',curto:'Terra por Dentro',img:'capa-terra-card.webp?v=3',tema:'terra',serie:['pequenos','maiores'],texto:'A Terra aberta ao meio: camadas, vulcões, placas e rochas.'},
+ {id:'historia',nome:'Egito Antigo',curto:'Egito Antigo',img:'capa-historia-card.webp?v=3',tema:'historia',serie:['pequenos','maiores'],texto:'Um museu do Egito em tamanho real, com peças de verdade escaneadas e a Grande Pirâmide por dentro.'},
+ {id:'quimica',nome:'Química',curto:'Química',img:'capa-quimica-card.webp?v=1',tema:'lab',serie:['maiores'],breve:true,texto:'A tabela periódica em volta de você, um átomo para montar e o teste de chama sem risco.'},
+ {id:'lab',nome:'Laboratório 3D',curto:'Laboratório',img:'capa-lab3d-card.webp?v=1',tema:'lab',serie:['maiores'],breve:true,semVR:true,explorar:'apps/lab/',texto:'Experimentos de física em 3D: dinamômetro, empuxo, pressão e vasos comunicantes.'},
+ /* ---------- em breve: capa provisória até chegar a foto em assets/em-breve/<id>.webp ---------- */
+ {id:'pantanal',nome:'Pantanal Vivo',img:'em-breve/pantanal.webp',tema:'vida',serie:['pequenos','maiores'],breve:true,ic:'🐊',cor:['#1f5f3a','#0b2a1a'],texto:'Uma trilha pelo maior alagado do planeta: bichos, plantas, cheia e seca.'},
+ {id:'oceano',nome:'Fundo do Mar',img:'em-breve/oceano.webp',tema:'vida',serie:['pequenos','maiores'],breve:true,ic:'🐋',cor:['#0f4c7a','#06182b'],texto:'Um mergulho do recife de coral até as fossas mais profundas.'},
+ {id:'dinossauros',nome:'Era dos Dinossauros',img:'em-breve/dinossauros.webp',tema:'terra',serie:['pequenos','maiores'],breve:true,ic:'🦕',cor:['#6b4a1f','#2a1a08'],texto:'Fósseis, eras geológicas e os dinossauros em tamanho real.'},
+ {id:'clima',nome:'Ciclo da Água e Clima',img:'em-breve/clima.webp',tema:'terra',serie:['pequenos','maiores'],breve:true,ic:'🌦️',cor:['#2b6b8f','#0b2236'],texto:'Evaporação, nuvens, chuva e o que muda o clima do planeta.'},
+ {id:'brasil-colonial',nome:'Brasil Colonial',img:'em-breve/brasil-colonial.webp',tema:'historia',serie:['pequenos','maiores'],breve:true,ic:'⛵',cor:['#7a5a2a','#2a1d0b'],texto:'As caravelas, os povos originários e a vida na vila colonial.'},
+ {id:'geometria',nome:'Sólidos Geométricos',img:'em-breve/geometria.webp',tema:'mat',serie:['pequenos','maiores'],breve:true,ic:'🔷',cor:['#4a3a8f','#140f33'],texto:'Pegue, gire, abra e planifique cubos, prismas, pirâmides e esferas.'}
+];
+var TEMAS=[['espaco','🪐','Espaço'],['vida','❤️','Corpo e vida'],['terra','🌋','Planeta Terra'],['historia','🏛️','História'],['lab','🧪','Química e laboratório'],['mat','📐','Matemática']];
+var TAGTEMA={espaco:'Espaço',vida:'Corpo e vida',terra:'Planeta Terra',historia:'História',lab:'Laboratório',mat:'Matemática'};
+var CHAVE='p360_novo_inicio';
+var est={ultimos:[],voz:false,filtro:'todos'};try{var sv=JSON.parse(localStorage.getItem(CHAVE)||'{}');est.ultimos=sv.ultimos||[];est.voz=!!sv.voz;}catch(e){}
+function salvar(){try{localStorage.setItem(CHAVE,JSON.stringify(est));}catch(e){}}
+/* aparelho: no óculos o card já leva para a imersão; na lousa/computador abre o 3D direto.
+   ?modo=oculos ou ?modo=tela força o modo (útil para testar e para o professor) */
+var MODO=new URLSearchParams(location.search).get('modo');
+var quest=MODO==='oculos'||(MODO!=='tela'&&(/OculusBrowser|Quest|Pacific|Pico|Vive/i.test(navigator.userAgent)||new URLSearchParams(location.search).get('quest')==='1'));
+if(quest)document.body.classList.add('quest');
+var $=function(id){return document.getElementById(id);};
+var esc=function(s){return String(s).replace(/[&<>"]/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c];});};
+var img=function(f){return "url('assets/"+f+"')";};
+
+/* ---------- voz: diz o nome ao passar o dedo/raio (opcional, ajuda os pequenos) ---------- */
+var tFala=null,ultimaFalada='';
+/* voz gravada (assets/voz-inicio/<id>.mp3); a voz do navegador só entra se o arquivo falhar */
+var vozAudio=null;
+function falar(t,ja,arq){if(!est.voz)return;clearTimeout(tFala);tFala=setTimeout(function(){var k=arq||t;if(k===ultimaFalada&&!ja)return;ultimaFalada=k;
+ try{if(vozAudio){vozAudio.pause();vozAudio=null;}if('speechSynthesis' in window)speechSynthesis.cancel();}catch(e){}
+ var tts=function(){try{if(!('speechSynthesis' in window))return;var u=new SpeechSynthesisUtterance(t);u.lang='pt-BR';u.rate=1;speechSynthesis.speak(u);}catch(e){}};
+ if(!arq){tts();return;}var a=new Audio('assets/voz-inicio/'+arq+'.mp3');vozAudio=a;var caiu=false;var cair=function(){if(caiu||vozAudio!==a)return;caiu=true;tts();};a.onerror=cair;var pr=a.play();if(pr&&pr.catch)pr.catch(cair);},ja?0:180);}
+function atualizarVoz(){$('chipVoz').setAttribute('aria-pressed',est.voz);$('chipVoz').innerHTML=est.voz?'🔊 <span class="rot">Voz ligada</span>':'🔈 <span class="rot">Voz</span>';}
+
+/* ---------- vitrine: todos os apps visíveis de cara ---------- */
+function destino(a){return (quest&&!a.semVR)?('apps/'+a.id+'/?vr=1'):(a.explorar||('apps/'+a.id+'/'));}
+function cardApp(a,i){if(a.breve)return cardBreve(a,i);var ult=est.ultimos[0]===a.id;var vr=quest&&!a.semVR;
+ var tags=(a.semVR?'<span class="tag">💻 Tela e lousa</span>':'<span class="tag vr">🥽 VR</span>')+'<span class="tag">'+esc(TAGTEMA[a.tema])+'</span>'+(a.serie.indexOf('pequenos')>=0?'<span class="tag">Anos iniciais</span>':'');
+ var cta=vr?'<span class="cta vr">🥽 Entrar no óculos</span>':'<span class="cta">▶ Abrir em 3D</span>';
+ return '<div class="cel" style="animation-delay:'+(i*45)+'ms"><a class="card" href="'+destino(a)+'" data-ultimo="'+a.id+'" data-fala="'+esc(a.nome)+'" data-voz="inicio-'+a.id+'">'+(a.novo?'<span class="selo">NOVO</span>':(ult?'<span class="selo cont">⏯ Continuar</span>':''))+'<span class="foto"><i style="background-image:'+img(a.img)+'"></i></span><span class="corpo"><b>'+esc(a.nome)+'</b><span class="d">'+esc(a.texto)+'</span><span class="tags">'+tags+'</span>'+cta+'</span></a>'+(a.yt?'<button type="button" class="mini" data-action="video:'+a.yt+'" data-fala="Aula em vídeo." data-voz="inicio-video" aria-label="Aula em vídeo de '+esc(a.nome)+'">▶ Vídeo</button>':'')+'</div>';}
+function cardBreve(a,i){var c=a.cor||['#1d3a55','#091827'];
+ return '<div class="cel" style="animation-delay:'+(i*45)+'ms"><div class="card trava" aria-disabled="true" data-fala="Esta experiência chega em breve." data-voz="inicio-em-breve" tabindex="-1"><span class="selo breve">🔒 EM BREVE</span><span class="foto"><span class="prov" style="background:radial-gradient(circle at 70% 30%,'+c[0]+','+c[1]+' 75%)"><em>'+(a.ic||'✨')+'</em></span><img class="capa" alt="" src="assets/'+a.img+'"></span><span class="corpo"><b>'+esc(a.nome)+'</b><span class="d">'+esc(a.texto)+'</span><span class="tags"><span class="tag">'+esc(TAGTEMA[a.tema])+'</span></span><span class="cta off">🔒 Em breve</span></span></div></div>';}
+function render(){var f=est.filtro;
+ var ord=APPS.slice().sort(function(x,y){var ix=est.ultimos.indexOf(x.id),iy=est.ultimos.indexOf(y.id);if(ix<0)ix=99;if(iy<0)iy=99;return (x.breve?1:0)-(y.breve?1:0)||ix-iy;});
+ var lista=ord.filter(function(a){return f==='todos'||a.tema===f;});
+ var fl='<button type="button" class="filtro" data-action="filtro:todos" aria-pressed="'+(f==='todos')+'">Todos</button>'+TEMAS.map(function(t){return '<button type="button" class="filtro" data-action="filtro:'+t[0]+'" aria-pressed="'+(f===t[0])+'">'+t[1]+' '+esc(t[2])+'</button>';}).join('');
+ $('principal').innerHTML='<section class="vitrine"><div class="dica-quest">🥽 Depois de abrir, aperte o gatilho em qualquer lugar da tela para entrar na imersão.</div><div class="topo-v"><div><h1>Escolha uma <span>experiência</span></h1><p>'+(quest?'Aponte para um card e puxe o gatilho. A experiência abre pronta para a imersão.':'Toque em um card e a experiência abre em 3D na hora.')+'</p><span class="modo">'+(quest?'🥽 Modo óculos':'💻 Modo tela e lousa')+' · <a href="?modo='+(quest?'tela':'oculos')+'">trocar</a></span></div><div class="filtros">'+fl+'</div></div><div class="grade">'+lista.map(cardApp).join('')+'</div></section>';}
+
+var atual=null;
+/* ---------- eventos (delegação; nada de onclick no HTML) ---------- */
+document.addEventListener('click',function(ev){var el=ev.target.closest('[data-action]');var lk=ev.target.closest('[data-ultimo]');
+ if(lk){var id=lk.getAttribute('data-ultimo');est.ultimos=[id].concat(est.ultimos.filter(function(x){return x!==id;})).slice(0,6);salvar();return;}
+ if(!el)return;var a=el.getAttribute('data-action'),arg=a.split(':')[1];
+ if(a.indexOf('filtro:')===0){est.filtro=arg;render();return;}
+ if(a==='voz'){est.voz=!est.voz;salvar();atualizarVoz();if(est.voz)falar('Voz ligada.',true,'inicio-voz');return;}
+ if(a.indexOf('video:')===0){if(!arg)return;$('videoQuadro').innerHTML='<iframe src="https://www.youtube-nocookie.com/embed/'+encodeURIComponent(arg)+'?autoplay=1&rel=0&hl=pt-BR&playsinline=1" allow="autoplay; fullscreen; picture-in-picture" allowfullscreen title="Aula em vídeo"></iframe>';$('video').classList.add('aberto');return;}
+ if(a==='fechar-video'){$('video').classList.remove('aberto');$('videoQuadro').innerHTML='';return;}
+});
+/* passar o dedo, o mouse ou o raio do óculos lê o nome em voz alta */
+document.addEventListener('pointerover',function(ev){var el=ev.target.closest('[data-fala]');if(el)falar(el.getAttribute('data-fala'),false,el.getAttribute('data-voz'));});
+document.addEventListener('focusin',function(ev){var el=ev.target.closest&&ev.target.closest('[data-fala]');if(el)falar(el.getAttribute('data-fala'),false,el.getAttribute('data-voz'));});
+document.addEventListener('keydown',function(ev){if(ev.key==='Escape'){if($('video').classList.contains('aberto')){$('video').classList.remove('aberto');$('videoQuadro').innerHTML='';}}});
+document.addEventListener('error',function(e){var t=e.target;if(t&&t.classList&&t.classList.contains('capa'))t.remove();},true);
+atualizarVoz();render();
+if(!quest&&!MODO&&navigator.xr&&navigator.xr.isSessionSupported){navigator.xr.isSessionSupported('immersive-vr').then(function(ok){if(ok&&!/Windows|Macintosh|CrOS/i.test(navigator.userAgent)){quest=true;document.body.classList.add('quest');render();}}).catch(function(){});}
 })();
 </script>
+<script defer src="assets/sala/sala-cliente.js?v=1.11.0"></script>
 </body>
 </html>

@@ -124,6 +124,8 @@ function salvar(){try{localStorage.setItem(CHAVE,JSON.stringify(est));}catch(e){
 /* aparelho: no óculos o card já leva para a imersão; na lousa/computador abre o 3D direto.
    ?modo=oculos ou ?modo=tela força o modo (útil para testar e para o professor) */
 var MODO=new URLSearchParams(location.search).get('modo');
+/* escolha manual ("trocar") fica salva neste aparelho */
+try{if(MODO==='oculos'||MODO==='tela')localStorage.setItem('p360_modo',MODO);else MODO=localStorage.getItem('p360_modo');}catch(e){}
 var quest=MODO==='oculos'||(MODO!=='tela'&&(/OculusBrowser|Quest|Pacific|Pico|Vive/i.test(navigator.userAgent)||new URLSearchParams(location.search).get('quest')==='1'));
 if(quest)document.body.classList.add('quest');
 var $=function(id){return document.getElementById(id);};
@@ -152,7 +154,7 @@ function render(){var f=est.filtro;
  var ord=APPS.slice().sort(function(x,y){var ix=est.ultimos.indexOf(x.id),iy=est.ultimos.indexOf(y.id);if(ix<0)ix=99;if(iy<0)iy=99;return (x.breve?1:0)-(y.breve?1:0)||ix-iy;});
  var lista=ord.filter(function(a){return f==='todos'||a.tema===f;});
  var fl='<button type="button" class="filtro" data-action="filtro:todos" aria-pressed="'+(f==='todos')+'">Todos</button>'+TEMAS.map(function(t){return '<button type="button" class="filtro" data-action="filtro:'+t[0]+'" aria-pressed="'+(f===t[0])+'">'+t[1]+' '+esc(t[2])+'</button>';}).join('');
- $('principal').innerHTML='<section class="vitrine"><div class="dica-quest">🥽 Depois de abrir, aperte o gatilho em qualquer lugar da tela para entrar na imersão.</div><div class="topo-v"><div><h1>Escolha uma <span>experiência</span></h1><p>'+(quest?'Aponte para um card e puxe o gatilho. A experiência abre pronta para a imersão.':'Toque em um card e a experiência abre em 3D na hora.')+'</p><span class="modo">'+(quest?'🥽 Modo óculos':'💻 Modo tela e lousa')+' · <a href="?modo='+(quest?'tela':'oculos')+'">trocar</a></span></div><div class="filtros">'+fl+'</div></div><div class="grade">'+lista.map(cardApp).join('')+'</div></section>';}
+ $('principal').innerHTML='<section class="vitrine"><div class="dica-quest">🥽 Depois de abrir, aperte o gatilho em qualquer lugar da tela para entrar na imersão.</div><div class="topo-v"><div><h1>Escolha uma <span>experiência</span></h1><p>'+(quest?'Aponte para um card e puxe o gatilho. A experiência abre pronta para a imersão.':'Toque em um card e a experiência abre em 3D na hora.')+'</p><span class="modo">'+(quest?'🥽 Modo óculos':'💻 Modo tela e lousa')+' · <a href="?modo='+(quest?'tela':'oculos')+'">'+(quest?'usar modo tela':'estou de óculos')+'</a></span></div><div class="filtros">'+fl+'</div></div><div class="grade">'+lista.map(cardApp).join('')+'</div></section>';}
 
 var atual=null;
 /* ---------- eventos (delegação; nada de onclick no HTML) ---------- */
@@ -170,7 +172,7 @@ document.addEventListener('focusin',function(ev){var el=ev.target.closest&&ev.ta
 document.addEventListener('keydown',function(ev){if(ev.key==='Escape'){if($('video').classList.contains('aberto')){$('video').classList.remove('aberto');$('videoQuadro').innerHTML='';}}});
 document.addEventListener('error',function(e){var t=e.target;if(t&&t.classList&&t.classList.contains('capa'))t.remove();},true);
 atualizarVoz();render();
-if(!quest&&!MODO&&navigator.xr&&navigator.xr.isSessionSupported){navigator.xr.isSessionSupported('immersive-vr').then(function(ok){if(ok&&!/Windows|Macintosh|CrOS/i.test(navigator.userAgent)){quest=true;document.body.classList.add('quest');render();}}).catch(function(){});}
+if(!quest&&!MODO&&navigator.xr&&navigator.xr.isSessionSupported){navigator.xr.isSessionSupported('immersive-vr').then(function(ok){if(ok){quest=true;document.body.classList.add('quest');render();}}).catch(function(){});}
 })();
 </script>
 <script defer src="assets/sala/sala-cliente.js?v=1.11.0"></script>

@@ -335,3 +335,16 @@ window.PortalEntrada={
   try{if(localStorage.getItem('p360_modo')==='tela')return;}catch(_){}
   navigator.xr.isSessionSupported('immersive-vr').then(ok=>{if(!ok)return;q.set('vr','1');location.replace(location.pathname+'?'+q.toString()+location.hash);}).catch(()=>{});
 }catch(_){}})();
+
+/* v1.3.1 · diagnóstico: se o navegador recusar abrir o VR, mostra o motivo na tela
+   (antes a tela de entrada sumia em silêncio e o app ficava no 3D). */
+(function(){try{
+  if(!navigator.xr||!navigator.xr.requestSession||navigator.xr.__p360diag)return;
+  const orig=navigator.xr.requestSession.bind(navigator.xr);navigator.xr.__p360diag=true;
+  const aviso=(txt)=>{try{const d=document.createElement('div');d.setAttribute('role','alert');
+    d.style.cssText='position:fixed;left:50%;top:18px;transform:translateX(-50%);z-index:2147483647;max-width:min(760px,92vw);background:#5a1010;color:#ffe1e1;border:2px solid #ff8a8a;border-radius:14px;padding:14px 18px;font:600 16px/1.4 system-ui,sans-serif;box-shadow:0 10px 30px rgba(0,0,0,.5)';
+    d.textContent=txt;document.body.appendChild(d);setTimeout(()=>d.remove(),15000);d.addEventListener('click',()=>d.remove());}catch(_){}};
+  navigator.xr.requestSession=function(modo,opts){return orig(modo,opts).catch(e=>{
+    aviso('Não consegui entrar no VR. Motivo do navegador: '+((e&&(e.name+': '+e.message))||e)+' · modo '+modo+'. Tire uma foto desta mensagem e mande para o suporte.');
+    throw e;});};
+}catch(_){}})();

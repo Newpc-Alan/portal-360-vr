@@ -332,7 +332,7 @@ window.PortalEntrada={
   if(q.get('vr')==='1'||q.get('vr')==='0'||q.get('embed')==='1')return;
   let emFrame=false;try{emFrame=window.top!==window;}catch(_){emFrame=true;}
   if(emFrame||!window.isSecureContext||!navigator.xr||!navigator.xr.isSessionSupported)return;
-  try{if(localStorage.getItem('p360_modo')==='tela')return;}catch(_){}
+  try{localStorage.removeItem('p360_modo_tela_antigo');}catch(_){}
   navigator.xr.isSessionSupported('immersive-vr').then(ok=>{if(!ok)return;q.set('vr','1');location.replace(location.pathname+'?'+q.toString()+location.hash);}).catch(()=>{});
 }catch(_){}})();
 

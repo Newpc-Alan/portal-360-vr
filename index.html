@@ -125,7 +125,8 @@ function salvar(){try{localStorage.setItem(CHAVE,JSON.stringify(est));}catch(e){
    ?modo=oculos ou ?modo=tela força o modo (útil para testar e para o professor) */
 var MODO=new URLSearchParams(location.search).get('modo');
 /* escolha manual ("trocar") fica salva neste aparelho */
-try{if(MODO==='oculos'||MODO==='tela')localStorage.setItem('p360_modo',MODO);else MODO=localStorage.getItem('p360_modo');}catch(e){}
+/* só a escolha "óculos" fica salva; "tela" vale só para aquele endereço, para nunca travar a detecção do óculos */
+try{if(MODO==='oculos')localStorage.setItem('p360_modo','oculos');else if(MODO==='tela')localStorage.removeItem('p360_modo');else MODO=localStorage.getItem('p360_modo')==='oculos'?'oculos':null;}catch(e){}
 var quest=MODO==='oculos'||(MODO!=='tela'&&(/OculusBrowser|Quest|Pacific|Pico|Vive/i.test(navigator.userAgent)||new URLSearchParams(location.search).get('quest')==='1'));
 if(quest)document.body.classList.add('quest');
 var $=function(id){return document.getElementById(id);};

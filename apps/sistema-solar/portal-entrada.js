@@ -376,6 +376,8 @@ window.PortalEntrada={
     ov.addEventListener('click',e=>{e.stopPropagation();const b=e.target.closest('[data-action]');
       if(b&&b.dataset.action==='vr-3d'){ov.remove();return;}
       if(entrar())setTimeout(()=>{if(document.getElementById('vrGate')===ov)ov.remove();},1500);},true);};
-  const iniciar=()=>setTimeout(montar,1500);
-  if(document.readyState==='complete')iniciar();else window.addEventListener('load',iniciar);
+  /* não espera texturas e áudios (o Sistema Solar demora a terminar de carregar no Quest): monta assim que a
+     estrutura da página existe, e confere de novo depois para cobrir apps que montam a própria tela mais tarde */
+  const iniciar=()=>{setTimeout(montar,1200);setTimeout(montar,4000);};
+  if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',iniciar);else iniciar();
 }catch(_){}})();

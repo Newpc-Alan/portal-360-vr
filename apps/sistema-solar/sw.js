@@ -2,7 +2,7 @@
    Rede primeiro para a casca (html, css, js): com internet sempre carrega a versão publicada mais nova, inclusive pacotes
    atualizados por fora; sem internet, ou se a rede não responder em 4 s, usa a cópia guardada. Áudios ficam numa cache
    persistente (cache primeiro), baixados em segundo plano depois da primeira abertura. Pedidos com Range recebem 206. */
-const VERSAO='9.21.4-5e5e05';
+const VERSAO='9.21.4-185a30';
 const PFX='solar-',CASCA=PFX+'casca-'+VERSAO,PESADA=PFX+'pesada-v1',META=PFX+'meta-v1';
 const ESCOPO=new URL(self.registration.scope).pathname;
 let baixando=false;
@@ -45,7 +45,7 @@ self.addEventListener('fetch',e=>{
   if(pesado){e.respondWith((async()=>{const c=await caches.open(PESADA);const hit=await c.match(req,{ignoreSearch:true});if(hit)return range?resposta206(hit,range):hit;
     try{const r=await fetch(req);if(r.ok&&r.status===200&&!range)c.put(req,r.clone());return r;}catch(_){return new Response('',{status:504,statusText:'offline'});}})());return;}
   e.respondWith((async()=>{const c=await caches.open(CASCA);
-    try{const r=await comPrazo(fetch(req),4000);if(r.ok&&r.status===200)c.put(req,r.clone());return r;}
+    try{const r=await comPrazo(fetch(req),12000);if(r.ok&&r.status===200)c.put(req,r.clone());return r;}
     catch(_){let hit=await c.match(req,{ignoreSearch:req.mode==='navigate'});if(!hit)hit=await c.match(req,{ignoreSearch:true});if(!hit&&req.mode==='navigate')hit=await c.match('index.html',{ignoreSearch:true});return hit||new Response('',{status:504,statusText:'offline'});}
   })());
 });

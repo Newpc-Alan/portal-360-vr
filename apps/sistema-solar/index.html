@@ -1434,6 +1434,15 @@ try{
   setKiosk(true); // abre já em tela cheia, sem cabeçalho/rodapé do Portal
   // Portal de entrada: abertura cinematográfica ao entrar no VR (e uma vez por sessão no 3D)
   if(window.PortalEntrada)PortalEntrada.configurar({titulo:'Sistema Solar VR',cor:'#ffb347',logo:'media/entrada-simbolo.png?v=2',logo2:'media/entrada-pde.png',auto3D:!/[?&]embed=1/.test(location.search),obter:()=>({renderer,scene,camera})});
+}catch(err){
+  var d=document.getElementById('dica');
+  if(d){d.style.background='rgba(140,12,12,.92)';d.style.color='#ffd6d6';d.textContent='Erro init: '+err.message;}
+  var mi=document.getElementById('modeinfo');
+  if(mi){mi.className='modeinfo show';mi.innerHTML='<b style="color:#ffb4b4">Erro na inicialização (mande este texto)</b><br>'+err.message;}
+  console.error(err);
+}
+/* tela de entrada do VR fica fora do try da inicialização: um erro lá não pode impedir o aluno de entrar no óculos */
+try{
   if(/[?&]vr=1/.test(location.search)){
     // O WebXR só abre a sessão a partir de um toque nesta página: mostramos uma tela de entrada com um único botão.
     const semVR=()=>vrMensagem('🥽 Para a experiência em VR, abra este mesmo link no navegador do óculos (Meta Quest). Aqui você pode explorar em 3D normalmente.',9000);
@@ -1445,16 +1454,13 @@ try{
         if(b.dataset.action==='vr-entrar'){alternarVR().finally(()=>{ov.remove();});}
         else{ov.remove();if(window.PortalEntrada)PortalEntrada.tocar3D();}});
     };
-    if(!navigator.xr) semVR();
+    /* no navegador do óculos a tela de entrada aparece sempre: alguns Quest respondem "sem VR" ao abrir a página */
+    const ehOculos=/OculusBrowser|Quest|Pacific|Pico|Wolvic/i.test(navigator.userAgent);
+    if(ehOculos)mostrarEntrada();
+    else if(!navigator.xr) semVR();
     else navigator.xr.isSessionSupported('immersive-vr').then(ok=>ok?mostrarEntrada():semVR()).catch(semVR);
   }
-}catch(err){
-  var d=document.getElementById('dica');
-  if(d){d.style.background='rgba(140,12,12,.92)';d.style.color='#ffd6d6';d.textContent='Erro init: '+err.message;}
-  var mi=document.getElementById('modeinfo');
-  if(mi){mi.className='modeinfo show';mi.innerHTML='<b style="color:#ffb4b4">Erro na inicialização (mande este texto)</b><br>'+err.message;}
-  console.error(err);
-}
+}catch(errVR){console.error(errVR);}
 if(!semWebGL())animate(); // inicia o loop de render SÓ depois de tudo declarado (evita TDZ)
 </script>
 <script>

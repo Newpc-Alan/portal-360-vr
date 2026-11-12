@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Portal Lab 3D · Laboratório virtual de ciências | Portal do Educador</title>
+<meta name="description" content="Portal Lab 3D: laboratório virtual com 13 bancadas e 37 experimentos de física, química, biologia, ciências da Terra e astronomia, com equipamentos em 3D e simulação calculada pelas leis científicas.">
+<style>
+:root{--azul:#0f2c4a;--verde:#1a6b2a;--fundo:#07131f;--card:#0f2236;--linha:#23415c;--texto:#e7f1f8;--suave:#9fb6c9}
+*{box-sizing:border-box}body{margin:0;background:radial-gradient(circle at 80% 0%,rgba(26,107,42,.18),transparent 40%),var(--fundo);color:var(--texto);font-family:"Segoe UI",system-ui,Arial,sans-serif}
+header{padding:28px clamp(16px,4vw,48px) 18px;border-bottom:1px solid var(--linha);background:linear-gradient(120deg,#0f2c4a,#0b3a26)}
+header a{color:#cfe6f2;text-decoration:none;font-size:14px;border:1px solid #2f5677;border-radius:10px;padding:6px 10px}
+h1{font-size:clamp(28px,4vw,44px);margin:16px 0 6px}h1 span{color:#7dffb0}
+.sub{color:#cfe0ec;max-width:900px;line-height:1.5;margin:0}
+.num{display:flex;gap:12px;flex-wrap:wrap;margin-top:14px}.num div{background:rgba(255,255,255,.06);border:1px solid #2f5677;border-radius:12px;padding:8px 14px}.num b{font-size:22px;display:block}.num small{color:var(--suave)}
+main{padding:22px clamp(16px,4vw,48px) 40px}
+.grade{display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:14px}
+.banc{background:var(--card);border:1px solid var(--linha);border-radius:16px;padding:14px 16px;position:relative}
+.banc.ativa{border-color:#3fbf63;box-shadow:0 0 0 1px #3fbf63 inset,0 14px 34px rgba(26,107,42,.25);background:linear-gradient(160deg,#123a2a,#0f2236)}
+.banc h2{margin:0 0 2px;font-size:18px}.banc .n{font-size:12px;letter-spacing:.08em;text-transform:uppercase;color:#9fe6b8}
+.tag{position:absolute;right:12px;top:12px;font-size:11px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;padding:4px 8px;border-radius:999px;background:#25384a;color:#9fb6c9}.ativa .tag{background:#1a6b2a;color:#fff}
+ol{margin:10px 0 0;padding:0;list-style:none;display:flex;flex-direction:column;gap:6px}
+li a,li span{display:flex;gap:10px;align-items:center;padding:8px 10px;border-radius:10px;border:1px solid #23415c;background:#0b1c2c;color:var(--texto);text-decoration:none;font-size:14px}
+li a{border-color:#3fbf63;background:#10301f;font-weight:600}li a:hover,li a:focus-visible{background:#1a6b2a;outline:none}
+li span{color:var(--suave)}li b{display:inline-grid;place-items:center;min-width:28px;height:28px;border-radius:8px;background:#1a2f44;font-size:12px}li a b{background:#1a6b2a}
+.nota{color:var(--suave);font-size:13px;line-height:1.5;margin-top:22px;max-width:900px}
+</style>
+</head>
+<body>
+<header>
+  <a href="../../">← Portal 360º VR</a>
+  <h1>Portal Lab <span>3D</span></h1>
+  <p class="sub">Laboratório virtual de ciências: o aluno monta, mede e analisa experimentos reais em 3D. Cada medição é calculada pelas leis físicas e químicas, com instrumentos em escala, roteiro guiado, tabela, gráfico e relatório.</p>
+  <div class="num"><div><b>13</b><small>bancadas</small></div><div><b>37</b><small>experimentos no catálogo</small></div><div><b>4</b><small>disponíveis agora (Bancada 04)</small></div></div>
+</header>
+<main>
+  <div class="grade" id="grade"></div>
+  <p class="nota">As demais bancadas estão em produção e serão liberadas por etapas. Funciona em computador, Chromebook, tablet e lousa digital; a versão para óculos de realidade virtual virá depois.</p>
+</main>
+<script>
+(function(){'use strict';
+var B=[['01','Mecânica',['Leis de Newton','Plano inclinado','Atrito entre superfícies','Conservação de energia']],['02','Cinemática',['Movimento uniforme','Movimento uniformemente variado','Queda livre']],['03','Dinâmica',['Força resultante','Sistemas de polias','Colisões e quantidade de movimento']],
+ ['04','Hidrostática',['Princípio de Arquimedes','Empuxo e densidade','Pressão hidrostática','Vasos comunicantes'],['arquimedes','densidade','pressao','vasos']],['05','Termologia',['Dilatação térmica','Transferência de calor','Equilíbrio térmico']],['06','Óptica',['Reflexão da luz','Refração da luz','Formação de imagens em lentes']],
+ ['07','Eletricidade',['Circuitos elétricos simples','Associação de resistores','Lei de Ohm']],['08','Magnetismo',['Campo magnético','Eletroímã']],['09','Ondulatória',['Frequência e amplitude','Propagação de ondas','Ressonância']],['10','Química',['Indicadores ácido-base','Separação de misturas','Conservação da massa']],
+ ['11','Biologia',['Observação de células ao microscópio','Osmose']],['12','Ciências da Terra',['Ciclo da água','Erosão do solo']],['13','Astronomia',['Fases da Lua','Eclipses solares e lunares']]];
+var esc=function(s){return String(s).replace(/[&<>"]/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c];});};
+var n=0,h='';B.forEach(function(b){var ativa=!!b[3];h+='<section class="banc'+(ativa?' ativa':'')+'"><span class="tag">'+(ativa?'Disponível':'Em breve')+'</span><div class="n">Bancada '+b[0]+'</div><h2>'+esc(b[1])+'</h2><ol>';
+ b[2].forEach(function(e,i){n++;h+='<li>'+(ativa?'<a href="hidrostatica/?exp='+b[3][i]+'"><b>'+n+'</b>'+esc(e)+'</a>':'<span><b>'+n+'</b>'+esc(e)+'</span>')+'</li>';});h+='</ol></section>';});
+document.getElementById('grade').innerHTML=h;})();
+</script>
+</body>
+</html>

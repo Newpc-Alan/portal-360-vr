@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<style>html{touch-action:pan-x pan-y}</style>
+<title>Portal Lab 3D · Bancada 04 · Hidrostática | Portal do Educador</title>
+<meta name="description" content="Laboratório virtual de hidrostática: empuxo, princípio de Arquimedes, densidade, pressão hidrostática e vasos comunicantes, com equipamentos em 3D e física calculada em tempo real.">
+<link rel="stylesheet" href="estilo.css?v=1.0.0">
+</head>
+<body>
+<header class="topo">
+  <a class="voltar" href="../" title="Voltar ao Portal Lab 3D">← Portal Lab 3D</a>
+  <div class="marca"><b>Portal Lab 3D</b><span>Bancada 04 · Hidrostática</span></div>
+  <label class="sel">Experimento <select id="selExp" aria-label="Experimento"></select></label>
+  <div class="acoes-topo">
+    <label class="sel">Nível <select id="selNivel" aria-label="Nível de complexidade"><option value="ef">Ensino Fundamental</option><option value="em">Ensino Médio</option></select></label>
+    <button type="button" data-action="guia" class="btn-sec">Roteiro</button>
+  </div>
+</header>
+
+<main class="lab">
+  <section class="palco" aria-label="Bancada em 3D">
+    <canvas id="cena" tabindex="0" aria-label="Bancada 3D: arraste o fundo para girar, arraste o cilindro para subir ou descer, use as setas para mover"></canvas>
+    <div class="hud" id="hud" aria-live="polite"></div>
+    <div class="dica" id="dica">Arraste o cilindro para subir ou descer · arraste o fundo para girar · roda ou pinça para aproximar · setas ↑ ↓ movem o cilindro</div>
+    <div class="ferramentas">
+      <button type="button" data-action="iniciar" class="btn-pri">▶ Iniciar experimento</button>
+      <button type="button" data-action="pausar" id="btPausar">❚❚ Pausar</button>
+      <button type="button" data-action="reiniciar">↺ Reiniciar</button>
+      <button type="button" data-action="forcas" id="btForcas" aria-pressed="false">Mostrar forças</button>
+      <button type="button" data-action="formulas" id="btFormulas" aria-pressed="false">Mostrar fórmulas</button>
+      <button type="button" data-action="registrar" class="btn-reg">● Registrar medição</button>
+      <button type="button" data-action="camera" title="Voltar a câmera para a posição inicial">⌖ Câmera</button>
+    </div>
+    <div class="carregando" id="carregando">Montando a bancada…</div>
+  </section>
+
+  <aside class="lateral" aria-label="Controles do experimento">
+    <div class="assistente" id="assistente" aria-live="polite">
+      <div class="ass-topo"><span class="ass-ic" aria-hidden="true">🧪</span><b>Assistente do laboratório</b><button type="button" data-action="ouvir" class="mini" title="Ouvir a mensagem">🔊</button></div>
+      <div id="assMsg"></div>
+    </div>
+    <div id="painelControles"></div>
+  </aside>
+
+  <section class="inferior" aria-label="Resultados e registro">
+    <nav class="abas" role="tablist">
+      <button type="button" role="tab" data-aba="resultados" class="on">Resultados</button>
+      <button type="button" role="tab" data-aba="formulas">Fórmulas</button>
+      <button type="button" role="tab" data-aba="tabela">Tabela <span id="nMed" class="cont">0</span></button>
+      <button type="button" role="tab" data-aba="grafico">Gráfico</button>
+      <button type="button" role="tab" data-aba="comparar">Comparar</button>
+      <button type="button" role="tab" data-aba="concluir">Concluir atividade</button>
+    </nav>
+    <div class="aba-corpo" id="abaCorpo"></div>
+  </section>
+</main>
+
+<dialog id="dlgGuia" class="dlg"><div id="guiaCorpo"></div><div class="dlg-acoes"><button type="button" data-action="fechar-guia" class="btn-pri">Começar</button></div></dialog>
+
+<script src="../vendor/three.r128.min.js"></script>
+<script src="fisica.js?v=1.0.0"></script>
+<script src="atividades.js?v=1.0.0"></script>
+<script src="equipamentos.js?v=1.0.0"></script>
+<script src="app.js?v=1.0.0"></script>
+</body>
+</html>

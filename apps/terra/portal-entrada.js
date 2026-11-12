@@ -348,3 +348,34 @@ window.PortalEntrada={
     aviso('Não consegui entrar no VR. Motivo do navegador: '+((e&&(e.name+': '+e.message))||e)+' · modo '+modo+'. Tire uma foto desta mensagem e mande para o suporte.');
     throw e;});};
 }catch(_){}})();
+
+/* v1.4.0 · tela de entrada garantida no óculos. Em alguns Quest o navegador responde "sem VR" quando a
+   página acaba de abrir (antes do primeiro toque), e o app caía no 3D. Agora: com ?vr=1, se em 1,5 s a tela
+   de entrada do app não apareceu e o aparelho é um óculos (navegador do Quest/Pico ou WebXR presente),
+   abrimos uma tela de entrada genérica. O toque nela chama o mesmo "Entrar em VR" do app. Sem ?vr=1, o
+   navegador do Quest é levado direto para ?vr=1 mesmo que a checagem automática ainda diga "não". */
+(function(){try{
+  const q=new URLSearchParams(location.search);
+  const ehOculos=/OculusBrowser|Quest|Pacific|Pico|Vive|Wolvic/i.test(navigator.userAgent);
+  let emFrame=false;try{emFrame=window.top!==window;}catch(_){emFrame=true;}
+  if(emFrame||q.get('embed')==='1'||q.get('vr')==='0')return;
+  if(q.get('vr')!=='1'){if(ehOculos){q.set('vr','1');location.replace(location.pathname+'?'+q.toString()+location.hash);}return;}
+  if(!navigator.xr&&!ehOculos)return;
+  const entrar=()=>{try{
+    if(typeof window.alternarVR==='function'){const r=window.alternarVR('vr');if(r&&r.catch)r.catch(()=>{});return true;}
+    const b=document.getElementById('btnVR')||[...document.querySelectorAll('button')].find(x=>/Entrar em VR/i.test(x.textContent||''));
+    if(b){b.click();return true;}}catch(_){}return false;};
+  const montar=()=>{
+    if(document.getElementById('vrGate')||document.body.classList.contains('vr-active'))return;
+    document.querySelectorAll('.stage-error').forEach(e=>e.remove());
+    const ov=document.createElement('div');ov.id='vrGate';
+    ov.style.cssText='position:fixed;inset:0;z-index:2147483300;display:flex;align-items:center;justify-content:center;background:radial-gradient(circle at 50% 35%,#0f2c4a,#05070f 70%);color:#fff;font-family:system-ui,Segoe UI,Arial,sans-serif;cursor:pointer';
+    const t=(document.title||'Portal 360º').split('|')[0].trim();
+    ov.innerHTML='<div style="display:flex;flex-direction:column;align-items:center;gap:16px;text-align:center;padding:24px"><div style="font-size:clamp(30px,5vw,54px);font-weight:800"></div><div class="vrgate-s" style="color:#9fdcff;letter-spacing:.08em;text-transform:uppercase;font-size:15px">Aperte o gatilho em qualquer lugar para entrar no VR</div><button type="button" data-action="vr-entrar" style="font:800 22px system-ui;padding:18px 40px;border-radius:999px;border:2px solid #7cc7ff;background:linear-gradient(160deg,#37b1da,#1f7fb8);color:#fff;cursor:pointer">🥽 Entrar em VR</button><button type="button" data-action="vr-3d" style="font:700 16px system-ui;padding:10px 22px;border-radius:999px;border:1.5px solid #5b6b7d;background:#1b2633;color:#e6eef6;cursor:pointer">Explorar em 3D</button></div>';
+    ov.firstChild.firstChild.textContent=t;document.body.appendChild(ov);
+    ov.addEventListener('click',e=>{e.stopPropagation();const b=e.target.closest('[data-action]');
+      if(b&&b.dataset.action==='vr-3d'){ov.remove();return;}
+      if(entrar())setTimeout(()=>{if(document.getElementById('vrGate')===ov)ov.remove();},1500);},true);};
+  const iniciar=()=>setTimeout(montar,1500);
+  if(document.readyState==='complete')iniciar();else window.addEventListener('load',iniciar);
+}catch(_){}})();

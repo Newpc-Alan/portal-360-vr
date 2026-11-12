@@ -322,3 +322,16 @@ window.PortalEntrada={
   const s=ov.querySelector('.vrgate-s');if(s)s.textContent='Aperte o gatilho em qualquer lugar para entrar no VR';};
  const ver=()=>{const ov=document.getElementById('vrGate');if(ov)ligar(ov);};
  new MutationObserver(ver).observe(document.documentElement,{childList:true,subtree:true});ver();}catch(_){}})();
+
+/* v1.1.0 · no óculos, o app já abre na tela de entrada do VR (?vr=1), venha de onde vier
+   (tela inicial, link direto, favorito). Só acontece quando o navegador confirma que aceita
+   realidade virtual imersiva; no computador, na lousa e no Chromebook nada muda.
+   ?vr=0 (ou ?embed=1, ou página dentro de iframe) mantém o 3D na tela. */
+(function(){try{
+  const q=new URLSearchParams(location.search);
+  if(q.get('vr')==='1'||q.get('vr')==='0'||q.get('embed')==='1')return;
+  let emFrame=false;try{emFrame=window.top!==window;}catch(_){emFrame=true;}
+  if(emFrame||!window.isSecureContext||!navigator.xr||!navigator.xr.isSessionSupported)return;
+  try{if(localStorage.getItem('p360_modo')==='tela')return;}catch(_){}
+  navigator.xr.isSessionSupported('immersive-vr').then(ok=>{if(!ok)return;q.set('vr','1');location.replace(location.pathname+'?'+q.toString()+location.hash);}).catch(()=>{});
+}catch(_){}})();

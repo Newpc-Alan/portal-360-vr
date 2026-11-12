@@ -366,7 +366,9 @@ window.PortalEntrada={
     const b=document.getElementById('btnVR')||[...document.querySelectorAll('button')].find(x=>/Entrar em VR/i.test(x.textContent||''));
     if(b){b.click();return true;}}catch(_){}return false;};
   const montar=()=>{
-    if(document.getElementById('vrGate')||document.body.classList.contains('vr-active'))return;
+    if(document.body.classList.contains('vr-active'))return;
+    const ja=document.getElementById('vrGate');
+    if(ja){if(ja.offsetParent!==null||getComputedStyle(ja).display!=='none')return;ja.style.setProperty('display','flex','important');return;}
     document.querySelectorAll('.stage-error').forEach(e=>e.remove());
     const ov=document.createElement('div');ov.id='vrGate';
     ov.style.cssText='position:fixed;inset:0;z-index:2147483300;display:flex;align-items:center;justify-content:center;background:radial-gradient(circle at 50% 35%,#0f2c4a,#05070f 70%);color:#fff;font-family:system-ui,Segoe UI,Arial,sans-serif;cursor:pointer';

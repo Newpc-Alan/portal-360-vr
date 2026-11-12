@@ -9,7 +9,7 @@
 <!-- Bibliotecas locais (funcionam sem internet / com CDN bloqueado na escola); CDN só como reserva -->
 <script src="vendor/three.r128.min.js"></script>
 <script>if(!window.THREE){document.write('<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"><\/script>');}</script>
-<script src="portal-entrada.js?v=1.4.1"></script>
+<script src="portal-entrada.js?v=1.4.2"></script>
 <script defer src="sala-cliente.js?v=1.11.0"></script><script defer src="primeiros-passos.js?v=1.4.0"></script><script defer src="acessibilidade.js?v=1.0.0"></script>
 <script src="vendor/qrcode.min.js"></script>
 <script>if(!window.QRCode){document.write('<script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"><\/script>');}</script>
@@ -1472,7 +1472,7 @@ if(!semWebGL())animate(); // inicia o loop de render SÓ depois de tudo declarad
   var Q={ativo:false,ocultos:[],quadro:null,estilo:'',btn:null};
   function esconder(corpo,manter){
     for(var i=0;i<corpo.children.length;i++){ var f=corpo.children[i];
-      if(f===manter||(f.contains&&f.contains(manter))||f===Q.btn||f.tagName==='SCRIPT'||f.tagName==='STYLE'){continue;}
+      if(f===manter||(f.contains&&f.contains(manter))||f===Q.btn||f.tagName==='SCRIPT'||f.tagName==='STYLE'||f.id==='vrGate'){continue;} /* a tela de entrada do VR nunca é escondida */
       f.__d=f.style.getPropertyValue('display'); f.__p=f.style.getPropertyPriority('display');
       f.style.setProperty('display','none','important'); Q.ocultos.push(f);
     }

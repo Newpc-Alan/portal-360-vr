@@ -1,0 +1,189 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="robots" content="noindex">
+<title>Portal 360º · nova tela inicial (protótipo)</title>
+<link rel="icon" href="../assets/marca/p360-favicon.svg">
+<style>
+/* Protótipo da nova tela inicial do Portal 360º (Fase 1). Identidade NEWPC: azul #0f2c4a, verde #1a6b2a. */
+:root{--azul:#0f2c4a;--verde:#1a6b2a;--verde2:#2fd16b;--fundo:#050d18;--texto:#f2f7fb;--suave:#a9bfd0;--r:22px;--tile:300px}
+*{box-sizing:border-box}html,body{margin:0;background:var(--fundo);color:var(--texto);font-family:"Segoe UI",system-ui,-apple-system,Arial,sans-serif}
+html{touch-action:pan-x pan-y}
+button{font:inherit;cursor:pointer}a{color:inherit}
+body.quest{--tile:360px;font-size:118%}body.pequenos{--tile:380px}
+.aviso{background:#3a2a00;color:#ffe3a8;text-align:center;font-size:13px;padding:6px 10px}.aviso a{font-weight:700}
+.barra{position:sticky;top:0;z-index:20;display:flex;align-items:center;gap:12px;padding:12px clamp(14px,3vw,36px);background:linear-gradient(180deg,rgba(5,13,24,.96),rgba(5,13,24,.8));backdrop-filter:blur(10px);border-bottom:1px solid #16314b}
+.barra img{height:42px}
+.chip{display:inline-flex;align-items:center;gap:8px;border-radius:999px;border:2px solid #2b5679;background:#0c2136;color:var(--texto);padding:10px 16px;font-weight:700;min-height:48px}
+.chip:hover,.chip:focus-visible{border-color:var(--verde2);outline:none}
+.chip.som[aria-pressed="true"]{background:#14472a;border-color:var(--verde2)}
+.direita{margin-left:auto;display:flex;gap:10px;flex-wrap:wrap}
+/* ---------- portas por idade ---------- */
+.portas{min-height:calc(100vh - 110px);display:flex;flex-direction:column;justify-content:center;padding:24px clamp(14px,4vw,48px)}
+.portas h1{font-size:clamp(30px,4.4vw,56px);margin:0 0 6px;text-align:center}
+.portas p.sub{text-align:center;color:var(--suave);font-size:clamp(16px,1.6vw,20px);margin:0 0 26px}
+.grade-portas{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:clamp(12px,2vw,26px);max-width:1400px;margin:0 auto;width:100%}
+.porta{position:relative;border:0;border-radius:28px;overflow:hidden;min-height:clamp(260px,46vh,520px);background:#0c2136 center/cover no-repeat;color:#fff;text-align:left;padding:0;box-shadow:0 20px 50px rgba(0,0,0,.45);transition:transform .18s ease,box-shadow .18s ease;outline:none}
+.porta::after{content:"";position:absolute;inset:0;background:linear-gradient(180deg,rgba(0,0,0,0) 30%,rgba(3,10,20,.92) 100%)}
+.porta:hover,.porta:focus-visible{transform:translateY(-6px) scale(1.015);box-shadow:0 0 0 4px var(--verde2),0 26px 60px rgba(0,0,0,.55)}
+.porta .txt{position:absolute;left:0;right:0;bottom:0;z-index:2;padding:22px 24px}
+.porta .ic{font-size:clamp(34px,3.6vw,52px);display:block;margin-bottom:6px}
+.porta b{display:block;font-size:clamp(24px,2.6vw,38px);line-height:1.05}
+.porta span.d{display:block;color:#d6e6f2;font-size:clamp(14px,1.3vw,18px);margin-top:6px}
+/* ---------- início ---------- */
+.inicio{padding:8px 0 60px}
+.prateleira{margin:22px 0 4px}
+.prateleira h2{display:flex;align-items:center;gap:10px;font-size:clamp(20px,2vw,28px);margin:0 clamp(14px,3vw,36px) 10px}
+.prateleira h2 small{color:var(--suave);font-weight:500;font-size:15px}
+.trilho{position:relative}
+.fila{display:flex;gap:16px;overflow-x:auto;scroll-snap-type:x mandatory;scroll-behavior:smooth;padding:8px clamp(14px,3vw,36px) 18px;scrollbar-width:none}
+.fila::-webkit-scrollbar{display:none}
+.seta{position:absolute;top:50%;transform:translateY(-60%);z-index:5;width:64px;height:64px;border-radius:50%;border:2px solid #4b7fa8;background:rgba(5,13,24,.86);color:#fff;font-size:28px;font-weight:900;display:none;place-items:center}
+.seta.esq{left:8px}.seta.dir{right:8px}.trilho.rola .seta{display:grid}.trilho.rola.ini .seta.esq,.trilho.rola.fim .seta.dir{display:none}
+.chip[hidden]{display:none}
+.seta:hover,.seta:focus-visible{background:var(--verde);border-color:var(--verde2);outline:none}
+.tile{position:relative;flex:0 0 var(--tile);aspect-ratio:4/3;border:0;border-radius:var(--r);overflow:hidden;background:#0c2136 center/cover no-repeat;scroll-snap-align:start;color:#fff;text-align:left;padding:0;outline:none;transition:transform .16s ease,box-shadow .16s ease;box-shadow:0 12px 30px rgba(0,0,0,.4)}
+.tile::after{content:"";position:absolute;inset:0;background:linear-gradient(180deg,rgba(0,0,0,0) 45%,rgba(3,10,20,.9) 100%)}
+.tile:hover,.tile:focus-visible{transform:scale(1.04);box-shadow:0 0 0 4px var(--verde2),0 18px 40px rgba(0,0,0,.5);z-index:2}
+.tile b{position:absolute;left:16px;right:16px;bottom:14px;z-index:2;font-size:clamp(19px,1.6vw,24px);line-height:1.1;text-shadow:0 2px 8px rgba(0,0,0,.7)}
+.pequenos .tile b{font-size:30px}
+.selo{position:absolute;right:12px;top:12px;z-index:2;background:rgba(5,13,24,.82);border:1px solid #2fd16b;color:#bff5d3;font-weight:800;font-size:13px;border-radius:999px;padding:5px 10px}
+.selo.novo{background:#1a6b2a;color:#fff}
+.vazio{color:var(--suave);margin:0 clamp(14px,3vw,36px)}
+/* ---------- palco (escolha do que fazer) ---------- */
+.palco{position:fixed;inset:0;z-index:50;display:none;background:#050d18 center/cover no-repeat}
+.palco.aberto{display:block;animation:surge .22s ease}
+@keyframes surge{from{opacity:0;transform:scale(1.02)}to{opacity:1;transform:none}}
+.palco::before{content:"";position:absolute;inset:0;background:linear-gradient(90deg,rgba(3,10,20,.95) 0%,rgba(3,10,20,.75) 45%,rgba(3,10,20,.25) 100%)}
+.palco .conteudo{position:relative;z-index:2;height:100%;display:flex;flex-direction:column;justify-content:center;padding:clamp(20px,5vw,80px);max-width:900px}
+.palco h2{font-size:clamp(34px,5vw,68px);margin:0 0 10px;line-height:1.02}
+.palco p{font-size:clamp(16px,1.6vw,21px);color:#d6e6f2;line-height:1.5;margin:0 0 26px;max-width:640px}
+.pequenos .palco p{display:none}
+.escolhas{display:flex;gap:16px;flex-wrap:wrap}
+.escolha{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:8px;min-width:190px;min-height:150px;border-radius:24px;border:3px solid #3b6c93;background:rgba(12,33,54,.92);color:#fff;font-weight:800;font-size:22px;text-decoration:none;padding:16px 18px;outline:none;transition:transform .15s ease}
+.escolha .ic{font-size:48px;line-height:1}
+.escolha small{font-weight:600;font-size:14px;color:#bcd2e2}
+.escolha:hover,.escolha:focus-visible{transform:translateY(-4px);border-color:var(--verde2);background:#13402a}
+.escolha.vr{border-color:var(--verde2);background:linear-gradient(160deg,#1a6b2a,#0f4a1f)}
+.escolha[aria-disabled="true"]{opacity:.35;pointer-events:none}
+.fechar{position:absolute;right:22px;top:18px;z-index:3;width:64px;height:64px;border-radius:50%;border:2px solid #4b7fa8;background:rgba(5,13,24,.85);color:#fff;font-size:30px}
+.fechar:hover,.fechar:focus-visible{border-color:var(--verde2);outline:none}
+.video{position:fixed;inset:0;z-index:60;display:none;background:rgba(0,0,0,.92);place-items:center;padding:20px}.video.aberto{display:grid}
+.video iframe{width:min(1100px,100%);aspect-ratio:16/9;border:0;border-radius:16px;background:#000}
+.dica-quest{margin:12px clamp(14px,3vw,36px) 0;padding:14px 18px;border-radius:16px;background:#0c2a1a;border:1px solid #2c7a4a;color:#d7f5e2;font-size:16px;display:none}
+.quest .dica-quest{display:block}
+@media(max-width:900px){.grade-portas{grid-template-columns:1fr}.porta{min-height:200px}:root{--tile:240px}body.pequenos{--tile:300px}.escolha{min-width:140px;min-height:120px;font-size:18px}}
+@media(max-width:600px){.barra img{height:30px}.barra{gap:8px;padding:10px 12px}.direita{gap:6px;flex-wrap:nowrap}.chip{padding:8px 10px;min-height:44px}.chip .rot{display:none}}
+@media(prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}.fila{scroll-behavior:auto}}
+</style>
+</head>
+<body>
+<div class="aviso">Protótipo da nova tela inicial · para teste e aprovação · <a href="../">abrir o catálogo atual</a></div>
+<header class="barra">
+  <img src="../assets/marca/p360-assinatura-horizontal-branca.png" alt="Portal 360º VR">
+  <div class="direita">
+    <button type="button" class="chip" data-action="trocar-publico" id="chipPublico" hidden>👥 <span class="rot" id="nomePublico"></span></button>
+    <button type="button" class="chip som" data-action="voz" id="chipVoz" aria-pressed="false" aria-label="Voz">🔊 <span class="rot">Voz</span></button>
+    <a class="chip" href="../apps/tutorial/" aria-label="Primeiros passos no óculos">🎓 <span class="rot">Primeiros passos no óculos</span></a>
+  </div>
+</header>
+
+<main id="principal"></main>
+
+<section class="palco" id="palco" role="dialog" aria-modal="true" aria-labelledby="palcoTitulo">
+  <button type="button" class="fechar" data-action="fechar-palco" aria-label="Voltar">✕</button>
+  <div class="conteudo">
+    <h2 id="palcoTitulo"></h2>
+    <p id="palcoTexto"></p>
+    <div class="escolhas" id="palcoEscolhas"></div>
+  </div>
+</section>
+<div class="video" id="video"><button type="button" class="fechar" data-action="fechar-video" aria-label="Fechar vídeo">✕</button><div id="videoQuadro"></div></div>
+
+<script>
+(function(){'use strict';
+/* ---------- conteúdo (mesmos apps, capas e links do catálogo atual) ---------- */
+var APPS=[
+ {id:'sistema-solar',nome:'Sistema Solar',curto:'Sistema Solar',img:'capa-sistema-solar-card.webp',tema:'espaco',serie:['pequenos','maiores'],yt:'ZtPpHocvT7A',texto:'Os planetas, as órbitas, as fases da Lua, as estações e os eclipses. Dá para voar pelo espaço no óculos.'},
+ {id:'corpo-humano',nome:'Corpo Humano',curto:'Corpo Humano',img:'capa-corpo-humano-card.webp?v=3',tema:'vida',serie:['pequenos','maiores'],yt:'TlR7TouWP5o',texto:'Oito sistemas do corpo para explorar por dentro: o coração batendo, os pulmões, o caminho da comida.'},
+ {id:'celula',nome:'Célula 3D',curto:'Célula',img:'capa-celula-card.webp?v=1',tema:'vida',serie:['maiores'],texto:'A célula animal e a vegetal abertas ao meio, e uma viagem por dentro da célula.'},
+ {id:'dna',nome:'DNA Imersivo',curto:'DNA',img:'capa-dna-card.webp',tema:'vida',serie:['maiores'],texto:'Entre na dupla hélice e complete a fita de DNA.'},
+ {id:'terra',nome:'Terra por Dentro',curto:'Terra por Dentro',img:'capa-terra-card.webp?v=3',tema:'terra',serie:['pequenos','maiores'],texto:'A Terra aberta ao meio: camadas, vulcões, placas e rochas.'},
+ {id:'historia',nome:'Egito Antigo',curto:'Egito Antigo',img:'capa-historia-card.webp?v=3',tema:'historia',serie:['pequenos','maiores'],texto:'Um museu do Egito em tamanho real, com peças de verdade escaneadas e a Grande Pirâmide por dentro.'},
+ {id:'quimica',nome:'Química',curto:'Química',img:'capa-quimica-card.webp?v=1',tema:'lab',serie:['maiores'],novo:true,texto:'A tabela periódica em volta de você, um átomo para montar e o teste de chama sem risco.'},
+ {id:'lab',nome:'Laboratório 3D',curto:'Laboratório',img:'capa-lab3d-card.webp?v=1',tema:'lab',serie:['maiores'],novo:true,semVR:true,explorar:'../apps/lab/',texto:'Experimentos de física em 3D: dinamômetro, empuxo, pressão e vasos comunicantes.'}
+];
+var TEMAS=[['espaco','🪐','Espaço'],['vida','❤️','Corpo e vida'],['terra','🌋','Planeta Terra'],['historia','🏛️','História'],['lab','🧪','Química e laboratório']];
+var PUBLICOS={
+ pequenos:{nome:'Pequenos (até o 5º ano)',ic:'🧒',img:'capa-sistema-solar-card.webp',d:'Imagens grandes, um toque para abrir e uma voz que lê o nome.'},
+ maiores:{nome:'Fundamental II e Médio',ic:'🎒',img:'capa-quimica-card.webp?v=1',d:'Todas as experiências, organizadas por tema.'},
+ professor:{nome:'Professor',ic:'👩‍🏫',img:'capa-corpo-humano-card.webp?v=3',d:'Todas as experiências, a Sala do professor e os guias de aula.'}};
+var CHAVE='p360_novo_inicio';
+var est={publico:null,ultimos:[],voz:false};try{var sv=JSON.parse(localStorage.getItem(CHAVE)||'{}');est.publico=sv.publico||null;est.ultimos=sv.ultimos||[];est.voz=!!sv.voz;}catch(e){}
+function salvar(){try{localStorage.setItem(CHAVE,JSON.stringify(est));}catch(e){}}
+var quest=/OculusBrowser|Quest|Pacific/i.test(navigator.userAgent)||new URLSearchParams(location.search).get('quest')==='1';
+if(quest)document.body.classList.add('quest');
+var $=function(id){return document.getElementById(id);};
+var esc=function(s){return String(s).replace(/[&<>"]/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c];});};
+var img=function(f){return "url('../assets/"+f+"')";};
+
+/* ---------- voz: diz o nome ao passar o dedo/raio (ligada por padrão para os pequenos) ---------- */
+var tFala=null,ultimaFalada='';
+function falar(t,ja){if(!est.voz||!('speechSynthesis' in window))return;clearTimeout(tFala);tFala=setTimeout(function(){if(t===ultimaFalada&&!ja)return;ultimaFalada=t;try{speechSynthesis.cancel();var u=new SpeechSynthesisUtterance(t);u.lang='pt-BR';u.rate=1;speechSynthesis.speak(u);}catch(e){}},ja?0:180);}
+function atualizarVoz(){$('chipVoz').setAttribute('aria-pressed',est.voz);$('chipVoz').innerHTML=est.voz?'🔊 <span class="rot">Voz ligada</span>':'🔈 <span class="rot">Voz</span>';}
+
+/* ---------- telas ---------- */
+function telaPortas(){document.body.classList.remove('pequenos');$('chipPublico').hidden=true;
+ var h='<section class="portas"><h1>Quem vai explorar hoje?</h1><p class="sub">Escolha uma porta. Dá para trocar a qualquer momento.</p><div class="grade-portas">';
+ Object.keys(PUBLICOS).forEach(function(k){var p=PUBLICOS[k];h+='<button type="button" class="porta" data-action="publico:'+k+'" data-fala="'+esc(p.nome)+'" style="background-image:'+img(p.img)+'"><span class="txt"><span class="ic">'+p.ic+'</span><b>'+esc(p.nome)+'</b><span class="d">'+esc(p.d)+'</span></span></button>';});
+ $('principal').innerHTML=h+'</div></section>';var p=document.querySelector('.porta');if(p&&!quest)p.focus({preventScroll:true});}
+function tileApp(a){return '<button type="button" class="tile" data-action="abrir:'+a.id+'" data-fala="'+esc(a.curto)+'" style="background-image:'+img(a.img)+'">'+(a.novo?'<span class="selo novo">NOVO</span>':(a.semVR?'':'<span class="selo">🥽 VR</span>'))+'<b>'+esc(est.publico==='pequenos'?a.curto:a.nome)+'</b></button>';}
+function prateleira(tit,ic,itens,sub){if(!itens.length)return '';return '<section class="prateleira"><h2>'+(ic?'<span aria-hidden="true">'+ic+'</span>':'')+esc(tit)+(sub?' <small>'+esc(sub)+'</small>':'')+'</h2><div class="trilho"><button type="button" class="seta esq" data-action="rolar:-1" aria-label="Voltar">‹</button><div class="fila">'+itens.join('')+'</div><button type="button" class="seta dir" data-action="rolar:1" aria-label="Avançar">›</button></div></section>';}
+function telaInicio(){var pub=est.publico;document.body.classList.toggle('pequenos',pub==='pequenos');$('chipPublico').hidden=false;$('nomePublico').textContent=PUBLICOS[pub].nome;
+ var lista=APPS.filter(function(a){return pub!=='pequenos'||a.serie.indexOf('pequenos')>=0;});var h='<div class="inicio"><div class="dica-quest">🥽 No óculos: aponte o raio e puxe o gatilho. Use as setas grandes para ver mais.</div>';
+ var cont=est.ultimos.map(function(id){return APPS.filter(function(a){return a.id===id;})[0];}).filter(function(a){return a&&lista.indexOf(a)>=0;});
+ if(cont.length)h+=prateleira('Continuar de onde parei','⏯️',cont.map(tileApp));
+ if(pub==='pequenos'){h+=prateleira('Vamos explorar!','✨',lista.map(tileApp));}
+ else{TEMAS.forEach(function(t){h+=prateleira(t[2],t[1],lista.filter(function(a){return a.tema===t[0];}).map(tileApp));});}
+ if(pub==='professor'){h+=prateleira('Para o professor','🧑‍🏫',['<a class="tile" href="../sala/" data-fala="Sala do professor" style="background-image:'+img('capa-corpo-humano-card.webp?v=3')+'"><span class="selo">Turma</span><b>Sala do professor</b></a>','<a class="tile" href="../apps/tutorial/" data-fala="Primeiros passos no óculos" style="background-image:'+img('capa-sistema-solar-hero.webp')+'"><b>Primeiros passos no óculos</b></a>','<a class="tile" href="../" data-fala="Catálogo completo" style="background-image:'+img('capa-historia-card.webp?v=3')+'"><b>Catálogo completo e guias</b></a>']);}
+ $('principal').innerHTML=h+'</div>';marcarSetas();}
+function render(){if(!est.publico)telaPortas();else telaInicio();}
+
+/* setas aparecem só quando a fila não cabe na tela (e sempre no óculos, onde arrastar é difícil) */
+function marcarSetas(){document.querySelectorAll('.trilho').forEach(function(t){var f=t.querySelector('.fila');t.classList.toggle('rola',quest||f.scrollWidth>f.clientWidth+4);t.classList.toggle('ini',f.scrollLeft<48);t.classList.toggle('fim',f.scrollLeft+f.clientWidth>=f.scrollWidth-8);if(!f._ok){f._ok=1;f.addEventListener('scroll',function(){t.classList.toggle('ini',f.scrollLeft<48);t.classList.toggle('fim',f.scrollLeft+f.clientWidth>=f.scrollWidth-8);},{passive:true});}});}
+window.addEventListener('resize',marcarSetas);
+
+/* ---------- palco: três escolhas grandes ---------- */
+var atual=null;
+function abrirPalco(id){var a=APPS.filter(function(x){return x.id===id;})[0];if(!a)return;atual=a;var p=$('palco');p.style.backgroundImage=img(a.img);$('palcoTitulo').textContent=a.nome;$('palcoTexto').textContent=a.texto;
+ var ex=a.explorar||('../apps/'+a.id+'/');var vr=a.semVR?null:('../apps/'+a.id+'/?vr=1');var e='';
+ var bVR=vr?'<a class="escolha vr" href="'+vr+'" data-ultimo="'+a.id+'" data-fala="Entrar no óculos"><span class="ic">🥽</span>Entrar no óculos<small>realidade virtual</small></a>':'';
+ var bEx='<a class="escolha" href="'+ex+'" data-ultimo="'+a.id+'" data-fala="Explorar"><span class="ic">✋</span>Explorar<small>na tela ou na lousa</small></a>';
+ var bAu='<button type="button" class="escolha" data-action="video:'+(a.yt||'')+'" data-fala="Assistir" '+(a.yt?'':'aria-disabled="true"')+'><span class="ic">▶</span>Assistir<small>'+(a.yt?'aula em vídeo':'vídeo em breve')+'</small></button>';
+ e=quest?(bVR+bEx+bAu):(bAu+bEx+bVR);$('palcoEscolhas').innerHTML=e;p.classList.add('aberto');falar(a.nome,true);var f=p.querySelector('.escolha:not([aria-disabled])');if(f)f.focus({preventScroll:true});}
+function fecharPalco(){$('palco').classList.remove('aberto');atual=null;}
+
+/* ---------- eventos (delegação; nada de onclick no HTML) ---------- */
+document.addEventListener('click',function(ev){var el=ev.target.closest('[data-action]');var lk=ev.target.closest('[data-ultimo]');
+ if(lk){var id=lk.getAttribute('data-ultimo');est.ultimos=[id].concat(est.ultimos.filter(function(x){return x!==id;})).slice(0,6);salvar();return;}
+ if(!el)return;var a=el.getAttribute('data-action'),arg=a.split(':')[1];
+ if(a.indexOf('publico:')===0){est.publico=arg;if(arg==='pequenos'&&!sessionStorage.getItem('p360_voz_auto')){est.voz=true;sessionStorage.setItem('p360_voz_auto','1');atualizarVoz();}salvar();render();window.scrollTo(0,0);falar(PUBLICOS[arg].nome,true);return;}
+ if(a==='trocar-publico'){est.publico=null;salvar();render();return;}
+ if(a==='voz'){est.voz=!est.voz;salvar();atualizarVoz();if(est.voz)falar('Voz ligada',true);return;}
+ if(a.indexOf('abrir:')===0){abrirPalco(arg);return;}
+ if(a==='fechar-palco'){fecharPalco();return;}
+ if(a.indexOf('rolar:')===0){var f=el.parentNode.querySelector('.fila');f.scrollBy({left:Number(arg)*f.clientWidth*.8,behavior:'smooth'});return;}
+ if(a.indexOf('video:')===0){if(!arg)return;$('videoQuadro').innerHTML='<iframe src="https://www.youtube-nocookie.com/embed/'+encodeURIComponent(arg)+'?autoplay=1&rel=0&hl=pt-BR&playsinline=1" allow="autoplay; fullscreen; picture-in-picture" allowfullscreen title="Aula em vídeo"></iframe>';$('video').classList.add('aberto');if(atual){est.ultimos=[atual.id].concat(est.ultimos.filter(function(x){return x!==atual.id;})).slice(0,6);salvar();}return;}
+ if(a==='fechar-video'){$('video').classList.remove('aberto');$('videoQuadro').innerHTML='';return;}
+});
+/* passar o dedo, o mouse ou o raio do óculos lê o nome em voz alta */
+document.addEventListener('pointerover',function(ev){var el=ev.target.closest('[data-fala]');if(el)falar(el.getAttribute('data-fala'));});
+document.addEventListener('focusin',function(ev){var el=ev.target.closest&&ev.target.closest('[data-fala]');if(el)falar(el.getAttribute('data-fala'));});
+document.addEventListener('keydown',function(ev){if(ev.key==='Escape'){if($('video').classList.contains('aberto')){$('video').classList.remove('aberto');$('videoQuadro').innerHTML='';}else fecharPalco();}});
+atualizarVoz();render();
+})();
+</script>
+</body>
+</html>

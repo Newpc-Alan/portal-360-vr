@@ -32,7 +32,8 @@ body.quest{font-size:118%}
 .filtro:hover,.filtro:focus-visible{border-color:var(--verde2);outline:none}
 .grade{display:grid;grid-template-columns:repeat(auto-fill,minmax(270px,1fr));gap:clamp(14px,1.6vw,24px)}
 .quest .grade{grid-template-columns:repeat(auto-fill,minmax(360px,1fr))}
-.card{position:relative;display:flex;flex-direction:column;border:1px solid #1d3a55;border-radius:24px;overflow:hidden;background:linear-gradient(180deg,#0d2238,#091827);color:#fff;text-align:left;padding:0;outline:none;box-shadow:0 14px 34px rgba(0,0,0,.38);transition:transform .2s ease,box-shadow .2s ease,border-color .2s ease;animation:entra .4s ease both}
+.cel{position:relative;animation:entra .4s ease both}
+.card{position:relative;display:flex;height:100%;text-decoration:none;flex-direction:column;border:1px solid #1d3a55;border-radius:24px;overflow:hidden;background:linear-gradient(180deg,#0d2238,#091827);color:#fff;text-align:left;padding:0;outline:none;box-shadow:0 14px 34px rgba(0,0,0,.38);transition:transform .2s ease,box-shadow .2s ease,border-color .2s ease}
 @keyframes entra{from{opacity:0;transform:translateY(14px)}to{opacity:1;transform:none}}
 .card .foto{position:relative;aspect-ratio:16/10;overflow:hidden}
 .card .foto i{position:absolute;inset:0;background:#0c2136 center/cover no-repeat;transition:transform .5s ease}
@@ -48,29 +49,21 @@ body.quest{font-size:118%}
 .tag.vr{background:#11391f;color:#bff5d3;border:1px solid #2fd16b}
 .selo{position:absolute;left:12px;top:12px;z-index:3;font-weight:800;font-size:12.5px;letter-spacing:.04em;border-radius:999px;padding:5px 11px;background:#1a6b2a;color:#fff;box-shadow:0 4px 12px rgba(0,0,0,.4)}
 .selo.cont{background:#0f2c4a;border:1px solid #4b7fa8}
-.card.extra .foto{aspect-ratio:16/10}
-/* ---------- palco (escolha do que fazer) ---------- */
-.palco{position:fixed;inset:0;z-index:50;display:none;background:#050d18 center/cover no-repeat}
-.palco.aberto{display:block;animation:surge .22s ease}
-@keyframes surge{from{opacity:0;transform:scale(1.02)}to{opacity:1;transform:none}}
-.palco::before{content:"";position:absolute;inset:0;background:linear-gradient(90deg,rgba(3,10,20,.95) 0%,rgba(3,10,20,.75) 45%,rgba(3,10,20,.25) 100%)}
-.palco .conteudo{position:relative;z-index:2;height:100%;display:flex;flex-direction:column;justify-content:center;padding:clamp(20px,5vw,80px);max-width:900px}
-.palco h2{font-size:clamp(34px,5vw,68px);margin:0 0 10px;line-height:1.02}
-.palco p{font-size:clamp(16px,1.6vw,21px);color:#d6e6f2;line-height:1.5;margin:0 0 26px;max-width:640px}
-.escolhas{display:flex;gap:16px;flex-wrap:wrap}
-.escolha{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:8px;min-width:190px;min-height:150px;border-radius:24px;border:3px solid #3b6c93;background:rgba(12,33,54,.92);color:#fff;font-weight:800;font-size:22px;text-decoration:none;padding:16px 18px;outline:none;transition:transform .15s ease}
-.escolha .ic{font-size:48px;line-height:1}
-.escolha small{font-weight:600;font-size:14px;color:#bcd2e2}
-.escolha:hover,.escolha:focus-visible{transform:translateY(-4px);border-color:var(--verde2);background:#13402a}
-.escolha.vr{border-color:var(--verde2);background:linear-gradient(160deg,#1a6b2a,#0f4a1f)}
-.escolha[aria-disabled="true"]{opacity:.35;pointer-events:none}
+.cta{display:inline-flex;align-items:center;gap:6px;align-self:flex-start;margin-top:8px;border-radius:12px;padding:9px 14px;font-weight:800;font-size:15px;background:#123552;color:#fff;border:1.5px solid #2f6a96}
+.cta.vr{background:linear-gradient(160deg,#1a6b2a,#0f4a1f);border-color:#2fd16b}
+.card:hover .cta,.card:focus-visible .cta{border-color:#7dffb0}
+.quest .cta{font-size:19px;padding:12px 18px}
+.mini{position:absolute;right:12px;top:12px;z-index:4;border-radius:999px;border:1.5px solid #4b7fa8;background:rgba(5,13,24,.85);color:#fff;font-weight:800;font-size:13px;padding:7px 12px;min-height:38px}
+.mini:hover,.mini:focus-visible{background:var(--verde);border-color:var(--verde2);outline:none}
+.modo{display:inline-flex;align-items:center;gap:6px;margin-top:10px;font-size:14px;color:#cfe0ec;background:#0c2136;border:1px solid #284d6c;border-radius:999px;padding:6px 12px}
+.modo a{color:#7dffb0;font-weight:700}
 .fechar{position:absolute;right:22px;top:18px;z-index:3;width:64px;height:64px;border-radius:50%;border:2px solid #4b7fa8;background:rgba(5,13,24,.85);color:#fff;font-size:30px}
 .fechar:hover,.fechar:focus-visible{border-color:var(--verde2);outline:none}
 .video{position:fixed;inset:0;z-index:60;display:none;background:rgba(0,0,0,.92);place-items:center;padding:20px}.video.aberto{display:grid}
 .video iframe{width:min(1100px,100%);aspect-ratio:16/9;border:0;border-radius:16px;background:#000}
 .dica-quest{margin:0 0 16px;padding:14px 18px;border-radius:16px;background:#0c2a1a;border:1px solid #2c7a4a;color:#d7f5e2;font-size:16px;display:none}
 .quest .dica-quest{display:block}
-@media(max-width:900px){.escolha{min-width:140px;min-height:120px;font-size:18px}}
+@media(max-width:900px){}
 @media(max-width:600px){.grade{grid-template-columns:1fr 1fr;gap:12px}.card .corpo{padding:2px 12px 12px}.card b{font-size:17px}.card .d{display:none}.filtros{flex-wrap:nowrap;overflow-x:auto;scrollbar-width:none;margin:0 -14px;padding:0 14px;width:calc(100% + 28px)}.filtros::-webkit-scrollbar{display:none}.filtro{flex:0 0 auto}.tag{font-size:11px;padding:3px 8px}}
 @media(max-width:600px){.barra img{height:30px}.barra{gap:8px;padding:10px 12px}.direita{gap:6px;flex-wrap:nowrap}.chip{padding:8px 10px;min-height:44px}.chip .rot{display:none}}
 @media(prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
@@ -89,14 +82,6 @@ body.quest{font-size:118%}
 
 <main id="principal"></main>
 
-<section class="palco" id="palco" role="dialog" aria-modal="true" aria-labelledby="palcoTitulo">
-  <button type="button" class="fechar" data-action="fechar-palco" aria-label="Voltar">✕</button>
-  <div class="conteudo">
-    <h2 id="palcoTitulo"></h2>
-    <p id="palcoTexto"></p>
-    <div class="escolhas" id="palcoEscolhas"></div>
-  </div>
-</section>
 <div class="video" id="video"><button type="button" class="fechar" data-action="fechar-video" aria-label="Fechar vídeo">✕</button><div id="videoQuadro"></div></div>
 
 <script>
@@ -117,7 +102,10 @@ var TAGTEMA={espaco:'Espaço',vida:'Corpo e vida',terra:'Planeta Terra',historia
 var CHAVE='p360_novo_inicio';
 var est={ultimos:[],voz:false,filtro:'todos'};try{var sv=JSON.parse(localStorage.getItem(CHAVE)||'{}');est.ultimos=sv.ultimos||[];est.voz=!!sv.voz;}catch(e){}
 function salvar(){try{localStorage.setItem(CHAVE,JSON.stringify(est));}catch(e){}}
-var quest=/OculusBrowser|Quest|Pacific/i.test(navigator.userAgent)||new URLSearchParams(location.search).get('quest')==='1';
+/* aparelho: no óculos o card já leva para a imersão; na lousa/computador abre o 3D direto.
+   ?modo=oculos ou ?modo=tela força o modo (útil para testar e para o professor) */
+var MODO=new URLSearchParams(location.search).get('modo');
+var quest=MODO==='oculos'||(MODO!=='tela'&&(/OculusBrowser|Quest|Pacific|Pico|Vive/i.test(navigator.userAgent)||new URLSearchParams(location.search).get('quest')==='1'));
 if(quest)document.body.classList.add('quest');
 var $=function(id){return document.getElementById(id);};
 var esc=function(s){return String(s).replace(/[&<>"]/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c];});};
@@ -129,40 +117,33 @@ function falar(t,ja){if(!est.voz||!('speechSynthesis' in window))return;clearTim
 function atualizarVoz(){$('chipVoz').setAttribute('aria-pressed',est.voz);$('chipVoz').innerHTML=est.voz?'🔊 <span class="rot">Voz ligada</span>':'🔈 <span class="rot">Voz</span>';}
 
 /* ---------- vitrine: todos os apps visíveis de cara ---------- */
-function cardApp(a,i){var ult=est.ultimos[0]===a.id;var tags=(a.semVR?'':'<span class="tag vr">🥽 VR</span>')+'<span class="tag">'+esc(TAGTEMA[a.tema])+'</span>'+(a.serie.indexOf('pequenos')>=0?'<span class="tag">Anos iniciais</span>':'');
- return '<button type="button" class="card" data-action="abrir:'+a.id+'" data-fala="'+esc(a.nome)+'" style="animation-delay:'+(i*45)+'ms">'+(a.novo?'<span class="selo">NOVO</span>':(ult?'<span class="selo cont">⏯ Continuar</span>':''))+'<span class="foto"><i style="background-image:'+img(a.img)+'"></i></span><span class="corpo"><b>'+esc(a.nome)+'</b><span class="d">'+esc(a.texto)+'</span><span class="tags">'+tags+'</span></span></button>';}
+function destino(a){return (quest&&!a.semVR)?('../apps/'+a.id+'/?vr=1'):(a.explorar||('../apps/'+a.id+'/'));}
+function cardApp(a,i){var ult=est.ultimos[0]===a.id;var vr=quest&&!a.semVR;
+ var tags=(a.semVR?'<span class="tag">💻 Tela e lousa</span>':'<span class="tag vr">🥽 VR</span>')+'<span class="tag">'+esc(TAGTEMA[a.tema])+'</span>'+(a.serie.indexOf('pequenos')>=0?'<span class="tag">Anos iniciais</span>':'');
+ var cta=vr?'<span class="cta vr">🥽 Entrar no óculos</span>':'<span class="cta">▶ Abrir em 3D</span>';
+ return '<div class="cel" style="animation-delay:'+(i*45)+'ms"><a class="card" href="'+destino(a)+'" data-ultimo="'+a.id+'" data-fala="'+esc(a.nome)+'">'+(a.novo?'<span class="selo">NOVO</span>':(ult?'<span class="selo cont">⏯ Continuar</span>':''))+'<span class="foto"><i style="background-image:'+img(a.img)+'"></i></span><span class="corpo"><b>'+esc(a.nome)+'</b><span class="d">'+esc(a.texto)+'</span><span class="tags">'+tags+'</span>'+cta+'</span></a>'+(a.yt?'<button type="button" class="mini" data-action="video:'+a.yt+'" data-fala="Aula em vídeo" aria-label="Aula em vídeo de '+esc(a.nome)+'">▶ Vídeo</button>':'')+'</div>';}
 function render(){var f=est.filtro;
  var ord=APPS.slice().sort(function(x,y){var ix=est.ultimos.indexOf(x.id),iy=est.ultimos.indexOf(y.id);if(ix<0)ix=99;if(iy<0)iy=99;return ix-iy;});
  var lista=ord.filter(function(a){return f==='todos'||a.tema===f;});
  var fl='<button type="button" class="filtro" data-action="filtro:todos" aria-pressed="'+(f==='todos')+'">Todos</button>'+TEMAS.map(function(t){return '<button type="button" class="filtro" data-action="filtro:'+t[0]+'" aria-pressed="'+(f===t[0])+'" data-fala="'+esc(t[2])+'">'+t[1]+' '+esc(t[2])+'</button>';}).join('');
- $('principal').innerHTML='<section class="vitrine"><div class="dica-quest">🥽 No óculos: aponte o raio para um card e puxe o gatilho.</div><div class="topo-v"><div><h1>Escolha uma <span>experiência</span></h1><p>Toque em um card para entrar no óculos, explorar na tela ou assistir.</p></div><div class="filtros">'+fl+'</div></div><div class="grade">'+lista.map(cardApp).join('')+'</div></section>';}
+ $('principal').innerHTML='<section class="vitrine"><div class="dica-quest">🥽 Depois de abrir, aperte o gatilho em qualquer lugar da tela para entrar na imersão.</div><div class="topo-v"><div><h1>Escolha uma <span>experiência</span></h1><p>'+(quest?'Aponte para um card e puxe o gatilho. A experiência abre pronta para a imersão.':'Toque em um card e a experiência abre em 3D na hora.')+'</p><span class="modo">'+(quest?'🥽 Modo óculos':'💻 Modo tela e lousa')+' · <a href="?modo='+(quest?'tela':'oculos')+'">trocar</a></span></div><div class="filtros">'+fl+'</div></div><div class="grade">'+lista.map(cardApp).join('')+'</div></section>';}
 
-/* ---------- palco: três escolhas grandes ---------- */
 var atual=null;
-function abrirPalco(id){var a=APPS.filter(function(x){return x.id===id;})[0];if(!a)return;atual=a;var p=$('palco');p.style.backgroundImage=img(a.img);$('palcoTitulo').textContent=a.nome;$('palcoTexto').textContent=a.texto;
- var ex=a.explorar||('../apps/'+a.id+'/');var vr=a.semVR?null:('../apps/'+a.id+'/?vr=1');var e='';
- var bVR=vr?'<a class="escolha vr" href="'+vr+'" data-ultimo="'+a.id+'" data-fala="Entrar no óculos"><span class="ic">🥽</span>Entrar no óculos<small>realidade virtual</small></a>':'';
- var bEx='<a class="escolha" href="'+ex+'" data-ultimo="'+a.id+'" data-fala="Explorar"><span class="ic">✋</span>Explorar<small>na tela ou na lousa</small></a>';
- var bAu='<button type="button" class="escolha" data-action="video:'+(a.yt||'')+'" data-fala="Assistir" '+(a.yt?'':'aria-disabled="true"')+'><span class="ic">▶</span>Assistir<small>'+(a.yt?'aula em vídeo':'vídeo em breve')+'</small></button>';
- e=quest?(bVR+bEx+bAu):(bAu+bEx+bVR);$('palcoEscolhas').innerHTML=e;p.classList.add('aberto');falar(a.nome,true);var f=p.querySelector('.escolha:not([aria-disabled])');if(f)f.focus({preventScroll:true});}
-function fecharPalco(){if(!$('palco').classList.contains('aberto'))return;$('palco').classList.remove('aberto');atual=null;render();}
-
 /* ---------- eventos (delegação; nada de onclick no HTML) ---------- */
 document.addEventListener('click',function(ev){var el=ev.target.closest('[data-action]');var lk=ev.target.closest('[data-ultimo]');
  if(lk){var id=lk.getAttribute('data-ultimo');est.ultimos=[id].concat(est.ultimos.filter(function(x){return x!==id;})).slice(0,6);salvar();return;}
  if(!el)return;var a=el.getAttribute('data-action'),arg=a.split(':')[1];
  if(a.indexOf('filtro:')===0){est.filtro=arg;render();return;}
  if(a==='voz'){est.voz=!est.voz;salvar();atualizarVoz();if(est.voz)falar('Voz ligada',true);return;}
- if(a.indexOf('abrir:')===0){abrirPalco(arg);return;}
- if(a==='fechar-palco'){fecharPalco();return;}
- if(a.indexOf('video:')===0){if(!arg)return;$('videoQuadro').innerHTML='<iframe src="https://www.youtube-nocookie.com/embed/'+encodeURIComponent(arg)+'?autoplay=1&rel=0&hl=pt-BR&playsinline=1" allow="autoplay; fullscreen; picture-in-picture" allowfullscreen title="Aula em vídeo"></iframe>';$('video').classList.add('aberto');if(atual){est.ultimos=[atual.id].concat(est.ultimos.filter(function(x){return x!==atual.id;})).slice(0,6);salvar();}return;}
+ if(a.indexOf('video:')===0){if(!arg)return;$('videoQuadro').innerHTML='<iframe src="https://www.youtube-nocookie.com/embed/'+encodeURIComponent(arg)+'?autoplay=1&rel=0&hl=pt-BR&playsinline=1" allow="autoplay; fullscreen; picture-in-picture" allowfullscreen title="Aula em vídeo"></iframe>';$('video').classList.add('aberto');return;}
  if(a==='fechar-video'){$('video').classList.remove('aberto');$('videoQuadro').innerHTML='';return;}
 });
 /* passar o dedo, o mouse ou o raio do óculos lê o nome em voz alta */
 document.addEventListener('pointerover',function(ev){var el=ev.target.closest('[data-fala]');if(el)falar(el.getAttribute('data-fala'));});
 document.addEventListener('focusin',function(ev){var el=ev.target.closest&&ev.target.closest('[data-fala]');if(el)falar(el.getAttribute('data-fala'));});
-document.addEventListener('keydown',function(ev){if(ev.key==='Escape'){if($('video').classList.contains('aberto')){$('video').classList.remove('aberto');$('videoQuadro').innerHTML='';}else fecharPalco();}});
+document.addEventListener('keydown',function(ev){if(ev.key==='Escape'){if($('video').classList.contains('aberto')){$('video').classList.remove('aberto');$('videoQuadro').innerHTML='';}}});
 atualizarVoz();render();
+if(!quest&&!MODO&&navigator.xr&&navigator.xr.isSessionSupported){navigator.xr.isSessionSupported('immersive-vr').then(function(ok){if(ok&&!/Windows|Macintosh|CrOS/i.test(navigator.userAgent)){quest=true;document.body.classList.add('quest');render();}}).catch(function(){});}
 })();
 </script>
 </body>

@@ -50,6 +50,14 @@ body.quest{font-size:118%}
 .selo{position:absolute;left:12px;top:12px;z-index:3;font-weight:800;font-size:12.5px;letter-spacing:.04em;border-radius:999px;padding:5px 11px;background:#1a6b2a;color:#fff;box-shadow:0 4px 12px rgba(0,0,0,.4)}
 .selo.cont{background:#0f2c4a;border:1px solid #4b7fa8}
 .cta{display:inline-flex;align-items:center;gap:6px;align-self:flex-start;margin-top:8px;border-radius:12px;padding:9px 14px;font-weight:800;font-size:15px;background:#123552;color:#fff;border:1.5px solid #2f6a96}
+.card.trava{cursor:default}
+.card.trava .foto i,.card.trava .foto img.capa{filter:grayscale(.55) brightness(.62)}
+.card.trava:hover{transform:none;border-color:#2b4d6b;box-shadow:0 14px 34px rgba(0,0,0,.38)}
+.card .foto .prov{position:absolute;inset:0;display:grid;place-items:center}
+.card .foto .prov em{font-style:normal;font-size:clamp(64px,6vw,96px);filter:drop-shadow(0 8px 18px rgba(0,0,0,.5));opacity:.9}
+.card .foto img.capa{position:absolute;inset:0;width:100%;height:100%;object-fit:cover}
+.selo.breve{background:rgba(5,13,24,.9);border:1.5px solid #f2c14e;color:#ffe3a8}
+.cta.off{background:#1b2a38;border-color:#3b4f62;color:#9fb3c4}
 .cta.vr{background:linear-gradient(160deg,#1a6b2a,#0f4a1f);border-color:#2fd16b}
 .card:hover .cta,.card:focus-visible .cta{border-color:#7dffb0}
 .quest .cta{font-size:19px;padding:12px 18px}
@@ -94,11 +102,18 @@ var APPS=[
  {id:'dna',nome:'DNA Imersivo',curto:'DNA',img:'capa-dna-card.webp',tema:'vida',serie:['maiores'],texto:'Entre na dupla hélice e complete a fita de DNA.'},
  {id:'terra',nome:'Terra por Dentro',curto:'Terra por Dentro',img:'capa-terra-card.webp?v=3',tema:'terra',serie:['pequenos','maiores'],texto:'A Terra aberta ao meio: camadas, vulcões, placas e rochas.'},
  {id:'historia',nome:'Egito Antigo',curto:'Egito Antigo',img:'capa-historia-card.webp?v=3',tema:'historia',serie:['pequenos','maiores'],texto:'Um museu do Egito em tamanho real, com peças de verdade escaneadas e a Grande Pirâmide por dentro.'},
- {id:'quimica',nome:'Química',curto:'Química',img:'capa-quimica-card.webp?v=1',tema:'lab',serie:['maiores'],novo:true,texto:'A tabela periódica em volta de você, um átomo para montar e o teste de chama sem risco.'},
- {id:'lab',nome:'Laboratório 3D',curto:'Laboratório',img:'capa-lab3d-card.webp?v=1',tema:'lab',serie:['maiores'],novo:true,semVR:true,explorar:'../apps/lab/',texto:'Experimentos de física em 3D: dinamômetro, empuxo, pressão e vasos comunicantes.'}
+ {id:'quimica',nome:'Química',curto:'Química',img:'capa-quimica-card.webp?v=1',tema:'lab',serie:['maiores'],breve:true,texto:'A tabela periódica em volta de você, um átomo para montar e o teste de chama sem risco.'},
+ {id:'lab',nome:'Laboratório 3D',curto:'Laboratório',img:'capa-lab3d-card.webp?v=1',tema:'lab',serie:['maiores'],breve:true,semVR:true,explorar:'../apps/lab/',texto:'Experimentos de física em 3D: dinamômetro, empuxo, pressão e vasos comunicantes.'},
+ /* ---------- em breve: capa provisória até chegar a foto em assets/em-breve/<id>.webp ---------- */
+ {id:'pantanal',nome:'Pantanal Vivo',img:'em-breve/pantanal.webp',tema:'vida',serie:['pequenos','maiores'],breve:true,ic:'🐊',cor:['#1f5f3a','#0b2a1a'],texto:'Uma trilha pelo maior alagado do planeta: bichos, plantas, cheia e seca.'},
+ {id:'oceano',nome:'Fundo do Mar',img:'em-breve/oceano.webp',tema:'vida',serie:['pequenos','maiores'],breve:true,ic:'🐋',cor:['#0f4c7a','#06182b'],texto:'Um mergulho do recife de coral até as fossas mais profundas.'},
+ {id:'dinossauros',nome:'Era dos Dinossauros',img:'em-breve/dinossauros.webp',tema:'terra',serie:['pequenos','maiores'],breve:true,ic:'🦕',cor:['#6b4a1f','#2a1a08'],texto:'Fósseis, eras geológicas e os dinossauros em tamanho real.'},
+ {id:'clima',nome:'Ciclo da Água e Clima',img:'em-breve/clima.webp',tema:'terra',serie:['pequenos','maiores'],breve:true,ic:'🌦️',cor:['#2b6b8f','#0b2236'],texto:'Evaporação, nuvens, chuva e o que muda o clima do planeta.'},
+ {id:'brasil-colonial',nome:'Brasil Colonial',img:'em-breve/brasil-colonial.webp',tema:'historia',serie:['pequenos','maiores'],breve:true,ic:'⛵',cor:['#7a5a2a','#2a1d0b'],texto:'As caravelas, os povos originários e a vida na vila colonial.'},
+ {id:'geometria',nome:'Sólidos Geométricos',img:'em-breve/geometria.webp',tema:'mat',serie:['pequenos','maiores'],breve:true,ic:'🔷',cor:['#4a3a8f','#140f33'],texto:'Pegue, gire, abra e planifique cubos, prismas, pirâmides e esferas.'}
 ];
-var TEMAS=[['espaco','🪐','Espaço'],['vida','❤️','Corpo e vida'],['terra','🌋','Planeta Terra'],['historia','🏛️','História'],['lab','🧪','Química e laboratório']];
-var TAGTEMA={espaco:'Espaço',vida:'Corpo e vida',terra:'Planeta Terra',historia:'História',lab:'Laboratório'};
+var TEMAS=[['espaco','🪐','Espaço'],['vida','❤️','Corpo e vida'],['terra','🌋','Planeta Terra'],['historia','🏛️','História'],['lab','🧪','Química e laboratório'],['mat','📐','Matemática']];
+var TAGTEMA={espaco:'Espaço',vida:'Corpo e vida',terra:'Planeta Terra',historia:'História',lab:'Laboratório',mat:'Matemática'};
 var CHAVE='p360_novo_inicio';
 var est={ultimos:[],voz:false,filtro:'todos'};try{var sv=JSON.parse(localStorage.getItem(CHAVE)||'{}');est.ultimos=sv.ultimos||[];est.voz=!!sv.voz;}catch(e){}
 function salvar(){try{localStorage.setItem(CHAVE,JSON.stringify(est));}catch(e){}}
@@ -118,12 +133,14 @@ function atualizarVoz(){$('chipVoz').setAttribute('aria-pressed',est.voz);$('chi
 
 /* ---------- vitrine: todos os apps visíveis de cara ---------- */
 function destino(a){return (quest&&!a.semVR)?('../apps/'+a.id+'/?vr=1'):(a.explorar||('../apps/'+a.id+'/'));}
-function cardApp(a,i){var ult=est.ultimos[0]===a.id;var vr=quest&&!a.semVR;
+function cardApp(a,i){if(a.breve)return cardBreve(a,i);var ult=est.ultimos[0]===a.id;var vr=quest&&!a.semVR;
  var tags=(a.semVR?'<span class="tag">💻 Tela e lousa</span>':'<span class="tag vr">🥽 VR</span>')+'<span class="tag">'+esc(TAGTEMA[a.tema])+'</span>'+(a.serie.indexOf('pequenos')>=0?'<span class="tag">Anos iniciais</span>':'');
  var cta=vr?'<span class="cta vr">🥽 Entrar no óculos</span>':'<span class="cta">▶ Abrir em 3D</span>';
  return '<div class="cel" style="animation-delay:'+(i*45)+'ms"><a class="card" href="'+destino(a)+'" data-ultimo="'+a.id+'" data-fala="'+esc(a.nome)+'">'+(a.novo?'<span class="selo">NOVO</span>':(ult?'<span class="selo cont">⏯ Continuar</span>':''))+'<span class="foto"><i style="background-image:'+img(a.img)+'"></i></span><span class="corpo"><b>'+esc(a.nome)+'</b><span class="d">'+esc(a.texto)+'</span><span class="tags">'+tags+'</span>'+cta+'</span></a>'+(a.yt?'<button type="button" class="mini" data-action="video:'+a.yt+'" data-fala="Aula em vídeo" aria-label="Aula em vídeo de '+esc(a.nome)+'">▶ Vídeo</button>':'')+'</div>';}
+function cardBreve(a,i){var c=a.cor||['#1d3a55','#091827'];
+ return '<div class="cel" style="animation-delay:'+(i*45)+'ms"><div class="card trava" aria-disabled="true" data-fala="'+esc(a.nome)+', em breve" tabindex="-1"><span class="selo breve">🔒 EM BREVE</span><span class="foto"><span class="prov" style="background:radial-gradient(circle at 70% 30%,'+c[0]+','+c[1]+' 75%)"><em>'+(a.ic||'✨')+'</em></span><img class="capa" alt="" src="../assets/'+a.img+'"></span><span class="corpo"><b>'+esc(a.nome)+'</b><span class="d">'+esc(a.texto)+'</span><span class="tags"><span class="tag">'+esc(TAGTEMA[a.tema])+'</span></span><span class="cta off">🔒 Em breve</span></span></div></div>';}
 function render(){var f=est.filtro;
- var ord=APPS.slice().sort(function(x,y){var ix=est.ultimos.indexOf(x.id),iy=est.ultimos.indexOf(y.id);if(ix<0)ix=99;if(iy<0)iy=99;return ix-iy;});
+ var ord=APPS.slice().sort(function(x,y){var ix=est.ultimos.indexOf(x.id),iy=est.ultimos.indexOf(y.id);if(ix<0)ix=99;if(iy<0)iy=99;return (x.breve?1:0)-(y.breve?1:0)||ix-iy;});
  var lista=ord.filter(function(a){return f==='todos'||a.tema===f;});
  var fl='<button type="button" class="filtro" data-action="filtro:todos" aria-pressed="'+(f==='todos')+'">Todos</button>'+TEMAS.map(function(t){return '<button type="button" class="filtro" data-action="filtro:'+t[0]+'" aria-pressed="'+(f===t[0])+'" data-fala="'+esc(t[2])+'">'+t[1]+' '+esc(t[2])+'</button>';}).join('');
  $('principal').innerHTML='<section class="vitrine"><div class="dica-quest">🥽 Depois de abrir, aperte o gatilho em qualquer lugar da tela para entrar na imersão.</div><div class="topo-v"><div><h1>Escolha uma <span>experiência</span></h1><p>'+(quest?'Aponte para um card e puxe o gatilho. A experiência abre pronta para a imersão.':'Toque em um card e a experiência abre em 3D na hora.')+'</p><span class="modo">'+(quest?'🥽 Modo óculos':'💻 Modo tela e lousa')+' · <a href="?modo='+(quest?'tela':'oculos')+'">trocar</a></span></div><div class="filtros">'+fl+'</div></div><div class="grade">'+lista.map(cardApp).join('')+'</div></section>';}
@@ -142,6 +159,7 @@ document.addEventListener('click',function(ev){var el=ev.target.closest('[data-a
 document.addEventListener('pointerover',function(ev){var el=ev.target.closest('[data-fala]');if(el)falar(el.getAttribute('data-fala'));});
 document.addEventListener('focusin',function(ev){var el=ev.target.closest&&ev.target.closest('[data-fala]');if(el)falar(el.getAttribute('data-fala'));});
 document.addEventListener('keydown',function(ev){if(ev.key==='Escape'){if($('video').classList.contains('aberto')){$('video').classList.remove('aberto');$('videoQuadro').innerHTML='';}}});
+document.addEventListener('error',function(e){var t=e.target;if(t&&t.classList&&t.classList.contains('capa'))t.remove();},true);
 atualizarVoz();render();
 if(!quest&&!MODO&&navigator.xr&&navigator.xr.isSessionSupported){navigator.xr.isSessionSupported('immersive-vr').then(function(ok){if(ok&&!/Windows|Macintosh|CrOS/i.test(navigator.userAgent)){quest=true;document.body.classList.add('quest');render();}}).catch(function(){});}
 })();
